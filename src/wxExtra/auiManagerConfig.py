@@ -74,12 +74,15 @@ class AuiManagerConfig( wx.Config ):
             # Load the managed window size
             winSizeX = self.ReadInt( self._keyWinSizeX )
             winSizeY = self.ReadInt( self._keyWinSizeY )
-            self.win.SetSize( (winSizeX, winSizeY) )
+            if winSizeX and winSizeY:
+                self.win.SetSize( (winSizeX, winSizeY) )
                 
             # Load the managed window position
             winPosX = self.ReadInt( self._keyWinPosX )
             winPosY = self.ReadInt( self._keyWinPosY )
-            self.win.SetPosition( (winPosX, winPosY) )
+            if winPosX and winPosY:
+                self.win.SetPosition( (winPosX, winPosY) )
             
         # Load the default perspective
-        self.auiMgr.LoadPerspective( self.Read( self._keyPerspDefault ) )
+        winPersp = self.Read( self._keyPerspDefault )
+        self.auiMgr.LoadPerspective( winPersp )
