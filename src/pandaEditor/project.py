@@ -7,6 +7,8 @@ import xml.etree.cElementTree as et
 import pandac.PandaModules as pm
 from wx.lib.pubsub import Publisher as pub
 
+import p3d
+import game
 import utils
 
 
@@ -215,10 +217,35 @@ run()"""
         shader = ''
         self.CreateAsset( shaderPath, shader )
         
+    def GetRequiredSysPaths( self ):
+        """
+        Return a list of all paths needed to be on sys.path for the build
+        process to run. Remember to replace backslashes with forward ones.
+        """
+        reqSysPaths = []
+        for mod in [game, p3d]:
+            modPath = os.path.dirname( mod.__file__ )
+            modLoc = os.path.dirname( modPath ).replace( '\\', '/' )
+            reqSysPaths.append( modLoc )
+            
+        return reqSysPaths
+        
     def CreateBuildScript( self, fileName ):
+        """
+        Return the python script responsible for building the project. This is
+        pretty inflexible at the moment, but the user should be able to change
+        how this script is generated in the future with some option boxes.
+        """
+        # Get the path to game and add it to sys.path or the builder won't 
+        # find it.
+        sysPathStr = ''
+        for path in self.GetRequiredSysPaths():
+            sysPathStr += 'sys.path.append( \'' + path + '\' )\n'
+        
         return """import sys
-sys.path.append( 'F:/Python' )
-sys.path.append( 'F:/Python/pandaEditor 0.1/pandaEditor' )
+
+
+""" + sysPathStr + """
 
 
 class """ + fileName + """( p3d ):
