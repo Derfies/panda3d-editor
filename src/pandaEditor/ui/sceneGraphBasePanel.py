@@ -136,13 +136,13 @@ class SceneGraphBasePanel( wx.Panel ):
         # Parent all dragged node paths
         cmds.Parent( self.dragNps, parentNp )
             
-    def PopulateTreeControl( self, doc ):
+    def PopulateTreeControl( self ):
         """
         Traverse the scene from the root node, creating tree items for each
         node path encountered.
         """
         def AddItem( np, parentItem ):
-            if np is doc.contents.rootNp:
+            if np is base.scene.rootNp:
                 return
             if np.getParent() in self._nps:
                 parentItem = self._nps[np.getParent()]
@@ -164,6 +164,7 @@ class SceneGraphBasePanel( wx.Panel ):
         Update the tree control by removing all items and replacing them.
         """
         self._updating = True
+        self.tc.Freeze()
         
         def GetItemsDict():
             
@@ -173,14 +174,12 @@ class SceneGraphBasePanel( wx.Panel ):
                 itemsDict[item.GetData()] = item
             return itemsDict
         
-        self.tc.Freeze()
-        
         # Get map of node paths to items before populating the tree control
         oldItems = GetItemsDict()
 
         # Clear existing items and repopulate tree control
         self.tc.DeleteAllItems()
-        self.PopulateTreeControl( msg.data )
+        self.PopulateTreeControl()
         
         # Get map of node paths to items after populating the tree control
         newItems = GetItemsDict()
@@ -196,12 +195,8 @@ class SceneGraphBasePanel( wx.Panel ):
             # Set selection states back
             if np in newItems and oldItem.IsSelected():
                 self.tc.SelectItem( newItems[np] )
-                #sels.append( newItems[np] )
                 
-        #self.SelectItems( sels )
-        
         self.tc.Thaw()
-        
         self._updating = False
         
     def SelectItems( self, items, unselect=True ):
@@ -211,6 +206,7 @@ class SceneGraphBasePanel( wx.Panel ):
         list. Disconnecting the event handler seems to stop the internal 
         redrawing, at least until we get a SelectItems() method.
         """
+        self.Freeze()
         self.tc.SetEvtHandlerEnabled( False )
         
         # Deselect all if indicated
@@ -221,8 +217,8 @@ class SceneGraphBasePanel( wx.Panel ):
         for item in items:
             self.tc.SelectItem( item )
         
-        self.tc.SetEvtHandlerEnabled( True )
-        
         # Make sure to call refresh at least once since we disabled the event
         # handler that would normally do this!
+        self.tc.SetEvtHandlerEnabled( True )
         self.tc.Refresh()
+        self.Thaw()

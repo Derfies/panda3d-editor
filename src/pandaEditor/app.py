@@ -25,11 +25,9 @@ class App( p3d.wx.App ):
     
     def OnInit( self ):
         self.gizmo = False
-        self._fooTask = None
         
         # Bind publisher events
         pub.subscribe( self.OnUpdate, 'Update' )
-        pub.subscribe( self.OnUpdateSelection, 'UpdateSelection' )
         
         # Build main frame, start Panda and replace the wx event loop with
         # Panda's.
@@ -73,13 +71,14 @@ class App( p3d.wx.App ):
             win=base.edWin, 
             mouseWatcherNode=base.edMouseWatcherNode 
         )
+        base.selection = self.selection
         
         # Create actions manager which will control the undo queue.
         self.actnMgr = actions.Manager()
         
         # Bind events
-        self.accept( 'z', self.actnMgr.Undo )
-        self.accept( 'shift-z', self.actnMgr.Redo )
+        self.accept( 'z', self.Undo )
+        self.accept( 'shift-z', self.Redo )
         self.accept( 'f', self.FrameSelection )
         self.accept( 'del', lambda fn: cmds.Remove( fn() ), [self.selection.Get] )
         self.accept( 'backspace', lambda fn: cmds.Remove( fn() ), [self.selection.Get] )
@@ -125,13 +124,25 @@ class App( p3d.wx.App ):
         self.gizmoMgr.AddGizmo( gizmos.Scale( 'scl', **kwargs ) )
         
         # Bind gizmo manager events
-        self.accept( 'q', self.gizmoMgr.SetActiveGizmo, [None] )
-        self.accept( 'w', self.gizmoMgr.SetActiveGizmo, ['pos'] )
-        self.accept( 'e', self.gizmoMgr.SetActiveGizmo, ['rot'] )
-        self.accept( 'r', self.gizmoMgr.SetActiveGizmo, ['scl'] )
-        self.accept( 'space', self.gizmoMgr.ToggleLocal )
+        self.accept( 'q', self.SetActiveGizmo, [None] )
+        self.accept( 'w', self.SetActiveGizmo, ['pos'] )
+        self.accept( 'e', self.SetActiveGizmo, ['rot'] )
+        self.accept( 'r', self.SetActiveGizmo, ['scl'] )
+        self.accept( 'space', self.ToggleGizmoLocal )
         self.accept( '+', self.gizmoMgr.SetSize, [2] )
         self.accept( '-', self.gizmoMgr.SetSize, [0.5] )
+        
+    def SetActiveGizmo( self, name ):
+        self.gizmoMgr.SetActiveGizmo( name )
+        self.frame.OnUpdateXform( None )
+        
+    def SetGizmoLocal( self, val ):
+        self.gizmoMgr.SetLocal( val )
+        self.frame.OnUpdateXform( None )
+        
+    def ToggleGizmoLocal( self ):
+        self.gizmoMgr.ToggleLocal()
+        self.frame.OnUpdateXform( None )
         
     def OnMouse1Down( self, shift=False ):
         """
@@ -182,7 +193,6 @@ class App( p3d.wx.App ):
         Start the transfrom operation by adding a task to constantly send a
         selection modified message while transfoming.
         """
-        self._fooTask = taskMgr.add( self.doc.OnSelectionModified, 'SelectionModified' )
         self.gizmo = True
             
     def StopTransform( self ):
@@ -194,16 +204,13 @@ class App( p3d.wx.App ):
         actGizmo = self.gizmoMgr.GetActiveGizmo()
         nps = actGizmo.attachedNps
         xforms = [np.getTransform() for np in nps]
-        actn = actions.Transform( self, nps, xforms, actGizmo.initNpXforms )
+        actn = actions.Transform( nps, xforms, actGizmo.initNpXforms )
         self.actnMgr.Push( actn )
-        
-        # Remove the transform task
-        if self._fooTask in taskMgr.getAllTasks():
-            taskMgr.remove( self._fooTask )
-            self._fooTask = None
-            
         self.gizmo = False
-        self.doc.OnModified()
+        
+        # Call OnModified next frame. Not sure why but if we call it straight
+        # away it causes a small jitter when xforming...
+        taskMgr.doMethodLater( 0, self.doc.OnModified, 'dragDrop' )
         
     def FrameSelection( self ):
         """
@@ -214,16 +221,14 @@ class App( p3d.wx.App ):
             base.edCamera.Frame( self.selection.nps )
             
     def OnUpdate( self, msg ):
-        self.selection.Update()
-            
-    def OnUpdateSelection( self, msg ):
         """
         Subscribed to the update selection message. Make sure that the
         selected nodes are attached to the managed gizmos, then refresh the
         active one.
         """
-        self.gizmoMgr.AttachNodePaths( msg.data )
+        self.gizmoMgr.AttachNodePaths( self.selection.nps )
         self.gizmoMgr.RefreshActiveGizmo()
+        self.selection.Update()
                     
     def CreateScene( self, filePath=None, newDoc=True ):
         """
@@ -241,6 +246,7 @@ class App( p3d.wx.App ):
         # Create a new scene
         self.scene = Scene( self, filePath=filePath, camera=base.edCamera )
         self.scene.rootNp.reparentTo( base.edRender )
+        base.scene = self.scene
         
         # Set the selection and picker root node to the scene's root node
         self.selection.rootNp = self.scene.rootNp
@@ -250,7 +256,6 @@ class App( p3d.wx.App ):
         # Create the document wrapper if creating a new document
         if newDoc:
             self.doc = ui.Document( self.scene )
-            self.doc.OnSelectionChanged()
         
     def OnDragDrop( self, filePath ):
         
@@ -277,3 +282,11 @@ class App( p3d.wx.App ):
         
     def OnProjectFilesModified( self, filePaths ):
         self.game.pluginMgr.OnProjectFilesModified( filePaths )
+        
+    def Undo( self ):
+        self.actnMgr.Undo()
+        self.doc.OnModified()
+        
+    def Redo( self ):
+        self.actnMgr.Redo()
+        self.doc.OnModified()

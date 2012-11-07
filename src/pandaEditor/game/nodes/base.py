@@ -20,8 +20,24 @@ class Base( object ):
     def GetAttributes( self ):
         return self.attributes[:]
     
-    def FindAttribute( self, name ):
+    def GetAllAttributes( self ):
+        """
+        Return a flat list of all the attributes of this component, including
+        all child attributes of attributes.
+        """
+        def RecurseGet( cAttr, results ):
+            for child in cAttr.children:
+                results.append( child )
+                RecurseGet( child, results )
+        
+        results = []
         for attr in self.attributes:
+            results.append( attr )
+            RecurseGet( attr, results )
+        return results
+    
+    def FindAttribute( self, name ):
+        for attr in self.GetAllAttributes():
             if attr.name == name:
                 return attr
     
@@ -29,7 +45,7 @@ class Base( object ):
         dataDict = {}
         
         # Put this component's attributes into key / value pairs.
-        for attr in self.attributes:
+        for attr in self.GetAllAttributes():
             if attr.w and attr.GetFn is not None:
                 dataDict[attr.name] = attr.Get( self.data )
             

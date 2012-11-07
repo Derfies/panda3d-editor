@@ -55,13 +55,9 @@ class Manager( p3d.Object ):
             self._activeGizmo.Start()
     
     def RefreshActiveGizmo( self ):
-        
-        # Get the active gizmo
-        activeGizmo = self.GetActiveGizmo()
-        if activeGizmo is not None:
-            
-            # Refresh the active gizmo so it appears in the right place
-            activeGizmo.Refresh()
+        """Refresh the active gizmo if there is one."""
+        if self._activeGizmo is not None:
+            self._activeGizmo.Refresh()
         
     def GetGizmoLocal( self, name ):
         """Return the gizmos local mode."""
@@ -74,17 +70,18 @@ class Manager( p3d.Object ):
         gizmo = self.GetGizmo( name )
         if gizmo is not None:
             gizmo.local = mode
-        
-        if self._activeGizmo is not None:
-            self._activeGizmo.Refresh()
+        self.RefreshActiveGizmo()
             
+    def SetLocal( self, val ):
+        for gizmo in self._gizmos.values():
+            gizmo.local = val
+        self.RefreshActiveGizmo()
+        
     def ToggleLocal( self ):
         """Toggle all gizmos local mode on or off."""
         for gizmo in self._gizmos.values():
             gizmo.local = not gizmo.local
-            
-        if self._activeGizmo is not None:
-            self._activeGizmo.Refresh()
+        self.RefreshActiveGizmo()
         
     def SetSize( self, factor ):
         """Resize the gizmo by a factor."""

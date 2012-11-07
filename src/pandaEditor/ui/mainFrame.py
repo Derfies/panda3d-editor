@@ -3,7 +3,6 @@ import sys
 
 import wx
 import wx.aui
-import wx.lib.agw.aui
 from wx.lib.pubsub import Publisher as pub
 import pandac.PandaModules as pm
 
@@ -38,10 +37,20 @@ ID_PROJ_NEW = wx.NewId()
 ID_PROJ_SET = wx.NewId()
 ID_PROJ_BUILD = wx.NewId()
 
+ID_EDIT_UNDO = wx.NewId()
+ID_EDIT_REDO = wx.NewId()
+
+ID_XFORM_SEL = wx.NewId()
+ID_XFORM_POS = wx.NewId()
+ID_XFORM_ROT = wx.NewId()
+ID_XFORM_SCL = wx.NewId()
+ID_XFORM_WORLD = wx.NewId()
+
 ID_VIEW_GRID = wx.NewId()
 
 ID_WIND_FILE_TOOLBAR = wx.NewId()
 ID_WIND_EDIT_TOOLBAR = wx.NewId()
+ID_WIND_XFORM_TOOLBAR = wx.NewId()
 ID_WIND_VIEWPORT = wx.NewId()
 ID_WIND_SCENE_GRAPH = wx.NewId()
 ID_WIND_PROPERTIES = wx.NewId()
@@ -79,6 +88,7 @@ class MainFrame( wx.Frame ):
         # Build toolbars
         self.BuildFileActions()
         self.BuildEditActions()
+        self.BuildXformActions()
         
         # Build game and editor viewports. Don't initialise just yet as 
         # ShowBase has not yet been created.
@@ -260,10 +270,10 @@ class MainFrame( wx.Frame ):
             self.app.project.Build( filePath )
             
     def OnUndo( self, evt ):
-        self.app.actnMgr.Undo()
+        self.app.Undo()
         
     def OnRedo( self, evt ):
-        self.app.actnMgr.Redo()
+        self.app.Redo()
             
     def OnViewGrid( self, evt ):
         """
@@ -344,6 +354,20 @@ class MainFrame( wx.Frame ):
         # Make sure to call or else we won't see any changes
         self._mgr.Update()
         
+    def OnXformSetActiveGizmo( self, evt ):
+        if evt.GetId() == ID_XFORM_WORLD:
+            self.app.SetGizmoLocal( not evt.Checked() )
+            return
+            
+        arg = None
+        if evt.GetId() == ID_XFORM_POS:
+            arg = 'pos'
+        elif evt.GetId() == ID_XFORM_ROT:
+            arg = 'rot'
+        elif evt.GetId() == ID_XFORM_SCL:
+            arg = 'scl'
+        self.app.SetActiveGizmo( arg )
+        
     def OnUpdateWindowMenu( self, evt ):
         """
         Set the checks in the window menu to match the visibility of the 
@@ -374,33 +398,11 @@ class MainFrame( wx.Frame ):
         NOTE: Don't use freeze / thaw as this will cause the 3D viewport to
         flicker.
         """
-        # Check the grid menu item if the grid is shown
-        self.mView.Check( ID_VIEW_GRID, False )
-        if not self.app.grid.isHidden():
-            self.mView.Check( ID_VIEW_GRID, True )
-        
-        # Disable all tools
-        self.mFile.EnableAllTools( False )
-        self.tbFile.EnableAllTools( False )
-        self.mProj.EnableAllTools( False )
-        
-        # Turn some tools back on depending on editor state.
-        self.mFile.Enable( ID_FILE_NEW, True )
-        self.mFile.Enable( ID_FILE_OPEN, True )
-        self.mFile.Enable( ID_FILE_SAVE_AS, True )
-        self.mFile.Enable( ID_FILE_PROJ, True )
-        self.tbFile.EnableTool( ID_FILE_NEW, True )
-        self.tbFile.EnableTool( ID_FILE_OPEN, True )
-        self.tbFile.EnableTool( ID_FILE_SAVE_AS, True )
-        self.mProj.Enable( ID_PROJ_NEW, True )
-        self.mProj.Enable( ID_PROJ_SET, True )
-        if self.app.doc.dirty:
-            self.mFile.Enable( ID_FILE_SAVE, True )
-            self.tbFile.EnableTool( ID_FILE_SAVE, True )
-        if self.app.project.path is not None:
-            self.mFile.Enable( ID_FILE_IMPORT, True )
-            self.mProj.EnableAllTools( True )
-        self.tbFile.Refresh()
+        self.OnUpdateFile( msg )
+        self.OnUpdateEdit( msg )
+        self.OnUpdateView( msg )
+        self.OnUpdateProject( msg )
+        self.OnUpdateXform( msg )
         
         # Set the frame's title to include the document's file path, include
         # dirty 'star'
@@ -410,6 +412,79 @@ class MainFrame( wx.Frame ):
         self.SetTitle( title )
         
         self.app.game.pluginMgr.OnUpdate( msg )
+        
+    def OnUpdateFile( self, msg ):
+        """
+        Update the file menu. Disable all menu and toolbar items then turn 
+        those back on depending on the document's state.
+        """
+        self.mFile.EnableAllTools( False )
+        self.tbFile.EnableAllTools( False )
+        
+        self.mFile.Enable( ID_FILE_NEW, True )
+        self.mFile.Enable( ID_FILE_OPEN, True )
+        self.mFile.Enable( ID_FILE_SAVE_AS, True )
+        self.mFile.Enable( ID_FILE_PROJ, True )
+        self.tbFile.EnableTool( ID_FILE_NEW, True )
+        self.tbFile.EnableTool( ID_FILE_OPEN, True )
+        self.tbFile.EnableTool( ID_FILE_SAVE_AS, True )
+        
+        if self.app.doc.dirty:
+            self.mFile.Enable( ID_FILE_SAVE, True )
+            self.tbFile.EnableTool( ID_FILE_SAVE, True )
+        if self.app.project.path is not None:
+            self.mFile.Enable( ID_FILE_IMPORT, True )
+        
+        self.tbFile.Refresh()
+        
+    def OnUpdateEdit( self, msg ):
+        """
+        Update the edit menu. Disable undo or redo queus if they are empty
+        and make sure to refresh the toolbar.
+        """
+        val = len( self.app.actnMgr.undoList ) > 0
+        self.mEdit.Enable( ID_EDIT_UNDO, val )
+        self.tbEdit.EnableTool( ID_EDIT_UNDO, val )
+        
+        val = len( self.app.actnMgr.redoList ) > 0
+        self.mEdit.Enable( ID_EDIT_REDO, val )
+        self.tbEdit.EnableTool( ID_EDIT_REDO, val )
+        
+        self.tbEdit.Refresh()
+        
+    def OnUpdateView( self, msg ):
+        """
+        Update the view menu. Ensure the grid menu item's checked state 
+        matches the visibility of the grid.
+        """
+        self.mView.Check( ID_VIEW_GRID, False )
+        if not self.app.grid.isHidden():
+            self.mView.Check( ID_VIEW_GRID, True )
+        
+    def OnUpdateProject( self, msg ):
+        self.mProj.EnableAllTools( False )
+        
+        self.mProj.Enable( ID_PROJ_NEW, True )
+        self.mProj.Enable( ID_PROJ_SET, True )
+        
+        if self.app.project.path is not None:
+            self.mProj.EnableAllTools( True )
+            
+    def OnUpdateXform( self, msg ):
+        gizmo = self.app.gizmoMgr.GetActiveGizmo()
+        if gizmo is None:
+            self.tbXform.ToggleTool( ID_XFORM_SEL, True )
+        elif gizmo.getName() == 'pos':
+            self.tbXform.ToggleTool( ID_XFORM_POS, True )
+        elif gizmo.getName() == 'rot':
+            self.tbXform.ToggleTool( ID_XFORM_ROT, True )
+        elif gizmo.getName() == 'scl':
+            self.tbXform.ToggleTool( ID_XFORM_SCL, True )
+        
+        val = not self.app.gizmoMgr.GetGizmoLocal( 'pos' )
+        self.tbXform.ToggleTool( ID_XFORM_WORLD, val )
+            
+        self.tbXform.Refresh()
         
     def OnMove( self, evt ):
         """
@@ -468,8 +543,8 @@ class MainFrame( wx.Frame ):
     def BuildEditActions( self ):
         """Add tools, set long help strings and bind toolbar events."""
         actns = [
-            ActionItem( 'Undo', os.path.join( 'data', 'images', 'arrow-curve-flip.png' ), self.OnUndo ),
-            ActionItem( 'Redo', os.path.join( 'data', 'images', 'arrow-curve.png' ), self.OnRedo )
+            ActionItem( 'Undo', os.path.join( 'data', 'images', 'arrow-curve-flip.png' ), self.OnUndo, ID_EDIT_UNDO ),
+            ActionItem( 'Redo', os.path.join( 'data', 'images', 'arrow-curve.png' ), self.OnRedo, ID_EDIT_REDO )
         ]
         
         # Create edit menu
@@ -481,11 +556,28 @@ class MainFrame( wx.Frame ):
         self.tbEdit.SetToolBitmapSize( TBAR_ICON_SIZE )
         self.tbEdit.AppendActionItems( actns )
         self.tbEdit.Realize()
+        
+    def BuildXformActions( self ):
+        """Add tools, set long help strings and bind toolbar events."""
+        fn = self.OnXformSetActiveGizmo
+        actns = [
+            ActionItem( 'World Transform', os.path.join( 'data', 'images', 'globe.png' ), fn, ID_XFORM_WORLD, kind=wx.ITEM_CHECK ),
+            ActionItem( 'Select', os.path.join( 'data', 'images', 'select.png' ), fn, ID_XFORM_SEL, kind=wx.ITEM_RADIO ),
+            ActionItem( 'Move', os.path.join( 'data', 'images', 'move.png' ), fn, ID_XFORM_POS, kind=wx.ITEM_RADIO ),
+            ActionItem( 'Rotate', os.path.join( 'data', 'images', 'rotate.png' ), fn, ID_XFORM_ROT, kind=wx.ITEM_RADIO ),
+            ActionItem( 'Scale', os.path.join( 'data', 'images', 'scale.png' ), fn, ID_XFORM_SCL, kind=wx.ITEM_RADIO )
+        ]
+        
+        # Create xform toolbar
+        self.tbXform = CustomAuiToolBar( self, -1, style=wx.aui.AUI_TB_DEFAULT_STYLE )
+        self.tbXform.SetToolBitmapSize( TBAR_ICON_SIZE )
+        self.tbXform.AppendActionItems( actns )
+        self.tbXform.Realize()
                 
     def BuildViewMenu( self ):
         """Build the view menu."""
         viewActns = [
-            ActionItem( 'Grid', '', self.OnViewGrid, ID_VIEW_GRID, check=True )
+            ActionItem( 'Grid', '', self.OnViewGrid, ID_VIEW_GRID, kind=wx.ITEM_CHECK )
         ]
         self.mView = CustomMenu()
         self.mView.AppendActionItems( viewActns, self )
@@ -551,6 +643,13 @@ class MainFrame( wx.Frame ):
                 wx.aui.AuiPaneInfo()
                 .Name( 'tbEdit' )
                 .Caption( 'Edit Toolbar' )
+                .ToolbarPane()
+                .Top()),
+                
+            ID_WIND_XFORM_TOOLBAR:(self.tbXform, True,
+                wx.aui.AuiPaneInfo()
+                .Name( 'tbXform' )
+                .Caption( 'Transform Toolbar' )
                 .ToolbarPane()
                 .Top()),
                 

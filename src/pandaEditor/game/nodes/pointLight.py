@@ -11,10 +11,12 @@ class PointLight( Light ):
         kwargs['nType'] = PL
         Light.__init__( self, *args, **kwargs )
         
-        self.attributes.extend( 
+        pAttr = Attr( 'PointLight' )
+        pAttr.children.extend( 
             [
                 Attr( 'Attenuation', pm.Vec3, PL.getAttenuation, PL.setAttenuation ),
                 Attr( 'Point', pm.Vec3, PL.getPoint, PL.setPoint ),
                 Attr( 'Specular Color', pm.Vec4, PL.getSpecularColor, PL.setSpecularColor )
             ]
         )
+        self.attributes.append( pAttr )

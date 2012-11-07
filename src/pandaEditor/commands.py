@@ -9,13 +9,14 @@ def Add( nps ):
     undo queue.
     """
     actns = [
-        actions.Deselect( wx.GetApp(), wx.GetApp().selection.nps ),
-        actions.Add( wx.GetApp(), nps ), 
-        actions.Select( wx.GetApp(), nps )
+        actions.Deselect( base.selection.nps ),
+        actions.Add( nps ), 
+        actions.Select( nps )
     ]
     comp = actions.Composite( actns )
     wx.GetApp().actnMgr.Push( comp )
     comp()
+    wx.GetApp().doc.OnModified()
     
 
 def Duplicate( nps ):
@@ -24,15 +25,16 @@ def Duplicate( nps ):
     create an add action and push it onto the undo queue.
     """
     # Record the current selection then clear it
-    selNps = wx.GetApp().selection.nps
-    wx.GetApp().selection.Clear()
+    selNps = base.selection.nps
+    base.selection.Clear()
     
     # Duplicate the indicated node paths
-    dupeNps = wx.GetApp().scene.DuplicateNodePaths( selNps )
+    dupeNps = base.scene.DuplicateNodePaths( selNps )
     
     # Reset the selection and run add
-    wx.GetApp().selection.Add( selNps )
+    base.selection.Add( selNps )
     Add( dupeNps )
+    wx.GetApp().doc.OnModified()
     
 
 def Remove( nps ):
@@ -41,12 +43,13 @@ def Remove( nps ):
     undo queue.
     """
     actns = [
-        actions.Deselect( wx.GetApp(), nps ), 
-        actions.Remove( wx.GetApp(), nps )
+        actions.Deselect( nps ), 
+        actions.Remove( nps )
     ]
     comp = actions.Composite( actns )
     wx.GetApp().actnMgr.Push( comp )
     comp()
+    wx.GetApp().doc.OnModified()
     
 
 def Select( nps ):
@@ -55,12 +58,13 @@ def Select( nps ):
     undo queue.
     """
     actns = [
-        actions.Deselect( wx.GetApp(), wx.GetApp().selection.nps ), 
-        actions.Select( wx.GetApp(), nps )
+        actions.Deselect( base.selection.nps ), 
+        actions.Select( nps )
     ]
     comp = actions.Composite( actns )
     wx.GetApp().actnMgr.Push( comp )
     comp()
+    wx.GetApp().doc.OnRefresh()
     
 
 def SetAttribute( nps, attr, val ):
@@ -68,15 +72,17 @@ def SetAttribute( nps, attr, val ):
     Create the set attribute action, execute it and push it onto the undo
     queue.
     """
-    actn = actions.SetAttribute( wx.GetApp(), nps, attr, val )
+    actn = actions.SetAttribute( nps, attr, val )
     wx.GetApp().actnMgr.Push( actn )
     actn()
+    wx.GetApp().doc.OnModified()
     
 
 def Parent( nps, parent ):
     """
     Create the parent action, execute it and push it onto the undo queue.
     """
-    actn = actions.Parent( wx.GetApp(), nps, parent )
+    actn = actions.Parent( nps, parent )
     wx.GetApp().actnMgr.Push( actn )
     actn()
+    wx.GetApp().doc.OnModified()

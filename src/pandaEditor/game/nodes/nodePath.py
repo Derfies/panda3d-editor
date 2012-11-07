@@ -14,21 +14,21 @@ class NodePath( Base ):
         nType = kwargs.pop( 'nType', None )
         Base.__init__( self, *args, **kwargs )
         
-        self.name = 'Node'
-        
         # Generate a default name from the node type.
         self.type = nType
         if self.type is not None:
             nodeName = self.type.__name__
             self.nodeName = nodeName[0:1].lower() + nodeName[1:]
         
-        self.attributes.extend( 
+        pAttr = Attr( 'NodePath' )
+        pAttr.children.extend( 
             [
                 Attr( 'Name', str, NP.getName, NP.setName ),
                 Attr( 'Matrix', pm.Mat4, NP.getMat, NP.setMat ),
                 Attr( 'Uuid', str, NP.getTag, NP.setTag, None, [TAG_NODE_UUID], [TAG_NODE_UUID], e=False )
             ]
         )
+        self.attributes.append( pAttr )
         
     def SetupNodePath( self, np ):
         id = str( uuid.uuid4() )
@@ -57,13 +57,6 @@ class NodePath( Base ):
         for child in self.children:
             child.Destroy()
         base.game.pluginMgr.OnNodeDestroy( self.data )
-    
-    def GetAttributes( self ):
-        attrs = Base.GetAttributes( self )
-        for child in self.children:
-            attrs.extend( child.GetAttributes() )
-            
-        return attrs
     
     def GetChildWrapper( self, name ):
         

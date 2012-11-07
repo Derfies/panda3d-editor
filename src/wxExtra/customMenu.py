@@ -25,7 +25,7 @@ class CustomMenu( wx.Menu ):
             mItem.SetBitmap( img.ConvertToBitmap() )
         
         # Append check item or regular item
-        if actn.GetCheck():
+        if actn.GetKind() == wx.ITEM_CHECK:
             self.AppendCheckItem( actn.GetId(), actnText )
         else:
             self.AppendItem( mItem )

@@ -1,17 +1,13 @@
-import p3d
 from base import Base
 
 
 class Add( Base ):
     
-    def __init__( self, app, nps ):
-        self.app = app
+    def __init__( self, nps ):
         self.nps = nps
     
     def Undo( self ):
-        self.app.scene.DeleteNodePaths( self.nps )
-        self.app.doc.OnModified()
+        base.scene.DeleteNodePaths( self.nps )
     
     def Redo( self ):
-        self.app.scene.AddNodePaths( self.nps )
-        self.app.doc.OnModified()
+        base.scene.AddNodePaths( self.nps )

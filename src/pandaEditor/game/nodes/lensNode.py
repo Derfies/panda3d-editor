@@ -11,11 +11,13 @@ class LensNode( NodePath ):
         kwargs['nType'] = pm.LensNode
         NodePath.__init__( self, *args, **kwargs )
         
-        self.attributes.extend( 
+        pAttr = Attr( 'LensNode' )
+        pAttr.children.extend( 
             [
                 Attr( 'Fov', pm.Vec2, Lens.getFov, Lens.setFov, self.GetLens )
             ]
         )
+        self.attributes.append( pAttr )
         
     def GetLens( self, np ):
         return np.node().getLens()

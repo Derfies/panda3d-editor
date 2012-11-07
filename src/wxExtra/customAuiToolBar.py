@@ -11,7 +11,8 @@ class CustomAuiToolBar( wx.aui.AuiToolBar ):
     
     def AppendActionItem( self, actn ):
         actnIcon = utils.ImgToBmp( actn.GetIconPath(), self.GetToolBitmapSize() )
-        self.AddTool( actn.GetId(), actn.GetText(), actnIcon )
+        self.AddTool( actn.GetId(), actn.GetText(), actnIcon, 
+                      actn.GetHelpString(), actn.GetKind() )
         self.Bind( wx.EVT_TOOL, actn.GetCommand(), id=actn.GetId() )
         
     def AppendActionItems( self, actns ):

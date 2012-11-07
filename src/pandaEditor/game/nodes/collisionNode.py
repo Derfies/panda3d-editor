@@ -11,8 +11,10 @@ class CollisionNode( NodePath ):
         kwargs['nType'] = CN
         NodePath.__init__( self, *args, **kwargs )
         
-        self.attributes.extend( 
+        pAttr = Attr( 'CollisionNode' )
+        pAttr.children.extend( 
             [
                 Attr( 'Num Solids', int, CN.getNumSolids )
             ]
         )
+        self.attributes.append( pAttr )

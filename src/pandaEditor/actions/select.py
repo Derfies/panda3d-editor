@@ -3,14 +3,11 @@ from base import Base
 
 class Select( Base ):
     
-    def __init__( self, app, nps ):
-        self.app = app
+    def __init__( self, nps ):
         self.nps = nps
     
     def Undo( self ):
-        self.app.selection.Remove( self.nps )
-        self.app.doc.OnSelectionChanged()
+        base.selection.Remove( self.nps )
     
     def Redo( self ):
-        self.app.selection.Add( self.nps )
-        self.app.doc.OnSelectionChanged()
+        base.selection.Add( self.nps )

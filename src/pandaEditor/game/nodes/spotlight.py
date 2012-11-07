@@ -13,7 +13,8 @@ class Spotlight( Light, LensNode ):
         LensNode.__init__( self, *args, **kwargs )
         Light.__init__( self, *args, **kwargs )
         
-        self.attributes.extend( 
+        pAttr = Attr( 'PointLight' )
+        pAttr.children.extend( 
             [
                 Attr( 'Attenuation', pm.Vec3, SL.getAttenuation, SL.setAttenuation ),
                 Attr( 'Exponent', float, SL.getExponent, SL.setExponent ),
@@ -21,3 +22,4 @@ class Spotlight( Light, LensNode ):
                 Attr( 'Shadow Caster', bool, SL.isShadowCaster, SL.setShadowCaster )
             ]
         )
+        self.attributes.append( pAttr )

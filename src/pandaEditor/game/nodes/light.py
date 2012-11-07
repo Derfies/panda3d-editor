@@ -10,11 +10,13 @@ class Light( NodePath ):
     def __init__( self, *args, **kwargs ):
         NodePath.__init__( self, *args, **kwargs )
         
-        self.attributes.extend( 
+        pAttr = Attr( 'Light' )
+        pAttr.children.extend( 
             [
                 Attr( 'Color', pm.Vec4, L.getColor, L.setColor )
             ]
         )
+        self.attributes.append( pAttr )
     
     def Create( self ):
         np = NodePath.Create( self )

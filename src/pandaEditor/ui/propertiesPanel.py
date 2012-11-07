@@ -134,20 +134,16 @@ class PropertyGrid( wxpg.PropertyGrid ):
         return self._propsByName.values()
     
     def GetPropertiesDictionary( self ):
+        """
+        Return a flat dictionary containing all properties including all their
+        decendants.
+        """
         props = {}
         
-        # Include children if specified
         for propLabel, prop in self._propsByLabel.items():
-            
-            # Ignore property categories
-            if prop.IsCategory():
-                props[prop.GetLabel()] = prop
-                continue
-            
             childs = self.GetAllChildren( prop )
             props = dict( props.items() + childs.items() )
         
-        # Return values of the property dict
         return props
     
     def Enable( self, value ):
@@ -209,14 +205,13 @@ class PropertiesPanel( wx.Panel ):
         self.bs1.Add( self.pg, 1, wx.EXPAND )
         self.SetSizer( self.bs1 )
         
-    def BuildPropertyGrid( self ):
+    def BuildPropertyGrid( self, nps ):
         """
         Build the properties for the grid based on the contents of nps.
         """
         self.pg.Clear()
         
-        # For convenience
-        nps = wx.GetApp().selection.nps
+        # Bail if there are no selected NodePaths.
         if not nps:
             return
         
@@ -245,10 +240,10 @@ class PropertiesPanel( wx.Panel ):
                     
                 # Append to property grid or the last property if it is a 
                 # child.
-                #if parent is None:
-                self.pg.Append( prop )
-                #else:
-                #    parent.AddPrivateChild( prop )
+                if parent is None:
+                    self.pg.Append( prop )
+                else:
+                    parent.AddPrivateChild( prop )
                         
         # Build all properties from attributes.
         wrpr = base.game.nodeMgr.Wrap( nps[0] )
@@ -269,7 +264,6 @@ class PropertiesPanel( wx.Panel ):
         # Get the node property from the property and set it.
         prop = evt.GetProperty()
         attr = prop.GetAttribute( ATTRIBUTE_TAG )
-        
         cmds.SetAttribute( nps, attr, prop.GetValue() )
         
     def OnUpdate( self, msg ):
@@ -281,7 +275,7 @@ class PropertiesPanel( wx.Panel ):
             self.propExps[propLongLbl] = prop.IsExpanded()
         
         # Clear and rebuild property grid
-        self.BuildPropertyGrid()
+        self.BuildPropertyGrid( msg.data )
         
         # Set expanded states back
         for propLongLbl, expanded in self.propExps.items():

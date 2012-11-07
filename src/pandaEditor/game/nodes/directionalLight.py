@@ -11,7 +11,8 @@ class DirectionalLight( Light ):
         kwargs['nType'] = DL
         Light.__init__( self, *args, **kwargs )
         
-        self.attributes.extend( 
+        pAttr = Attr( 'DirectionalLight' )
+        pAttr.children.extend( 
             [
                 Attr( 'Direction', pm.Vec3, DL.getDirection, DL.setDirection ),
                 Attr( 'Point',pm.Point3, DL.getPoint, DL.setPoint ),
@@ -19,3 +20,4 @@ class DirectionalLight( Light ):
                 Attr( 'Shadow Caster', bool, DL.isShadowCaster, DL.setShadowCaster )
             ]
         )
+        self.attributes.append( pAttr )
