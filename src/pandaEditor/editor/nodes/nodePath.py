@@ -28,12 +28,12 @@ class NodePath( GameNodePath ):
         )
         pAttr.children.append( attr )
         
-        attr = Attr( 'Rotation', pm.Vec3, NP.getPos, NP.setPos, w=False )
+        attr = Attr( 'Rotation', pm.Vec3, NP.getHpr, NP.setHpr, w=False )
         attr.children.extend( 
             [
-                Attr( 'H', float, NP.getX, NP.setX, w=False ),
-                Attr( 'P', float, NP.getY, NP.setY, w=False ),
-                Attr( 'R', float, NP.getZ, NP.setZ, w=False )
+                Attr( 'H', float, NP.getH, NP.setH, w=False ),
+                Attr( 'P', float, NP.getP, NP.setP, w=False ),
+                Attr( 'R', float, NP.getR, NP.setR, w=False )
             ]
         )
         pAttr.children.append( attr )
