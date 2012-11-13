@@ -66,10 +66,16 @@ class Scene( p3d.Object ):
         
     def DeleteNodePaths( self, nps ):
         """
-        Delete the indicated node paths, taking care to destroy the node's 
-        helper if there is one.
+        Delete the indicated node paths. Remember to call OnDelete methods on
+        the node wrapper.
         """
         for np in nps:
+            
+            # Call delete methods for any wrappers
+            wrpr = base.game.nodeMgr.Wrap( np )
+            if wrpr is not None:
+                wrpr.OnDelete( np )
+                
             np.detachNode()
     
     def DuplicateNodePaths( self, nps ):

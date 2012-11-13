@@ -73,3 +73,6 @@ class NodePath( GameNodePath ):
     
     def OnDeselect( self, np ):
         pass
+    
+    def OnDelete( self, np ):
+        pass

@@ -15,7 +15,7 @@ class PointLight( Light ):
         pAttr.children.extend( 
             [
                 Attr( 'Attenuation', pm.Vec3, PL.getAttenuation, PL.setAttenuation ),
-                Attr( 'Point', pm.Vec3, PL.getPoint, PL.setPoint ),
+                Attr( 'Point', pm.Point3, PL.getPoint, PL.setPoint ),
                 Attr( 'Specular Color', pm.Vec4, PL.getSpecularColor, PL.setSpecularColor )
             ]
         )
