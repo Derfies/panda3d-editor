@@ -12,6 +12,7 @@ class SceneGraphBasePanel( wx.Panel ):
     def __init__( self, *args, **kwargs ):
         wx.Panel.__init__( self, *args, **kwargs )
         
+        self.filter = None
         self._updating = False
         self._selUpdating = False
         self.dragNps = []
@@ -144,6 +145,10 @@ class SceneGraphBasePanel( wx.Panel ):
         def AddItem( np, parentItem ):
             if np is base.scene.rootNp:
                 return
+            
+            if self.filter is not None and not np.node().isOfType( self.filter ):
+                return
+            
             if np.getParent() in self._nps:
                 parentItem = self._nps[np.getParent()]
             else:
