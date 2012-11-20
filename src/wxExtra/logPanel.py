@@ -46,7 +46,10 @@ class LogPanel( wx.Panel ):
         wx.Panel.__init__( self, *args, **kwargs )
         
         # Build log text control
-        self.tc = wx.TextCtrl( self, style=wx.TE_MULTILINE | wx.TE_RICH2 )
+        self.tc = wx.TextCtrl( self, style=
+                               wx.TE_MULTILINE | 
+                               wx.TE_RICH2 |
+                               wx.NO_BORDER )
         
         # Redirect text here
         sys.stdout = self.RedirectText( sys.stdout, self.tc )
