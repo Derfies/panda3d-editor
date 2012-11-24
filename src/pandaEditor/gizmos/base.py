@@ -225,8 +225,8 @@ class Base( NodePath, p3d.SingleTask ):
             p1 = Point3()
             p2 = Point3()
             self.camera.node().getLens().extrude( mp, p1, p2 )
-            p1 = render.getRelativePoint( self.camera, p1 )
-            p2 = render.getRelativePoint( self.camera, p2 )
+            p1 = self.rootNp.getRelativePoint( self.camera, p1 )
+            p2 = self.rootNp.getRelativePoint( self.camera, p2 )
             
             # Get the point of intersection with a plane with the normal
             # specified
@@ -251,9 +251,9 @@ class Base( NodePath, p3d.SingleTask ):
         # Get the axis vector - by default this is the selected axis'
         # vector unless we need to use the camera's look vector
         if axis.vector == CAMERA_VECTOR:
-            axisVector = render.getRelativeVector( self.camera, Vec3(0, -1, 0) )
+            axisVector = self.rootNp.getRelativeVector( self.camera, Vec3(0, -1, 0) )
         else:
-            axisVector = render.getRelativeVector( self, axis.vector )
+            axisVector = self.rootNp.getRelativeVector( self, axis.vector )
             
         # Get the transform plane's normal. If we're transforming in
         # planar mode use the axis vector as the plane normal, otherwise
@@ -264,7 +264,7 @@ class Base( NodePath, p3d.SingleTask ):
             
             # Get the cross of the camera vector and the axis vector - a
             # vector of 0, 1, 0 in camera space is coming out of the lens
-            camVector = render.getRelativeVector( self.camera, Vec3(0, 1, 0) )
+            camVector = self.rootNp.getRelativeVector( self.camera, Vec3(0, 1, 0) )
             camAxisCross = camVector.cross( axisVector )
             
             # Cross this back with the axis to get a plane's normal

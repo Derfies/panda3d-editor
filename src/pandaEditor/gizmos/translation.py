@@ -63,7 +63,7 @@ class Translation( Base ):
         # Get the attached node path's translation matrix
         transVec = axisPoint - self.initMousePoint
         if axis.vector != CAMERA_VECTOR:
-            transVec = self.getRelativeVector( render, transVec ) * self.getScale()[0]
+            transVec = self.getRelativeVector( self.rootNp, transVec ) * self.getScale()[0]
         newTransMat = Mat4().translateMat( transVec )
         
         # Transform attached node paths

@@ -131,7 +131,7 @@ class Rotation( Base ):
         
         axis = self.GetSelectedAxis()
         if axis is not None and axis.vector == CAMERA_VECTOR:
-            endVec = self.getRelativeVector( render, self.GetAxisPoint( axis ) - self.getPos() )
+            endVec = self.getRelativeVector( self.rootNp, self.GetAxisPoint( axis ) - self.getPos() )
             
             cross = startVec.cross( endVec )
             direction = self.getRelativeVector( self.camera, Vec3(0, -1, 0) ).dot( cross )
@@ -143,7 +143,7 @@ class Rotation( Base ):
             if self.collEntry.getIntoNode() == self.initCollEntry.getIntoNode():
                 endVec = self.collEntry.getSurfaceNormal( self )
             else:
-                endVec = self.getRelativeVector( render, self.GetAxisPoint( self.foobar ) - self.getPos() )
+                endVec = self.getRelativeVector( self.rootNp, self.GetAxisPoint( self.foobar ) - self.getPos() )
             
             # If an axis is selected then constrain the vectors by projecting
             # them onto a plane whose normal is the axis vector
@@ -198,7 +198,7 @@ class Rotation( Base ):
         # otherwise use the surface normal from the collision with the sphere
         axis = self.GetSelectedAxis()
         if axis is not None and axis.vector == CAMERA_VECTOR:
-            self.startVec = self.getRelativeVector( render, self.initMousePoint - self.getPos() )
+            self.startVec = self.getRelativeVector( self.rootNp, self.initMousePoint - self.getPos() )
         else:
             self.startVec = self.initCollEntry.getSurfaceNormal( self )
         
@@ -208,9 +208,9 @@ class Rotation( Base ):
         axis = self.GetSelectedAxis()
         if ( hasattr( self, 'collEntry' ) and hasattr( self, 'initCollEntry' ) and 
              self.collEntry.getIntoNode() != self.initCollEntry.getIntoNode() ):
-            self.startVec = self.getRelativeVector( render, self.GetAxisPoint( self.foobar ) - self.getPos() )
+            self.startVec = self.getRelativeVector( self.rootNp, self.GetAxisPoint( self.foobar ) - self.getPos() )
         else:
-            self.startVec = self.getRelativeVector( render, self.initMousePoint - self.getPos() )
+            self.startVec = self.getRelativeVector( self.rootNp, self.initMousePoint - self.getPos() )
     
     def OnNodeMouseOver( self, collEntry ):
         Base.OnNodeMouseOver( self, collEntry )

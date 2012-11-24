@@ -59,7 +59,7 @@ class Scale( Base ):
         # Using length() will give us a positive number, which doesn't work if
         # we're trying to scale down the object. Get the sign for the distance
         # from the dot of the axis and the mouse direction
-        mousePoint = self.getRelativePoint( render, axisPoint ) - self.getRelativePoint( render, self.initMousePoint )
+        mousePoint = self.getRelativePoint( self.rootNp, axisPoint ) - self.getRelativePoint( self.rootNp, self.initMousePoint )
         direction = axis.vector.dot( mousePoint )
         sign = math.copysign( 1, direction )
         distance = distance * sign

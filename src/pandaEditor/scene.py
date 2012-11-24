@@ -16,10 +16,12 @@ class Scene( p3d.Object ):
         p3d.Object.__init__( self, *args, **kwargs )
         
         # Tag default nodes
+        render.setTag( game.nodes.TAG_NODE_TYPE, 'Render' )
         base.cam.setTag( game.nodes.TAG_NODE_TYPE, 'BaseCam' )
         base.camera.setTag( game.nodes.TAG_NODE_TYPE, 'BaseCamera' )
         
         # Call create to run editor create methods.
+        base.game.nodeMgr.Create( 'Render' )
         base.game.nodeMgr.Create( 'BaseCam' )
         base.game.nodeMgr.Create( 'BaseCamera' )
         

@@ -143,9 +143,9 @@ class SceneGraphBasePanel( wx.Panel ):
         node path encountered.
         """
         def AddItem( np, parentItem ):
-            if np is base.scene.rootNp:
-                return
             
+            # Bail if there is a filter set and the node is not derived from
+            # that type.
             if self.filter is not None and not np.node().isOfType( self.filter ):
                 return
             
@@ -227,3 +227,16 @@ class SceneGraphBasePanel( wx.Panel ):
         self.tc.SetEvtHandlerEnabled( True )
         self.tc.Refresh()
         self.Thaw()
+        
+    def GetValidSelections( self ):
+        """
+        Return a list of selected items, making sure that they are valid by
+        using IsOk() and are not the root item.
+        """
+        items = []
+        
+        for item in self.tc.GetSelections():
+            if item.IsOk() and item is not self.tc.GetRootItem():
+                items.append( item )
+                
+        return items

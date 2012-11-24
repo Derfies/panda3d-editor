@@ -9,9 +9,14 @@ class ShowBase( P3dShowBase.ShowBase ):
     def __init__( self, wxGameWin, wxEdWin, *args, **kwargs ):
         P3dShowBase.ShowBase.__init__( self, *args, **kwargs )
         
+        self.wxGameWin = wxGameWin
+        self.wxEdWin = wxEdWin
+        
+    def FinishInit( self ):
+        
         self.SetupEdRender()
         self.SetupEdRender2d()
-        self.SetupEdWindow( wxGameWin, wxEdWin )
+        self.SetupEdWindow( self.wxGameWin, self.wxEdWin )
         self.SetupEdMouseWatcher()
         self.SetupEdCamera()
         
@@ -80,6 +85,7 @@ class ShowBase( P3dShowBase.ShowBase ):
             'camera', 
             style=p3d.CAM_VIEWPORT_AXES,
             speed=0.5, 
+            rootNp=self.edRender,
             rootP2d=self.edPixel2d,
             win=self.edWin,
             mouseWatcherNode=self.edMouseWatcherNode 

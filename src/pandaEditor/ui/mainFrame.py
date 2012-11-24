@@ -17,6 +17,7 @@ from baseDialog import BaseDialog
 from resourcesPanel import ResourcesPanel
 from propertiesPanel import PropertiesPanel
 from sceneGraphPanel import SceneGraphPanel
+from lightLinkerPanel import LightLinkerPanel
 from projectSettingsPanel import ProjectSettingsPanel
 
 
@@ -53,6 +54,7 @@ ID_WIND_EDIT_TOOLBAR = wx.NewId()
 ID_WIND_XFORM_TOOLBAR = wx.NewId()
 ID_WIND_VIEWPORT = wx.NewId()
 ID_WIND_SCENE_GRAPH = wx.NewId()
+ID_WIND_LIGHT_LINKER = wx.NewId()
 ID_WIND_PROPERTIES = wx.NewId()
 ID_WIND_RESOURCES = wx.NewId()
 ID_WIND_LOG = wx.NewId()
@@ -107,6 +109,7 @@ class MainFrame( wx.Frame ):
         
         # Build editor panels
         self.pnlSceneGraph = SceneGraphPanel( self, style=wx.SUNKEN_BORDER )
+        self.pnlLightLinker = LightLinkerPanel( self, style=wx.SUNKEN_BORDER )
         self.pnlProps = PropertiesPanel( self, style=wx.SUNKEN_BORDER )
         self.pnlRsrcs = ResourcesPanel( self, style=wx.SUNKEN_BORDER )
         self.pnlLog = LogPanel( self, style=wx.SUNKEN_BORDER )
@@ -290,6 +293,10 @@ class MainFrame( wx.Frame ):
         node = base.game.nodeMgr.Create( typeStr )
         np = pm.NodePath( node )
         cmds.Add( [np] )
+        
+        # Default anys lights to the scene root node.
+        if np.node().isOfType( pm.Light ):
+            self.app.scene.rootNp.setLight( np )
         
     def OnCreateActor( self, evt ):
         """
@@ -671,14 +678,15 @@ class MainFrame( wx.Frame ):
                 .Left()
                 .Position( 2 )),
                 
-            ID_WIND_PROPERTIES:(self.pnlProps, True,
+            ID_WIND_LIGHT_LINKER:(self.pnlLightLinker, True,
                 wx.aui.AuiPaneInfo()
-                .Name( 'pnlProps' )
-                .Caption( 'Properties' )
+                .Name( 'pnlLightLinker' )
+                .Caption( 'Light Linker' )
                 .CloseButton( True )
                 .MaximizeButton( True )
                 .MinSize( (100, 100) )
-                .Right()),
+                .Right()
+                .Position( 2 )),
                 
             ID_WIND_RESOURCES:(self.pnlRsrcs, True,
                 wx.aui.AuiPaneInfo()
@@ -689,6 +697,15 @@ class MainFrame( wx.Frame ):
                 .MinSize( (100, 100) )
                 .Right()
                 .Position( 2 )),
+                
+            ID_WIND_PROPERTIES:(self.pnlProps, True,
+                wx.aui.AuiPaneInfo()
+                .Name( 'pnlProps' )
+                .Caption( 'Properties' )
+                .CloseButton( True )
+                .MaximizeButton( True )
+                .MinSize( (100, 100) )
+                .Right()),
                 
             ID_WIND_LOG:(self.pnlLog, True,
                 wx.aui.AuiPaneInfo()

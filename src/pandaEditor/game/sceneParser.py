@@ -28,6 +28,7 @@ class SceneParser( object ):
         return attrib
     
     def LoadData( self, wrpr, elem ):
+        rtn = None
         
         # Pull all data from the xml for this component, then get the wrapper
         # to set the data.
@@ -38,6 +39,11 @@ class SceneParser( object ):
             if dataType in self.loadCastFnMap:
                 castFn = self.loadCastFnMap[dataType]
                 dataDict[dataElem.get( 'name' )] = castFn( dataElem.get( 'value' ) )
+                
+                # Keep a record of all uuids so we can set up connections 
+                # later.
+                if dataElem.get( 'name' ) == 'uuid':
+                    rtn = dataElem.get( 'value' )
             else:
                 print 'Could not load attribute: ', dataElem.get( 'name' ), ' : of type: ', dataType
         wrpr.SetData( dataDict )
@@ -49,7 +55,9 @@ class SceneParser( object ):
             if CWrpr is not None:
                 cWrpr = CWrpr()
                 cWrpr.Create( wrpr.data, **self.GetCreateArgs( cElem.attrib ) )
-                self.LoadData( cWrpr, cElem )
+                return self.LoadData( cWrpr, cElem )
+                
+        return rtn
         
     def LoadNode( self, elem, parentNp ):
         """Build an element from xml."""
@@ -64,14 +72,31 @@ class SceneParser( object ):
                 # Create the base node path
                 wrpr = Wrpr()
                 np = wrpr.Create( **self.GetCreateArgs( elem.attrib ) )
-                np.reparentTo( parentNp )
+                
+                if parentNp is not None:
+                    np.reparentTo( parentNp )
+                    
+                    if not hasattr( self, 'rootNp' ):
+                        self.rootNp = parentNp
                 
                 # Load data for the node.
-                self.LoadData( wrpr, elem )
+                self.nodes[self.LoadData( wrpr, elem )] = np
                 
                 # At this stage np might be an actor, so cast back to node path.
                 # This may cause some weird issues. Not sure...
-                np = np.anyPath( np.node() )     
+                np = np.anyPath( np.node() )   
+                
+                # Store connections so we can set them up once the rest of
+                # the scene has been loaded.
+                cnctnsElem = elem.find( 'Connections' )
+                if cnctnsElem is not None:
+                    cnctnDict = {}
+                    for cnctnElem in cnctnsElem:
+                        cType = cnctnElem.get( 'type' )
+                        uuid = cnctnElem.get( 'value' )
+                        cnctnDict.setdefault( cType, [] )
+                        cnctnDict[cType].append( uuid )
+                        self.cnctns[np] = cnctnDict
                 
         else:
             np = parentNp
@@ -81,8 +106,33 @@ class SceneParser( object ):
         if cElem is not None:
             for childElem in cElem:
                 self.LoadNode( childElem, np )
+                
+    def LoadConnections( self ):
+
+        for np, cnctn in self.cnctns.items():
+            
+            # Swap uuids for NodePaths
+            cnctnDict = {}
+            for key, vals in cnctn.items():
+                for val in vals:
+                    if val in self.nodes:
+                        cnctnDict.setdefault( key, [] )
+                        cnctnDict[key].append( self.nodes[val] )
+            
+            wrpr = base.game.nodeMgr.Wrap( np )
+            wrpr.SetConnections( cnctnDict )
             
     def Load( self, rootNp, filePath ):
         """Load the scene from an xml file."""
+        self.nodes = {}
+        self.cnctns = {}
+        
         tree = et.parse( filePath )
-        self.LoadNode( tree.getroot(), rootNp )
+        # DEBUG
+        if rootNp is render:
+            rootNp = None
+        for child in tree.getroot():
+            self.LoadNode( child, rootNp )
+            
+        # Load connections
+        self.LoadConnections()

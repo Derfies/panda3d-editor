@@ -29,6 +29,13 @@ class NodePath( Base ):
             ]
         )
         self.attributes.append( pAttr )
+    
+    def SetConnections( self, cnctns ):
+        self.data.clearLight()
+        for cType, vals in cnctns.items():
+            if cType == 'onLight':
+                for val in vals:
+                    self.data.setLight( val )
         
     def SetupNodePath( self, np ):
         id = str( uuid.uuid4() )
@@ -50,6 +57,9 @@ class NodePath( Base ):
         for child in self.children:
             child.Duplicate( np, dupeNp )
         base.game.pluginMgr.OnNodeDuplicate( self.data )
+        
+        # Give a new uuid to the duplicate node.
+        self.SetupNodePath( dupeNp )
     
     def Destroy( self ):
         Base.Destroy( self )

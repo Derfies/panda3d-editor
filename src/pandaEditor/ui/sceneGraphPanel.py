@@ -23,13 +23,8 @@ class SceneGraphPanel( SceneGraphBasePanel ):
         if self._selUpdating or self._updating:
             return
         
-        # Get all valid selected items
-        items = []
-        for item in self.tc.GetSelections():
-            if item.IsOk() and item is not self.tc.GetRootItem():
-                items.append( item )
-        
         # Set selected items
+        items = self.GetValidSelections()
         if items:
             nps = [item.GetData() for item in items]
             cmds.Select( nps )

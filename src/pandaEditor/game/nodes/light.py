@@ -17,11 +17,3 @@ class Light( NodePath ):
             ]
         )
         self.attributes.append( pAttr )
-    
-    def Create( self ):
-        np = NodePath.Create( self )
-        
-        # DEBUG
-        render.setLight( np )
-        
-        return np

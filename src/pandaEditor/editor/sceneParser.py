@@ -56,6 +56,16 @@ class SceneParser( game.SceneParser ):
             for key, value in cWrpr.createArgs.items():
                 cElem.set( key, value )
             self.SaveData( cWrpr, cElem )
+            
+    def SaveConnections( self, wrpr, elem ):
+        cnctnDict = wrpr.GetConnections()
+        if cnctnDict:
+            cnctnsElem = et.SubElement( elem, 'Connections' )
+            for key, vals in cnctnDict.items():
+                for val in vals:
+                    cnctnElem = et.SubElement( cnctnsElem, 'Connection' )
+                    cnctnElem.set( 'type', key )
+                    cnctnElem.set( 'value', val )
     
     def SaveNode( self, np, parentElem ):
         """
@@ -82,7 +92,7 @@ class SceneParser( game.SceneParser ):
                 
                 # Recursively save the data.
                 self.SaveData( wrpr, elem )
-            
+                self.SaveConnections( wrpr, elem )
         else:
             elem = parentElem
         

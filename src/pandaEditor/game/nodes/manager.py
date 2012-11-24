@@ -5,6 +5,7 @@ class Manager( object ):
     
     def __init__( self ):
         from nodePath import NodePath
+        from render import Render
         from actor import Actor
         from pandaNode import PandaNode
         from collisionNode import CollisionNode
@@ -22,6 +23,7 @@ class Manager( object ):
         
         self.nodeWrappers = {
             'NodePath':NodePath,
+            'Render':Render,
             'PandaNode':PandaNode,
             'Actor':Actor,
             'CollisionNode':CollisionNode,

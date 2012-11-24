@@ -2,6 +2,7 @@ import pandac.PandaModules as pm
 from pandac.PandaModules import NodePath as NP
 
 from constants import *
+from game.nodes.constants import *
 from game.nodes.nodePath import NodePath as GameNodePath
 from game.nodes.attributes import NodePathAttribute as Attr
 
@@ -76,3 +77,12 @@ class NodePath( GameNodePath ):
     
     def OnDelete( self, np ):
         pass
+    
+    def GetConnections( self ):
+        data = {}
+        lights = self.data.getAttrib( pm.LightAttrib )
+        if lights is not None:
+            onLights = lights.getOnLights()
+            uuids = [lgt.getTag( TAG_NODE_UUID ) for lgt in onLights]
+            data['onLight'] = uuids
+        return data

@@ -151,7 +151,7 @@ class Camera( NodePath, p3d.SingleTask ):
     def Frame( self, nps ):
         
         # Create a bounding volume which includes all node paths
-        parent = render.attachNewNode( 'parent' )
+        parent = self.rootNp.attachNewNode( 'parent' )
         dupeNps = []
         for np in nps:
             dupeNp = np.copyTo( parent )

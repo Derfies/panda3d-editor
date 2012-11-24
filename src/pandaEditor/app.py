@@ -1,6 +1,7 @@
 import os
 import traceback
 
+import wx
 from direct.directtools.DirectGrid import DirectGrid
 from wx.lib.pubsub import Publisher as pub
 import pandac.PandaModules as pm
@@ -34,7 +35,14 @@ class App( p3d.wx.App ):
         self.frame = ui.MainFrame( None, size=(800, 600) )
         ShowBase( self.frame.pnlGameView, self.frame.pnlEdView )
         self.ReplaceEventLoop()
+        self.frame.Show()
+        wx.CallAfter( self.FinishInit )
         
+        return True
+    
+    def FinishInit( self ):
+        base.FinishInit()
+    
         # Create project manager
         self.project = Project( self )
         self.frame.SetProjectPath( self.frame.cfg.Read( 'projDirPath' ) )
@@ -104,8 +112,6 @@ class App( p3d.wx.App ):
         # Start with a new scene
         self.CreateScene()
         self.doc.OnRefresh()
-        
-        self.frame.Show( True )
         
         return True
     
