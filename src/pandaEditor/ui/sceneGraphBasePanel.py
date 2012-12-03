@@ -14,7 +14,6 @@ class SceneGraphBasePanel( wx.Panel ):
         
         self.filter = None
         self._updating = False
-        self._selUpdating = False
         self.dragNps = []
         
         # Build tree control

@@ -20,7 +20,7 @@ class SceneGraphPanel( SceneGraphBasePanel ):
         """
         # Bail if we got here by setting the item inside the OnUpdateSelection
         # method, we get stuck in an infinite loop otherwise.
-        if self._selUpdating or self._updating:
+        if self._updating:
             return
         
         # Set selected items
@@ -36,10 +36,6 @@ class SceneGraphPanel( SceneGraphBasePanel ):
         iterate through the entire tree to find the items we need.
         """
         SceneGraphBasePanel.OnUpdate( self, msg )
-        
-        self._selUpdating = True
 
         items = [self._nps[np] for np in msg.data if np in self._nps]
         self.SelectItems( items )
-
-        self._selUpdating = False

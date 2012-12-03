@@ -2,7 +2,10 @@ import wx
 import wx.lib.agw.customtreectrl as ct
 
 import pandac.PandaModules as pm
+from pandac.PandaModules import NodePath as NP
 
+from .. import commands as cmds
+from game.nodes import Attribute as Attr
 from sceneGraphBasePanel import SceneGraphBasePanel
 
 
@@ -65,15 +68,34 @@ class LightLinkerPanel( wx.Panel ):
         Set relationship with those items selected in the left list with those
         the user has selected in the right list.
         """
+        if self.pnlRight._updating:
+            return
+        
+        # Get the light NodePath selected in the left panel
         items = self.pnlLeft.GetValidSelections()
         if not items:
             self.pnlRight.tc.UnselectAll()
             return
-        
         lgtNp = items[0].GetData()
-        for item in self.pnlRight.tc.GetAllItems():
-            np = item.GetData()
-            if item in self.pnlRight.tc.GetSelections():
-                np.setLight( lgtNp )
-            else:
-                np.clearLight( lgtNp )
+        
+        # Get the light attribute for the NodePath. Create an empty one if 
+        # None is returned (has not had any lights applied yet).
+        item = evt.GetItem()
+        np = item.GetData()
+        attrib = np.getAttrib( pm.LightAttrib )
+        if attrib is None:
+            
+            # Set an empty light attrib so this works with the undo system.
+            attrib = pm.LightAttrib.make()
+            np.setAttrib( attrib )
+        
+        # Add / remove lights from the attrib.
+        if item in self.pnlRight.tc.GetSelections():
+            attrib = attrib.addOnLight( lgtNp )
+        else:
+            attrib = attrib.removeOnLight( lgtNp )
+        
+        # Construct the attribute and set it.
+        attr = Attr( 'OnLight', pm.LightAttrib, NP.getAttrib, 
+                     NP.setAttrib, getArgs=[pm.LightAttrib] )
+        cmds.SetAttribute( [np], attr, attrib )
