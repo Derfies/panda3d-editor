@@ -14,7 +14,10 @@ class EditorPlugin( Base ):
         # Set editor meshes.
         nWrprs = self.app.game.nodeMgr.nodeWrappers
         nWrprs['BaseCam'].SetEditorGeometry( loader.loadModel( self.GetModelPath( 'Camera.egg' ) ) )
+        nWrprs['AmbientLight'].SetEditorGeometry( loader.loadModel( self.GetModelPath( 'AmbientLight.egg' ) ) )
+        nWrprs['Spotlight'].SetEditorGeometry( loader.loadModel( self.GetModelPath( 'Spotlight.egg' ) ) )
         nWrprs['PointLight'].SetEditorGeometry( loader.loadModel( self.GetModelPath( 'PointLight.egg' ) ) )
+        nWrprs['DirectionalLight'].SetEditorGeometry( loader.loadModel( self.GetModelPath( 'DirectionalLight.egg' ) ) )
         
     def GetModelPath( self, fileName ):
         """
