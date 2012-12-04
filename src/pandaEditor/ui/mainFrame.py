@@ -49,9 +49,14 @@ ID_XFORM_WORLD = wx.NewId()
 
 ID_VIEW_GRID = wx.NewId()
 
+ID_LAYOUT_GAME = wx.NewId() 
+ID_LAYOUT_EDITOR = wx.NewId() 
+ID_LAYOUT_BOTH = wx.NewId() 
+
 ID_WIND_FILE_TOOLBAR = wx.NewId()
 ID_WIND_EDIT_TOOLBAR = wx.NewId()
 ID_WIND_XFORM_TOOLBAR = wx.NewId()
+ID_WIND_LAYOUT_TOOLBAR = wx.NewId()
 ID_WIND_VIEWPORT = wx.NewId()
 ID_WIND_SCENE_GRAPH = wx.NewId()
 ID_WIND_LIGHT_LINKER = wx.NewId()
@@ -91,21 +96,11 @@ class MainFrame( wx.Frame ):
         self.BuildFileActions()
         self.BuildEditActions()
         self.BuildXformActions()
+        self.BuildLayoutActions()
         
-        # Build game and editor viewports. Don't initialise just yet as 
-        # ShowBase has not yet been created.
-        self.pnlGameView = Viewport( self )
-        self.pnlEdView = Viewport( self )
-        
-        # Build viewport notebook
-        nbStyle = ( wx.aui.AUI_NB_DEFAULT_STYLE &~ 
-                    wx.aui.AUI_NB_CLOSE_ON_ACTIVE_TAB )
-        self.nbViewport = wx.aui.AuiNotebook( self, style=nbStyle )
-        self.nbViewport.AddPage( self.pnlEdView, 'Editor' )
-        self.nbViewport.AddPage( self.pnlGameView, 'Game' )
-        self.nbViewport.Bind( wx.EVT_KEY_UP, p3d.wx.OnKeyUp )
-        self.nbViewport.Bind( wx.EVT_KEY_DOWN, p3d.wx.OnKeyDown )
-        self.nbViewport.Bind( wx.EVT_LEFT_UP, p3d.wx.OnLeftUp )
+        # Build viewport. Don't initialise just yet as ShowBase has not yet 
+        # been created.
+        self.pnlViewport = Viewport( self )
         
         # Build editor panels
         self.pnlSceneGraph = SceneGraphPanel( self, style=wx.SUNKEN_BORDER )
@@ -375,6 +370,32 @@ class MainFrame( wx.Frame ):
             arg = 'scl'
         self.app.SetActiveGizmo( arg )
         
+    def OnLayout( self, evt ):
+        
+        # Deactivate both display regions and enable mouse.
+        base.dr.setActive( False )
+        base.edDr.setActive( False )
+        base.EnableEditorMouse()
+        base.edRender2d.show()
+        base.edPixel2d.show()
+        
+        # Show either the game or editor viewport, or in the case of showing
+        # both put the game viewport in the upper right hand corner. Disable
+        # the mouse when in game view.
+        if evt.GetId() == ID_LAYOUT_GAME:
+            base.dr.setActive( True )
+            base.dr.setDimensions( 0, 1, 0, 1 )
+            base.edRender2d.hide()
+            base.edPixel2d.hide()
+            base.DisableEditorMouse()
+        elif evt.GetId() == ID_LAYOUT_EDITOR:
+            base.edDr.setActive( True )
+            base.edDr.setDimensions( 0, 1, 0, 1 )
+        elif evt.GetId() == ID_LAYOUT_BOTH:
+            base.dr.setActive( True )
+            base.edDr.setActive( True )
+            base.dr.setDimensions( 0.65, 1, 0.65, 1 )
+        
     def OnUpdateWindowMenu( self, evt ):
         """
         Set the checks in the window menu to match the visibility of the 
@@ -568,18 +589,35 @@ class MainFrame( wx.Frame ):
         """Add tools, set long help strings and bind toolbar events."""
         fn = self.OnXformSetActiveGizmo
         actns = [
-            ActionItem( 'World Transform', os.path.join( 'data', 'images', 'globe.png' ), fn, ID_XFORM_WORLD, kind=wx.ITEM_CHECK ),
             ActionItem( 'Select', os.path.join( 'data', 'images', 'select.png' ), fn, ID_XFORM_SEL, kind=wx.ITEM_RADIO ),
             ActionItem( 'Move', os.path.join( 'data', 'images', 'move.png' ), fn, ID_XFORM_POS, kind=wx.ITEM_RADIO ),
             ActionItem( 'Rotate', os.path.join( 'data', 'images', 'rotate.png' ), fn, ID_XFORM_ROT, kind=wx.ITEM_RADIO ),
-            ActionItem( 'Scale', os.path.join( 'data', 'images', 'scale.png' ), fn, ID_XFORM_SCL, kind=wx.ITEM_RADIO )
+            ActionItem( 'Scale', os.path.join( 'data', 'images', 'scale.png' ), fn, ID_XFORM_SCL, kind=wx.ITEM_RADIO ),
+            ActionItem( 'World Transform', os.path.join( 'data', 'images', 'globe.png' ), fn, ID_XFORM_WORLD, kind=wx.ITEM_CHECK )
         ]
         
         # Create xform toolbar
         self.tbXform = CustomAuiToolBar( self, -1, style=wx.aui.AUI_TB_DEFAULT_STYLE )
         self.tbXform.SetToolBitmapSize( TBAR_ICON_SIZE )
+        self.tbXform.AddSpacer( 0 )   # Need to insert a null object here or the radio buttons don't seem to work (win7 at least).
         self.tbXform.AppendActionItems( actns )
         self.tbXform.Realize()
+        
+    def BuildLayoutActions( self ):
+        """Add tools, set long help strings and bind toolbar events."""
+        actns = [
+            ActionItem( 'Editor', os.path.join( 'data', 'images', 'application-sidebar-list.png' ), self.OnLayout, ID_LAYOUT_EDITOR, kind=wx.ITEM_RADIO ),
+            ActionItem( 'Game', os.path.join( 'data', 'images', 'layout-game.png' ), self.OnLayout, ID_LAYOUT_GAME, kind=wx.ITEM_RADIO ),
+            ActionItem( 'Both', os.path.join( 'data', 'images', 'layout-both.png' ), self.OnLayout, ID_LAYOUT_BOTH, kind=wx.ITEM_RADIO )
+        ]
+        
+        # Create layout toolbar
+        self.tbLayout = CustomAuiToolBar( self, -1, style=wx.aui.AUI_TB_DEFAULT_STYLE )
+        self.tbLayout.SetToolBitmapSize( TBAR_ICON_SIZE )
+        self.tbLayout.AddSpacer( 0 )   # Need to insert a null object here or the radio buttons don't seem to work (win7 at least).
+        self.tbLayout.AppendActionItems( actns )
+        self.tbLayout.ToggleTool( ID_LAYOUT_EDITOR, True )
+        self.tbLayout.Realize()
                 
     def BuildViewMenu( self ):
         """Build the view menu."""
@@ -660,9 +698,16 @@ class MainFrame( wx.Frame ):
                 .ToolbarPane()
                 .Top()),
                 
-            ID_WIND_VIEWPORT:(self.nbViewport, True,
+            ID_WIND_LAYOUT_TOOLBAR:(self.tbLayout, True,
                 wx.aui.AuiPaneInfo()
-                .Name( 'pnlGameView' )
+                .Name( 'tbLayout' )
+                .Caption( 'Layout Toolbar' )
+                .ToolbarPane()
+                .Top()),
+
+            ID_WIND_VIEWPORT:(self.pnlViewport, True,
+                wx.aui.AuiPaneInfo()
+                .Name( 'pnlViewport' )
                 .Caption( 'Viewport' )
                 .CloseButton( False )
                 .MaximizeButton( True )

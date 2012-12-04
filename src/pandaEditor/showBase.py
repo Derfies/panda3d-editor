@@ -6,28 +6,26 @@ import p3d
 
 class ShowBase( P3dShowBase.ShowBase ):
     
-    def __init__( self, wxGameWin, wxEdWin, *args, **kwargs ):
+    def __init__( self, wxWin, *args, **kwargs ):
         P3dShowBase.ShowBase.__init__( self, *args, **kwargs )
         
-        self.wxGameWin = wxGameWin
-        self.wxEdWin = wxEdWin
+        self.wxWin = wxWin
         
     def FinishInit( self ):
-        
         self.SetupEdRender()
         self.SetupEdRender2d()
-        self.SetupEdWindow( self.wxGameWin, self.wxEdWin )
+        self.SetupEdWindow()
         self.SetupEdMouseWatcher()
         self.SetupEdCamera()
         
         # Make additional camera for 2d nodes
-        cam2d = self.makeCamera2d( self.edWin )
+        cam2d = self.makeCamera2d( self.win )
         cam2d.reparentTo( self.edRender2d )
         
         # Add the editor window, camera and pixel 2d to the list of forced
         # aspect windows so aspect is fixed when the window is resized.
         self.forcedAspectWins = []
-        self.forcedAspectWins.append( (self.edWin, self.edCamera, self.edPixel2d) )
+        self.forcedAspectWins.append( (self.win, self.edCamera, self.edPixel2d) )
         
         # Set up masks for camera and render
         self.SetupCameraMask()
@@ -66,17 +64,16 @@ class ShowBase( P3dShowBase.ShowBase ):
         if xsize > 0 and ysize > 0:
             self.edPixel2d.setScale( 2.0 / xsize, 1.0, 2.0 / ysize )
             
-    def SetupEdWindow( self, wxGameWin, wxEdWin ):
-        wxGameWin.Initialize()
-        wxEdWin.Initialize( useMainWin=False )
-        self.edWin = wxEdWin.GetWindow()
+    def SetupEdWindow( self ):
+        self.wxWin.Initialize()
         
     def SetupEdMouseWatcher( self ):
         
         # Setup mouse watcher for the editor window
-        buttonThrowers, pointerWatcherNodes = self.setupMouseCB( self.edWin )
+        buttonThrowers, pointerWatcherNodes = self.setupMouseCB( self.win )
         self.edMouseWatcher = buttonThrowers[0].getParent()
         self.edMouseWatcherNode = self.edMouseWatcher.node()
+        self.edMouseWatcherParent = self.edMouseWatcher.getParent()
         
     def SetupEdCamera( self ):
         
@@ -87,16 +84,21 @@ class ShowBase( P3dShowBase.ShowBase ):
             speed=0.5, 
             rootNp=self.edRender,
             rootP2d=self.edPixel2d,
-            win=self.edWin,
+            win=self.win,
             mouseWatcherNode=self.edMouseWatcherNode 
         )
         self.edCamera.reparentTo( self.edRender )
         self.edCamera.Start()
         
-        # Fix camera pathing
-        dr = self.edWin.getDisplayRegion( 0 )
-        dr.setActive( True )
-        dr.setCamera( self.edCamera )
+        # Modify the existing display region and create a new one for the 
+        # editor camera.
+        self.dr = base.cam.node().getDisplayRegion( 0 )
+        self.dr.setClearColorActive( True )
+        self.dr.setClearColor( self.getBackgroundColor() )
+        self.dr.setSort( 1 )
+        self.dr.setActive( False )
+        self.edDr = self.win.makeDisplayRegion( 0, 1, 0, 1 )
+        self.edDr.setCamera( self.edCamera )
         
     def windowEvent( self, *args, **kwargs ):
         """
@@ -162,9 +164,13 @@ class ShowBase( P3dShowBase.ShowBase ):
         self.camera.removeNode()
         self.camera = None
         
-        # Recreate all nodes
+        # Recreate all default nodes. Remove the new display region created
+        # by makeCamera() and connect the new camera to the existing one.
         self.setupRender()
         self.makeCamera( self.win )
+        dr = self.cam.node().getDisplayRegion( 0 )
+        self.win.removeDisplayRegion( dr ) 
+        self.dr.setCamera( self.cam )
         __builtins__['render'] = self.render
         
         # Set up masks
@@ -178,3 +184,9 @@ class ShowBase( P3dShowBase.ShowBase ):
         """
         pm.getModelPath().clear()
         pm.getModelPath().prependDirectory( '.' )
+        
+    def DisableEditorMouse( self ):
+        self.edMouseWatcher.detachNode()
+            
+    def EnableEditorMouse( self ):
+        self.edMouseWatcher.reparentTo( self.edMouseWatcherParent )

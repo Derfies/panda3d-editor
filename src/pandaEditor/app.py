@@ -33,7 +33,7 @@ class App( p3d.wx.App ):
         # Build main frame, start Panda and replace the wx event loop with
         # Panda's.
         self.frame = ui.MainFrame( None, size=(800, 600) )
-        ShowBase( self.frame.pnlGameView, self.frame.pnlEdView )
+        ShowBase( self.frame.pnlViewport )
         self.ReplaceEventLoop()
         self.frame.Show()
         wx.CallAfter( self.FinishInit )
@@ -42,7 +42,7 @@ class App( p3d.wx.App ):
     
     def FinishInit( self ):
         base.FinishInit()
-    
+        
         # Create project manager
         self.project = Project( self )
         self.frame.SetProjectPath( self.frame.cfg.Read( 'projDirPath' ) )
@@ -76,7 +76,7 @@ class App( p3d.wx.App ):
         self.selection = Selection(
             camera=base.edCamera, 
             root2d=base.edRender2d, 
-            win=base.edWin, 
+            win=base.win, 
             mouseWatcherNode=base.edMouseWatcherNode 
         )
         base.selection = self.selection
@@ -121,7 +121,7 @@ class App( p3d.wx.App ):
         kwargs = {
             'camera':base.edCamera, 
             'rootNp':gizmoMgrRootNp, 
-            'win':base.edWin, 
+            'win':base.win, 
             'mouseWatcherNode':base.edMouseWatcherNode
         }
         self.gizmoMgr = gizmos.Manager( **kwargs )
