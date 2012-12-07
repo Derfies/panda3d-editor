@@ -1,5 +1,6 @@
 import pandac.PandaModules as pm
 from pandac.PandaModules import NodePath as NP
+from direct.directtools.DirectSelection import DirectBoundingBox
 
 from constants import *
 from game.nodes.constants import *
@@ -70,10 +71,20 @@ class NodePath( GameNodePath ):
             np.setPythonTag( TAG_PICKABLE, self.pickable )
             
     def OnSelect( self, np ):
-        pass
+        """Add a bounding box to the indicated node."""
+        bbox = DirectBoundingBox( np, (1, 1, 1, 1) )
+        bbox.show()
+        bbox.lines.setPythonTag( TAG_IGNORE, True )
+        bbox.lines.node().adjustDrawMask( *base.GetEditorRenderMasks() )
+        np.setPythonTag( TAG_BBOX, bbox )
+        return bbox
     
     def OnDeselect( self, np ):
-        pass
+        """Remove the bounding box from the indicated node."""
+        bbox = np.getPythonTag( TAG_BBOX )
+        if bbox is not None:
+            bbox.lines.removeNode()
+        np.clearPythonTag( TAG_BBOX )
     
     def OnDelete( self, np ):
         pass

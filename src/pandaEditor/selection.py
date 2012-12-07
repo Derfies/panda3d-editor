@@ -1,10 +1,7 @@
-import wx
-from direct.directtools.DirectSelection import DirectBoundingBox
 import pandac.PandaModules as pm
 
 import p3d
 import editor
-from scene import Scene
 
 
 class Selection( p3d.Object ):
@@ -25,52 +22,36 @@ class Selection( p3d.Object ):
         self.picker = p3d.MousePicker( 'picker', *args, fromCollideMask=bitMask, **kwargs )
         self.picker.Start()
         
-    def AddBBox( self, np ):
-        """Add a bounding box to the indicated node."""
-        bbox = DirectBoundingBox( np, (1, 0, 0, 1) )
-        bbox.show()
-        bbox.lines.setPythonTag( editor.nodes.TAG_IGNORE, True )
-        bbox.lines.node().adjustDrawMask( *base.GetEditorRenderMasks() )
-        np.setPythonTag( self.BBOX_TAG, bbox )
-        return bbox
-    
-    def RemoveBBox( self, np ):
-        """Remove the bounding box from the indicated node."""
-        bbox = np.getPythonTag( self.BBOX_TAG )
-        if bbox is not None:
-            bbox.lines.removeNode()
-        np.clearPythonTag( self.BBOX_TAG )
-        
     def Get( self ):
         """Return the selected node paths."""
         return self.nps
     
     def Clear( self ):
-        """Clear the selection list and remove all bounding boxes."""
+        """Clear the selection list and run deselect handlers."""
         for np in self.nps:
             if not np.isEmpty():
-                self.RemoveBBox( np )
+                wrpr = base.game.nodeMgr.Wrap( np )
+                if wrpr is not None:
+                    wrpr.OnDeselect( np )
         self.nps = []
     
     def Add( self, nps ):
-        """Add the indicated node paths to the selection."""
+        """
+        Add the indicated node paths to the selection and run select handlers.
+        """
         for np in list( set( nps ) ):
-            if not np.isEmpty():
-                self.AddBBox( np )
-            self.nps.append( np )
-            
-            # Run OnSelect handlers
             wrpr = base.game.nodeMgr.Wrap( np )
             if wrpr is not None:
                 wrpr.OnSelect( np )
+                
+            self.nps.append( np )
     
     def Remove( self, nps ):
-        """Remove those node paths that were in the selection."""
+        """
+        Remove those node paths that were in the selection and run deselect
+        handlers.
+        """
         for np in nps:
-            if not np.isEmpty():
-                self.RemoveBBox( np )
-                
-            # Run OnDeselect handlers
             wrpr = base.game.nodeMgr.Wrap( np )
             if wrpr is not None:
                 wrpr.OnDeselect( np )
@@ -185,6 +166,9 @@ class Selection( p3d.Object ):
             return None
         
     def Update( self ):
+        """Update the selection by running deselect and select handlers."""
         for np in self.nps:
-            self.RemoveBBox( np )
-            self.AddBBox( np )
+            wrpr = base.game.nodeMgr.Wrap( np )
+            if wrpr is not None:
+                wrpr.OnDeselect( np )
+                wrpr.OnSelect( np )
