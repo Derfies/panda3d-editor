@@ -13,13 +13,13 @@ class SceneParser( object ):
             'float':float,
             'int':int,
             'str':str,
-            'LVector2f':p3d.Str2FloatTuple,
-            'LVecBase2f':p3d.Str2FloatTuple,
-            'LVector3f':p3d.Str2FloatTuple,
-            'LVecBase3f':p3d.Str2FloatTuple,
-            'LVector4f':p3d.Str2FloatTuple,
-            'LVecBase4f':p3d.Str2FloatTuple,
-            'LPoint3f':p3d.Str2FloatTuple,
+            'LVector2f':p3d.Str2Vec2,
+            'LVecBase2f':p3d.Str2Vec2,
+            'LVector3f':p3d.Str2Vec3,
+            'LVecBase3f':p3d.Str2Vec3,
+            'LVector4f':p3d.Str2Vec4,
+            'LVecBase4f':p3d.Str2Vec4,
+            'LPoint3f':p3d.Str2Point3,
             'LMatrix4f':p3d.Str2Mat4
         }
         
@@ -46,6 +46,7 @@ class SceneParser( object ):
                     rtn = dataElem.get( 'value' )
             else:
                 print 'Could not load attribute: ', dataElem.get( 'name' ), ' : of type: ', dataType
+        
         wrpr.SetData( dataDict )
         
         # Do child components

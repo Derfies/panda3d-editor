@@ -208,42 +208,38 @@ def Cone( radius=1.0, height=1.0, numSegs=16, degrees=360,
     return geomNode
     
 
-class Box( pm.NodePath ):
+def Box( width=1, depth=1, height=1, origin=pm.Point3(0, 0, 0) ):
+    """Return a geom node representing a box."""
+    # Create vetex data format
+    gvf = pm.GeomVertexFormat.getV3n3()
+    gvd = pm.GeomVertexData( 'vertexData', gvf, pm.Geom.UHStatic )
     
-    """NodePath class representing a polygonal box."""
+    # Create vetex writers for each type of data we are going to store
+    gvwV = pm.GeomVertexWriter( gvd, 'vertex' )
+    gvwN = pm.GeomVertexWriter( gvd, 'normal' )
     
-    def __init__( self, width=1, depth=1, height=1, origin=pm.Point3(0, 0, 0) ):
+    # Write out all points
+    for p in GetPointsForBox( width, depth, height ):
+        gvwV.addData3f( pm.Point3( p ) - origin )
+    
+    # Write out all the normals
+    for n in ( (-1, 0, 0), (1, 0, 0), (0, -1, 0), (0, 1, 0), (0, 0, -1), (0, 0, 1) ):
+        for i in range( 4 ):
+            gvwN.addData3f( n )
+    
+    geom = pm.Geom( gvd )
+    for i in range( 0, gvwV.getWriteRow(), 4 ):
         
-        # Create vetex data format
-        gvf = pm.GeomVertexFormat.getV3n3()
-        gvd = pm.GeomVertexData( 'vertexData', gvf, pm.Geom.UHStatic )
-        
-        # Create vetex writers for each type of data we are going to store
-        gvwV = pm.GeomVertexWriter( gvd, 'vertex' )
-        gvwN = pm.GeomVertexWriter( gvd, 'normal' )
-        
-        # Write out all points
-        for p in GetPointsForBox( width, depth, height ):
-            gvwV.addData3f( pm.Point3( p ) - origin )
-        
-        # Write out all the normals
-        for n in ( (-1, 0, 0), (1, 0, 0), (0, -1, 0), (0, 1, 0), (0, 0, -1), (0, 0, 1) ):
-            for i in range( 4 ):
-                gvwN.addData3f( n )
-        
-        geom = pm.Geom( gvd )
-        for i in range( 0, gvwV.getWriteRow(), 4 ):
-            
-            # Create and add both triangles
-            geom.addPrimitive( GetGeomTriangle( i, i + 1, i + 2 ) )
-            geom.addPrimitive( GetGeomTriangle( i, i + 2, i + 3 ) )
+        # Create and add both triangles
+        geom.addPrimitive( GetGeomTriangle( i, i + 1, i + 2 ) )
+        geom.addPrimitive( GetGeomTriangle( i, i + 2, i + 3 ) )
 
-        # Init the node path, wrapping the box
-        geomNode = pm.GeomNode( 'box' )
-        geomNode.addGeom( geom )
-        pm.NodePath.__init__( self, geomNode )
-        
-        
+    # Init the node path, wrapping the box
+    geomNode = pm.GeomNode( 'box' )
+    geomNode.addGeom( geom )
+    return geomNode
+    
+
 class Polygon( pm.NodePath ):
     
     def __init__( self, points, normals=None, texcoords=None, origin=pm.Point3(0, 0, 0) ):
