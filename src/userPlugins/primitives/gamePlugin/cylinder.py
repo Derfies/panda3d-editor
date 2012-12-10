@@ -8,7 +8,7 @@ from game.nodes import Attribute as Attr
 from game.nodes import NodePathObjectAttribute as NPOAttr
 
 
-class ConeNPO( p3d.NodePathObject ):
+class CylinderNPO( p3d.NodePathObject ):
     
     def __init__( self, *args, **kwargs ):
         p3d.NodePathObject.__init__( self, *args, **kwargs )
@@ -41,17 +41,18 @@ class ConeNPO( p3d.NodePathObject ):
     def Rebuild( self ):
         """Rebulid the cone and update geoms."""
         self.np.node().removeAllGeoms()
-        coneGeom = p3d.geometry.Cone( self._radius, self._height, self._numSegs, 
-                                      self._degrees, self._axis, self._origin )
+        coneGeom = p3d.geometry.Cylinder( self._radius, self._height, 
+                                          self._numSegs, self._degrees, 
+                                          self._axis, self._origin )
         self.np.node().addGeomsFrom( coneGeom )
     
 
-class Cone( NodePath ):
+class Cylinder( NodePath ):
     
     def __init__( self, *args, **kwargs ):
         NodePath.__init__( self, *args, **kwargs )
         
-        pAttr = Attr( 'Cone' )
+        pAttr = Attr( 'Cylinder' )
         pAttr.children.extend( 
             [
                 NPOAttr( 'Radius', float, 'radius' ),
@@ -67,12 +68,12 @@ class Cone( NodePath ):
     def SetupNodePath( self, np ):
         NodePath.SetupNodePath( self, np )
         
-        np.setName( 'cone' )
-        np.setTag( game.nodes.TAG_NODE_TYPE, TAG_CONE )
-        ConeNPO( np )
+        np.setName( 'cylinder' )
+        np.setTag( game.nodes.TAG_NODE_TYPE, TAG_CYLINDER )
+        CylinderNPO( np )
     
     def Create( self ):
-        np = pm.NodePath( p3d.geometry.Cone() )
+        np = pm.NodePath( p3d.geometry.Cylinder() )
         self.SetupNodePath( np )
         self.Wrap( np )
         return np

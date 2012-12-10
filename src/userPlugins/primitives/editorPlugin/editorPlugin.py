@@ -6,6 +6,7 @@ from wxExtra import utils as wxUtils
 
 ID_CREATE_BOX = wx.NewId()
 ID_CREATE_CONE = wx.NewId()
+ID_CREATE_CYLINDER = wx.NewId()
 
 
 class EditorPlugin( gp.GamePlugin ):
@@ -17,10 +18,12 @@ class EditorPlugin( gp.GamePlugin ):
         self.mPrim = wx.Menu()
         self.mPrim.Append( ID_CREATE_BOX, '&Box' )
         self.mPrim.Append( ID_CREATE_CONE, '&Cone' )
+        self.mPrim.Append( ID_CREATE_CYLINDER, '&Cylinder' )
         
         # Bind primitives menu events
         wxUtils.IdBind( self.ui, wx.EVT_MENU, ID_CREATE_BOX, self.ui.OnCreate, gp.TAG_BOX )
         wxUtils.IdBind( self.ui, wx.EVT_MENU, ID_CREATE_CONE, self.ui.OnCreate, gp.TAG_CONE )
+        wxUtils.IdBind( self.ui, wx.EVT_MENU, ID_CREATE_CYLINDER, self.ui.OnCreate, gp.TAG_CYLINDER )
         
         # Append to create menu
         self.ui.mCreate.AppendSeparator()

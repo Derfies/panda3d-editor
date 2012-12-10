@@ -26,7 +26,7 @@ class Scale( Base ):
         
         # Create the geometry and collision
         line = NodePath( Line( (0, 0, 0), vector ) )
-        box = NodePath( Box( 0.1, 0.1, 0.1, origin=Point3(0.05, 0.05, 0.05) + vector * 0.05 ) )
+        box = NodePath( Box( 0.1, 0.1, 0.1, vector * 0.05 ) )
         collSphere = CollisionSphere( Point3( vector * -0.05 ), 0.1 )
         
         # Create the axis, add the geometry and collision
@@ -42,7 +42,7 @@ class Scale( Base ):
         
         # Create the axis, add the geometry and collision
         axis = Axis( self.name, vector, colour, default=True )
-        axis.AddGeometry( NodePath( Box( 0.1, 0.1, 0.1, origin=Point3(0.05, 0.05, 0.05) ) ), sizeStyle=NONE )
+        axis.AddGeometry( NodePath( Box( 0.1, 0.1, 0.1 ) ), sizeStyle=NONE )
         axis.AddCollisionSolid( CollisionSphere( 0, 0.1 ), sizeStyle=NONE )
         axis.reparentTo( self )
         

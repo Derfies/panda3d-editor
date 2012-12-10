@@ -1,5 +1,6 @@
 from box import Box
 from cone import Cone
+from cylinder import Cylinder
 from constants import *
 from game.plugins.base import Base
 
@@ -14,3 +15,4 @@ class GamePlugin( Base ):
         # Register primitive types
         self.RegisterNodeWrapper( TAG_BOX, Box )
         self.RegisterNodeWrapper( TAG_CONE, Cone )
+        self.RegisterNodeWrapper( TAG_CYLINDER, Cylinder )

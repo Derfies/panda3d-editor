@@ -23,7 +23,7 @@ class Translation( Base ):
         
         # Create the geometry and collision
         line = NodePath( Line( (0, 0, 0), vector ) )
-        cone = NodePath( Cone( 0.05, 0.25, axis=vector, origin=vector * 0.25 ) )
+        cone = NodePath( Cone( 0.05, 0.25, axis=vector, origin=vector * 0.125 ) )
         collTube = CollisionTube( (0,0,0), Point3( vector ) * 0.95, 0.05 )
         
         # Create the axis, add the geometry and collision
@@ -38,7 +38,7 @@ class Translation( Base ):
     def CreateSquare( self, vector, colour ):
         
         # Create the geometry and collision
-        self.square = NodePath( Square( 0.2, 0.2, Vec3(0, 1, 0), origin=Point3(0.1, 0.1, 0) ) )
+        self.square = NodePath( Square( 0.2, 0.2, Vec3(0, 1, 0) ) )
         self.square.setBillboardPointEye()
         collSphere = CollisionSphere( 0, 0.125 )
         

@@ -6,25 +6,10 @@ import pandac.PandaModules as pm
 def GetPointsForSquare( x, y, reverse=False ):
     points = []
     
-    points.append( (0, 0) )
-    points.append( (0, y) )
-    points.append( (x, y) )
-    points.append( (x, 0) )
-    
-    # Reverse the order if necessary
-    if reverse:
-        points.reverse()
-        
-    return points
-    
-
-def GetPointsForSquare2( x, y, reverse=False ):
-    points = []
-    
-    points.append( pm.Point2(0, 0) )
-    points.append( pm.Point2(0, y) )
-    points.append( pm.Point2(x, y) )
-    points.append( pm.Point2(x, 0) )
+    points.append( (-x / 2.0, -y / 2.0) )
+    points.append( (-x / 2.0, y / 2.0) )
+    points.append( (x / 2.0, y / 2.0) )
+    points.append( (x / 2.0, -y / 2.0) )
     
     # Reverse the order if necessary
     if reverse:
@@ -36,16 +21,16 @@ def GetPointsForSquare2( x, y, reverse=False ):
 def GetPointsForBox( x, y, z ):
     points = []
     
-    for dx in (0, x):
-        for p in GetPointsForSquare( y, z, dx ):
+    for dx in (-x / 2.0, x / 2.0):
+        for p in GetPointsForSquare( y, z, dx > 0 ):
             points.append( (dx, p[0], p[1] ) )
                           
-    for dy in (0, y):
-        for p in GetPointsForSquare( x, z, not dy ):
+    for dy in (-y / 2.0, y / 2.0):
+        for p in GetPointsForSquare( x, z, dy < 0  ):
             points.append( (p[0], dy, p[1] ) )
                           
-    for dz in (0, z):
-        for p in GetPointsForSquare( x, y, dz ):
+    for dz in (-z / 2.0, z / 2.0):
+        for p in GetPointsForSquare( x, y, dz > 0  ):
             points.append( (p[0], p[1], dz ) )
     
     return points
@@ -70,6 +55,10 @@ def GetPointsForArc( degrees, numSegs, reverse=False ):
     
 
 def RotatePoint3( p, v1, v2 ):
+    """
+    Return the input point rotated around the cross of the input vectors. The
+    amount to rotate is the angle between the two vectors.
+    """
     v1 = pm.Vec3( v1 )
     v2 = pm.Vec3( v2 )
     v1.normalize()
@@ -157,7 +146,7 @@ def Square( width=1, height=1, axis=pm.Vec3(1, 0, 0), thickness=1.0, origin=pm.P
     return ls.create()
         
 
-def Cone( radius=1.0, height=1.0, numSegs=16, degrees=360, 
+def Cone( radius=1.0, height=2.0, numSegs=16, degrees=360, 
           axis=pm.Vec3(0, 0, 1), origin=pm.Point3(0, 0, 0) ):
     """Return a geom node representing a cone."""
     # Create vetex data format
@@ -169,6 +158,9 @@ def Cone( radius=1.0, height=1.0, numSegs=16, degrees=360,
     gvwN = pm.GeomVertexWriter( gvd, 'normal' )
     
     # Get the points for an arc
+    axis2 = pm.Vec3( axis )
+    axis2.normalize()
+    offset = axis2 * height / 2.0
     points = GetPointsForArc( degrees, numSegs, True )
     for i in range( len( points ) - 1 ):
         
@@ -181,20 +173,19 @@ def Cone( radius=1.0, height=1.0, numSegs=16, degrees=360,
         cross = ( p2 - axis ).cross( p1 - axis )
         cross.normalize()
         
-        gvwV.addData3f( p1 )
-        gvwV.addData3f( axis * height - origin )
-        gvwV.addData3f( p2 )
-        gvwN.addData3f( cross )
-        gvwN.addData3f( cross )
-        gvwN.addData3f( cross )
+        # Facet
+        gvwV.addData3f( p1 - offset )
+        gvwV.addData3f( offset - origin )
+        gvwV.addData3f( p2 - offset )
+        for i in range( 3 ):
+            gvwN.addData3f( cross )
         
         # Base
-        gvwV.addData3f( p2 )
-        gvwV.addData3f( pm.Point3(0, 0, 0) - origin )
-        gvwV.addData3f( p1 )
-        gvwN.addData3f( -axis )
-        gvwN.addData3f( -axis )
-        gvwN.addData3f( -axis )
+        gvwV.addData3f( p2 - offset )
+        gvwV.addData3f( -offset - origin )
+        gvwV.addData3f( p1 - offset )
+        for i in range( 3 ):
+            gvwN.addData3f( -axis )
         
     geom = pm.Geom( gvd )
     for i in range( 0, gvwV.getWriteRow(), 3 ):
@@ -202,8 +193,70 @@ def Cone( radius=1.0, height=1.0, numSegs=16, degrees=360,
         # Create and add triangle
         geom.addPrimitive( GetGeomTriangle( i, i + 1, i + 2 ) )
     
-    # Init the node path, wrapping the box
+    # Return the cone GeomNode
     geomNode = pm.GeomNode( 'cone' )
+    geomNode.addGeom( geom )
+    return geomNode
+    
+
+def Cylinder( radius=1.0, height=2.0, numSegs=16, degrees=360, 
+              axis=pm.Vec3(0, 0, 1), origin=pm.Point3(0, 0, 0) ):
+    """Return a geom node representing a cylinder."""
+    # Create vetex data format
+    gvf = pm.GeomVertexFormat.getV3n3()
+    gvd = pm.GeomVertexData( 'vertexData', gvf, pm.Geom.UHStatic )
+    
+    # Create vetex writers for each type of data we are going to store
+    gvwV = pm.GeomVertexWriter( gvd, 'vertex' )
+    gvwN = pm.GeomVertexWriter( gvd, 'normal' )
+    
+    # Get the points for an arc
+    #offset = height / 2.0
+    axis2 = pm.Vec3( axis )
+    axis2.normalize()
+    offset = axis2 * height / 2.0
+    points = GetPointsForArc( degrees, numSegs, True )
+    for i in range( len( points ) - 1 ):
+        
+        # Rotate the points around the desired axis
+        p1 = pm.Point3(points[i][0], points[i][1], 0) * radius
+        p1 = RotatePoint3( p1, pm.Vec3(0, 0, 1), axis ) - origin
+        p2 = pm.Point3(points[i + 1][0], points[i + 1][1], 0) * radius
+        p2 = RotatePoint3( p2, pm.Vec3(0, 0, 1), axis ) - origin
+
+        # Base
+        gvwV.addData3f( p2 - offset )
+        gvwV.addData3f( -offset - origin )
+        gvwV.addData3f( p1 -offset )
+        for i in range( 3 ):
+            gvwN.addData3f( -axis )
+        
+        # Cap
+        gvwV.addData3f( p1 + offset )
+        gvwV.addData3f( offset - origin )
+        gvwV.addData3f( p2 + offset )
+        for i in range( 3 ):
+            gvwN.addData3f( axis )
+        
+        # Sides
+        gvwV.addData3f( p1 + offset )
+        gvwV.addData3f( p2 + offset)
+        gvwV.addData3f( p1 - offset)
+        gvwV.addData3f( p2 - offset )
+        gvwV.addData3f( p1 - offset )
+        gvwV.addData3f( p2 + offset )
+        cross = ( p1 + offset - p1 ).cross( p2 - p1 )
+        for i in range( 6 ):
+            gvwN.addData3f( cross )
+        
+    geom = pm.Geom( gvd )
+    for i in range( 0, gvwV.getWriteRow(), 3 ):
+        
+        # Create and add triangle
+        geom.addPrimitive( GetGeomTriangle( i, i + 1, i + 2 ) )
+    
+    # Return the cylinder GeomNode
+    geomNode = pm.GeomNode( 'cylinder' )
     geomNode.addGeom( geom )
     return geomNode
     
@@ -234,7 +287,7 @@ def Box( width=1, depth=1, height=1, origin=pm.Point3(0, 0, 0) ):
         geom.addPrimitive( GetGeomTriangle( i, i + 1, i + 2 ) )
         geom.addPrimitive( GetGeomTriangle( i, i + 2, i + 3 ) )
 
-    # Init the node path, wrapping the box
+    # Return the box GeomNode
     geomNode = pm.GeomNode( 'box' )
     geomNode.addGeom( geom )
     return geomNode

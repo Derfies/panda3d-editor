@@ -50,10 +50,10 @@ class Box( NodePath ):
         pAttr = Attr( 'Box' )
         pAttr.children.extend( 
             [
-                NPOAttr( 'width', float, 'width' ),
-                NPOAttr( 'depth', float, 'depth' ),
-                NPOAttr( 'height', float, 'height' ),
-                NPOAttr( 'origin', pm.Point3, 'origin' )
+                NPOAttr( 'Width', float, 'width' ),
+                NPOAttr( 'Depth', float, 'depth' ),
+                NPOAttr( 'Height', float, 'height' ),
+                NPOAttr( 'Origin', pm.Point3, 'origin' )
             ]
         )
         self.attributes.append( pAttr )
