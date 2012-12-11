@@ -261,6 +261,72 @@ def Cylinder( radius=1.0, height=2.0, numSegs=16, degrees=360,
     return geomNode
     
 
+def Sphere( radius=1.0, numSegs=16, degrees=360,
+            axis=pm.Vec3(0, 0, 1), origin=pm.Point3(0, 0, 0) ):
+    """Return a geom node representing a cylinder."""
+    # Create vetex data format
+    gvf = pm.GeomVertexFormat.getV3n3()
+    gvd = pm.GeomVertexData( 'vertexData', gvf, pm.Geom.UHStatic )
+
+    # Create vetex writers for each type of data we are going to store
+    gvwV = pm.GeomVertexWriter( gvd, 'vertex' )
+    gvwN = pm.GeomVertexWriter( gvd, 'normal' )
+
+    # Get the points for an arc
+    axis = pm.Vec3( axis )
+    axis.normalize()
+    points = GetPointsForArc( degrees, numSegs, True )
+    zPoints = GetPointsForArc( 180, numSegs / 2, True )
+    for z in range( 1, len( zPoints ) - 2 ):
+        rad1 = zPoints[z][1] * radius
+        rad2 = zPoints[z+1][1] * radius
+        offset1 = axis * zPoints[z][0]
+        offset2 = axis * zPoints[z+1][0]
+        
+        for i in range( len( points ) - 1 ):
+            
+            # Get points
+            p1 = pm.Point3(points[i][0], points[i][1], 0) * rad1
+            p2 = pm.Point3(points[i + 1][0], points[i + 1][1], 0) * rad1
+            p3 = pm.Point3(points[i + 1][0], points[i + 1][1], 0) * rad2
+            p4 = pm.Point3(points[i][0], points[i][1], 0) * rad2
+            
+            # Rotate the points around the desired axis
+            p1, p2, p3, p4 = [
+                RotatePoint3( p, pm.Vec3(0, 0, 1), axis ) 
+                for p in [p1, p2, p3, p4]
+            ]
+            
+            a = p1 + offset1 - origin
+            b = p2 + offset1 - origin
+            c = p3 + offset2 - origin
+            d = p4 + offset2 - origin
+
+            # Quad
+            gvwV.addData3f( d )
+            gvwV.addData3f( b )
+            gvwV.addData3f( a )
+            gvwV.addData3f( d )
+            gvwV.addData3f( c )
+            gvwV.addData3f( b )
+            
+            # Normals
+            cross = ( b - c ).cross( a - c )
+            for i in range( 6 ):
+                gvwN.addData3f( cross )
+
+    geom = pm.Geom( gvd )
+    for i in range( 0, gvwV.getWriteRow(), 3 ):
+
+        # Create and add triangle
+        geom.addPrimitive( GetGeomTriangle( i, i + 1, i + 2 ) )
+
+    # Return the cylinder GeomNode
+    geomNode = pm.GeomNode( 'cylinder' )
+    geomNode.addGeom( geom )
+    return geomNode
+    
+
 def Box( width=1, depth=1, height=1, origin=pm.Point3(0, 0, 0) ):
     """Return a geom node representing a box."""
     # Create vetex data format
