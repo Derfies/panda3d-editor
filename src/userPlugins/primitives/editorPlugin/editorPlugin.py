@@ -20,13 +20,13 @@ class EditorPlugin( gp.GamePlugin ):
         self.mPrim.Append( ID_CREATE_BOX, '&Box' )
         self.mPrim.Append( ID_CREATE_CONE, '&Cone' )
         self.mPrim.Append( ID_CREATE_CYLINDER, '&Cylinder' )
-        #self.mPrim.Append( ID_CREATE_SPHERE, '&Sphere' )
+        self.mPrim.Append( ID_CREATE_SPHERE, '&Sphere' )
         
         # Bind primitives menu events
         wxUtils.IdBind( self.ui, wx.EVT_MENU, ID_CREATE_BOX, self.ui.OnCreate, gp.TAG_BOX )
         wxUtils.IdBind( self.ui, wx.EVT_MENU, ID_CREATE_CONE, self.ui.OnCreate, gp.TAG_CONE )
         wxUtils.IdBind( self.ui, wx.EVT_MENU, ID_CREATE_CYLINDER, self.ui.OnCreate, gp.TAG_CYLINDER )
-        #wxUtils.IdBind( self.ui, wx.EVT_MENU, ID_CREATE_SPHERE, self.ui.OnCreate, gp.TAG_SPHERE )
+        wxUtils.IdBind( self.ui, wx.EVT_MENU, ID_CREATE_SPHERE, self.ui.OnCreate, gp.TAG_SPHERE )
         
         # Append to create menu
         self.ui.mCreate.AppendSeparator()

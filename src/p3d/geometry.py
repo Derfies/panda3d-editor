@@ -314,6 +314,49 @@ def Sphere( radius=1.0, numSegs=16, degrees=360,
             cross = ( b - c ).cross( a - c )
             for i in range( 6 ):
                 gvwN.addData3f( cross )
+            
+    # Get points
+    rad1 = zPoints[1][1] * radius
+    for m in [1, -2]:
+        offset1 = axis * zPoints[m][0]
+        print axis, ' : ', zPoints[m][0]
+        
+        clampedM = max( -1, min( m, 1 ) )
+        
+        for i in range( len( points ) - 1 ):
+            p1 = pm.Point3(points[i][0], points[i][1], 0) * rad1
+            p2 = pm.Point3(points[i + 1][0], points[i + 1][1], 0) * rad1
+            
+            # Rotate the points around the desired axis
+            p1, p2 = [
+                RotatePoint3( p, pm.Vec3(0, 0, 1), axis ) 
+                for p in [p1, p2]
+            ]
+            
+            a = p1 + offset1 - origin
+            b = p2 + offset1 - origin
+            c = -axis * clampedM
+            
+            #if clampedM < 0:
+            #    print 'switch'
+            #    temp = pm.Vec3( a )
+            #    b = pm.Vec3( a )
+            #    b = pm.Vec3( temp )
+
+            # Quad
+            if clampedM > 0:
+                gvwV.addData3f( a )
+                gvwV.addData3f( b )
+                gvwV.addData3f( c )
+            else:
+                gvwV.addData3f( c )
+                gvwV.addData3f( b )
+                gvwV.addData3f( a )
+            
+            # Normals
+            cross = ( b - c ).cross( a - c )
+            for i in range( 3 ):
+                gvwN.addData3f( cross * -m )
 
     geom = pm.Geom( gvd )
     for i in range( 0, gvwV.getWriteRow(), 3 ):
