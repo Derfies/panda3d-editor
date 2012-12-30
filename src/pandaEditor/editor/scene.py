@@ -1,13 +1,11 @@
-import copy
-
 import pandac.PandaModules as pm
 
 import p3d
 import game
-import editor
+import nodes
 
 
-class Scene( p3d.Object ):
+class Scene( game.Scene ):
     
     def __init__( self, app, *args, **kwargs ):
         self.app = app
@@ -104,7 +102,7 @@ class Scene( p3d.Object ):
         
         # Bail if helpers were not included and this node represents a helper
         # geometry or collision
-        if not includeHelpers and np.getPythonTag( editor.nodes.TAG_IGNORE ):
+        if not includeHelpers and np.getPythonTag( nodes.TAG_IGNORE ):
             return
         
         children = np.getChildren()

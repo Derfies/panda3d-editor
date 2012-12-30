@@ -14,7 +14,6 @@ import editor
 import gizmos
 import actions
 import commands as cmds
-from scene import Scene
 from showBase import ShowBase
 from selection import Selection
 from project import Project
@@ -250,7 +249,7 @@ class App( p3d.wx.App ):
             self.scene.Close()
             
         # Create a new scene
-        self.scene = Scene( self, filePath=filePath, camera=base.edCamera )
+        self.scene = editor.Scene( self, filePath=filePath, camera=base.edCamera )
         self.scene.rootNp.reparentTo( base.edRender )
         base.scene = self.scene
         

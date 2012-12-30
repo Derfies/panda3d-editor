@@ -11,7 +11,7 @@ from .. import commands as cmds
 from wxExtra import utils as wxUtils, ActionItem, LogPanel, CustomMenu
 from wxExtra import AuiManagerConfig, CustomAuiToolBar, CustomMenu
 from viewport import Viewport
-from pandaEditor import Scene, game
+from pandaEditor import game
 from document import Document
 from baseDialog import BaseDialog
 from resourcesPanel import ResourcesPanel

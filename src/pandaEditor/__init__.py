@@ -8,7 +8,6 @@ if pandaEditorPath not in sys.path:
     sys.path.append( pandaEditorPath )
     
 
-from scene import Scene
 from showBase import ShowBase
 from selection import Selection
 from project import Project
