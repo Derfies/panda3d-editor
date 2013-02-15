@@ -8,10 +8,14 @@ import nodes
 class Scene( game.Scene ):
     
     def __init__( self, app, *args, **kwargs ):
+        game.Scene.__init__( self, app, *args, **kwargs )
+        
         self.app = app
+        self.cnnctns = {}
         
         self.filePath = kwargs.pop( 'filePath', None )
         p3d.Object.__init__( self, *args, **kwargs )
+        self.rootNp.reparentTo( base.edRender )
         
         # Tag default nodes
         render.setTag( game.nodes.TAG_NODE_TYPE, 'Render' )
@@ -29,7 +33,7 @@ class Scene( game.Scene ):
         if filePath is None:
             return False
         
-        self.app.game.scnParser.Load( self.rootNp, filePath )
+        base.game.scnParser.Load( self.rootNp, filePath )
     
     def Save( self, **kwargs ):
         """Save a scene graph to file."""
@@ -37,17 +41,17 @@ class Scene( game.Scene ):
         if filePath is None:
             return False
         
-        self.app.game.scnParser.Save( self.rootNp, filePath )
+        base.game.scnParser.Save( self, filePath )
         
     def Close( self ):
         """Destroy the scene by removing all its nodes."""
-        def Destroy( np, cookie ):
+        def Destroy( np ):
             wrpr = base.game.nodeMgr.Wrap( np )
             if wrpr is not None:
                 wrpr.Destroy()
         
         self.Walk( Destroy )
-        self.app.game.pluginMgr.OnSceneClose()
+        base.game.pluginMgr.OnSceneClose()
         
         # Now remove the root node. If the root node was render, reset base
         # in order to remove and recreate the default node set.
@@ -58,25 +62,6 @@ class Scene( game.Scene ):
             self.app.selection.marquee.rootNp = render
         
         self.rootNp.removeNode()
-        
-    def AddNodePaths( self, nps ):
-        """Parent the indicated node paths to the scene root."""
-        for np in nps:
-            np.reparentTo( self.rootNp )
-        
-    def DeleteNodePaths( self, nps ):
-        """
-        Delete the indicated node paths. Remember to call OnDelete methods on
-        the node wrapper.
-        """
-        for np in nps:
-            
-            # Call delete methods for any wrappers
-            wrpr = base.game.nodeMgr.Wrap( np )
-            if wrpr is not None:
-                wrpr.OnDelete( np )
-                
-            np.detachNode()
     
     def DuplicateNodePaths( self, nps ):
         """Duplicate node paths."""
@@ -106,7 +91,10 @@ class Scene( game.Scene ):
             return
         
         children = np.getChildren()
-        func( np, arg )
+        if arg is None:
+            func( np )
+        else:
+            func( np, arg )
         
         # Flag as being under a model root before processing children.
         # WARNING: this may play badly with eggs that have nested children.

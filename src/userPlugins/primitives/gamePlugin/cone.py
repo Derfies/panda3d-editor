@@ -74,5 +74,5 @@ class Cone( NodePath ):
     def Create( self ):
         np = pm.NodePath( p3d.geometry.Cone() )
         self.SetupNodePath( np )
-        self.Wrap( np )
+        self.data = np
         return np

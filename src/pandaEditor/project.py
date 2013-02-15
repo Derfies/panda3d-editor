@@ -60,7 +60,7 @@ import game
 # Create game base and load level
 game = game.Base()
 game.OnInit()
-game.scnParser.Load( render, 'maps/test.xml' )
+game.Load( render, 'maps/test.xml' )
 run()"""
     
     def New( self, dirPath, **kwargs ):
@@ -251,6 +251,7 @@ run()"""
 class """ + fileName + """( p3d ):
     require( 'morepy' )
     require( 'audio' )
+    require( 'bullet' )
     mainModule( 'main' )
     dir( 'maps', newDir='maps' )
     dir( 'models', newDir='models' )

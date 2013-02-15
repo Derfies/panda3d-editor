@@ -9,7 +9,7 @@ from attributes import NodeAttribute as Attr
 class Spotlight( Light, LensNode ):
     
     def __init__( self, *args, **kwargs ):
-        kwargs['nType'] = SL
+        kwargs.setdefault( 'cType', SL )
         LensNode.__init__( self, *args, **kwargs )
         Light.__init__( self, *args, **kwargs )
         

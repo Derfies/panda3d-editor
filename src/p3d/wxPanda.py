@@ -41,6 +41,8 @@ def OnKey( evt, action='' ):
             mod += 'alt-'
         char = chr( keyCode ).lower()
         messenger.send( mod + char + action )
+        
+    evt.Skip()
 
 def OnKeyUp( evt ):
     OnKey( evt, '-up' )
@@ -52,6 +54,7 @@ def OnKeyDown( evt ):
 
 def OnLeftUp( evt ):
     messenger.send( 'mouse1-up' )
+    evt.Skip()
     
 
 class Viewport( wx.Panel ):

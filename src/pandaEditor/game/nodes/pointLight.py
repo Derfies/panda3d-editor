@@ -8,7 +8,7 @@ from attributes import NodeAttribute as Attr
 class PointLight( Light ):
     
     def __init__( self, *args, **kwargs ):
-        kwargs['nType'] = PL
+        kwargs.setdefault( 'cType', PL )
         Light.__init__( self, *args, **kwargs )
         
         pAttr = Attr( 'PointLight' )

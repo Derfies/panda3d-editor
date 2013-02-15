@@ -8,7 +8,7 @@ from attributes import Attribute as Attr
 class LensNode( NodePath ):
     
     def __init__( self, *args, **kwargs ):
-        kwargs['nType'] = pm.LensNode
+        kwargs.setdefault( 'cType', pm.LensNode )
         NodePath.__init__( self, *args, **kwargs )
         
         pAttr = Attr( 'LensNode' )

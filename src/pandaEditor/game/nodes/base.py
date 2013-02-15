@@ -1,25 +1,68 @@
 class Base( object ):
     
-    def __init__( self, data=None ):
+    def __init__( self, data=None, cType=None ):
+        self.data = data
+        self.type = cType
+        
         self.attributes = []
+        self.cnnctns = []
         self.children = []
         self.createArgs = {}
+        self.initArgs = None
+            
+        # Generate a default name from the node type.
+        if self.type is not None:
+            nodeName = self.type.__name__
+            self.nodeName = nodeName[0:1].lower() + nodeName[1:]
+    
+    def Create( self ):
+        if self.initArgs is None:
+            comp = self.type()
+        else:
+            comp = self.type( *self.initArgs )
+        self.data = comp
         
-        if data is not None:
-            self.Wrap( data )
-        
-    def Create( self, parent, args ):
+        return comp
+    
+    def Detach( self ):
+        base.scene.DeregisterComponent( self.data )
+    
+    def Destroy( self ):
         pass
     
     def Duplicate( self, np, dupeNp ):
         pass
     
-    def Destroy( self ):
-        pass
+    def FindProperty( self, name ):
+        for attr in self.GetAllAttributes():
+            if attr.name == name:
+                return attr
+            
+    def FindConnection( self, name ):
+        for cnnctn in self.GetAllConnections():
+            if cnnctn.name == name:
+                return cnnctn
     
-    def GetAttributes( self ):
-        return self.attributes[:]
+    def SetParent( self, pComp ):
+        if pComp is not None:
+            wrpr = base.game.nodeMgr.Wrap( pComp )
+            wrpr.AddChild( self.data )
     
+    def SetPropertyData( self, propDict ):
+        for key, val in propDict.items():
+            attr = self.FindProperty( key )
+            if attr is not None and attr.setFn is not None:
+                attr.Set( self.data, val )
+            else:
+                print 'Failed to set property: ', key
+                
+    def SetConnectionData( self, cnctnDict ):
+        for key, vals in cnctnDict.items():
+            cnnctn = self.FindConnection( key )
+            if cnnctn is not None:
+                for val in vals:
+                    cnnctn.Connect( val )
+                
     def GetAllAttributes( self ):
         """
         Return a flat list of all the attributes of this component, including
@@ -36,32 +79,11 @@ class Base( object ):
             RecurseGet( attr, results )
         return results
     
-    def FindAttribute( self, name ):
-        for attr in self.GetAllAttributes():
-            if attr.name == name:
-                return attr
-    
-    def GetData( self ):
-        dataDict = {}
+    def GetAllConnections( self ):
+        cnnctns = []
         
-        # Put this component's attributes into key / value pairs.
         for attr in self.GetAllAttributes():
-            if attr.w and attr.GetFn is not None:
-                dataDict[attr.name] = attr.Get( self.data )
-            
-        return dataDict
-    
-    def SetData( self, dataDict ):
-        for key, value in dataDict.items():
-            attr = self.FindAttribute( key )
-            if attr is not None and attr.SetFn is not None:
-                attr.Set( self.data, value )
-            else:
-                print 'Failed to load attribute: ', key
-    
-    def Wrap( self, data ):
-        self.data = data
-    
-    def GetChildWrapper( self, name ):
-        return None
-        
+            if hasattr( attr, 'cnnctn' ):
+                cnnctns.append( attr )
+                
+        return cnnctns

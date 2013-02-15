@@ -68,5 +68,5 @@ class Box( NodePath ):
     def Create( self ):
         np = pm.NodePath( p3d.geometry.Box() )
         self.SetupNodePath( np )
-        self.Wrap( np )
+        self.data = np
         return np

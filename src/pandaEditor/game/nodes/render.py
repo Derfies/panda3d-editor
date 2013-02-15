@@ -3,7 +3,13 @@ from nodePath import NodePath
 
 class Render( NodePath ):
     
-    def Create( self ):
+    def Create( self, parent=None ):
         self.SetupNodePath( render )
-        self.Wrap( render )
+        self.data = render
         return render
+    
+    def SetParent( self, pComp ):
+        
+        # Render is a default Panda NodePath which shouldn't be parented to
+        # anything.
+        pass

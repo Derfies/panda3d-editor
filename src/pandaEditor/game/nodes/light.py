@@ -8,6 +8,7 @@ from attributes import NodeAttribute as Attr
 class Light( NodePath ):
     
     def __init__( self, *args, **kwargs ):
+        kwargs.setdefault( 'cType', L )
         NodePath.__init__( self, *args, **kwargs )
         
         pAttr = Attr( 'Light' )

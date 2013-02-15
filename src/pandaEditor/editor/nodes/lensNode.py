@@ -13,7 +13,7 @@ class LensNode( GameLensNode ):
     def __init__( self, *args, **kwargs ):
         GameLensNode.__init__( self, *args, **kwargs )
         
-        pAttr = self.FindAttribute( 'lensNode' )
+        pAttr = self.FindProperty( 'lensNode' )
         attr = Attr( 'Show Frustum', bool, self.GetFrustumVisible, self.SetFrustumVisible, w=False )
         pAttr.children.append( attr )
         

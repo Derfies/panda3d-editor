@@ -1,6 +1,7 @@
 import wx
 import wx.lib.intctrl
 import wx.lib.agw.floatspin as fs
+import  wx.lib.scrolledpanel as scrolled
 from wx.lib.embeddedimage import PyEmbeddedImage
 from wx.lib.newevent import NewEvent
 
@@ -54,6 +55,7 @@ class BaseProperty( object ):
         self._window = None
         self._grid = None
         self._parent = None
+        self._enabled = True
         self._children = []
         self._attrs = {}
         
@@ -80,6 +82,12 @@ class BaseProperty( object ):
     
     def SetParent( self, parent ):
         self._parent = parent
+        
+    def IsEnabled( self ):
+        return self._enabled
+    
+    def Enable( self, val ):
+        self._enabled = val
         
     def GetCount( self ):
         return len( self._children )
@@ -120,16 +128,9 @@ class BaseProperty( object ):
     
     def OnChanged( self, evt ):
         self.SetValueFromEvent( evt )
-        #event = PropertyGridEvent( wxEVT_PG_CHANGED )
-        #event.SetProperty( self )
-        #evt.GetEventObject().GetEventHandler().ProcessEvent( event )
+        self.PostChangedEvent()
         
-        # Call after otherwise we crash!
-        #fn = lambda evt: evt.GetEventObject().GetEventHandler().ProcessEvent( event )
-        #wx.CallAfter( fn )
-        
-        #fn = lambda event: self.GetGrid().GetEventHandler().ProcessEvent( event )
-        #wx.CallAfter( fn )
+    def PostChangedEvent( self ):
         
         # Call after otherwise we crash!
         evt = PropertyGridEvent( wxEVT_PG_CHANGED )
@@ -158,6 +159,7 @@ class BoolProperty( BaseProperty ):
     def BuildControl( self, parent, id ):
         ctrl = wx.CheckBox( parent, id, style=wx.ALIGN_RIGHT )
         ctrl.SetValue( self.GetValue() )
+        ctrl.Enable( self.IsEnabled() )
         ctrl.Bind( wx.EVT_CHECKBOX, self.OnChanged )
         return ctrl
     
@@ -170,6 +172,7 @@ class IntProperty( BaseProperty ):
     def BuildControl( self, parent, id ):
         ctrl = wx.lib.intctrl.IntCtrl( parent, id )
         ctrl.SetValue( self.GetValue() )
+        ctrl.Enable( self.IsEnabled() )
         ctrl.Bind( wx.lib.intctrl.EVT_INT, self.OnChanged )
         return ctrl
         
@@ -180,7 +183,8 @@ class FloatProperty( BaseProperty ):
         BaseProperty.__init__( self, *args, **kwargs )
         
     def BuildControl( self, parent, id ):
-        ctrl = fs.FloatSpin( parent, id, value=self.GetValue() )
+        ctrl = fs.FloatSpin( parent, id, value=self.GetValue(), digits=3 )
+        ctrl.Enable( self.IsEnabled() )
         ctrl.Bind( fs.EVT_FLOATSPIN, self.OnChanged )
         return ctrl
     
@@ -192,6 +196,7 @@ class StringProperty( BaseProperty ):
         
     def BuildControl( self, parent, id ):
         ctrl = wx.TextCtrl( parent, id, value=str( self.GetValue() ) )
+        ctrl.Enable( self.IsEnabled() )
         ctrl.Bind( wx.EVT_TEXT, self.OnChanged )
         return ctrl
     
@@ -307,7 +312,7 @@ class CollapsiblePanel( BasePanel ):
         # Create the control
         ctrl = self.prop.BuildControl( self, -1 )
         if ctrl is not None:
-            self.sizer2.Add( ctrl, 2, wx.RIGHT, 5 )
+            self.sizer2.Add( ctrl, 4, wx.RIGHT, 5 )
         
         self.Collapse()
         
@@ -350,6 +355,7 @@ class CollapsiblePanel( BasePanel ):
         
         # Layout has changed, make sure to refresh the entire tree.
         self.grid.RecurseLayout( self.grid.panel )
+        self.grid.FitInside()
 
     def Collapse( self ):
         """Collapse the panel."""
@@ -362,10 +368,10 @@ class CollapsiblePanel( BasePanel ):
         self.Expand( self.hidden )
     
 
-class PropertyGrid( wx.Panel ):
+class PropertyGrid( scrolled.ScrolledPanel ):
     
     def __init__( self, *args, **kwargs ):
-        wx.Panel. __init__( self, *args, **kwargs )
+        scrolled.ScrolledPanel. __init__( self, *args, **kwargs )
         self.SetBackgroundColour( wx.Colour( 255, 255, 255 ) )
         
         self._props = []
@@ -376,6 +382,9 @@ class PropertyGrid( wx.Panel ):
         self.sizer = wx.BoxSizer( wx.VERTICAL )
         self.sizer.Add( self.panel, 1, wx.EXPAND )
         self.SetSizer( self.sizer )
+        
+        self.SetAutoLayout( 1 )
+        self.SetupScrolling()
         
     def Append( self, prop ):
         
@@ -421,3 +430,10 @@ class PropertyGrid( wx.Panel ):
             
     def Clear( self ):
         self.panel.DestroyChildren()
+        
+    def OnChildFocus( self, evt ):
+        """
+        Overriden to stop the property grid scrolling to the child which just
+        received focus.
+        """
+        pass

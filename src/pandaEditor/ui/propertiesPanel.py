@@ -2,6 +2,7 @@ import wx
 from wxExtra import wxpg
 from wx.lib.pubsub import Publisher as pub
 import pandac.PandaModules as pm
+from panda3d.core import Filename
 
 from .. import commands as cmds
 import customProperties as custProps
@@ -11,7 +12,6 @@ ATTRIBUTE_TAG = 'attr'
 
 
 class PropertyGrid( wxpg.PropertyGrid ):
-    
     """
     Unfortunately I've had to override some of the basic methods of the
     property grid in order to overcome what seems like an odd limitation /
@@ -20,7 +20,6 @@ class PropertyGrid( wxpg.PropertyGrid ):
     Append(). This seems odd to me as then none of the overridden methods used
     in custom properties will work...
     """
-    
     def __init__( self, *args, **kwargs ):
         wxpg.PropertyGrid.__init__( self, *args, **kwargs )
         
@@ -186,7 +185,8 @@ class PropertiesPanel( wx.Panel ):
             int:wxpg.IntProperty,
             str:wxpg.StringProperty,
             bool:wxpg.BoolProperty,
-            float:wxpg.FloatProperty
+            float:wxpg.FloatProperty,
+            Filename:custProps.FilePathProperty
         }
         
         # Bind publisher events
@@ -220,16 +220,15 @@ class PropertiesPanel( wx.Panel ):
             # Find the correct property to display this attribute
             if attr.type in self.propMap:
                 prop = None
-                if attr.e:
-                    propCls = self.propMap[attr.type]
-                    if attr.type is not None:
-                        prop = propCls( attr.label, '', attr.Get( nps[0] ) )
-                        prop.SetAttribute( ATTRIBUTE_TAG, attr )
-                    else:
-                        prop = propCls( attr.label )
-                    nextP = prop
+                propCls = self.propMap[attr.type]
+                if attr.type is not None:
+                    prop = propCls( attr.label, '', attr.Get( nps[0] ) )
+                    prop.SetAttribute( ATTRIBUTE_TAG, attr )
+                    if attr.setFn is None:
+                        prop.Enable( False )
                 else:
-                    nextP = parent
+                    prop = propCls( attr.label )
+                nextP = prop
                 
                 # Recurse through attribute children.
                 for child in attr.children:
@@ -244,6 +243,16 @@ class PropertiesPanel( wx.Panel ):
                     self.pg.Append( prop )
                 else:
                     parent.AddPrivateChild( prop )
+            elif hasattr( attr, 'cnnctn' ):
+                
+                val = attr.Get()
+                try:
+                    objIter = iter( val )
+                    prop = custProps.ConnectionListProperty( attr.label, '', attr.Get() )
+                except TypeError, te:
+                    prop = custProps.ConnectionProperty( attr.label, '', attr.Get() )
+                prop.SetAttribute( ATTRIBUTE_TAG, attr )
+                parent.AddPrivateChild( prop )
                         
         # Build all properties from attributes.
         wrpr = base.game.nodeMgr.Wrap( nps[0] )
@@ -264,10 +273,16 @@ class PropertiesPanel( wx.Panel ):
         # Get the node property from the property and set it.
         prop = evt.GetProperty()
         attr = prop.GetAttribute( ATTRIBUTE_TAG )
-        cmds.SetAttribute( nps, attr, prop.GetValue() )
+        if not hasattr( attr, 'cnnctn' ):
+            cmds.SetAttribute( nps, attr, prop.GetValue() )
+        else:
+            cmds.SetConnections( prop.GetValue(), attr )
         
     def OnUpdate( self, msg ):
         self.pg.Freeze()
+        
+        # Get the scroll position.
+        x, y = self.pg.GetViewStart()
         
         # Get property expanded states
         allProps = self.pg.GetPropertiesDictionary()
@@ -282,6 +297,9 @@ class PropertiesPanel( wx.Panel ):
             prop = self.pg.GetPropertyByLongLabel( propLongLbl )
             if prop is not None:
                 prop.SetExpanded( expanded )
+        
+        # Get the scroll position back.
+        self.pg.Scroll( x, y )
         
         self.pg.Thaw()
         

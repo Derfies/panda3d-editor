@@ -1,7 +1,9 @@
 import wx
 import wx.lib.agw.floatspin as fs
 import pandac.PandaModules as pm
+from panda3d.core import Filename
 
+#from propertiesPanel import ATTRIBUTE_TAG
 from wxExtra import wxpg, CompositeDropTarget
 
 
@@ -17,7 +19,8 @@ class Float3Property( wxpg.BaseProperty ):
     def BuildControl( self, parent, id ):
         ctrl = wx.BoxSizer( wx.HORIZONTAL )
         for i in range( self._count ):
-            spin = fs.FloatSpin( parent, id, value=self._value[i] )
+            spin = fs.FloatSpin( parent, id, value=self._value[i], digits=3 )
+            spin.Enable( self.IsEnabled() )
             spin.Bind( fs.EVT_FLOATSPIN, self.OnChanged )
             ctrl.Add( spin, 1, wx.EXPAND )
             self._ctrls.append( spin )
@@ -75,6 +78,27 @@ class Point4Property( Float3Property ):
         self._count = 4
         self._cast = pm.Point4
         
+        
+class FilePathProperty( wxpg.StringProperty ):
+    
+    def SetValueFromEvent( self, evt ):
+        ctrl = evt.GetEventObject()
+        val = ctrl.GetValue()
+        self.SetValue( Filename.fromOsSpecific( val ) )
+        
+    def BuildControl( self, *args, **kwargs ):
+        ctrl = wxpg.StringProperty.BuildControl( self, *args, **kwargs )
+        dt = CompositeDropTarget( ['filePath'], self.OnDropItem, self.ValidateDropItem )
+        ctrl.SetDropTarget( dt )
+        return ctrl
+    
+    def OnDropItem( self, arg ):
+        self.SetValue( arg )
+        self.PostChangedEvent()
+        
+    def ValidateDropItem( self, *args ):
+        return True
+        
 
 """
 class AnimationDictProperty( wxpg.PyStringProperty ):
@@ -116,8 +140,95 @@ class NodePathProperty( wxpg.StringProperty ):
         np = wx.GetApp().frame.pnlSceneGraph.dragNps[0]
         self.SetValue( np )
         
-        # Call after otherwise we crash!
-        evt = wxpg.PropertyGridEvent( wxpg.wxEVT_PG_CHANGED )
-        evt.SetProperty( self )
-        fn = lambda event: self.GetGrid().GetEventHandler().ProcessEvent( evt )
-        wx.CallAfter( fn )
+        self.PostChangedEvent()
+        
+
+class ConnectionBaseProperty( wxpg.BaseProperty ):
+    
+    def BuildControl( self, parent, id ):
+        ctrl = wx.ListBox( parent, id, size=(-1,50), style=wx.LB_EXTENDED )
+        ctrl.Enable( self.IsEnabled() )
+        ctrl.Bind( wx.EVT_KEY_UP, self.OnDelete )
+        
+        dt = CompositeDropTarget( ['nodePath'], 
+                                  self.OnDropItem, 
+                                  self.ValidateDropItem )
+        ctrl.SetDropTarget( dt )
+        
+        return ctrl
+    
+    def ValidateDropItem( self, x, y ):
+        for comp in wx.GetApp().frame.pnlSceneGraph.dragNps:
+            cnnctn = self.GetAttribute( 'attr' )
+            wrpr = base.game.nodeMgr.Wrap( comp )
+            if wrpr is not None and wrpr.IsOfType( cnnctn.type ):
+                return True
+        
+        return False
+    
+
+class ConnectionProperty( ConnectionBaseProperty ):
+    
+    def BuildControl( self, parent, id ):
+        ctrl = ConnectionBaseProperty.BuildControl( self, parent, id )
+        
+        comp = self.GetValue()
+        wrpr = base.game.nodeMgr.Wrap( comp )
+        if wrpr is not None:
+            ctrl.Append( wrpr.GetName() )
+            ctrl.SetClientData( 0, wrpr.data )
+        
+        return ctrl
+        
+    def OnDelete( self, evt ):
+        if evt.GetKeyCode() not in [wx.WXK_DELETE, wx.WXK_BACK]:
+            return
+        
+        self.SetValue( None )
+        self.PostChangedEvent()
+    
+    def OnDropItem( self, arg ):
+        val = wx.GetApp().frame.pnlSceneGraph.dragNps[0]
+        self.SetValue( val )
+        self.PostChangedEvent()
+        
+
+class ConnectionListProperty( ConnectionBaseProperty ):
+    
+    def BuildControl( self, parent, id ):
+        ctrl = ConnectionBaseProperty.BuildControl( self, parent, id )
+        
+        comps = self.GetValue()
+        if comps is not None:
+            for i in range( len( comps ) ):
+                wrpr = base.game.nodeMgr.Wrap( comps[i] )
+                if wrpr is not None:
+                    ctrl.Append( wrpr.GetName() )
+                    ctrl.SetClientData( i, wrpr.data )
+        
+        return ctrl
+    
+    def OnDelete( self, evt ):
+        """
+        Remove those components that were selected in the list box from this
+        property's value.
+        """
+        if evt.GetKeyCode() not in [wx.WXK_DELETE, wx.WXK_BACK]:
+            return
+        
+        lb = evt.GetEventObject()
+        indices = lb.GetSelections()
+        delComps = [lb.GetClientData( i ) for i in range( len( indices ) )]
+        oldComps = self.GetValue()
+        newComps = [comp for comp in oldComps if comp not in delComps]
+        self.SetValue( newComps )
+        self.PostChangedEvent()
+    
+    def OnDropItem( self, arg ):
+        val = self.GetValue()
+        if val is None:
+            val = []
+        val.extend( wx.GetApp().frame.pnlSceneGraph.dragNps )
+        self.SetValue( val )
+        self.PostChangedEvent()
+

@@ -1,46 +1,44 @@
 import p3d
-import pandac.PandaModules as pm
 
 
 class Attribute( object ):
     
-    def __init__( self, label, pType=None, GetFn=None, SetFn=None, TgtFn=None, 
-                  getArgs=[], setArgs=[], tgtArgs=[], w=True, e=True ):
+    def __init__( self, label, pType=None, getFn=None, setFn=None, tgtFn=None, 
+                  getArgs=[], setArgs=[], tgtArgs=[], w=True ):
         self.label = label
         self.type = pType
-        self.GetFn = GetFn
-        self.SetFn = SetFn
-        self.TgtFn = TgtFn
+        self.getFn = getFn
+        self.setFn = setFn
+        self.tgtFn = tgtFn
         self.getArgs = getArgs
         self.setArgs = setArgs
         self.tgtArgs = tgtArgs
         self.w = w
-        self.e = e
         
         self.children = []
         name = self.label.replace( ' ', '' )
         self.name = name[0].lower() + name[1:]
         
     def GetTarget( self, np ):
-        if self.TgtFn is None:
+        if self.tgtFn is None:
             tgt = np
         else:
             args = self.tgtArgs[:]
             args.insert( 0, np )
-            tgt = self.TgtFn( *args )
+            tgt = self.tgtFn( *args )
             
         return tgt
         
     def Get( self, np ):
         args = self.getArgs[:]
         args.insert( 0, self.GetTarget( np ) )
-        return self.GetFn( *args )
+        return self.getFn( *args )
     
     def Set( self, np, val ):
         args = self.setArgs[:]
         args.insert( 0, self.GetTarget( np ) )
         args.append( val )
-        return self.SetFn( *args )
+        return self.setFn( *args )
     
 
 class NodeAttribute( Attribute ):

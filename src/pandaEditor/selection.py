@@ -29,10 +29,10 @@ class Selection( p3d.Object ):
     def Clear( self ):
         """Clear the selection list and run deselect handlers."""
         for np in self.nps:
-            if not np.isEmpty():
-                wrpr = base.game.nodeMgr.Wrap( np )
-                if wrpr is not None:
-                    wrpr.OnDeselect( np )
+            #if not np.isEmpty():
+            wrpr = base.game.nodeMgr.Wrap( np )
+            if wrpr is not None:
+                wrpr.OnDeselect( np )
         self.nps = []
     
     def Add( self, nps ):

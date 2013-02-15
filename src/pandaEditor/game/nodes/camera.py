@@ -6,5 +6,5 @@ from lensNode import LensNode
 class Camera( LensNode ):
     
     def __init__( self, *args, **kwargs ):
-        kwargs['nType'] = pm.Camera
+        kwargs.setdefault( 'cType', pm.Camera )
         LensNode.__init__( self, *args, **kwargs )

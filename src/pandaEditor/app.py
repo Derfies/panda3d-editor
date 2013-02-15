@@ -222,8 +222,9 @@ class App( p3d.wx.App ):
         Call frame selection on the camera if there are some node paths in the 
         selection.
         """
-        if self.selection.nps:
-            base.edCamera.Frame( self.selection.nps )
+        nps = [comp for comp in self.selection.nps if type( comp ) == pm.NodePath]
+        if nps:
+            base.edCamera.Frame( nps )
             
     def OnUpdate( self, msg ):
         """
@@ -231,7 +232,8 @@ class App( p3d.wx.App ):
         selected nodes are attached to the managed gizmos, then refresh the
         active one.
         """
-        self.gizmoMgr.AttachNodePaths( self.selection.nps )
+        nps = [comp for comp in self.selection.nps if type( comp ) == pm.NodePath]
+        self.gizmoMgr.AttachNodePaths( nps )
         self.gizmoMgr.RefreshActiveGizmo()
         self.selection.Update()
                     
@@ -250,8 +252,6 @@ class App( p3d.wx.App ):
             
         # Create a new scene
         self.scene = editor.Scene( self, filePath=filePath, camera=base.edCamera )
-        self.scene.rootNp.reparentTo( base.edRender )
-        base.scene = self.scene
         
         # Set the selection and picker root node to the scene's root node
         self.selection.rootNp = self.scene.rootNp
@@ -273,10 +273,16 @@ class App( p3d.wx.App ):
         if ext in self.fileTypes:
             fn = self.fileTypes[ext]
             fn( filePath, np )
-                
+        
     def AddModel( self, filePath, np=None ):
-        np = base.game.nodeMgr.Create( 'ModelRoot', filePath )
-        cmds.Add( [np] )
+        self.AddComponent( 'ModelRoot', filePath )
+        
+    def AddComponent( self, typeStr, *args ):
+        wrprCls = base.game.nodeMgr.GetWrapperByName( typeStr )
+        wrpr = wrprCls()
+        wrpr.Create( *args )
+        wrpr.SetDefaultValues()
+        cmds.Add( [wrpr.data] )
                 
     def AddShader( self, filePath, np=None ):
         pandaPath = pm.Filename.fromOsSpecific( filePath )

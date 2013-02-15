@@ -8,7 +8,7 @@ from attributes import NodeAttribute as Attr
 class CollisionNode( NodePath ):
     
     def __init__( self, *args, **kwargs ):
-        kwargs['nType'] = CN
+        kwargs.setdefault( 'cType', CN )
         NodePath.__init__( self, *args, **kwargs )
         
         pAttr = Attr( 'CollisionNode' )

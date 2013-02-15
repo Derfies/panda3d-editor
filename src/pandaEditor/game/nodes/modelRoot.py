@@ -10,7 +10,7 @@ from attributes import NodeAttribute as Attr
 class ModelRoot( NodePath ):
     
     def __init__( self, *args, **kwargs ):
-        kwargs['nType'] = pm.ModelRoot
+        kwargs.setdefault( 'cType', pm.ModelRoot )
         NodePath.__init__( self, *args, **kwargs )
         
     def Create( self, modelPath='' ):
@@ -24,6 +24,7 @@ class ModelRoot( NodePath ):
                 print 'Failed to load: ', filePath
                 np = pm.NodePath( pm.ModelRoot( '' ) )
         np.setName( filePath.getBasenameWoExtension() )
+        #np.reparentTo( parent )
         
         # Iterate over child nodes
         def Recurse( node ):
@@ -40,34 +41,6 @@ class ModelRoot( NodePath ):
         Recurse( np )
         
         self.SetupNodePath( np )
-        self.Wrap( np )
+        self.data = np
         
         return np
-    
-    def Wrap( self, np ):
-        NodePath.Wrap( self, np )
-        
-        self.createArgs = {'modelPath':self.GetRelModelPath()}
-    
-    def GetRelModelPath( self ):
-        """
-        Attempt to find the indicated file path on one of the model search 
-        paths. If found then return a path relative to it. Also make sure to 
-        remove all extensions so we can load  both egg and bam files.
-        """
-        node = self.data.node()
-        
-        relPath = pm.Filename( node.getFullpath() )
-        index = relPath.findOnSearchpath( pm.getModelPath().getValue() )
-        if index >= 0:
-            basePath = pm.getModelPath().getDirectories()[index]
-            relPath.makeRelativeTo( basePath )
-            
-        # Remove all extensions
-        modelPath = str( relPath )
-        while True:
-            modelPath, ext = os.path.splitext( modelPath )
-            if not ext:
-                break
-        
-        return modelPath

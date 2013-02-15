@@ -284,14 +284,7 @@ class MainFrame( wx.Frame ):
             self.app.grid.hide()
         
     def OnCreate( self, evt, typeStr ):
-        """Create the node path, add it to the scene and select it."""
-        node = base.game.nodeMgr.Create( typeStr )
-        np = pm.NodePath( node )
-        cmds.Add( [np] )
-        
-        # Default anys lights to the scene root node.
-        if np.node().isOfType( pm.Light ):
-            self.app.scene.rootNp.setLight( np )
+        self.app.AddComponent( typeStr )
         
     def OnCreateActor( self, evt ):
         """
@@ -638,10 +631,28 @@ class MainFrame( wx.Frame ):
         mLights = CustomMenu()
         mLights.AppendActionItems( lightActns, self )
         
+        texActns = [
+            ActionItem( 'Texture', '', self.OnCreate, args='Texture' )#,
+            #ActionItem( 'Texture Stage', '', self.OnCreate, args='TextureStage' )
+        ]
+        mTex = CustomMenu()
+        mTex.AppendActionItems( texActns, self )
+        
+        bltActions = [
+            ActionItem( 'Bullet World', '', self.OnCreate, args='BulletWorld' ),
+            ActionItem( 'Bullet Debug Node', '', self.OnCreate, args='BulletDebugNode' ),
+            ActionItem( 'Bullet Rigid Body Node', '', self.OnCreate, args='BulletRigidBodyNode' ),
+            ActionItem( 'Bullet Box Shape', '', self.OnCreate, args='BulletBoxShape' )
+        ]
+        mBlt = CustomMenu()
+        mBlt.AppendActionItems( bltActions, self )
+        
         self.mCreate = CustomMenu()
         self.mCreate.AppendActionItem( ActionItem( 'Panda Node', '', self.OnCreate, args='PandaNode' ), self )
         #self.mCreate.AppendActionItem( ActionItem( 'Actor', '', self.OnCreateActor ), self )   # Not supported... yet.
         self.mCreate.AppendSubMenu( mLights, '&Lights' )
+        self.mCreate.AppendSubMenu( mTex, '&Texture' )
+        self.mCreate.AppendSubMenu( mBlt, '&Bullet' )
         #self.mCreate.AppendSeparator()
         #self.mCreate.AppendActionItem( ActionItem( 'Collision Node', '', self.OnCreate, args='CollisionNode' ), self )
         #self.mCreate.AppendSeparator()

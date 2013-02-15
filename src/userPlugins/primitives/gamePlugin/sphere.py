@@ -72,5 +72,5 @@ class Sphere( NodePath ):
     def Create( self ):
         np = pm.NodePath( p3d.geometry.Sphere() )
         self.SetupNodePath( np )
-        self.Wrap( np )
+        self.data = np
         return np

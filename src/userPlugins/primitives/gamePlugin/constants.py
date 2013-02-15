@@ -1,4 +1,4 @@
-TAG_BOX = 'PrimitiveBox'
-TAG_CONE = 'PrimitiveCone'
-TAG_CYLINDER = 'PrimitiveCylinder'
-TAG_SPHERE = 'PrimitiveSphere'
+TAG_BOX = 'Box'
+TAG_CONE = 'Cone'
+TAG_CYLINDER = 'Cylinder'
+TAG_SPHERE = 'Sphere'

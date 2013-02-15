@@ -1,5 +1,6 @@
 import xml.etree.ElementTree as et
 
+import panda3d.core as pc
 import pandac.PandaModules as pm
 
 import p3d
@@ -28,18 +29,37 @@ class SceneParser( game.SceneParser ):
             pm.Point3:p3d.FloatTuple2Str,
             pm.Point4:p3d.FloatTuple2Str,
             pm.Mat4:p3d.Mat42Str,
-            pm.LMatrix4f:p3d.Mat42Str
+            pm.LMatrix4f:p3d.Mat42Str,
+            pc.Filename:str
         }
         
     def GetName( self, ttype ):
         return ttype.__name__
     
-    def SaveData( self, wrpr, elem ):
+    def SaveComponent( self, wrpr, pElem ):
+        """Serialise a component to an xml element."""
+        elem = et.SubElement( pElem, 'Component' )
+        elem.set( 'type', type( wrpr ).__name__ )
+        id = wrpr.GetId()
+        if id is not None:
+            elem.set( 'id', id )
+        for key, value in wrpr.GetCreateArgs().items():
+            elem.set( key, value )
+        self.SaveProperties( wrpr, elem )
+        self.SaveConnections( wrpr, elem )
         
-        # Get a dictionary representing all the data for the component then
-        # serialise it.
-        dataDict = wrpr.GetData()
-        for key, value in dataDict.items():
+        # Recurse through hierarchy.
+        for cWrpr in wrpr.GetChildren():
+            if cWrpr is not None:
+                self.SaveComponent( cWrpr, elem )
+                
+    def SaveProperties( self, wrpr, elem ):
+        """
+        Get a dictionary representing all the properties for the component
+        then serialise it.
+        """
+        propDict = wrpr.GetPropertyData()
+        for key, value in propDict.items():
             if type( value ) in self.saveCastFnMap:
                 castFn = self.saveCastFnMap[type( value )]
                 subElem = et.SubElement( elem, 'Item' )
@@ -49,71 +69,30 @@ class SceneParser( game.SceneParser ):
             else:
                 print 'Could not save attribute: ', key, ' : of type: ', type( value )
                 
-        # Do child components
-        for cWrpr in wrpr.children:
-            cElem = et.SubElement( elem, 'Component' )
-            cElem.set( 'type', cWrpr.name )
-            for key, value in cWrpr.createArgs.items():
-                cElem.set( key, value )
-            self.SaveData( cWrpr, cElem )
-            
     def SaveConnections( self, wrpr, elem ):
-        cnctnDict = wrpr.GetConnections()
-        if cnctnDict:
-            cnctnsElem = et.SubElement( elem, 'Connections' )
-            for key, vals in cnctnDict.items():
-                for val in vals:
-                    cnctnElem = et.SubElement( cnctnsElem, 'Connection' )
-                    cnctnElem.set( 'type', key )
-                    cnctnElem.set( 'value', val )
-    
-    def SaveNode( self, np, parentElem ):
-        """
-        TO DO: Remove dependency on 'P3D_PickableNode' tag.
-        """
-        if np.getPythonTag( 'P3D_PickableNode' ):
-            
-            # Get the wrapper for this node type
-            Wrpr = base.game.nodeMgr.GetWrapper( np )
-            if Wrpr is not None:
-                
-                wrpr = Wrpr( np )
-            
-                # Create new element for this node path
-                elem = et.SubElement( parentElem, 'Component' )
-                
-                # Write out node type and uuid.
-                nTypeStr = base.game.nodeMgr.GetTypeString( np )
-                elem.set( 'type', nTypeStr )
-                
-                # Write out create args
-                for key, value in wrpr.createArgs.items():
-                    elem.set( key, value )
-                
-                # Recursively save the data.
-                self.SaveData( wrpr, elem )
-                self.SaveConnections( wrpr, elem )
-        else:
-            elem = parentElem
+        cnctnDict = wrpr.GetConnectionData()
+        if not cnctnDict:
+            return
         
-        # Recurse down the tree but ignore model root children, as serialising
-        # them will load them twice.
-        cElem = et.SubElement( elem, 'Children' )
-        if type( np.node() ) != pm.ModelRoot:
-            for childNp in np.getChildren():
-                self.SaveNode( childNp, cElem )
+        cnctnsElem = et.Element( 'Connections' )
+        for key, vals in cnctnDict.items():
+            for val in vals:
+                cnctnElem = et.SubElement( cnctnsElem, 'Connection' )
+                cnctnElem.set( 'type', key )
+                cnctnElem.set( 'value', val )
+                
+        # Append the connections element only if it isn't empty.
+        if list( cnctnsElem ):
+            elem.append( cnctnsElem )
             
-        # Delete child elements if they're empty.
-        if not list( cElem ) and not cElem.keys():
-            elem.remove( cElem )
-            
-    def Save( self, rootNp, filePath ):
+    def Save( self, scene, filePath ):
         """Save the scene out to an xml file."""
-        # Create root element and version info
-        rootElem = et.Element( 'Map' )
-        self.SaveNode( rootNp, rootElem )
+        rootElem = et.Element( 'Scene' )
+        wrprCls = base.game.nodeMgr.nodeWrappers['SceneRoot']
+        wrpr = wrprCls( scene )
+        self.SaveComponent( wrpr, rootElem )
         
-        # Wrap with an element tree and write to file
+        # Wrap with an element tree and write to file.
         tree = et.ElementTree( rootElem )
         utils.Indent( tree.getroot() )
         tree.write( filePath )

@@ -6,40 +6,37 @@ from pandac.PandaModules import NodePath as NP
 from base import Base
 from constants import *
 from attributes import NodePathAttribute as Attr
+from game.nodes.connections import Connection as Cnnctn
+from game.nodes.connections import ConnectionList as CnnctnList
 
 
 class NodePath( Base ):
     
     def __init__( self, *args, **kwargs ):
-        nType = kwargs.pop( 'nType', None )
+        kwargs.setdefault( 'cType', NP )
         Base.__init__( self, *args, **kwargs )
         
-        # Generate a default name from the node type.
-        self.type = nType
-        if self.type is not None:
-            nodeName = self.type.__name__
-            self.nodeName = nodeName[0:1].lower() + nodeName[1:]
+        self.initArgs = [self.nodeName]
         
         pAttr = Attr( 'NodePath' )
         pAttr.children.extend( 
             [
                 Attr( 'Name', str, NP.getName, NP.setName ),
                 Attr( 'Matrix', pm.Mat4, NP.getMat, NP.setMat ),
-                Attr( 'Uuid', str, NP.getTag, NP.setTag, None, [TAG_NODE_UUID], [TAG_NODE_UUID], e=False )
+                CnnctnList( 'Light', pm.Light, self.GetLights, NP.setLight, NP.clearLight, NP.clearLight, self.data ),
+                Cnnctn( 'Texture', pm.Texture, NP.getTexture, NP.setTexture, NP.clearTexture, self.data, [1] )
             ]
         )
         self.attributes.append( pAttr )
-    
-    def SetConnections( self, cnctns ):
-        self.data.clearLight()
-        for cType, vals in cnctns.items():
-            if cType == 'onLight':
-                for val in vals:
-                    self.data.setLight( val )
         
-    def SetupNodePath( self, np ):
-        id = str( uuid.uuid4() )
-        np.setTag( TAG_NODE_UUID, id )
+    def GetLights( self, data ):
+        lgts = []
+        
+        lgtAttrib = data.getAttrib( pm.LightAttrib )
+        if lgtAttrib is not None:
+            lgts = lgtAttrib.getOnLights()
+        
+        return lgts
             
     def Create( self ):
         """
@@ -48,9 +45,19 @@ class NodePath( Base ):
         """
         np = pm.NodePath( self.type( self.nodeName ) )
         self.SetupNodePath( np )
-        self.Wrap( np )
-        return pm.NodePath( np )
+        self.data = np
+        return np
     
+    def Detach( self ):
+        self.data.detachNode()
+    
+    def Destroy( self ):
+        Base.Destroy( self )
+        
+        for child in self.children:
+            child.Destroy()
+        base.game.pluginMgr.OnNodeDestroy( self.data )
+        
     def Duplicate( self, np, dupeNp ):
         Base.Duplicate( self, np, dupeNp )
         
@@ -60,35 +67,10 @@ class NodePath( Base ):
         
         # Give a new uuid to the duplicate node.
         self.SetupNodePath( dupeNp )
-    
-    def Destroy( self ):
-        Base.Destroy( self )
         
-        for child in self.children:
-            child.Destroy()
-        base.game.pluginMgr.OnNodeDestroy( self.data )
-    
-    def GetChildWrapper( self, name ):
+    def SetupNodePath( self, np ):
+        id = str( uuid.uuid4() )
+        np.setTag( TAG_NODE_UUID, id )
         
-        if name in base.game.nodeMgr.pyTagWrappers:
-            return base.game.nodeMgr.pyTagWrappers[name]
-        
-        return None
-    
-    def GetTags( self ):
-        tags = self.data.getPythonTag( TAG_PYTHON_TAGS )
-        if tags is not None:
-            return [tag for tag in tags if tag in base.game.nodeMgr.pyTagWrappers]
-        
-        return []
-            
-    def Wrap( self, np ):
-        Base.Wrap( self, np )
-        
-        # Wrap python objects
-        tags = self.GetTags()
-        for tag in tags:
-            pyObj = np.getPythonTag( tag )
-            pyObjWrpr = base.game.nodeMgr.pyTagWrappers[tag]
-            wrpr = pyObjWrpr( pyObj )
-            self.children.append( wrpr )
+    def AddChild( self, np ):
+        np.reparentTo( self.data )

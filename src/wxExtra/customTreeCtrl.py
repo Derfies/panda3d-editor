@@ -13,17 +13,14 @@ class CustomTreeCtrl( ct.CustomTreeCtrl ):
         self.SetFirstGradientColour( wx.Color(46, 46, 46) )
         self.SetSecondGradientColour( wx.Color(123, 123, 123) )
     
-    def GetItemChildren( self, parentItem ):
-        
+    def GetItemChildren( self, pItem ):
         """
         wxPython's standard tree control does not have a get item children
         method by default.
         """
-        
         children = []
         
-        item, cookie = self.GetFirstChild( parentItem )
-        
+        item, cookie = self.GetFirstChild( pItem )
         while item is not None and item.IsOk():
             children.append( item )
             item = self.GetNextSibling( item )
@@ -31,30 +28,28 @@ class CustomTreeCtrl( ct.CustomTreeCtrl ):
         return children
     
     def FindItemByText( self, text ):
-        
         """
         Iterate through all items and return the first which matches the given
         text.
         """
-        
-        def __Recurse( item, text ):
+        def Recurse( item, text ):
             for child in self.GetItemChildren( item ):
                 if self.GetItemText( child ) == text:
                     return child
             
-                __Recurse( child, text )
+                Recurse( child, text )
             
-        return __Recurse( self.GetRootItem(), text )
+        return Recurse( self.GetRootItem(), text )
     
     def GetAllItems( self ):
-        
         """Return a list of all items in the control."""
-        
-        def __GetChildren( item, allItems ):
+        def GetChildren( item, allItems ):
+            if item is None:
+                return
             for child in self.GetItemChildren( item ):
                 allItems.append( child )
-                __GetChildren( child, allItems )
+                GetChildren( child, allItems )
         
         allItems = []
-        __GetChildren( self.GetRootItem(), allItems )
+        GetChildren( self.GetRootItem(), allItems )
         return allItems

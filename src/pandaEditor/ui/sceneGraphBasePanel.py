@@ -1,10 +1,17 @@
 import wx
+import pandac.PandaModules as pm
+import wx.lib.agw.flatmenu as fm
+import wx.lib.agw.fmresources as fmr
 import wx.lib.agw.customtreectrl as ct
 from wx.lib.pubsub import Publisher as pub
 
 import p3d
 from .. import commands as cmds
+from wxExtra import utils as wxUtils
 from wxExtra import CustomTreeCtrl, CompositeDropTarget
+
+
+DISPLAY_NODEPATHS = wx.NewId()
 
 
 class SceneGraphBasePanel( wx.Panel ):
@@ -15,6 +22,21 @@ class SceneGraphBasePanel( wx.Panel ):
         self.filter = None
         self._updating = False
         self.dragNps = []
+        
+        # Build menu
+        fileMenu = fm.FlatMenu()
+        item = fm.FlatMenuItem( fileMenu, DISPLAY_NODEPATHS, '&NodePaths Only', '', wx.ITEM_CHECK )
+        item.Check()
+        fileMenu.AppendItem( item )
+        
+        self.fm = fm.FlatMenuBar( self, -1, 16, 1, options=fmr.FM_OPT_IS_LCD )
+        self.fm.Append( fileMenu, '&Display' )
+        self.fm.GetRendererManager().SetTheme( fm.StyleVista )
+        
+        ln = wx.StaticLine( self, -1, style=wx.LI_HORIZONTAL )
+        
+        # Bind menu controls
+        self.Bind( fm.EVT_FLAT_MENU_SELECTED, self.OnFlatMenuSelected, id=DISPLAY_NODEPATHS )
         
         # Build tree control
         self.tc = CustomTreeCtrl( self, -1, agwStyle=
@@ -46,23 +68,33 @@ class SceneGraphBasePanel( wx.Panel ):
         
         # Build sizers
         self.bs1 = wx.BoxSizer( wx.VERTICAL )
+        self.bs1.Add( self.fm, 0, wx.EXPAND )
+        self.bs1.Add( ln, 0, wx.EXPAND )
         self.bs1.Add( self.tc, 1, wx.EXPAND )
         self.SetSizer( self.bs1 )
+        
+    def OnFlatMenuSelected( self, evt ):
+        wx.GetApp().doc.OnRefresh()
             
     def OnTreeEndLabelEdit( self, evt ):
-        """Match the node path's name to the new name of the item."""
-        def setNodePathName( np, name ):
-            np.setName( name )
-            wx.CallAfter( wx.GetApp().doc.OnModified )
-        np = evt.GetItem().GetData()
+        """Change the component's name to that of the new item's name."""
+        def SetComponentName( comp, name ):
+            wrpr = base.game.nodeMgr.Wrap( comp )
+            attr = wrpr.FindProperty( 'name' )
+            if attr is not None:
+                wx.CallAfter( cmds.SetAttribute, [comp], attr, name )
+        
+        comp = evt.GetItem().GetData()
         name = evt.GetLabel()
         if not name:
             return
-        wx.CallAfter( setNodePathName, np, name )
+        wx.CallAfter( SetComponentName, comp, name )
         
     def OnTreeItemActivated( self, evt ):
         """Put the event item into label edit mode."""
-        self.tc.EditLabel( evt.GetItem() )
+        flags = self.tc.GetAGWWindowStyleFlag()
+        if flags & ct.TR_EDIT_LABELS:
+            self.tc.EditLabel( evt.GetItem() )
             
     def OnMiddleDown( self, evt ):
         
@@ -93,68 +125,88 @@ class SceneGraphBasePanel( wx.Panel ):
             
     def ValidateDropItem( self, x, y ):
         """Perform validation procedures."""
-        dropItem = ( self.tc.HitTest( wx.Point( x, y ) ) )[0]
-        
-        # If the drop item is none then the drop item will default to the
-        # root node. No other checks necessary.
+        dropItem = self.tc.HitTest( wx.Point( x, y ) )[0]
         if dropItem is None:
-            return True
-            
-        # Fail if the drop item is one of the items being dragged
-        dropNp = dropItem.GetData()
-        if dropNp in self.dragNps:
             return False
         
-        # Fail if the drag items are ancestors of the drop items
-        for np in self.dragNps:
-            if np.isAncestorOf( dropNp ):
-                return False
+        wrpr = base.game.nodeMgr.Wrap( dropItem.GetData() )
+        if wrpr is None:
+            return False
         
-        # Drop target item is ok, continue
-        return True
+        if wx.GetMouseState().CmdDown():
+            return wrpr.GetPossibleConnections( self.dragNps )
+        else:
+            return wrpr.ValidateDragDrop( self.dragNps, dropItem.GetData() )
             
     def OnDropItem( self, str ):
         
         # Get the item at the drop point
-        dropItem = ( self.tc.HitTest( wx.Point( self.dt.x, self.dt.y ) ) )[0]
+        dropItem = self.tc.HitTest( wx.Point( self.dt.x, self.dt.y ) )[0]
+        wrpr = base.game.nodeMgr.Wrap( dropItem.GetData() )
+        if wrpr is None:
+            return False
         
-        # Check if there are drag node paths set, if so perform parenting
-        # operation
-        if not self.dragNps:
-            np = None
-            if dropItem is not None:
-                np = dropItem.GetData()
-            wx.GetApp().AddFile( str, np )
-            return
-            
-        # Get the parent
-        if dropItem is not None and dropItem.IsOk():
-            parentNp = dropItem.GetData()
+        self.data = {}
+        if wx.GetMouseState().CmdDown():
+            menu = wx.Menu()
+            for cnnctn in wrpr.GetPossibleConnections( self.dragNps ):
+                mItem = wx.MenuItem( menu, wx.NewId(), cnnctn.label )
+                menu.AppendItem( mItem )
+                self.Bind( wx.EVT_MENU, self.OnConnect, id=mItem.GetId() )
+                self.data[mItem.GetId()] = cnnctn
+                
+                #mItem = wx.MenuItem( menu, wx.NewId(), cnnctn.undoLabel )
+                #menu.AppendItem( mItem )
+                #self.Bind( wx.EVT_MENU, self.OnConnect, id=mItem.GetId() )
+                #self.data[mItem.GetId()] = cnnctn
+            self.PopupMenu( menu )
+            menu.Destroy()
         else:
-            parentNp = wx.GetApp().doc.contents.rootNp
-        
-        # Parent all dragged node paths
-        cmds.Parent( self.dragNps, parentNp )
+            wrpr.OnDragDrop( self.dragNps, wrpr.data )
+            
+    def OnConnect( self, evt ):
+        menu = evt.GetEventObject()
+        mItem = menu.FindItemById( evt.GetId() )
+        cnnctn = self.data[evt.GetId()]
+        cmds.Connect( self.dragNps, cnnctn, cnnctn.Connect )
+        #if mItem.GetItemLabel() == cnnctn.doLabel:
+        #    cmds.Connect( self.dragNps, cnnctn, cnnctn.Connect )
+        #elif mItem.GetItemLabel() == cnnctn.undoLabel:
+        #    cmds.Connect( self.dragNps, cnnctn, cnnctn.Break )
             
     def PopulateTreeControl( self ):
         """
         Traverse the scene from the root node, creating tree items for each
         node path encountered.
         """
-        def AddItem( np, parentItem ):
+        def AddItem( comp ):
             
             # Bail if there is a filter set and the node is not derived from
             # that type.
-            if self.filter is not None and not np.node().isOfType( self.filter ):
+            #if self.filter is not None and #type( comp ) == pm.NodePath and not comp.node().isOfType( self.filter ):
+            #    return
+            
+            wrpr = base.game.nodeMgr.Wrap( comp )
+            if wrpr is not None:
+                pComp = wrpr.GetParent()
+                compName = wrpr.GetName()
+                if self.filter is not None and not wrpr.IsOfType( self.filter ):
+                    return
+            elif type( comp ) == pm.NodePath:
+                pComp = comp.getParent()
+                compName = comp.getName()
+                if self.filter is not None and not comp.node().isOfType( self.filter ):
+                    return
+            else:
                 return
             
-            if np.getParent() in self._nps:
-                parentItem = self._nps[np.getParent()]
+            if pComp in self._nps:
+                pItem = self._nps[pComp]
             else:
-                parentItem = self.tc.GetRootItem()
-            item = self.tc.AppendItem( parentItem, np.getName() )
-            item.SetData( np )
-            self._nps[np] = item
+                pItem = self.tc.GetRootItem()
+            item = self.tc.AppendItem( pItem, compName )
+            item.SetData( comp )
+            self._nps[comp] = item
         
         # Clear the node path / tree item dict
         self._nps = {}
@@ -162,6 +214,10 @@ class SceneGraphBasePanel( wx.Panel ):
         # Create scene root node, then recurse down scene hierarchy
         self.tc.AddRoot( 'root' )
         wx.GetApp().doc.contents.Walk( AddItem, includeHelpers=False, modelRootsOnly=False )
+        
+        # Add other components to the tree.
+        for comp in base.scene.comps.keys():
+            AddItem( comp )
         
     def OnUpdate( self, msg ):
         """
@@ -177,6 +233,12 @@ class SceneGraphBasePanel( wx.Panel ):
             for item in self.tc.GetAllItems():
                 itemsDict[item.GetData()] = item
             return itemsDict
+        
+        # Set the filter based on the flat menu selection.
+        self.filter = None
+        val = self.fm.FindMenuItem( DISPLAY_NODEPATHS ).IsChecked()
+        if val:
+            self.filter = pm.PandaNode
         
         # Get map of node paths to items before populating the tree control
         oldItems = GetItemsDict()

@@ -8,7 +8,7 @@ from attributes import NodeAttribute as Attr
 class DirectionalLight( Light ):
     
     def __init__( self, *args, **kwargs ):
-        kwargs['nType'] = DL
+        kwargs.setdefault( 'cType', DL )
         Light.__init__( self, *args, **kwargs )
         
         pAttr = Attr( 'DirectionalLight' )

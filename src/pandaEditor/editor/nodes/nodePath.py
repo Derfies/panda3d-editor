@@ -4,6 +4,7 @@ from direct.directtools.DirectSelection import DirectBoundingBox
 
 from constants import *
 from game.nodes.constants import *
+from pandaEditor import commands as cmds
 from game.nodes.nodePath import NodePath as GameNodePath
 from game.nodes.attributes import NodePathAttribute as Attr
 
@@ -16,10 +17,14 @@ class NodePath( GameNodePath ):
     def __init__( self, *args, **kwargs ):
         GameNodePath.__init__( self, *args, **kwargs )
         
+        # Find the index of the 'name' property so we can add position, 
+        # rotation and scale properties immediately after it.
+        pAttr = self.FindProperty( 'nodePath' )
+        index = pAttr.children.index( self.FindProperty( 'name' ) )
+        
         # Add attributes for position, rotation and scale. These are
         # implemented editor side only as we only need a matrix to xform the
         # node. These are provided for the user's benefit only.
-        pAttr = self.FindAttribute( 'nodePath' )
         attr = Attr( 'Position', pm.Vec3, NP.getPos, NP.setPos, w=False )
         attr.children.extend( 
             [
@@ -28,7 +33,7 @@ class NodePath( GameNodePath ):
                 Attr( 'Z', float, NP.getZ, NP.setZ, w=False )
             ]
         )
-        pAttr.children.append( attr )
+        pAttr.children.insert( index + 1, attr )
         
         attr = Attr( 'Rotation', pm.Vec3, NP.getHpr, NP.setHpr, w=False )
         attr.children.extend( 
@@ -38,7 +43,7 @@ class NodePath( GameNodePath ):
                 Attr( 'R', float, NP.getR, NP.setR, w=False )
             ]
         )
-        pAttr.children.append( attr )
+        pAttr.children.insert( index + 2, attr )
          
         attr = Attr( 'Scale', pm.Vec3, NP.getScale, NP.setScale, w=False )
         attr.children.extend( 
@@ -48,7 +53,7 @@ class NodePath( GameNodePath ):
                 Attr( 'Sz', float, NP.getSz, NP.setSz, w=False )
             ]
         )
-        pAttr.children.append( attr )
+        pAttr.children.insert( index + 3, attr )
         
     @classmethod
     def SetPickable( cls, value=True ):
@@ -89,11 +94,76 @@ class NodePath( GameNodePath ):
     def OnDelete( self, np ):
         pass
     
-    def GetConnections( self ):
-        data = {}
-        lights = self.data.getAttrib( pm.LightAttrib )
-        if lights is not None:
-            onLights = lights.getOnLights()
-            uuids = [lgt.getTag( TAG_NODE_UUID ) for lgt in onLights]
-            data['onLight'] = uuids
-        return data
+    def GetTags( self ):
+        tags = self.data.getPythonTag( TAG_PYTHON_TAGS )
+        if tags is not None:
+            return [tag for tag in tags if tag in base.game.nodeMgr.pyTagWrappers]
+        
+        return []
+    
+    def GetChildren( self ):
+        children = []
+        
+        # Add wrappers for python objects.
+        for tag in self.GetTags():
+            pyObj = self.data.getPythonTag( tag )
+            pyObjWrpr = base.game.nodeMgr.pyTagWrappers[tag]
+            children.append( pyObjWrpr( pyObj ) )
+        
+        # Add wrappers for child NodePaths.
+        childNps = [
+            np 
+            for np in self.data.getChildren()
+            if not np.getPythonTag( TAG_IGNORE ) and not np.getPythonTag( TAG_DO_NOT_SAVE )
+        ]
+        for np in childNps:
+            children.append( base.game.nodeMgr.Wrap( np ) )
+            
+        return children
+        
+    def GetId( self ):
+        return self.data.getTag( TAG_NODE_UUID )
+    
+    def SetId( self, id ):
+        self.data.setTag( TAG_NODE_UUID, id )
+    
+    def GetParent( self ):
+        return self.data.getParent()
+    
+    def GetName( self ):
+        return self.data.getName()
+    
+    def ValidateDragDrop( self, dragComps, dropComp ):
+        dragNps = [dragComp for dragComp in dragComps if type( dragComp ) == pm.NodePath]
+        if not dragNps:
+            return False
+        
+        # If the drop item is none then the drop item will default to the
+        # root node. No other checks necessary.
+        if dropComp is None:
+            return True
+            
+        # Fail if the drop item is one of the items being dragged
+        #dropNp = dropItem.GetData()
+        if dropComp in dragComps:
+            return False
+        
+        # Fail if the drag items are ancestors of the drop items
+        if True in [comp.isAncestorOf( dropComp ) for comp in dragComps]:
+            return False
+        
+        # Drop target item is ok, continue
+        return True
+    
+    def OnDragDrop( self, dragComps, dropNp ):
+        dragNps = [dragComp for dragComp in dragComps if type( dragComp ) == pm.NodePath]
+        if dragNps:
+            cmds.Parent( dragNps, dropNp )
+            
+    def IsOfType( self, cType ):
+        return self.data.node().isOfType( cType )
+            
+    def SetDefaultValues( self ):
+        
+        # Set default parent.
+        self.data.reparentTo( render )
