@@ -319,7 +319,6 @@ def Sphere( radius=1.0, numSegs=16, degrees=360,
     rad1 = zPoints[1][1] * radius
     for m in [1, -2]:
         offset1 = axis * zPoints[m][0]
-        print axis, ' : ', zPoints[m][0]
         
         clampedM = max( -1, min( m, 1 ) )
         
@@ -336,12 +335,6 @@ def Sphere( radius=1.0, numSegs=16, degrees=360,
             a = p1 + offset1 - origin
             b = p2 + offset1 - origin
             c = -axis * clampedM
-            
-            #if clampedM < 0:
-            #    print 'switch'
-            #    temp = pm.Vec3( a )
-            #    b = pm.Vec3( a )
-            #    b = pm.Vec3( temp )
 
             # Quad
             if clampedM > 0:
