@@ -256,9 +256,8 @@ class PropertiesPanel( wx.Panel ):
                         
         # Build all properties from attributes.
         wrpr = base.game.nodeMgr.Wrap( nps[0] )
-        if wrpr is not None:
-            for attr in wrpr.GetAttributes():
-                RecurseAttribute( attr )
+        for attr in wrpr.GetAttributes():
+            RecurseAttribute( attr )
                             
     def OnPgChanged( self, evt ):
         """

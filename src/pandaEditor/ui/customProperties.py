@@ -161,7 +161,7 @@ class ConnectionBaseProperty( wxpg.BaseProperty ):
         for comp in wx.GetApp().frame.pnlSceneGraph.dragNps:
             cnnctn = self.GetAttribute( 'attr' )
             wrpr = base.game.nodeMgr.Wrap( comp )
-            if wrpr is not None and wrpr.IsOfType( cnnctn.type ):
+            if wrpr.IsOfType( cnnctn.type ):
                 return True
         
         return False
@@ -173,8 +173,8 @@ class ConnectionProperty( ConnectionBaseProperty ):
         ctrl = ConnectionBaseProperty.BuildControl( self, parent, id )
         
         comp = self.GetValue()
-        wrpr = base.game.nodeMgr.Wrap( comp )
-        if wrpr is not None:
+        if comp is not None:
+            wrpr = base.game.nodeMgr.Wrap( comp )
             ctrl.Append( wrpr.GetName() )
             ctrl.SetClientData( 0, wrpr.data )
         
@@ -202,9 +202,8 @@ class ConnectionListProperty( ConnectionBaseProperty ):
         if comps is not None:
             for i in range( len( comps ) ):
                 wrpr = base.game.nodeMgr.Wrap( comps[i] )
-                if wrpr is not None:
-                    ctrl.Append( wrpr.GetName() )
-                    ctrl.SetClientData( i, wrpr.data )
+                ctrl.Append( wrpr.GetName() )
+                ctrl.SetClientData( i, wrpr.data )
         
         return ctrl
     

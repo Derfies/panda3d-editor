@@ -29,9 +29,9 @@ class ModelRoot( NodePath ):
         # Iterate over child nodes
         def Recurse( node ):
             nTypeStr = node.getTag( TAG_NODE_TYPE )
-            Wrpr = base.game.nodeMgr.GetWrapperByName( nTypeStr )
-            if Wrpr is not None:
-                wrpr = Wrpr( node )
+            wrprCls = base.game.nodeMgr.GetWrapperByName( nTypeStr )
+            if wrprCls is not None:
+                wrpr = wrprCls( node )
                 wrpr.Create( inputNp=node )
             
             # Recurse

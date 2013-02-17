@@ -50,7 +50,7 @@ class SceneParser( game.SceneParser ):
         
         # Recurse through hierarchy.
         for cWrpr in wrpr.GetChildren():
-            if cWrpr is not None:
+            if cWrpr.IsSaveable():
                 self.SaveComponent( cWrpr, elem )
                 
     def SaveProperties( self, wrpr, elem ):

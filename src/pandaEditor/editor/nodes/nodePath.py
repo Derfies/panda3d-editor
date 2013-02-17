@@ -111,13 +111,9 @@ class NodePath( GameNodePath ):
             children.append( pyObjWrpr( pyObj ) )
         
         # Add wrappers for child NodePaths.
-        childNps = [
-            np 
-            for np in self.data.getChildren()
-            if not np.getPythonTag( TAG_IGNORE ) and not np.getPythonTag( TAG_DO_NOT_SAVE )
-        ]
-        for np in childNps:
-            children.append( base.game.nodeMgr.Wrap( np ) )
+        for np in self.data.getChildren():
+            if not np.getPythonTag( TAG_IGNORE ):
+                children.append( base.game.nodeMgr.Wrap( np ) )
             
         return children
         
@@ -167,3 +163,6 @@ class NodePath( GameNodePath ):
         
         # Set default parent.
         self.data.reparentTo( render )
+        
+    def IsSaveable( self ):
+        return not self.data.getPythonTag( TAG_DO_NOT_SAVE )

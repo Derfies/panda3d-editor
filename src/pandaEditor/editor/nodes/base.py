@@ -107,3 +107,6 @@ class Base( GameBase ):
         
         # Set default parent.
         base.scene.RegisterComponent( self.data )
+        
+    def IsSaveable( self ):
+        return True

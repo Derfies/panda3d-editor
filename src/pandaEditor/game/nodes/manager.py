@@ -4,6 +4,7 @@ from constants import *
 class Manager( object ):
     
     def __init__( self ):
+        from base import Base
         from sceneRoot import SceneRoot
         
         from nodePath import NodePath
@@ -32,6 +33,7 @@ class Manager( object ):
         from bulletBoxShape import BulletBoxShape
         
         self.nodeWrappers = {
+            'Base':Base,
             'SceneRoot':SceneRoot,
             
             'NodePath':NodePath,
@@ -68,11 +70,18 @@ class Manager( object ):
         return wrpr.Create( *args )
     
     def Wrap( self, comp ):
+        """
+        Return a wrapper suitable for the indicated component. If the correct
+        wrapper cannot be found, return a NodePath wrapper for NodePaths and
+        a Base wrapper for everything else.
+        """
         wrprCls = self.GetWrapper( comp )
         if wrprCls is not None:
             return wrprCls( comp )
-        
-        return None
+        elif hasattr( comp, 'getPythonTag' ):
+            return self.nodeWrappers['NodePath']( comp )
+        else:
+            return self.nodeWrappers['Base']( comp )
         
     def GetWrapper( self, comp ):
         typeStr = self.GetTypeString( comp )

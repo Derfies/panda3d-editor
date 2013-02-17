@@ -47,8 +47,7 @@ class Scene( game.Scene ):
         """Destroy the scene by removing all its nodes."""
         def Destroy( np ):
             wrpr = base.game.nodeMgr.Wrap( np )
-            if wrpr is not None:
-                wrpr.Destroy()
+            wrpr.Destroy()
         
         self.Walk( Destroy )
         base.game.pluginMgr.OnSceneClose()
@@ -75,8 +74,7 @@ class Scene( game.Scene ):
         
             # Call duplicate methods for any wrappers
             wrpr = base.game.nodeMgr.Wrap( np )
-            if wrpr is not None:
-                wrpr.Duplicate( np, dupeNp )
+            wrpr.Duplicate( np, dupeNp )
         
         return dupeNps
         

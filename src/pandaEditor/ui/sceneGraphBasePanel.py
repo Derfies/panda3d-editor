@@ -130,9 +130,6 @@ class SceneGraphBasePanel( wx.Panel ):
             return False
         
         wrpr = base.game.nodeMgr.Wrap( dropItem.GetData() )
-        if wrpr is None:
-            return False
-        
         if wx.GetMouseState().CmdDown():
             return wrpr.GetPossibleConnections( self.dragNps )
         else:
@@ -143,9 +140,6 @@ class SceneGraphBasePanel( wx.Panel ):
         # Get the item at the drop point
         dropItem = self.tc.HitTest( wx.Point( self.dt.x, self.dt.y ) )[0]
         wrpr = base.game.nodeMgr.Wrap( dropItem.GetData() )
-        if wrpr is None:
-            return False
-        
         self.data = {}
         if wx.GetMouseState().CmdDown():
             menu = wx.Menu()
@@ -154,11 +148,6 @@ class SceneGraphBasePanel( wx.Panel ):
                 menu.AppendItem( mItem )
                 self.Bind( wx.EVT_MENU, self.OnConnect, id=mItem.GetId() )
                 self.data[mItem.GetId()] = cnnctn
-                
-                #mItem = wx.MenuItem( menu, wx.NewId(), cnnctn.undoLabel )
-                #menu.AppendItem( mItem )
-                #self.Bind( wx.EVT_MENU, self.OnConnect, id=mItem.GetId() )
-                #self.data[mItem.GetId()] = cnnctn
             self.PopupMenu( menu )
             menu.Destroy()
         else:
@@ -169,55 +158,23 @@ class SceneGraphBasePanel( wx.Panel ):
         mItem = menu.FindItemById( evt.GetId() )
         cnnctn = self.data[evt.GetId()]
         cmds.Connect( self.dragNps, cnnctn, cnnctn.Connect )
-        #if mItem.GetItemLabel() == cnnctn.doLabel:
-        #    cmds.Connect( self.dragNps, cnnctn, cnnctn.Connect )
-        #elif mItem.GetItemLabel() == cnnctn.undoLabel:
-        #    cmds.Connect( self.dragNps, cnnctn, cnnctn.Break )
-            
-    def PopulateTreeControl( self ):
+        
+    def AddItem( self, wrpr, pItem ):
         """
         Traverse the scene from the root node, creating tree items for each
         node path encountered.
         """
-        def AddItem( comp ):
+        # Bail if there is a filter set and the node is not derived from
+        # that type.
+        if self.filter is not None and not wrpr.IsOfType( self.filter ):
+            return
             
-            # Bail if there is a filter set and the node is not derived from
-            # that type.
-            #if self.filter is not None and #type( comp ) == pm.NodePath and not comp.node().isOfType( self.filter ):
-            #    return
-            
-            wrpr = base.game.nodeMgr.Wrap( comp )
-            if wrpr is not None:
-                pComp = wrpr.GetParent()
-                compName = wrpr.GetName()
-                if self.filter is not None and not wrpr.IsOfType( self.filter ):
-                    return
-            elif type( comp ) == pm.NodePath:
-                pComp = comp.getParent()
-                compName = comp.getName()
-                if self.filter is not None and not comp.node().isOfType( self.filter ):
-                    return
-            else:
-                return
-            
-            if pComp in self._nps:
-                pItem = self._nps[pComp]
-            else:
-                pItem = self.tc.GetRootItem()
-            item = self.tc.AppendItem( pItem, compName )
-            item.SetData( comp )
-            self._nps[comp] = item
+        item = self.tc.AppendItem( pItem, wrpr.GetName() )
+        item.SetData( wrpr.data )
+        self._nps[wrpr.data] = item
         
-        # Clear the node path / tree item dict
-        self._nps = {}
-        
-        # Create scene root node, then recurse down scene hierarchy
-        self.tc.AddRoot( 'root' )
-        wx.GetApp().doc.contents.Walk( AddItem, includeHelpers=False, modelRootsOnly=False )
-        
-        # Add other components to the tree.
-        for comp in base.scene.comps.keys():
-            AddItem( comp )
+        for cWrpr in wrpr.GetChildren():
+            self.AddItem( cWrpr, item )
         
     def OnUpdate( self, msg ):
         """
@@ -245,7 +202,11 @@ class SceneGraphBasePanel( wx.Panel ):
 
         # Clear existing items and repopulate tree control
         self.tc.DeleteAllItems()
-        self.PopulateTreeControl()
+        self._nps = {}
+        rItem = self.tc.AddRoot( 'root' )
+        wrpr = base.game.nodeMgr.Wrap( base.scene )
+        for cWrpr in wrpr.GetChildren(): 
+            self.AddItem( cWrpr, rItem )
         
         # Get map of node paths to items after populating the tree control
         newItems = GetItemsDict()

@@ -31,8 +31,7 @@ class Selection( p3d.Object ):
         for np in self.nps:
             #if not np.isEmpty():
             wrpr = base.game.nodeMgr.Wrap( np )
-            if wrpr is not None:
-                wrpr.OnDeselect( np )
+            wrpr.OnDeselect( np )
         self.nps = []
     
     def Add( self, nps ):
@@ -41,8 +40,7 @@ class Selection( p3d.Object ):
         """
         for np in list( set( nps ) ):
             wrpr = base.game.nodeMgr.Wrap( np )
-            if wrpr is not None:
-                wrpr.OnSelect( np )
+            wrpr.OnSelect( np )
                 
             self.nps.append( np )
     
@@ -53,8 +51,7 @@ class Selection( p3d.Object ):
         """
         for np in nps:
             wrpr = base.game.nodeMgr.Wrap( np )
-            if wrpr is not None:
-                wrpr.OnDeselect( np )
+            wrpr.OnDeselect( np )
             
         self.nps = list( set( self.nps ) - set( nps ) )
     
@@ -169,6 +166,5 @@ class Selection( p3d.Object ):
         """Update the selection by running deselect and select handlers."""
         for np in self.nps:
             wrpr = base.game.nodeMgr.Wrap( np )
-            if wrpr is not None:
-                wrpr.OnDeselect( np )
-                wrpr.OnSelect( np )
+            wrpr.OnDeselect( np )
+            wrpr.OnSelect( np )
