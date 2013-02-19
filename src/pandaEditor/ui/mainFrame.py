@@ -631,6 +631,17 @@ class MainFrame( wx.Frame ):
         mLights = CustomMenu()
         mLights.AppendActionItems( lightActns, self )
         
+        mCollActns = [
+            ActionItem( 'Collision Node', '', self.OnCreate, args='CollisionNode' ),
+            ActionItem( 'Collision Box', '', self.OnCreate, args='CollisionBox' ),
+            ActionItem( 'Collision Ray', '', self.OnCreate, args='CollisionRay' ),
+            ActionItem( 'Collision Sphere', '', self.OnCreate, args='CollisionSphere' ),
+            ActionItem( 'Collision Inverse Sphere', '', self.OnCreate, args='CollisionInvSphere' ),
+            ActionItem( 'Collision Tube', '', self.OnCreate, args='CollisionTube' )
+        ]
+        mColl = CustomMenu()
+        mColl.AppendActionItems( mCollActns, self )
+        
         texActns = [
             ActionItem( 'Texture', '', self.OnCreate, args='Texture' )#,
             #ActionItem( 'Texture Stage', '', self.OnCreate, args='TextureStage' )
@@ -650,6 +661,7 @@ class MainFrame( wx.Frame ):
         self.mCreate = CustomMenu()
         self.mCreate.AppendActionItem( ActionItem( 'Panda Node', '', self.OnCreate, args='PandaNode' ), self )
         #self.mCreate.AppendActionItem( ActionItem( 'Actor', '', self.OnCreateActor ), self )   # Not supported... yet.
+        self.mCreate.AppendSubMenu( mColl, '&Collision' )
         self.mCreate.AppendSubMenu( mLights, '&Lights' )
         self.mCreate.AppendSubMenu( mTex, '&Texture' )
         self.mCreate.AppendSubMenu( mBlt, '&Bullet' )

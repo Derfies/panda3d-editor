@@ -11,12 +11,18 @@ class Manager( object ):
         from render import Render
         from actor import Actor
         from pandaNode import PandaNode
-        from collisionNode import CollisionNode
         from camera import Camera
         from baseCam import BaseCam
         from modelNode import ModelNode
         from baseCamera import BaseCamera
         from modelRoot import ModelRoot
+        
+        from collisionNode import CollisionNode
+        from collisionSolids import CollisionBox
+        from collisionSolids import CollisionRay
+        from collisionSolids import CollisionSphere
+        from collisionSolids import CollisionInvSphere
+        from collisionSolids import CollisionTube
 
         from light import Light
         from ambientLight import AmbientLight
@@ -40,12 +46,18 @@ class Manager( object ):
             'Render':Render,
             'PandaNode':PandaNode,
             'Actor':Actor,
-            'CollisionNode':CollisionNode,
             'Camera':Camera,
             'BaseCam':BaseCam,
             'ModelNode':ModelNode,
             'BaseCamera':BaseCamera,
             'ModelRoot':ModelRoot,
+            
+            'CollisionNode':CollisionNode,
+            'CollisionBox':CollisionBox,
+            'CollisionRay':CollisionRay,
+            'CollisionSphere':CollisionSphere,
+            'CollisionInvSphere':CollisionInvSphere,
+            'CollisionTube':CollisionTube,
             
             'Light':Light,
             'AmbientLight':AmbientLight,
