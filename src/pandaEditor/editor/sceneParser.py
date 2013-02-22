@@ -36,9 +36,20 @@ class SceneParser( game.SceneParser ):
     def GetName( self, ttype ):
         return ttype.__name__
     
-    def SaveComponent( self, wrpr, pElem ):
+    def Save( self, scene, filePath ):
+        """Save the scene out to an xml file."""
+        rootElem = et.Element( 'Scene' )
+        wrpr = base.game.nodeMgr.Wrap( scene )
+        self.SaveComponent( wrpr, rootElem )
+        
+        # Wrap with an element tree and write to file.
+        tree = et.ElementTree( rootElem )
+        utils.Indent( tree.getroot() )
+        tree.write( filePath )
+    
+    def SaveComponent( self, wrpr, pElem, name='Component' ):
         """Serialise a component to an xml element."""
-        elem = et.SubElement( pElem, 'Component' )
+        elem = et.SubElement( pElem, name )
         elem.set( 'type', type( wrpr ).__name__ )
         id = wrpr.GetId()
         if id is not None:
@@ -47,6 +58,11 @@ class SceneParser( game.SceneParser ):
             elem.set( key, value )
         self.SaveProperties( wrpr, elem )
         self.SaveConnections( wrpr, elem )
+        
+        # Write out addons.
+        for cWrpr in wrpr.GetAddons():
+            if cWrpr.IsSaveable():
+                self.SaveComponent( cWrpr, elem )
         
         # Recurse through hierarchy.
         for cWrpr in wrpr.GetChildren():
@@ -66,8 +82,22 @@ class SceneParser( game.SceneParser ):
                 subElem.set( 'name', key )
                 subElem.set( 'value', castFn( value ) )
                 subElem.set( 'type', type( value ).__name__ )
+            elif type( value ) == dict:
+                subElem = et.SubElement( elem, 'Item' )
+                subElem.set( 'name', key )
+                subElem.set( 'type', 'dict' )
+                for key, val in value.items():
+                    subElem.append( self.SaveItem( key, val ) )
             else:
                 print 'Could not save attribute: ', key, ' : of type: ', type( value )
+                
+    def SaveItem( self, name, value ):
+        castFn = self.saveCastFnMap[type( value )]
+        elem = et.Element( 'Item' )
+        elem.set( 'name', name )
+        elem.set( 'type', type( value ).__name__ )
+        elem.set( 'value', castFn( value ) )
+        return elem
                 
     def SaveConnections( self, wrpr, elem ):
         cnctnDict = wrpr.GetConnectionData()
@@ -84,15 +114,3 @@ class SceneParser( game.SceneParser ):
         # Append the connections element only if it isn't empty.
         if list( cnctnsElem ):
             elem.append( cnctnsElem )
-            
-    def Save( self, scene, filePath ):
-        """Save the scene out to an xml file."""
-        rootElem = et.Element( 'Scene' )
-        wrprCls = base.game.nodeMgr.nodeWrappers['SceneRoot']
-        wrpr = wrprCls( scene )
-        self.SaveComponent( wrpr, rootElem )
-        
-        # Wrap with an element tree and write to file.
-        tree = et.ElementTree( rootElem )
-        utils.Indent( tree.getroot() )
-        tree.write( filePath )

@@ -1,3 +1,5 @@
+import os
+
 import wx
 import wx.lib.agw.floatspin as fs
 import pandac.PandaModules as pm
@@ -230,4 +232,34 @@ class ConnectionListProperty( ConnectionBaseProperty ):
         val.extend( wx.GetApp().frame.pnlSceneGraph.dragNps )
         self.SetValue( val )
         self.PostChangedEvent()
+        
 
+class DictProperty( wxpg.BaseProperty ):
+    
+    def BuildControl( self, parent, id ):
+        ctrl = wx.ListBox( parent, id, size=(-1,50), style=wx.LB_EXTENDED )
+        ctrl.Enable( self.IsEnabled() )
+        ctrl.Bind( wx.EVT_KEY_UP, self.OnDelete )
+        
+        dt = CompositeDropTarget( ['filePath'], 
+                                  self.OnDropItem, 
+                                  self.ValidateDropItem )
+        ctrl.SetDropTarget( dt )
+
+        for name in self.GetValue():
+            ctrl.Append( name )
+        
+        return ctrl
+    
+    def ValidateDropItem( self, x, y ):
+        return True
+    
+    def OnDelete( self, evt ):
+        pass
+    
+    def OnDropItem( self, arg ):
+        myDict = dict( self.GetValue() )
+        key = os.path.split( arg )[-1].split( '.' )[0]
+        myDict[key] = arg
+        self.SetValue( myDict )
+        self.PostChangedEvent()

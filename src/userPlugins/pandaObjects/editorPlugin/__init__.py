@@ -1,0 +1,1 @@
+from editorPlugin import EditorPlugin

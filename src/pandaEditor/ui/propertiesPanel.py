@@ -186,7 +186,8 @@ class PropertiesPanel( wx.Panel ):
             str:wxpg.StringProperty,
             bool:wxpg.BoolProperty,
             float:wxpg.FloatProperty,
-            Filename:custProps.FilePathProperty
+            Filename:custProps.FilePathProperty,
+            dict:custProps.DictProperty
         }
         
         # Bind publisher events
@@ -256,7 +257,7 @@ class PropertiesPanel( wx.Panel ):
                         
         # Build all properties from attributes.
         wrpr = base.game.nodeMgr.Wrap( nps[0] )
-        for attr in wrpr.GetAttributes():
+        for attr in wrpr.GetAttributes( flat=False, addons=True ):
             RecurseAttribute( attr )
                             
     def OnPgChanged( self, evt ):

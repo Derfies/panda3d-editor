@@ -104,16 +104,22 @@ class NodePath( GameNodePath ):
     def GetChildren( self ):
         children = []
         
-        # Add wrappers for python objects.
-        for tag in self.GetTags():
-            pyObj = self.data.getPythonTag( tag )
-            pyObjWrpr = base.game.nodeMgr.pyTagWrappers[tag]
-            children.append( pyObjWrpr( pyObj ) )
-        
         # Add wrappers for child NodePaths.
         for np in self.data.getChildren():
             if not np.getPythonTag( TAG_IGNORE ):
                 children.append( base.game.nodeMgr.Wrap( np ) )
+            
+        return children
+    
+    def GetAddons( self ):
+        children = []
+        
+        # Add wrappers for python objects.
+        for tag in self.GetTags():
+            
+            pyObj = self.data.getPythonTag( tag )
+            pyObjWrpr = base.game.nodeMgr.pyTagWrappers[tag]
+            children.append( pyObjWrpr( pyObj ) )
             
         return children
         

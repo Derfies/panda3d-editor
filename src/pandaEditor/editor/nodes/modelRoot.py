@@ -20,17 +20,15 @@ class ModelRoot( GameModelRoot ):
         return np
 
     def GetCreateArgs( self ):
-        return {'modelPath':self.GetRelModelPath()}
+        return {'modelPath':self.GetRelModelPath( self.data.node().getFullpath() )}
     
-    def GetRelModelPath( self ):
+    def GetRelModelPath( self, pandaPath ):
         """
         Attempt to find the indicated file path on one of the model search 
         paths. If found then return a path relative to it. Also make sure to 
         remove all extensions so we can load  both egg and bam files.
         """
-        node = self.data.node()
-        
-        relPath = pm.Filename( node.getFullpath() )
+        relPath = pm.Filename( pandaPath )
         index = relPath.findOnSearchpath( pm.getModelPath().getValue() )
         if index >= 0:
             basePath = pm.getModelPath().getDirectories()[index]

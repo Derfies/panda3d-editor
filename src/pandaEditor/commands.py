@@ -52,6 +52,23 @@ def Duplicate( nps ):
     wx.GetApp().doc.OnModified()
     
 
+def Replace( fromComp, toComp ):
+    """
+    
+    """
+    actns = [
+        actions.Deselect( [fromComp] ),
+        actions.Remove( fromComp ),
+        actions.Add( toComp ),
+        actions.Select( [toComp] )
+    ]
+    
+    actn = actions.Composite( actns )
+    wx.GetApp().actnMgr.Push( actn )
+    actn()
+    wx.GetApp().doc.OnModified()
+    
+
 def Select( nps ):
     """
     Create the select composite action, execute it and push it onto the

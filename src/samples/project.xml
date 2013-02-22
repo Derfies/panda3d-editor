@@ -1,0 +1,7 @@
+<Project>
+    <Directory name="models" type="models" />
+    <Directory name="maps" type="maps" />
+    <Directory name="shaders" type="shaders" />
+    <Directory name="prefabs" type="prefabs" />
+    <Directory name="scripts" type="scripts" />
+</Project>

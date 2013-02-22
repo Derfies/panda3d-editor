@@ -5,6 +5,7 @@ import wx
 import wx.aui
 from wx.lib.pubsub import Publisher as pub
 import pandac.PandaModules as pm
+from direct.actor.Actor import Actor
 
 import p3d
 from .. import commands as cmds
@@ -291,31 +292,17 @@ class MainFrame( wx.Frame ):
         Turn the selection into actors. This is still a massive hack - we need
         a more concise way of storing this information.
         """
-        actors = []
+        comps = []
         for np in self.app.selection.nps:
+            wrpr = base.game.nodeMgr.Wrap( np )
+            modelPath = wrpr.GetRelModelPath( np.node().getFullpath() )
             
-            # Get the panda object for this node path or create one if it
-            # doesn't exist
-            pObj = p3d.PandaObject.Get( np )
-            if pObj is None:
-                pObj = p3d.PandaObject( np )
-            
-            # Create an actor from the node path
-            pObj.CreateActor()
-            
-            # HAXX - this could end up being pretty dodgy. We need a list of
-            # node paths in order to set the selection - not a list of actors.
-            # This seems like a somewhat reliable method of getting that.
-            np = pObj.np.anyPath( pObj.np.node() )
-            self.app.doc.contents.AddNodePaths( [np] )
-            actors.append( np )
-            
-            # DEBUG
-            # Set actor type
-            np.setTag( game.nodes.TAG_NODE_TYPE, 'Actor' )
-
-        self.app.Remove( self.app.selection.nps )
-        self.app.Select( actors )
+            wrprCls = base.game.nodeMgr.nodeWrappers['Actor']
+            wrpr = wrprCls()
+            comp = wrpr.Create( modelPath )
+            comp.setTransform( np.getTransform() )
+            wrpr.SetDefaultValues()
+            cmds.Replace( np, wrpr.data )
         
     def OnCreatePrefab( self, evt ):
         """
@@ -623,21 +610,21 @@ class MainFrame( wx.Frame ):
     def BuildCreateMenu( self ):
         """Build the create menu."""
         lightActns = [
-            ActionItem( 'Ambient Light', '', self.OnCreate, args='AmbientLight' ),
-            ActionItem( 'Point Light', '', self.OnCreate, args='PointLight' ),
-            ActionItem( 'Directional Light', '', self.OnCreate, args='DirectionalLight' ),
-            ActionItem( 'Spotlight', '', self.OnCreate, args='Spotlight' )
+            ActionItem( 'Ambient', '', self.OnCreate, args='AmbientLight' ),
+            ActionItem( 'Point', '', self.OnCreate, args='PointLight' ),
+            ActionItem( 'Directional', '', self.OnCreate, args='DirectionalLight' ),
+            ActionItem( 'Spot', '', self.OnCreate, args='Spotlight' )
         ]
         mLights = CustomMenu()
         mLights.AppendActionItems( lightActns, self )
         
         mCollActns = [
-            ActionItem( 'Collision Node', '', self.OnCreate, args='CollisionNode' ),
-            ActionItem( 'Collision Box', '', self.OnCreate, args='CollisionBox' ),
-            ActionItem( 'Collision Ray', '', self.OnCreate, args='CollisionRay' ),
-            ActionItem( 'Collision Sphere', '', self.OnCreate, args='CollisionSphere' ),
-            ActionItem( 'Collision Inverse Sphere', '', self.OnCreate, args='CollisionInvSphere' ),
-            ActionItem( 'Collision Tube', '', self.OnCreate, args='CollisionTube' )
+            ActionItem( 'Node', '', self.OnCreate, args='CollisionNode' ),
+            ActionItem( 'Box', '', self.OnCreate, args='CollisionBox' ),
+            ActionItem( 'Ray', '', self.OnCreate, args='CollisionRay' ),
+            ActionItem( 'Sphere', '', self.OnCreate, args='CollisionSphere' ),
+            ActionItem( 'Inverse Sphere', '', self.OnCreate, args='CollisionInvSphere' ),
+            ActionItem( 'Tube', '', self.OnCreate, args='CollisionTube' )
         ]
         mColl = CustomMenu()
         mColl.AppendActionItems( mCollActns, self )
@@ -650,17 +637,19 @@ class MainFrame( wx.Frame ):
         mTex.AppendActionItems( texActns, self )
         
         bltActions = [
-            ActionItem( 'Bullet World', '', self.OnCreate, args='BulletWorld' ),
-            ActionItem( 'Bullet Debug Node', '', self.OnCreate, args='BulletDebugNode' ),
-            ActionItem( 'Bullet Rigid Body Node', '', self.OnCreate, args='BulletRigidBodyNode' ),
-            ActionItem( 'Bullet Box Shape', '', self.OnCreate, args='BulletBoxShape' )
+            ActionItem( 'World', '', self.OnCreate, args='BulletWorld' ),
+            ActionItem( 'Debug Node', '', self.OnCreate, args='BulletDebugNode' ),
+            ActionItem( 'Rigid Body Node', '', self.OnCreate, args='BulletRigidBodyNode' ),
+            #ActionItem( 'Character Controller Node', '', self.OnCreate, args='BulletCharacterControllerNode' ),
+            #ActionItem( 'Capsule Shape', '', self.OnCreate, args='BulletCapsuleShape' ),
+            ActionItem( 'Box Shape', '', self.OnCreate, args='BulletBoxShape' )
         ]
         mBlt = CustomMenu()
         mBlt.AppendActionItems( bltActions, self )
         
         self.mCreate = CustomMenu()
         self.mCreate.AppendActionItem( ActionItem( 'Panda Node', '', self.OnCreate, args='PandaNode' ), self )
-        #self.mCreate.AppendActionItem( ActionItem( 'Actor', '', self.OnCreateActor ), self )   # Not supported... yet.
+        self.mCreate.AppendActionItem( ActionItem( 'Actor', '', self.OnCreateActor ), self )
         self.mCreate.AppendSubMenu( mColl, '&Collision' )
         self.mCreate.AppendSubMenu( mLights, '&Lights' )
         self.mCreate.AppendSubMenu( mTex, '&Texture' )

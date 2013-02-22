@@ -24,6 +24,9 @@ class Base( GameBase ):
     def GetParent( self ):
         return base.scene
     
+    def GetAddons( self ):
+        return []
+    
     def GetChildren( self ):
         return [] 
         
@@ -31,7 +34,7 @@ class Base( GameBase ):
         propDict = {}
         
         # Put this component's properties into key / value pairs.
-        props = self.GetAllAttributes()
+        props = self.GetAttributes( flat=True )
         props = [prop for prop in props if not hasattr( prop, 'cnnctn' )]
         for prop in props:
             if prop.w and prop.getFn is not None:
@@ -62,12 +65,6 @@ class Base( GameBase ):
     
     def GetCreateArgs( self ):
         return {}
-    
-    def GetAttributes( self ):
-        return self.attributes[:]
-    
-    def GetDefaultConnections( self ):
-        return []
     
     def OnSelect( self, comp ):
         pass

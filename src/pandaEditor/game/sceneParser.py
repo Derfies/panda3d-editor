@@ -24,12 +24,18 @@ class SceneParser( object ):
             'LMatrix4f':p3d.Str2Mat4,
             'Filename':str
         }
+    
+    def Load( self, rootNp, filePath ):
+        """Load the scene from an xml file."""
+        self.nodes = {}
+        self.cnctns = {}
         
-    def GetCreateArgs( self, attrib ):
-        createArgs = attrib.copy()
-        createArgs.pop( 'id', None )
-        createArgs.pop( 'type' )
-        return createArgs
+        tree = et.parse( filePath )
+        sRootElem = tree.find( ".//Component[@type='SceneRoot']" )
+        self.LoadComponent( sRootElem, None )
+            
+        # Load connections
+        self.LoadConnections()
             
     def LoadComponent( self, elem, pComp ):
         wrprCls = base.game.nodeMgr.GetWrapperByName( elem.get( 'type' ) )
@@ -56,6 +62,12 @@ class SceneParser( object ):
         for cElem in elem.findall( 'Component' ):
             self.LoadComponent( cElem, comp )
             
+    def GetCreateArgs( self, attrib ):
+        createArgs = attrib.copy()
+        createArgs.pop( 'id', None )
+        createArgs.pop( 'type' )
+        return createArgs
+            
     def LoadProperties( self, wrpr, elem ):
         
         # Pull all properties from the xml for this component, then get the 
@@ -67,6 +79,12 @@ class SceneParser( object ):
             if propType in self.loadCastFnMap:
                 castFn = self.loadCastFnMap[propType]
                 propDict[propElem.get( 'name' )] = castFn( propElem.get( 'value' ) )
+            elif propType == 'dict':
+                itemDict = {}
+                for itemElem in propElem.findall( 'Item' ):
+                    castFn = self.loadCastFnMap[itemElem.get( 'type' )]
+                    itemDict[itemElem.get( 'name' )] = castFn( itemElem.get( 'value' ) )
+                propDict[propElem.get( 'name' )] = itemDict
             else:
                 print 'Could not load attribute: ', propElem.get( 'name' ), ' : of type: ', propType
         
@@ -85,15 +103,3 @@ class SceneParser( object ):
             
             wrpr = base.game.nodeMgr.Wrap( comp )
             wrpr.SetConnectionData( cnctnDict )
-            
-    def Load( self, rootNp, filePath ):
-        """Load the scene from an xml file."""
-        self.nodes = {}
-        self.cnctns = {}
-        
-        tree = et.parse( filePath )
-        sRootElem = tree.find( ".//Component[@type='SceneRoot']" )
-        self.LoadComponent( sRootElem, None )
-            
-        # Load connections
-        self.LoadConnections()

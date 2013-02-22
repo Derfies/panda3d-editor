@@ -36,21 +36,23 @@ class Manager( object ):
         from bulletWorld import BulletWorld
         from bulletDebugNode import BulletDebugNode
         from bulletRigidBodyNode import BulletRigidBodyNode
+        from bulletCharacterControllerNode import BulletCharacterControllerNode
         from bulletBoxShape import BulletBoxShape
+        from bulletCapsuleShape import BulletCapsuleShape
         
         self.nodeWrappers = {
             'Base':Base,
             'SceneRoot':SceneRoot,
             
             'NodePath':NodePath,
-            'Render':Render,
             'PandaNode':PandaNode,
-            'Actor':Actor,
+            'Render':Render,
             'Camera':Camera,
             'BaseCam':BaseCam,
             'ModelNode':ModelNode,
             'BaseCamera':BaseCamera,
             'ModelRoot':ModelRoot,
+            'Actor':Actor,
             
             'CollisionNode':CollisionNode,
             'CollisionBox':CollisionBox,
@@ -71,7 +73,9 @@ class Manager( object ):
             'BulletWorld':BulletWorld,
             'BulletDebugNode':BulletDebugNode,
             'BulletRigidBodyNode':BulletRigidBodyNode,
-            'BulletBoxShape':BulletBoxShape
+            'BulletCharacterControllerNode':BulletCharacterControllerNode,
+            'BulletBoxShape':BulletBoxShape,
+            'BulletCapsuleShape':BulletCapsuleShape
         }
         
         self.pyTagWrappers = {}

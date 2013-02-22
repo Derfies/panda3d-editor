@@ -34,7 +34,7 @@ class Base( object ):
         pass
     
     def FindProperty( self, name ):
-        for attr in self.GetAllAttributes():
+        for attr in self.GetAttributes():
             if attr.name == name:
                 return attr
             
@@ -63,7 +63,7 @@ class Base( object ):
                 for val in vals:
                     cnnctn.Connect( val )
                 
-    def GetAllAttributes( self ):
+    def GetAttributes( self, flat=True, addons=False ):
         """
         Return a flat list of all the attributes of this component, including
         all child attributes of attributes.
@@ -73,17 +73,27 @@ class Base( object ):
                 results.append( child )
                 RecurseGet( child, results )
         
-        results = []
-        for attr in self.attributes:
-            results.append( attr )
-            RecurseGet( attr, results )
-        return results
+        attrs = self.attributes[:]
+        
+        if flat:
+            for attr in self.attributes:
+                RecurseGet( attr, attrs )
+                
+        if addons:
+            for wrpr in self.GetAddons():
+                for attr in wrpr.GetAttributes( flat, addons ):
+                    attrs.append( attr )
+                
+        return attrs
     
     def GetAllConnections( self ):
         cnnctns = []
         
-        for attr in self.GetAllAttributes():
+        for attr in self.GetAttributes():
             if hasattr( attr, 'cnnctn' ):
                 cnnctns.append( attr )
                 
         return cnnctns
+    
+    def AddChild( self, comp ):
+        pass

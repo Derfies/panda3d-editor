@@ -11,6 +11,8 @@ import nodePath
 sys.modules['game.nodes.nodePath'] = nodePath
 import modelRoot
 sys.modules['game.nodes.modelRoot'] = modelRoot
+import actor
+sys.modules['game.nodes.actor'] = actor
 import lensNode
 sys.modules['game.nodes.lensNode'] = lensNode
 import light

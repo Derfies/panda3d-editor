@@ -60,3 +60,13 @@ class NodePathObjectAttribute( Attribute ):
     
     def GetTarget( self, np ):
         return p3d.NodePathObject.Get( np )
+    
+
+class PyTagAttribute( Attribute ):
+    
+    def __init__( self, *args, **kwargs ):
+        self.pyTagName = kwargs.pop( 'pyTagName' )
+        Attribute.__init__( self, *args, **kwargs )
+    
+    def GetTarget( self, np ):
+        return np.getPythonTag( self.pyTagName )
