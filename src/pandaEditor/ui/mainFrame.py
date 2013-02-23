@@ -49,6 +49,12 @@ ID_XFORM_SCL = wx.NewId()
 ID_XFORM_WORLD = wx.NewId()
 
 ID_VIEW_GRID = wx.NewId()
+ID_VIEW_TOP = wx.NewId() 
+ID_VIEW_BOTTOM = wx.NewId() 
+ID_VIEW_FRONT = wx.NewId() 
+ID_VIEW_BACK = wx.NewId() 
+ID_VIEW_RIGHT = wx.NewId() 
+ID_VIEW_LEFT = wx.NewId() 
 
 ID_LAYOUT_GAME = wx.NewId() 
 ID_LAYOUT_EDITOR = wx.NewId() 
@@ -283,6 +289,14 @@ class MainFrame( wx.Frame ):
             self.app.grid.show()
         else:
             self.app.grid.hide()
+            
+    def OnViewCamera( self, evt, yaw_pitch ):
+        """ 
+        Orbit camera top or bottom by manipulating delta values 
+        See p3d.camera.Orbit for more 
+        """ 
+        delta = pm.Vec2( -base.edCamera.getH() + yaw_pitch[0], -base.edCamera.getP() + yaw_pitch[1] ) 
+        base.edCamera.Orbit( delta ) 
         
     def OnCreate( self, evt, typeStr ):
         self.app.AddComponent( typeStr )
@@ -604,8 +618,23 @@ class MainFrame( wx.Frame ):
         viewActns = [
             ActionItem( 'Grid', '', self.OnViewGrid, ID_VIEW_GRID, kind=wx.ITEM_CHECK )
         ]
+        
+        camActns = [ 
+            ActionItem( 'Top', '', self.OnViewCamera, ID_VIEW_TOP, args=(0, -90) ), 
+            ActionItem( 'Bottom', '', self.OnViewCamera, ID_VIEW_BOTTOM, args=(0, 90) ), 
+            ActionItem( 'Left', '', self.OnViewCamera, ID_VIEW_LEFT, args=(-90, 0) ), 
+            ActionItem( 'Right', '', self.OnViewCamera, ID_VIEW_RIGHT, args=(90, 0) ), 
+            ActionItem( 'Front', '', self.OnViewCamera, ID_VIEW_FRONT, args=(0, 0) ), 
+            ActionItem( 'Back', '', self.OnViewCamera, ID_VIEW_BACK, args=(-180, 0) )
+        ] 
+        self.mCameras = CustomMenu() 
+        self.mCameras.AppendActionItems( camActns, self ) 
+
+        # Append to view menu 
         self.mView = CustomMenu()
         self.mView.AppendActionItems( viewActns, self )
+        self.mView.AppendSeparator() 
+        self.mView.AppendSubMenu( self.mCameras, '&Camera' ) 
                 
     def BuildCreateMenu( self ):
         """Build the create menu."""
