@@ -38,13 +38,16 @@ class NodePath( Base ):
         
         return lgts
             
-    def Create( self ):
+    def Create( self, *args, **kwargs ):
         """
         Create a NodePath with the indicated type and name, set it up and
         return it.
         """
-        np = pm.NodePath( self.type( self.nodeName ) )
-        self.SetupNodePath( np )
+        if 'path' not in kwargs:
+            np = pm.NodePath( self.type( self.nodeName ) )
+            self.SetupNodePath( np )
+        else:
+            np = self.FindChild( kwargs['path'], kwargs['parent'] )
         self.data = np
         return np
     
@@ -74,3 +77,13 @@ class NodePath( Base ):
         
     def AddChild( self, np ):
         np.reparentTo( self.data )
+        
+    def FindChild( self, path, parent ):
+        buffer = path.split( '|' )
+        np = parent
+        for elem in buffer:
+            childNames = [child.getName() for child in np.getChildren()]
+            index = childNames.index( elem )
+            np = np.getChildren()[index]
+                    
+        return np

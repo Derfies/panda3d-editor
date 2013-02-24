@@ -41,9 +41,6 @@ class Actor( ModelRoot ):
             
         actor.loadAnims( myDict )
         
-    def GetCreateArgs( self ):
-        return {'modelPath':self.GetRelModelPath()}
-        
     def Create( self, *args, **kwargs ):
         np = ModelRoot.Create( self, *args, **kwargs )
         

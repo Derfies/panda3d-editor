@@ -1,8 +1,9 @@
 import os
 
-from constants import *
 import pandac.PandaModules as pm
 
+from constants import *
+from game.nodes.constants import *
 from game.nodes.modelRoot import ModelRoot as GameModelRoot
 
 
@@ -11,11 +12,10 @@ class ModelRoot( GameModelRoot ):
     def Create( self, *args, **kwargs ):
         np = GameModelRoot.Create( self, *args, **kwargs )
         
-        # Tag child nodes so they don't get saved out. This is a hack fix to
-        # a larger problem - we need to be able to save / load child node
-        # transforms and properties eventually.
-        for child in np.getChildren():
-            child.setPythonTag( TAG_DO_NOT_SAVE, True )
+        # Tag each descendant NodePath as a child of a model root. This edits
+        # of these NodePaths to be saved out.
+        for childNp in np.findAllMatches( '**/*' ):
+            childNp.setPythonTag( TAG_MODEL_ROOT_CHILD, True )
         
         return np
 

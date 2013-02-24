@@ -4,6 +4,7 @@ import p3d
 
 
 MOUSE_ALT = 0
+MOUSE_CTRL = 1
 
 
 class Mouse( p3d.SingleTask ):
@@ -23,16 +24,21 @@ class Mouse( p3d.SingleTask ):
         # Bind button events
         self.accept( 'alt', self.SetModifier, [MOUSE_ALT] )
         self.accept( 'alt-up', self.ClearModifier, [MOUSE_ALT] )
+        self.accept( 'control', self.SetModifier, [MOUSE_CTRL] )
+        self.accept( 'control-up', self.ClearModifier, [MOUSE_CTRL] )
         
         self.accept( 'alt-mouse1', self.SetButton, [0, True] )
+        self.accept( 'control-mouse1', self.SetButton, [0, True] )
         self.accept( 'mouse1', self.SetButton, [0, True] )
         self.accept( 'mouse1-up', self.SetButton, [0, False] )
         
         self.accept( 'alt-mouse2', self.SetButton, [1, True] )
+        self.accept( 'control-mouse2', self.SetButton, [1, True] )
         self.accept( 'mouse2', self.SetButton, [1, True] )
         self.accept( 'mouse2-up', self.SetButton, [1, False] )
         
         self.accept( 'alt-mouse3', self.SetButton, [2, True] )
+        self.accept( 'control-mouse3', self.SetButton, [2, True] )
         self.accept( 'mouse3', self.SetButton, [2, True] )
         self.accept( 'mouse3-up', self.SetButton, [2, False] )
             

@@ -131,9 +131,8 @@ class Selection( p3d.Object ):
         # Find all node paths below the root node which are inside the marquee
         # AND have the correct tag
         for np in self.rootNp.findAllMatches( '**' ):
-            if ( self.marquee.IsNodePathInside( np ) and
-                 np.getPythonTag( editor.nodes.TAG_PICKABLE ) ):
-                nps.append( np )
+            if self.marquee.IsNodePathInside( np ):
+                nps.append( self.GetPickedNodePath( np ) )
                     
         # Add any node path which was under the mouse to the selection
         np = self.GetNodePathUnderMouse()
@@ -158,9 +157,17 @@ class Selection( p3d.Object ):
         """
         pickedNp = self.picker.GetFirstNodePath()
         if pickedNp is not None:
-            return pickedNp.findNetPythonTag( editor.nodes.TAG_PICKABLE )
+            return self.GetPickedNodePath( pickedNp )
         else:
             return None
+        
+    def GetPickedNodePath( self, np ):
+        if np.getPythonTag( editor.nodes.TAG_IGNORE ):
+            return np.findNetPythonTag( editor.nodes.TAG_PICKABLE )
+        elif p3d.MOUSE_CTRL in base.edCamera.mouse.modifiers:
+            return np
+        else:
+            return np.findNetPythonTag( editor.nodes.TAG_PICKABLE )
         
     def Update( self ):
         """Update the selection by running deselect and select handlers."""

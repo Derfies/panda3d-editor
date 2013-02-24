@@ -15,7 +15,7 @@ class Base( object ):
             nodeName = self.type.__name__
             self.nodeName = nodeName[0:1].lower() + nodeName[1:]
     
-    def Create( self ):
+    def Create( self, *args, **kwargs ):
         if self.initArgs is None:
             comp = self.type()
         else:

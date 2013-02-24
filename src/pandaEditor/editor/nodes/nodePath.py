@@ -61,7 +61,13 @@ class NodePath( GameNodePath ):
         
     @classmethod
     def SetEditorGeometry( cls, geo ):
-        geo.setPythonTag( TAG_IGNORE, True )
+        """
+        Set the indicated geometry to be used as a proxy for the NodePath. 
+        Tag all descendant NodePaths with the ignore tag so they don't show up
+        in the scene graph and cannot be selected.
+        """
+        for childNp in geo.findAllMatches( '**' ):
+            childNp.setPythonTag( TAG_IGNORE, True )
         geo.setLightOff()
         geo.node().adjustDrawMask( *base.GetEditorRenderMasks() )
         cls.geo = geo
@@ -116,7 +122,6 @@ class NodePath( GameNodePath ):
         
         # Add wrappers for python objects.
         for tag in self.GetTags():
-            
             pyObj = self.data.getPythonTag( tag )
             pyObjWrpr = base.game.nodeMgr.pyTagWrappers[tag]
             children.append( pyObjWrpr( pyObj ) )
@@ -134,6 +139,32 @@ class NodePath( GameNodePath ):
     
     def GetName( self ):
         return self.data.getName()
+    
+    def GetCreateArgs( self ):
+        args = GameNodePath.GetCreateArgs( self )
+        
+        # If this node is a child of a model root, make sure to add its
+        # position in the hierarchy to the list of create arguments.
+        if self.GetModified():
+            modelRoot = self.data.findNetPythonTag( TAG_PICKABLE )
+            
+            def Rec( tgtNp, np, path ):
+                if np.compareTo( tgtNp ) != 0:
+                    path.insert( 0, np.getName() )
+                    Rec( tgtNp, np.getParent(), path )
+            
+            path = []
+            Rec( modelRoot, self.data, path )
+            args['path'] = '|'.join( path )
+            
+        return args
+    
+    def GetModified( self ):
+        return self.data.getPythonTag( TAG_MODIFIED )
+    
+    def SetModified( self, val ):
+        if self.data.getPythonTag( TAG_MODEL_ROOT_CHILD ):
+            self.data.setPythonTag( TAG_MODIFIED, val )
     
     def ValidateDragDrop( self, dragComps, dropComp ):
         dragNps = [dragComp for dragComp in dragComps if type( dragComp ) == pm.NodePath]
@@ -171,4 +202,12 @@ class NodePath( GameNodePath ):
         self.data.reparentTo( render )
         
     def IsSaveable( self ):
-        return not self.data.getPythonTag( TAG_DO_NOT_SAVE )
+        if self.data.getPythonTag( TAG_MODEL_ROOT_CHILD ):
+            return self.GetModified()
+        else:
+            return True
+        
+    def FindChild( self, *args, **kwargs ):
+        np = GameNodePath.FindChild( self, *args, **kwargs )
+        np.setPythonTag( TAG_MODIFIED, True )
+        return np

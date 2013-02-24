@@ -13,7 +13,8 @@ class ModelRoot( NodePath ):
         kwargs.setdefault( 'cType', pm.ModelRoot )
         NodePath.__init__( self, *args, **kwargs )
         
-    def Create( self, modelPath ):
+    def Create( self, *args, **kwargs ):
+        modelPath = kwargs['modelPath']
         filePath = pm.Filename.fromOsSpecific( modelPath )
         try:
             np = loader.loadModel( filePath )
@@ -43,3 +44,12 @@ class ModelRoot( NodePath ):
         self.data = np
         
         return np
+    
+    def AddChild( self, np ):
+        """
+        Parent the indicated NodePath to the NodePath wrapped by this object.
+        We don't have to parent NodePaths with the model root tag as they were
+        created with the correct hierarchy to begin with.
+        """
+        if not np.getPythonTag( TAG_MODEL_ROOT_CHILD ):
+            np.reparentTo( self.data )

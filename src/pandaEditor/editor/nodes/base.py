@@ -66,6 +66,12 @@ class Base( GameBase ):
     def GetCreateArgs( self ):
         return {}
     
+    def GetModified( self ):
+        return False
+    
+    def SetModified( self ):
+        pass
+    
     def OnSelect( self, comp ):
         pass
     
@@ -92,7 +98,7 @@ class Base( GameBase ):
         
         for comp in comps:
             wrpr = base.game.nodeMgr.Wrap( comp )
-            posCnnctns = [attr for attr in self.GetAllAttributes() if hasattr( attr, 'cnnctn' )]
+            posCnnctns = [attr for attr in self.GetAttributes() if hasattr( attr, 'cnnctn' )]
             posCnnctns.extend( self.cnnctns )
             for cnnctn in posCnnctns:
                 if wrpr.IsOfType( cnnctn.type ) and cnnctn not in cnnctns:

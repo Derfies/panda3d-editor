@@ -3,7 +3,7 @@ from base import Base
 
 class SceneRoot( Base ):
     
-    def Create( self ):
+    def Create( self, *args, **kwargs ):
         self.data = base.scene
         return base.scene
     

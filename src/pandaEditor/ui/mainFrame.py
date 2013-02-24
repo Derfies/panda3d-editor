@@ -313,7 +313,7 @@ class MainFrame( wx.Frame ):
             
             wrprCls = base.game.nodeMgr.nodeWrappers['Actor']
             wrpr = wrprCls()
-            comp = wrpr.Create( modelPath )
+            comp = wrpr.Create( modelPath=modelPath )
             comp.setTransform( np.getTransform() )
             wrpr.SetDefaultValues()
             cmds.Replace( np, wrpr.data )

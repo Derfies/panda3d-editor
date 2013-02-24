@@ -67,6 +67,7 @@ class App( p3d.wx.App ):
         # Bind mouse events
         self.accept( 'mouse1', self.OnMouse1Down )
         self.accept( 'shift-mouse1', self.OnMouse1Down, [True] )
+        self.accept( 'control-mouse1', self.OnMouse1Down )
         self.accept( 'mouse2', self.OnMouse2Down )
         self.accept( 'mouse1-up', self.OnMouse1Up )
         self.accept( 'mouse2-up', self.OnMouse2Up )
@@ -213,6 +214,11 @@ class App( p3d.wx.App ):
         self.actnMgr.Push( actn )
         self.gizmo = False
         
+        # Make sure to mark the NodePath as dirty in case it is a child of a
+        # model root.
+        wrpr = base.game.nodeMgr.Wrap( np )
+        wrpr.SetModified( True )
+        
         # Call OnModified next frame. Not sure why but if we call it straight
         # away it causes a small jitter when xforming...
         taskMgr.doMethodLater( 0, self.doc.OnModified, 'dragDrop' )
@@ -275,12 +281,12 @@ class App( p3d.wx.App ):
             fn( filePath, np )
         
     def AddModel( self, filePath, np=None ):
-        self.AddComponent( 'ModelRoot', filePath )
+        self.AddComponent( 'ModelRoot', modelPath=filePath )
         
-    def AddComponent( self, typeStr, *args ):
+    def AddComponent( self, typeStr, *args, **kwargs ):
         wrprCls = base.game.nodeMgr.GetWrapperByName( typeStr )
         wrpr = wrprCls()
-        wrpr.Create( *args )
+        wrpr.Create( *args, **kwargs )
         wrpr.SetDefaultValues()
         cmds.Add( [wrpr.data] )
                 

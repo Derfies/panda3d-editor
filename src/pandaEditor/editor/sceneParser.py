@@ -49,25 +49,25 @@ class SceneParser( game.SceneParser ):
     
     def SaveComponent( self, wrpr, pElem, name='Component' ):
         """Serialise a component to an xml element."""
-        elem = et.SubElement( pElem, name )
-        elem.set( 'type', type( wrpr ).__name__ )
-        id = wrpr.GetId()
-        if id is not None:
-            elem.set( 'id', id )
-        for key, value in wrpr.GetCreateArgs().items():
-            elem.set( key, value )
-        self.SaveProperties( wrpr, elem )
-        self.SaveConnections( wrpr, elem )
+        elem = pElem
+        if wrpr.IsSaveable():
+            elem = et.SubElement( pElem, name )
+            elem.set( 'type', type( wrpr ).__name__ )
+            id = wrpr.GetId()
+            if id is not None:
+                elem.set( 'id', id )
+            for key, value in wrpr.GetCreateArgs().items():
+                elem.set( key, value )
+            self.SaveProperties( wrpr, elem )
+            self.SaveConnections( wrpr, elem )
         
         # Write out addons.
         for cWrpr in wrpr.GetAddons():
-            if cWrpr.IsSaveable():
-                self.SaveComponent( cWrpr, elem )
+            self.SaveComponent( cWrpr, elem )
         
         # Recurse through hierarchy.
         for cWrpr in wrpr.GetChildren():
-            if cWrpr.IsSaveable():
-                self.SaveComponent( cWrpr, elem )
+            self.SaveComponent( cWrpr, elem )
                 
     def SaveProperties( self, wrpr, elem ):
         """

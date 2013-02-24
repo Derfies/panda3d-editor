@@ -41,7 +41,9 @@ class SceneParser( object ):
         wrprCls = base.game.nodeMgr.GetWrapperByName( elem.get( 'type' ) )
         if wrprCls is not None:
             wrpr = wrprCls()
-            comp = wrpr.Create( **self.GetCreateArgs( elem.attrib ) )
+            args = self.GetCreateArgs( elem.attrib )
+            args['parent'] = pComp
+            comp = wrpr.Create( **args )
             wrpr.SetParent( pComp )
             self.nodes[elem.get( 'id' )] = comp
             self.LoadProperties( wrpr, elem )
