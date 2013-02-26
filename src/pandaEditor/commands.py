@@ -78,6 +78,7 @@ def Select( nps ):
         actions.Deselect( base.selection.nps ), 
         actions.Select( nps )
     ]
+    
     comp = actions.Composite( actns )
     wx.GetApp().actnMgr.Push( comp )
     comp()
@@ -89,7 +90,9 @@ def SetAttribute( comps, attr, val ):
     Create the set attribute action, execute it and push it onto the undo
     queue.
     """
-    actn = actions.SetAttribute( comps, attr, val )
+    actns = [actions.SetAttribute( comp, attr, val ) for comp in comps]
+    
+    actn = actions.Composite( actns )
     wx.GetApp().actnMgr.Push( actn )
     actn()
     wx.GetApp().doc.OnModified()

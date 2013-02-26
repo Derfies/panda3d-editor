@@ -208,9 +208,10 @@ class App( p3d.wx.App ):
         queue.
         """
         actGizmo = self.gizmoMgr.GetActiveGizmo()
-        nps = actGizmo.attachedNps
-        xforms = [np.getTransform() for np in nps]
-        actn = actions.Transform( nps, xforms, actGizmo.initNpXforms )
+        actns = []
+        for i, np in enumerate( actGizmo.attachedNps ):
+            actns.append( actions.Transform( np, np.getTransform(), actGizmo.initNpXforms[i] ) )
+        actn = actions.Composite( actns )
         self.actnMgr.Push( actn )
         self.gizmo = False
         
