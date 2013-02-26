@@ -44,7 +44,7 @@ class NodePath( Base ):
         return it.
         """
         if 'path' not in kwargs:
-            np = pm.NodePath( self.type( self.nodeName ) )
+            np = pm.NodePath( self.type( *self.initArgs ) )
             self.SetupNodePath( np )
         else:
             np = self.FindChild( kwargs['path'], kwargs['parent'] )
