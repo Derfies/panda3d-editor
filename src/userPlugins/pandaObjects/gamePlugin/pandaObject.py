@@ -7,7 +7,7 @@ from game.nodes import Attribute as Attr
 
 class PandaObject( Base ):
         
-    def Create( self ):
+    def Create( self, *args, **kwargs ):
         self.data = p3d.PandaObject()
         return self.data
     

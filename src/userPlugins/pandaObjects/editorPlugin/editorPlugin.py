@@ -1,5 +1,6 @@
 import os
 import sys
+import tempfile
 import traceback
 
 import wx
@@ -10,7 +11,7 @@ from wxExtra import utils as wxUtils, ActionItem, CustomAuiToolBar
 
 
 TBAR_ICON_SIZE = (24, 24)
-TEMP_SCENE_PATH = 'C:/Users/Jamie/Documents/temp.xml'
+TEMP_SCENE_PATH = os.path.join( tempfile.gettempdir(), 'temp.xml' )
 
 ID_WIND_PLAY_TOOLBAR = wx.NewId()
 
@@ -71,7 +72,7 @@ class EditorPlugin( gp.GamePlugin ):
         pObjWrpr.SetParent( np )
         
         scriptWrpr = gp.Script()
-        scriptWrpr.Create( filePath )
+        scriptWrpr.Create( filePath=filePath )
         scriptWrpr.SetParent( pObjWrpr.data )
         
         self.app.doc.OnModified()

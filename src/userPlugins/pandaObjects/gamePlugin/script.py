@@ -20,10 +20,10 @@ class Script( Base ):
         pObj.instances[clsName] = self.data
         self.data.np = pObj.np
         
-    def Create( self, filePath ):
+    def Create( self, *args, **kwargs ):
         
         # Make sure we're dealing with forward slashes 
-        filePath = filePath.replace( '\\', '/' )
+        filePath = kwargs.pop( 'filePath' ).replace( '\\', '/' )
         name = self.GetFileName( filePath )
         
         # If the script path is not absolute then we'll need to search for it.
