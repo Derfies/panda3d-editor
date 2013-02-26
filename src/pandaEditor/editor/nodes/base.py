@@ -69,7 +69,7 @@ class Base( GameBase ):
     def GetModified( self ):
         return False
     
-    def SetModified( self ):
+    def SetModified( self, val ):
         pass
     
     def OnSelect( self, comp ):
