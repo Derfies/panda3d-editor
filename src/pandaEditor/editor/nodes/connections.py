@@ -1,4 +1,5 @@
 from game.nodes.connections import Connection as GameConnection
+from game.nodes.connections import NodePathTargetConnection as GameNodePathTargetConnection
 from game.nodes.connections import ConnectionList as GameConnectionList
 from game.nodes.connections import NodePathSourceConnectionList as GameNodePathSourceConnectionList
 from game.nodes.connections import NodePathTargetConnectionList as GameNodePathTargetConnectionList
@@ -38,6 +39,9 @@ class Connection( GameConnection ):
         base.scene.cnnctns.setdefault( tgtId, {} )
         base.scene.cnnctns[tgtId].setdefault( self.name, [] )
         base.scene.cnnctns[tgtId][self.name].append( (self.srcComp, self) )
+        
+
+class NodePathTargetConnection( GameNodePathTargetConnection, Connection ): pass
     
 
 class ConnectionList( GameConnectionList ):

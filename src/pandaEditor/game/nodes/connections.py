@@ -43,6 +43,15 @@ class Connection( object ):
         self.clearFn( self.GetSource() )
         
 
+class NodePathTargetConnection( Connection ):
+    
+    def GetTarget( self, comp ):
+        try:
+            return comp.node()
+        except AttributeError:
+            return comp
+        
+
 class ConnectionList( Connection ):
     
     def __init__( self, label, cType, getFn, setFn, clearFn, removeFn, srcComp, args=[] ):
