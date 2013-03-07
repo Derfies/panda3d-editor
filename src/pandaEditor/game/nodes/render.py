@@ -3,10 +3,11 @@ from nodePath import NodePath
 
 class Render( NodePath ):
     
-    def Create( self, parent=None ):
-        self.SetupNodePath( render )
-        self.data = render
-        return render
+    @classmethod
+    def Create( cls, *args, **kwargs ):
+        wrpr = cls( render )
+        wrpr.SetupNodePath()
+        return wrpr
     
     def SetParent( self, pComp ):
         

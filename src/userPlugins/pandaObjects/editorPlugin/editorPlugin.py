@@ -47,9 +47,6 @@ class EditorPlugin( gp.GamePlugin ):
             
         self.ui._mgr.Update()
         
-        # DEBUG
-        base.pandaMgr = p3d.PandaManager()
-        
     def BuildPlaybackToolBar( self ):
         """Build playback toolbar."""
         dirPath = os.path.join( os.path.split( __file__ )[0], 'images' )
@@ -67,12 +64,19 @@ class EditorPlugin( gp.GamePlugin ):
         if np is None:
             return
         
-        pObjWrpr = gp.PandaObject()#
-        pObjWrpr.Create()
+        #for foo in base.game.nodeMgr.nodeWrappers:
+        #     print foo
+        
+        #pObjWrpr = gp.PandaObject()#
+        pObjWrprCls = base.game.nodeMgr.pyTagWrappers[p3d.TAG_PANDA_OBJECT]
+        #pObjWrpr = pObjWrprCls()
+        pObjWrpr = pObjWrprCls.Create()
         pObjWrpr.SetParent( np )
         
-        scriptWrpr = gp.Script()
-        scriptWrpr.Create( filePath=filePath )
+        #scriptWrpr = gp.Script()
+        scriptWrprCls = base.game.nodeMgr.pyTagWrappers['Script']
+        #scriptWrpr = scriptWrprCls()
+        scriptWrpr = scriptWrprCls.Create( filePath=filePath )
         scriptWrpr.SetParent( pObjWrpr.data )
         
         self.app.doc.OnModified()

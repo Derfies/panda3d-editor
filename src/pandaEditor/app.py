@@ -286,8 +286,7 @@ class App( p3d.wx.App ):
         
     def AddComponent( self, typeStr, *args, **kwargs ):
         wrprCls = base.game.nodeMgr.GetWrapperByName( typeStr )
-        wrpr = wrprCls()
-        wrpr.Create( *args, **kwargs )
+        wrpr = wrprCls.Create( *args, **kwargs )
         wrpr.SetDefaultValues()
         cmds.Add( [wrpr.data] )
                 

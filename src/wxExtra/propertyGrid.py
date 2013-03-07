@@ -100,6 +100,10 @@ class BaseProperty( object ):
     
     def AddPrivateChild( self, child ):
         self._children.append( child )
+        
+        win = self.GetWindow()
+        if win is not None:
+            self.GetGrid().Append( child, win )
     
     def GetAttribute( self, name ):
         return self._attrs[name]
@@ -115,6 +119,9 @@ class BaseProperty( object ):
     
     def SetExpanded( self, val ):
         self._window.Expand( val )
+        
+    def GetWindow( self ):
+        return self._window
         
     def SetWindow( self, win ):
         self._window = win
@@ -386,37 +393,41 @@ class PropertyGrid( scrolled.ScrolledPanel ):
         self.SetAutoLayout( 1 )
         self.SetupScrolling()
         
-    def Append( self, prop ):
+    def Append( self, prop, parent=None ):
         
         # Only parent categories to the top level.
         if type( prop ) == PropertyCategory:
             self._currParent = self.panel
+            
+        # DEBUG
+        if parent is None:
+            parent = self._currParent
         
-        pnl = CollapsiblePanel( self, prop, self._currParent )
-        self._currParent.AddWindow( pnl )
+        #pnl = CollapsiblePanel( self, prop, self._currParent )
+        #self._currParent.AddWindow( pnl )
+        #prop.SetWindow( pnl )
+        #prop.SetGrid( self )
+        #prop.SetParent( self._currParent.prop )
+        #self._props.append( prop )
+        
+        pnl = CollapsiblePanel( self, prop, parent )
+        parent.AddWindow( pnl )
         prop.SetWindow( pnl )
         prop.SetGrid( self )
-        
-        # HAXXOR - Need to get this to recurse.
-        # Add any children
-        for child in prop.GetChildren():
-            cPnl = CollapsiblePanel( self, child, pnl )
-            pnl.AddWindow( cPnl )
-            child.SetWindow( cPnl )
-            child.SetGrid( self )
-            
-            for gChild in child.GetChildren():
-                gcPnl = CollapsiblePanel( self, gChild, cPnl )
-                cPnl.AddWindow( gcPnl )
-                gChild.SetWindow( gcPnl )
-                gChild.SetGrid( self )
-        
-        prop.SetParent( self._currParent.prop )
+        prop.SetParent( parent.prop )
         self._props.append( prop )
         
         # Set current parent if the property was a category
         if type( prop ) == PropertyCategory:
             self._currParent = pnl
+            
+    #def Append2( self, prop, parent ):
+    #    pnl = CollapsiblePanel( self, prop, parent )
+    #    parent.AddWindow( pnl )
+    #    prop.SetWindow( pnl )
+    #    prop.SetGrid( self )
+    #    prop.SetParent( parent.prop )
+    #    self._props.append( prop )
             
     def RecurseLayout( self, ctrl=None ):
         """

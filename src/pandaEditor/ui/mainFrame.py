@@ -42,6 +42,8 @@ ID_PROJ_BUILD = wx.NewId()
 ID_EDIT_UNDO = wx.NewId()
 ID_EDIT_REDO = wx.NewId()
 
+ID_MODIFY_PHYSICS = wx.NewId()
+
 ID_XFORM_SEL = wx.NewId()
 ID_XFORM_POS = wx.NewId()
 ID_XFORM_ROT = wx.NewId()
@@ -62,6 +64,7 @@ ID_LAYOUT_BOTH = wx.NewId()
 
 ID_WIND_FILE_TOOLBAR = wx.NewId()
 ID_WIND_EDIT_TOOLBAR = wx.NewId()
+ID_WIND_MODIFY_TOOLBAR = wx.NewId()
 ID_WIND_XFORM_TOOLBAR = wx.NewId()
 ID_WIND_LAYOUT_TOOLBAR = wx.NewId()
 ID_WIND_VIEWPORT = wx.NewId()
@@ -102,6 +105,7 @@ class MainFrame( wx.Frame ):
         # Build toolbars
         self.BuildFileActions()
         self.BuildEditActions()
+        self.BuildModifyActions()
         self.BuildXformActions()
         self.BuildLayoutActions()
         
@@ -274,11 +278,18 @@ class MainFrame( wx.Frame ):
         if filePath:
             self.app.project.Build( filePath )
             
-    def OnUndo( self, evt ):
+    def OnEditUndo( self, evt ):
         self.app.Undo()
         
-    def OnRedo( self, evt ):
+    def OnEditRedo( self, evt ):
         self.app.Redo()
+        
+    def OnEngagePhysics( self, evt ):
+        wrpr = base.game.nodeMgr.Wrap( base.scene.physicsWorld )
+        if base.scene.physicsTask not in taskMgr.getAllTasks():
+            wrpr.EnablePhysics()
+        else:
+            wrpr.DisablePhysics()
             
     def OnViewGrid( self, evt ):
         """
@@ -312,9 +323,8 @@ class MainFrame( wx.Frame ):
             modelPath = wrpr.GetRelModelPath( np.node().getFullpath() )
             
             wrprCls = base.game.nodeMgr.nodeWrappers['Actor']
-            wrpr = wrprCls()
-            comp = wrpr.Create( modelPath=modelPath )
-            comp.setTransform( np.getTransform() )
+            wrpr = wrprCls.Create( modelPath=modelPath )
+            wrpr.data.setTransform( np.getTransform() )
             wrpr.SetDefaultValues()
             cmds.Replace( np, wrpr.data )
         
@@ -422,6 +432,7 @@ class MainFrame( wx.Frame ):
         """
         self.OnUpdateFile( msg )
         self.OnUpdateEdit( msg )
+        self.OnUpdateModify( msg )
         self.OnUpdateView( msg )
         self.OnUpdateProject( msg )
         self.OnUpdateXform( msg )
@@ -473,6 +484,18 @@ class MainFrame( wx.Frame ):
         self.tbEdit.EnableTool( ID_EDIT_REDO, val )
         
         self.tbEdit.Refresh()
+        
+    def OnUpdateModify( self, msg ):
+        self.tbModify.EnableTool( ID_MODIFY_PHYSICS, False )
+        if base.scene.physicsWorld is not None:
+            self.tbModify.EnableTool( ID_MODIFY_PHYSICS, True )
+            
+            if base.scene.physicsTask not in taskMgr.getAllTasks():
+                self.tbModify.ToggleTool( ID_MODIFY_PHYSICS, False )
+            else:
+                self.tbModify.ToggleTool( ID_MODIFY_PHYSICS, True )
+                
+        self.tbModify.Refresh()
         
     def OnUpdateView( self, msg ):
         """
@@ -565,8 +588,8 @@ class MainFrame( wx.Frame ):
     def BuildEditActions( self ):
         """Add tools, set long help strings and bind toolbar events."""
         actns = [
-            ActionItem( 'Undo', os.path.join( 'data', 'images', 'arrow-curve-flip.png' ), self.OnUndo, ID_EDIT_UNDO ),
-            ActionItem( 'Redo', os.path.join( 'data', 'images', 'arrow-curve.png' ), self.OnRedo, ID_EDIT_REDO )
+            ActionItem( 'Undo', os.path.join( 'data', 'images', 'arrow-curve-flip.png' ), self.OnEditUndo, ID_EDIT_UNDO ),
+            ActionItem( 'Redo', os.path.join( 'data', 'images', 'arrow-curve.png' ), self.OnEditRedo, ID_EDIT_REDO )
         ]
         
         # Create edit menu
@@ -578,6 +601,22 @@ class MainFrame( wx.Frame ):
         self.tbEdit.SetToolBitmapSize( TBAR_ICON_SIZE )
         self.tbEdit.AppendActionItems( actns )
         self.tbEdit.Realize()
+        
+    def BuildModifyActions( self ):
+        """Add tools, set long help strings and bind toolbar events."""
+        actns = [
+            ActionItem( 'Engage Physics', os.path.join( 'data', 'images', 'point.png' ), self.OnEngagePhysics, ID_MODIFY_PHYSICS, kind=wx.ITEM_CHECK )
+        ]
+        
+        # Create edit menu
+        self.mModify = CustomMenu()
+        self.mModify.AppendActionItems( actns, self )
+        
+        # Create edit toolbar
+        self.tbModify = CustomAuiToolBar( self, -1, style=wx.aui.AUI_TB_DEFAULT_STYLE )
+        self.tbModify.SetToolBitmapSize( TBAR_ICON_SIZE )
+        self.tbModify.AppendActionItems( actns )
+        self.tbModify.Realize()
         
     def BuildXformActions( self ):
         """Add tools, set long help strings and bind toolbar events."""
@@ -669,9 +708,10 @@ class MainFrame( wx.Frame ):
             ActionItem( 'World', '', self.OnCreate, args='BulletWorld' ),
             ActionItem( 'Debug Node', '', self.OnCreate, args='BulletDebugNode' ),
             ActionItem( 'Rigid Body Node', '', self.OnCreate, args='BulletRigidBodyNode' ),
-            #ActionItem( 'Character Controller Node', '', self.OnCreate, args='BulletCharacterControllerNode' ),
+            ActionItem( 'Character Controller Node', '', self.OnCreate, args='BulletCharacterControllerNode' ),
             #ActionItem( 'Capsule Shape', '', self.OnCreate, args='BulletCapsuleShape' ),
-            ActionItem( 'Box Shape', '', self.OnCreate, args='BulletBoxShape' )
+            ActionItem( 'Box Shape', '', self.OnCreate, args='BulletBoxShape' ),
+            ActionItem( 'Plane Shape', '', self.OnCreate, args='BulletPlaneShape' )
         ]
         mBlt = CustomMenu()
         mBlt.AppendActionItems( bltActions, self )
@@ -729,6 +769,13 @@ class MainFrame( wx.Frame ):
                 wx.aui.AuiPaneInfo()
                 .Name( 'tbEdit' )
                 .Caption( 'Edit Toolbar' )
+                .ToolbarPane()
+                .Top()),
+                
+            ID_WIND_MODIFY_TOOLBAR:(self.tbModify, True,
+                wx.aui.AuiPaneInfo()
+                .Name( 'tbModify' )
+                .Caption( 'Modify Toolbar' )
                 .ToolbarPane()
                 .Top()),
                 

@@ -29,9 +29,11 @@ class Selection( p3d.Object ):
     def Clear( self ):
         """Clear the selection list and run deselect handlers."""
         for np in self.nps:
-            #if not np.isEmpty():
-            wrpr = base.game.nodeMgr.Wrap( np )
-            wrpr.OnDeselect( np )
+            try:
+                wrpr = base.game.nodeMgr.Wrap( np )
+                wrpr.OnDeselect( np )
+            except AssertionError:
+                print 'Empty NodePath was unselected.'
         self.nps = []
     
     def Add( self, nps ):

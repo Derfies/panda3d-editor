@@ -3,7 +3,6 @@ import imp
 import sys
 import inspect
 
-from direct.actor.Actor import Actor
 from direct.showbase.DirectObject import DirectObject
 
 import p3d

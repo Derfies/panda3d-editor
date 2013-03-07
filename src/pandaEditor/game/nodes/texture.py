@@ -9,20 +9,17 @@ from attributes import Attribute as Attr
 
 class Texture( Base ):
     
+    type_ = T
+    initArgs = ['texture']
+    
     def __init__( self, *args, **kwargs ):
-        kwargs.setdefault( 'cType', T )
         Base.__init__( self, *args, **kwargs )
         
-        self.initArgs = ['texture']
-        
-        pAttr = Attr( 'Texture' )
-        pAttr.children.extend( 
-            [
-                Attr( 'Name', str, T.getName, T.setName ),
-                Attr( 'Full Path', Filename, T.getFullpath, self.SetTex )
-            ]
+        self.AddAttributes(
+            Attr( 'Name', str, T.getName, T.setName ),
+            Attr( 'Full Path', Filename, T.getFullpath, self.SetTex ),
+            parent='Texture'
         )
-        self.attributes.append( pAttr )
         
     def SetTex( self, data, filePath ):
         try:

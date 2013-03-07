@@ -2,7 +2,7 @@ import pandac.PandaModules as pm
 from pandac.PandaModules import NodePath as NP
 
 from game.nodes.light import Light as GameLight
-from game.nodes.connections import ConnectionList as CnnctnL
+from game.nodes.attributes import ConnectionList as CnnctnL
 
 
 class Light( GameLight ):

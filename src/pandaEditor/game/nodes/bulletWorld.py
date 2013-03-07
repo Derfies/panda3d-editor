@@ -1,29 +1,54 @@
 import pandac.PandaModules as pm
 from panda3d.bullet import BulletWorld as BW
+from panda3d.bullet import BulletDebugNode as BDN
 from panda3d.bullet import BulletRigidBodyNode as BRBN
+from panda3d.bullet import BulletCharacterControllerNode as BCCN
 
 from base import Base
 from attributes import Attribute as Attr
-from game.nodes.connections import NodePathTargetConnectionList as Cnnctn
+from game.nodes.attributes import NodePathTargetConnection as Cnnctn
+from game.nodes.attributes import NodePathTargetConnectionList as CnnctnList
 
 
 class BulletWorld( Base ):
     
+    type_ = BW
+    
     def __init__( self, *args, **kwargs ):
-        kwargs.setdefault( 'cType', BW )
         Base.__init__( self, *args, **kwargs )
         
-        pAttr = Attr( 'BulletWorld' )
-        pAttr.children.extend( 
-            [
-                Attr( 'Gravity', pm.Vec3, BW.getGravity, BW.setGravity ),
-                Cnnctn( 'Rigid Body', BRBN, BW.getRigidBodies, BW.attachRigidBody, self.ClearRigidBodies, BW.removeRigidBody, self.data )
-            ]
+        self.AddAttributes(
+            Attr( 'Gravity', pm.Vec3, BW.getGravity, BW.setGravity ),
+            CnnctnList( 'Rigid Body', BRBN, BW.getRigidBodies, BW.attachRigidBody, self.ClearRigidBodies, BW.removeRigidBody, self.data ),
+            CnnctnList( 'Character', BCCN, BW.getCharacters, BW.attachCharacter, self.ClearCharacters, BW.removeCharacter, self.data ),
+            Cnnctn( 'Debug Node', BDN, self.GetDebugNode, BW.setDebugNode, BW.clearDebugNode, self.data ),
+            parent='BulletWorld'
         )
-        self.attributes.append( pAttr )
+        
+    def Destroy( self ):
+        if ( base.scene.physicsWorld is self.data and 
+             base.scene.physicsTask in taskMgr.getAllTasks() ):
+            self.DisablePhysics()
         
     def ClearRigidBodies( self, comp ):
-        numRigidBodies = comp.getNumRigidBodies()
-        for i in range( numRigidBodies ):
-            rBody = comp.getRigidBody( 0 )
-            comp.removeRigidBody( rBody )
+        for i in range( comp.getNumRigidBodies() ):
+            comp.removeRigidBody( comp.getRigidBody( 0 ) )
+            
+    def ClearCharacters( comp ):
+        for i in range( comp.getNumCharacters() ):
+            comp.removeRigidBody( comp.getCharacter( 0 ) )
+            
+    def GetDebugNode( self, args ):
+        pass
+    
+    def EnablePhysics( self ):
+        
+        def update( task ):
+          dt = globalClock.getDt()
+          self.data.doPhysics( dt )
+          return task.cont
+        
+        base.scene.physicsTask = taskMgr.add( update, 'update' )
+        
+    def DisablePhysics( self ):
+        taskMgr.remove( base.scene.physicsTask )

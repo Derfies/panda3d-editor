@@ -7,16 +7,13 @@ from attributes import Attribute as Attr
 
 class BulletBoxShape( Base ):
     
+    type_ = BBS
+    initArgs = [pm.Vec3( 0.5, 0.5, 0.5 )]
+    
     def __init__( self, *args, **kwargs ):
-        kwargs.setdefault( 'cType', BBS )
         Base.__init__( self, *args, **kwargs )
         
-        self.initArgs = [pm.Vec3( 0.5, 0.5, 0.5 )]
-        
-        pAttr = Attr( 'BulletBoxShape' )
-        pAttr.children.extend( 
-            [
-                Attr( 'Half Extents Without Margin', pm.Vec3, BBS.getHalfExtentsWithMargin )
-            ]
+        self.AddAttributes(
+            Attr( 'Half Extents Without Margin', pm.Vec3, BBS.getHalfExtentsWithMargin ),
+            parent='BulletBoxShape'
         )
-        self.attributes.append( pAttr )

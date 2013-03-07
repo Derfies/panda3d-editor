@@ -7,14 +7,12 @@ from attributes import NodeAttribute as Attr
 
 class Light( NodePath ):
     
+    type_ = L
+    
     def __init__( self, *args, **kwargs ):
-        kwargs.setdefault( 'cType', L )
         NodePath.__init__( self, *args, **kwargs )
         
-        pAttr = Attr( 'Light' )
-        pAttr.children.extend( 
-            [
-                Attr( 'Color', pm.Vec4, L.getColor, L.setColor )
-            ]
+        self.AddAttributes(
+            Attr( 'Color', pm.Vec4, L.getColor, L.setColor ),
+            parent='Light'
         )
-        self.attributes.append( pAttr )

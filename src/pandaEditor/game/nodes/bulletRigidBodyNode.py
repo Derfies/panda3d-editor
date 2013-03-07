@@ -3,25 +3,23 @@ from panda3d.bullet import BulletRigidBodyNode as BRBN, BulletShape as BS
 
 from nodePath import NodePath
 from attributes import NodeAttribute as Attr
-from game.nodes.connections import NodePathSourceConnectionList as Cnnctn
+from game.nodes.attributes import NodePathSourceConnectionList as Cnnctn
 
 
 class BulletRigidBodyNode( NodePath ):
     
+    type_ = BRBN
+    
     def __init__( self, *args, **kwargs ):
-        kwargs.setdefault( 'cType', BRBN )
         NodePath.__init__( self, *args, **kwargs )
         
-        pAttr = Attr( 'BulletRigidBodyNode' )
-        pAttr.children.extend( 
-            [
-                Attr( 'Angular Damping', float, BRBN.getAngularDamping, BRBN.setAngularDamping ),
-                Attr( 'Gravity', pm.Vec3, BRBN.getGravity, BRBN.setGravity ),
-                Attr( 'Mass', float, BRBN.getMass, BRBN.setMass ),
-                Cnnctn( 'Shape', BS, BRBN.getShapes, BRBN.addShape, self.ClearShapes, BRBN.removeShape, self.data )
-            ]
+        self.AddAttributes(
+            Attr( 'Angular Damping', float, BRBN.getAngularDamping, BRBN.setAngularDamping ),
+            Attr( 'Gravity', pm.Vec3, BRBN.getGravity, BRBN.setGravity ),
+            Attr( 'Mass', float, BRBN.getMass, BRBN.setMass ),
+            Cnnctn( 'Shapes', BS, BRBN.getShapes, BRBN.addShape, self.ClearShapes, BRBN.removeShape, self.data ),
+            parent='BulletRigidBodyNode'
         )
-        self.attributes.append( pAttr )
         
     def ClearShapes( self, comp ):
         numShapes = comp.getNumShapes()

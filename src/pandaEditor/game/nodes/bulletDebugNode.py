@@ -10,23 +10,22 @@ TAG_BULLET_DEBUG_WIREFRAME = 'P3D_BulletDebugWireframe'
 
 class BulletDebugNode( NodePath ):
     
+    type_ = BDN
+    
     def __init__( self, *args, **kwargs ):
-        kwargs.setdefault( 'cType', BDN )
         NodePath.__init__( self, *args, **kwargs )
         
-        pAttr = Attr( 'BulletDebugNode' )
-        pAttr.children.extend( 
-            [
-                Attr( 'Show Wireframe', bool, self.GetWireframe, self.SetWireframe )
-            ]
+        self.AddAttributes(
+            Attr( 'Show Wireframe', bool, self.GetWireframe, self.SetWireframe ),
+            parent='BulletDebugNode'
         )
-        self.attributes.append( pAttr )
         
-    def Create( self, *args, **kwargs ):
-        np = NodePath.Create( self, *args, **kwargs )
-        self.SetWireframe( np, True )
-        np.show()
-        return np
+    @classmethod
+    def Create( cls, *args, **kwargs ):
+        wrpr = super( BulletDebugNode, cls ).Create( *args, **kwargs )
+        wrpr.SetWireframe( wrpr.data, True )
+        wrpr.data.show()
+        return wrpr
         
     def GetWireframe( self, np ):
         return np.getPythonTag( TAG_BULLET_DEBUG_WIREFRAME )

@@ -1,32 +1,32 @@
 import p3d
 import game
-from script import Script
 from game.nodes.base import Base
 from game.nodes import Attribute as Attr
 
 
 class PandaObject( Base ):
-        
-    def Create( self, *args, **kwargs ):
-        self.data = p3d.PandaObject()
-        return self.data
+    
+    @classmethod
+    def Create( cls, *args, **kwargs ):
+        return cls( p3d.PandaObject() )
     
     def Destroy( self ):
         p3d.PandaObject.Break( self.data.np )
         self.data = None
     
-    def GetAttributes( self, flat=None, addons=None ):
+    def GetAttributes( self, *args, **kwargs ):
         attrs = []
         for name, instance in self.data.instances.items():
-            pAttr = Attr( name )
             for pName, pType in self.GetProps( instance ).items():
-                pAttr.children.append( Attr( pName, pType, getattr, setattr, self.GetPObjInstance, [pName], [pName], [name], w=False ) )
-            attrs.append( pAttr )
+                attrs.append( Attr( pName, pType, getattr, setattr, self.GetPObjInstance, [pName], [pName], [name], w=False, parent=name,srcComp=self.data ) )
         
         return attrs
     
-    def GetPObjInstance( self, np, clsName ):
-        return p3d.PandaObject.Get( np ).instances[clsName]
+    def GetPObjInstance( self, pObj, clsName ):
+        #print 'np: ', np
+        #print 'clsName: ', clsName
+        return pObj.instances[clsName]
+        #return p3d.PandaObject.Get( np ).instances[clsName]
     
     def GetProps( self, instance ):
         props = {}
@@ -40,8 +40,9 @@ class PandaObject( Base ):
         children = []
         
         # Create wrappers for each script attached to the object.
+        wrprCls = base.game.nodeMgr.pyTagWrappers['Script']
         for name, instance in self.data.instances.items():
-            children.append( Script( instance ) )
+            children.append( wrprCls( instance ) )
             
         return children
     

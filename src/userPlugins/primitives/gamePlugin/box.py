@@ -4,7 +4,6 @@ import p3d
 import game
 from constants import *
 from game.nodes.nodePath import NodePath
-from game.nodes.attributes import NodeAttribute as Attr
 from game.nodes import NodePathObjectAttribute as NPOAttr
 
 
@@ -47,26 +46,27 @@ class Box( NodePath ):
     def __init__( self, *args, **kwargs ):
         NodePath.__init__( self, *args, **kwargs )
         
-        pAttr = Attr( 'Box' )
-        pAttr.children.extend( 
-            [
-                NPOAttr( 'Width', float, 'width' ),
-                NPOAttr( 'Depth', float, 'depth' ),
-                NPOAttr( 'Height', float, 'height' ),
-                NPOAttr( 'Origin', pm.Point3, 'origin' )
-            ]
+        self.AddAttributes(
+            NPOAttr( 'Width', float, 'width' ),
+            NPOAttr( 'Depth', float, 'depth' ),
+            NPOAttr( 'Height', float, 'height' ),
+            NPOAttr( 'Origin', pm.Point3, 'origin' ),
+            parent='Box'
         )
-        self.attributes.append( pAttr )
     
-    def SetupNodePath( self, np ):
-        NodePath.SetupNodePath( self, np )
+    def SetupNodePath( self ):
+        NodePath.SetupNodePath( self )
         
-        np.setName( 'box' )
-        np.setTag( game.nodes.TAG_NODE_TYPE, TAG_BOX )
-        BoxNPO( np )
+        self.data.setName( 'box' )
+        self.data.setTag( game.nodes.TAG_NODE_TYPE, TAG_BOX )
+        BoxNPO( self.data )
     
-    def Create( self ):
-        np = pm.NodePath( p3d.geometry.Box() )
-        self.SetupNodePath( np )
-        self.data = np
-        return np
+    @classmethod
+    def Create( cls, *args, **kwargs ):
+        wrpr = cls( pm.NodePath( p3d.geometry.Box() ) )
+        wrpr.SetupNodePath()
+        return wrpr
+    
+    def Destroy( self ):
+        p3d.NodePathObject.Break( self.data )
+        NodePath.Destroy( self )

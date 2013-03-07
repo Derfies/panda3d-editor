@@ -13,9 +13,8 @@ class LensNode( GameLensNode ):
     def __init__( self, *args, **kwargs ):
         GameLensNode.__init__( self, *args, **kwargs )
         
-        pAttr = self.FindProperty( 'lensNode' )
-        attr = Attr( 'Show Frustum', bool, self.GetFrustumVisible, self.SetFrustumVisible, w=False )
-        pAttr.children.append( attr )
+        i = self.attributes.index( self.FindProperty( 'fov' ) )
+        self.AddAttributes( Attr( 'Show Frustum', bool, self.GetFrustumVisible, self.SetFrustumVisible, w=False ), index=i + 1 )
         
     def OnSelect( self, np ):
         """

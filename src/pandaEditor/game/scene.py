@@ -10,6 +10,8 @@ class Scene( p3d.Object ):
         
         self.comps = {}
         base.scene = self
+        self.physicsWorld = None
+        self.physicsTask = None
     
     def RegisterComponent( self, comp ):
         id = str( uuid.uuid4() )
@@ -18,3 +20,12 @@ class Scene( p3d.Object ):
     def DeregisterComponent( self, comp ):
         if comp in self.comps:
             del self.comps[comp]
+            
+    def GetPhysicsWorld( self, foo ):
+        return self.physicsWorld
+    
+    def SetPhysicsWorld( self, cookie, phWorld ):
+        self.physicsWorld = phWorld
+    
+    def ClearPhysicsWorld( self, cookie ):
+        self.physicsWorld = None

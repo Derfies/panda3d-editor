@@ -27,7 +27,7 @@ class PropertyGrid( wxpg.PropertyGrid ):
         self._propsByLabel = {}
         self._propsByLongLabel = {}
     
-    def Append( self, prop ):
+    def Append( self, prop, *args, **kwargs ):
         
         # Do not allow properties with '|' in the label as we use this as a
         # delimiter
@@ -37,7 +37,7 @@ class PropertyGrid( wxpg.PropertyGrid ):
             raise AttributeError, msg
         
         # Add the property
-        wxpg.PropertyGrid.Append( self, prop )
+        wxpg.PropertyGrid.Append( self, prop, *args, **kwargs )
         
         # Store the property again in our dicts by name and label
         self._propsByName[prop.GetName()] = prop
@@ -163,6 +163,13 @@ class PropertyGrid( wxpg.PropertyGrid ):
                 self.SetPropertyColourToDefault( property )
             else:
                 self.SetPropertyTextColour( property, wx.Colour(150, 150, 150) )
+                
+    def OnChildFocus( self, evt ):
+        """
+        Overriden to stop the property grid scrolling to the child which just
+        received focus.
+        """
+        pass
     
 
 class PropertiesPanel( wx.Panel ):
@@ -216,49 +223,47 @@ class PropertiesPanel( wx.Panel ):
         if not nps:
             return
         
-        def RecurseAttribute( attr, parent=None ):
+        self.propAttrMap = {}
+                        
+        # Build all properties from attributes.
+        wrprCls = base.game.nodeMgr.GetCommonWrapper( nps )
+        wrprs = [wrprCls( comp ) for comp in nps]
+        for i, attr in enumerate( wrprs[0].GetAttributes( addons=True ) ):
             
             # Find the correct property to display this attribute
             if attr.type in self.propMap:
-                prop = None
                 propCls = self.propMap[attr.type]
                 if attr.type is not None:
                     prop = propCls( attr.label, '', attr.Get( nps[0] ) )
-                    prop.SetAttribute( ATTRIBUTE_TAG, attr )
                     if attr.setFn is None:
                         prop.Enable( False )
                 else:
                     prop = propCls( attr.label )
-                nextP = prop
-                
-                # Recurse through attribute children.
-                for child in attr.children:
-                    RecurseAttribute( child, nextP )
-                    
-                if prop is None:
-                    return
-                    
-                # Append to property grid or the last property if it is a 
-                # child.
-                if parent is None:
-                    self.pg.Append( prop )
-                else:
-                    parent.AddPrivateChild( prop )
             elif hasattr( attr, 'cnnctn' ):
-                
                 val = attr.Get()
                 try:
                     objIter = iter( val )
                     prop = custProps.ConnectionListProperty( attr.label, '', attr.Get() )
                 except TypeError, te:
                     prop = custProps.ConnectionProperty( attr.label, '', attr.Get() )
-                prop.SetAttribute( ATTRIBUTE_TAG, attr )
-                parent.AddPrivateChild( prop )
-                        
-        # Build all properties from attributes.
-        wrpr = base.game.nodeMgr.Wrap( nps[0] )
-        for attr in wrpr.GetAttributes( flat=False, addons=True ):
-            RecurseAttribute( attr )
+            else:
+                continue
+            
+            if hasattr( attr, 'parent' ) and attr.parent not in self.propAttrMap and attr.parent is not None:
+                pProp = wxpg.PropertyCategory( attr.parent )
+                self.propAttrMap[attr.parent] = pProp
+                self.pg.Append( pProp )
+            
+            allAttrs = [wrpr.GetAttributes( addons=True )[i] for wrpr in wrprs]
+            prop.SetAttribute( ATTRIBUTE_TAG, allAttrs )
+            self.propAttrMap[attr.label] = prop
+                
+            # Append to property grid or the last property if it is a 
+            # child.
+            if hasattr( attr, 'parent' ) and attr.parent in self.propAttrMap:
+                self.propAttrMap[attr.parent].AddPrivateChild( prop )
+            else:
+                self.pg.Append( prop )
                             
     def OnPgChanged( self, evt ):
         """
@@ -272,11 +277,11 @@ class PropertiesPanel( wx.Panel ):
         
         # Get the node property from the property and set it.
         prop = evt.GetProperty()
-        attr = prop.GetAttribute( ATTRIBUTE_TAG )
-        if not hasattr( attr, 'cnnctn' ):
-            cmds.SetAttribute( nps, attr, prop.GetValue() )
+        attrs = prop.GetAttribute( ATTRIBUTE_TAG )
+        if not hasattr( attrs[0], 'cnnctn' ):
+            cmds.SetAttribute( nps, attrs, prop.GetValue() )
         else:
-            cmds.SetConnections( prop.GetValue(), attr )
+            cmds.SetConnections( prop.GetValue(), attrs )
         
     def OnUpdate( self, msg ):
         self.pg.Freeze()

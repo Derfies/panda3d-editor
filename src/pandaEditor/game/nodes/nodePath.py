@@ -6,28 +6,24 @@ from pandac.PandaModules import NodePath as NP
 from base import Base
 from constants import *
 from attributes import NodePathAttribute as Attr
-from game.nodes.connections import Connection as Cnnctn
-from game.nodes.connections import ConnectionList as CnnctnList
+from game.nodes.attributes import Connection as Cnnctn
+from game.nodes.attributes import ConnectionList as CnnctnList
 
 
 class NodePath( Base ):
     
+    type_ = NP
+    
     def __init__( self, *args, **kwargs ):
-        kwargs.setdefault( 'cType', NP )
         Base.__init__( self, *args, **kwargs )
         
-        self.initArgs = [self.nodeName]
-        
-        pAttr = Attr( 'NodePath' )
-        pAttr.children.extend( 
-            [
-                Attr( 'Name', str, NP.getName, NP.setName ),
-                Attr( 'Matrix', pm.Mat4, NP.getMat, NP.setMat ),
-                CnnctnList( 'Light', pm.Light, self.GetLights, NP.setLight, NP.clearLight, NP.clearLight, self.data ),
-                Cnnctn( 'Texture', pm.Texture, NP.getTexture, NP.setTexture, NP.clearTexture, self.data, [1] )
-            ]
+        self.AddAttributes(
+            Attr( 'Name', str, NP.getName, NP.setName ),
+            Attr( 'Matrix', pm.Mat4, NP.getMat, NP.setMat ),
+            CnnctnList( 'Lights', pm.Light, self.GetLights, NP.setLight, NP.clearLight, NP.clearLight ),
+            Cnnctn( 'Texture', pm.Texture, NP.getTexture, NP.setTexture, NP.clearTexture, args=[1] ),
+            parent='NodePath'
         )
-        self.attributes.append( pAttr )
         
     def GetLights( self, data ):
         lgts = []
@@ -37,19 +33,26 @@ class NodePath( Base ):
             lgts = lgtAttrib.getOnLights()
         
         return lgts
-            
-    def Create( self, *args, **kwargs ):
+    
+    @classmethod
+    def Create( cls, *args, **kwargs ):
         """
         Create a NodePath with the indicated type and name, set it up and
         return it.
         """
         if 'path' not in kwargs:
-            np = pm.NodePath( self.type( *self.initArgs ) )
-            self.SetupNodePath( np )
+            if cls.initArgs is None:
+                strType = cls.type_.__name__
+                initArgs = [strType[0:1].lower() + strType[1:]]
+            else:
+                initArgs = cls.initArgs
+            
+            wrpr = cls( pm.NodePath( cls.type_( *initArgs ) ) )
+            wrpr.SetupNodePath()
         else:
-            np = self.FindChild( kwargs['path'], kwargs['parent'] )
-        self.data = np
-        return np
+            wrpr = cls( cls.FindChild( kwargs['path'], kwargs['parent'] ) )
+            
+        return wrpr
     
     def Detach( self ):
         self.data.detachNode()
@@ -57,8 +60,6 @@ class NodePath( Base ):
     def Destroy( self ):
         Base.Destroy( self )
         
-        for child in self.children:
-            child.Destroy()
         base.game.pluginMgr.OnNodeDestroy( self.data )
         
     def Duplicate( self, np, dupeNp ):
@@ -69,16 +70,18 @@ class NodePath( Base ):
         base.game.pluginMgr.OnNodeDuplicate( self.data )
         
         # Give a new uuid to the duplicate node.
-        self.SetupNodePath( dupeNp )
+        dupeWrpr = base.game.nodeMgr.Wrap( dupeNp )
+        dupeWrpr.SetupNodePath()
         
-    def SetupNodePath( self, np ):
+    def SetupNodePath( self ):
         id = str( uuid.uuid4() )
-        np.setTag( TAG_NODE_UUID, id )
+        self.data.setTag( TAG_NODE_UUID, id )
         
     def AddChild( self, np ):
         np.reparentTo( self.data )
         
-    def FindChild( self, path, parent ):
+    @classmethod
+    def FindChild( cls, path, parent ):
         buffer = path.split( '|' )
         np = parent
         for elem in buffer:

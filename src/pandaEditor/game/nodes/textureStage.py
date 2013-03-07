@@ -7,16 +7,13 @@ from attributes import Attribute as Attr
 
 class TextureStage( Base ):
     
+    type_ = TS
+    initArgs = ['textureStage']
+    
     def __init__( self, *args, **kwargs ):
-        kwargs.setdefault( 'cType', TS )
         Base.__init__( self, *args, **kwargs )
         
-        self.initArgs = ['textureStage']
-        
-        pAttr = Attr( 'Texture Stage' )
-        pAttr.children.extend( 
-            [
-                Attr( 'Name', str, TS.getName, TS.setName )
-            ]
+        self.AddAttributes(
+            Attr( 'Name', str, TS.getName, TS.setName ),
+            parent='TextureStage'
         )
-        self.attributes.append( pAttr )

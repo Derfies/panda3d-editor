@@ -4,7 +4,6 @@ import p3d
 import game
 from constants import *
 from game.nodes.nodePath import NodePath
-from game.nodes import Attribute as Attr
 from game.nodes import NodePathObjectAttribute as NPOAttr
 
 
@@ -51,28 +50,29 @@ class Cone( NodePath ):
     def __init__( self, *args, **kwargs ):
         NodePath.__init__( self, *args, **kwargs )
         
-        pAttr = Attr( 'Cone' )
-        pAttr.children.extend( 
-            [
-                NPOAttr( 'Radius', float, 'radius' ),
-                NPOAttr( 'Height', float, 'height' ),
-                NPOAttr( 'NumSegs', int, 'numSegs' ),
-                NPOAttr( 'Degrees', int, 'degrees' ),
-                NPOAttr( 'Axis', pm.Vec3, 'axis' ),
-                NPOAttr( 'Origin', pm.Point3, 'origin' )
-            ]
+        self.AddAttributes(
+            NPOAttr( 'Radius', float, 'radius' ),
+            NPOAttr( 'Height', float, 'height' ),
+            NPOAttr( 'NumSegs', int, 'numSegs' ),
+            NPOAttr( 'Degrees', int, 'degrees' ),
+            NPOAttr( 'Axis', pm.Vec3, 'axis' ),
+            NPOAttr( 'Origin', pm.Point3, 'origin' ),
+            parent='Cone'
         )
-        self.attributes.append( pAttr )
         
-    def SetupNodePath( self, np ):
-        NodePath.SetupNodePath( self, np )
+    def SetupNodePath( self ):
+        NodePath.SetupNodePath( self )
         
-        np.setName( 'cone' )
-        np.setTag( game.nodes.TAG_NODE_TYPE, TAG_CONE )
-        ConeNPO( np )
+        self.data.setName( 'cone' )
+        self.data.setTag( game.nodes.TAG_NODE_TYPE, TAG_CONE )
+        ConeNPO( self.data )
     
-    def Create( self ):
-        np = pm.NodePath( p3d.geometry.Cone() )
-        self.SetupNodePath( np )
-        self.data = np
-        return np
+    @classmethod
+    def Create( cls, *args, **kwargs ):
+        wrpr = cls( pm.NodePath( p3d.geometry.Cone() ) )
+        wrpr.SetupNodePath()
+        return wrpr
+    
+    def Destroy( self ):
+        p3d.NodePathObject.Break( self.data )
+        NodePath.Destroy( self )

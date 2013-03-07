@@ -82,7 +82,7 @@ class SceneGraphBasePanel( wx.Panel ):
             wrpr = base.game.nodeMgr.Wrap( comp )
             attr = wrpr.FindProperty( 'name' )
             if attr is not None:
-                wx.CallAfter( cmds.SetAttribute, [comp], attr, name )
+                wx.CallAfter( cmds.SetAttribute, [comp], [attr], name )
         
         comp = evt.GetItem().GetData()
         name = evt.GetLabel()
@@ -131,9 +131,9 @@ class SceneGraphBasePanel( wx.Panel ):
         
         wrpr = base.game.nodeMgr.Wrap( dropItem.GetData() )
         if wx.GetMouseState().CmdDown():
-            return wrpr.GetPossibleConnections( self.dragNps )
-        else:
             return wrpr.ValidateDragDrop( self.dragNps, dropItem.GetData() )
+        else:
+            return wrpr.GetPossibleConnections( self.dragNps )
             
     def OnDropItem( self, str ):
         
@@ -142,6 +142,8 @@ class SceneGraphBasePanel( wx.Panel ):
         wrpr = base.game.nodeMgr.Wrap( dropItem.GetData() )
         self.data = {}
         if wx.GetMouseState().CmdDown():
+            wrpr.OnDragDrop( self.dragNps, wrpr.data )
+        else:
             menu = wx.Menu()
             for cnnctn in wrpr.GetPossibleConnections( self.dragNps ):
                 mItem = wx.MenuItem( menu, wx.NewId(), cnnctn.label )
@@ -150,9 +152,7 @@ class SceneGraphBasePanel( wx.Panel ):
                 self.data[mItem.GetId()] = cnnctn
             self.PopupMenu( menu )
             menu.Destroy()
-        else:
-            wrpr.OnDragDrop( self.dragNps, wrpr.data )
-            
+        
     def OnConnect( self, evt ):
         menu = evt.GetEventObject()
         mItem = menu.FindItemById( evt.GetId() )

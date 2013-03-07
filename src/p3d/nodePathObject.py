@@ -1,6 +1,3 @@
-TAG_PANDA_OBJECT = 'PandaObject'
-
-
 class NodePathObject( object ):
 
     """
@@ -10,17 +7,19 @@ class NodePathObject( object ):
     remove it.
     """
     
+    tagName = 'NodePathObject'
+    
     def __init__( self, np ):
         self.np = np
-        self.np.setPythonTag( TAG_PANDA_OBJECT, self )
+        self.np.setPythonTag( NodePathObject.tagName, self )
         
     def __del__( self ):
-        print TAG_PANDA_OBJECT, ' : ', self.np.getName(), ' DELETED'
+        print NodePathObject.tagName, ' : ', self.np.getName(), ' DELETED'
         
-    @staticmethod
-    def Get( np ):
-        return np.getPythonTag( TAG_PANDA_OBJECT )
+    @classmethod
+    def Get( cls, np ):
+        return np.getPythonTag( cls.tagName )
     
-    @staticmethod
-    def Break( np ):
-        np.clearPythonTag( TAG_PANDA_OBJECT )
+    @classmethod
+    def Break( cls, np ):
+        np.clearPythonTag( cls.tagName )

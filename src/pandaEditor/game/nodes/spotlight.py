@@ -8,18 +8,16 @@ from attributes import NodeAttribute as Attr
 
 class Spotlight( Light, LensNode ):
     
+    type_ = SL
+    
     def __init__( self, *args, **kwargs ):
-        kwargs.setdefault( 'cType', SL )
         LensNode.__init__( self, *args, **kwargs )
         Light.__init__( self, *args, **kwargs )
         
-        pAttr = Attr( 'PointLight' )
-        pAttr.children.extend( 
-            [
-                Attr( 'Attenuation', pm.Vec3, SL.getAttenuation, SL.setAttenuation ),
-                Attr( 'Exponent', float, SL.getExponent, SL.setExponent ),
-                Attr( 'Specular Color', pm.Vec4, SL.getSpecularColor, SL.setSpecularColor ),
-                Attr( 'Shadow Caster', bool, SL.isShadowCaster, SL.setShadowCaster )
-            ]
+        self.AddAttributes(
+            Attr( 'Attenuation', pm.Vec3, SL.getAttenuation, SL.setAttenuation ),
+            Attr( 'Exponent', float, SL.getExponent, SL.setExponent ),
+            Attr( 'Specular Color', pm.Vec4, SL.getSpecularColor, SL.setSpecularColor ),
+            Attr( 'Shadow Caster', bool, SL.isShadowCaster, SL.setShadowCaster ),
+            parent='Spotlight'
         )
-        self.attributes.append( pAttr )

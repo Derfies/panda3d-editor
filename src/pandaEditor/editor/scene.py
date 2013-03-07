@@ -44,12 +44,13 @@ class Scene( game.Scene ):
         base.game.scnParser.Save( self, filePath )
         
     def Close( self ):
-        """Destroy the scene by removing all its nodes."""
-        def Destroy( np ):
-            wrpr = base.game.nodeMgr.Wrap( np )
+        """Destroy the scene by removing all its components."""
+        def Destroy( wrpr ):
+            for cWrpr in wrpr.GetChildren():
+                Destroy( cWrpr )
             wrpr.Destroy()
-        
-        self.Walk( Destroy )
+            
+        Destroy( base.game.nodeMgr.Wrap( self ) )
         base.game.pluginMgr.OnSceneClose()
         
         # Now remove the root node. If the root node was render, reset base
@@ -77,40 +78,3 @@ class Scene( game.Scene ):
             wrpr.Duplicate( np, dupeNp )
         
         return dupeNps
-        
-    def Walk( self, func, np=None, arg=None, includeHelpers=False, modelRootsOnly=True ):
-        """Walk hierarchy calling func on each member."""
-        if np is None:
-            np = self.rootNp
-        
-        # Bail if helpers were not included and this node represents a helper
-        # geometry or collision
-        if not includeHelpers and np.getPythonTag( nodes.TAG_IGNORE ):
-            return
-        
-        children = np.getChildren()
-        if arg is None:
-            func( np )
-        else:
-            func( np, arg )
-        
-        # Flag as being under a model root before processing children.
-        # WARNING: this may play badly with eggs that have nested children.
-        isActor = False
-        pObj = p3d.PandaObject.Get( np )
-        if pObj is not None and hasattr( pObj, 'actor' ) and pObj.actor:
-            isActor = True
-            self.underModelRoot = True
-            
-        isModelRoot = np.node().isOfType( pm.ModelRoot )
-        if isModelRoot:
-            self.underModelRoot = True
-        
-        if not modelRootsOnly or ( modelRootsOnly and not 
-                                   np.node().isOfType( pm.ModelRoot ) ):
-            for child in children:
-                self.Walk( func, child, arg, includeHelpers, modelRootsOnly )
-                
-        # Finished processing children - reset underModelRoot flag.
-        if isModelRoot or isActor:
-            self.underModelRoot = False

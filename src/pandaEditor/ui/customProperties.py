@@ -147,8 +147,8 @@ class NodePathProperty( wxpg.StringProperty ):
 
 class ConnectionBaseProperty( wxpg.BaseProperty ):
     
-    def BuildControl( self, parent, id ):
-        ctrl = wx.ListBox( parent, id, size=(-1,50), style=wx.LB_EXTENDED )
+    def BuildControl( self, parent, id, height ):
+        ctrl = wx.ListBox( parent, id, size=wx.Size( -1, height ), style=wx.LB_EXTENDED )
         ctrl.Enable( self.IsEnabled() )
         ctrl.Bind( wx.EVT_KEY_UP, self.OnDelete )
         
@@ -161,7 +161,7 @@ class ConnectionBaseProperty( wxpg.BaseProperty ):
     
     def ValidateDropItem( self, x, y ):
         for comp in wx.GetApp().frame.pnlSceneGraph.dragNps:
-            cnnctn = self.GetAttribute( 'attr' )
+            cnnctn = self.GetAttribute( 'attr' )[0]
             wrpr = base.game.nodeMgr.Wrap( comp )
             if wrpr.IsOfType( cnnctn.type ):
                 return True
@@ -172,7 +172,8 @@ class ConnectionBaseProperty( wxpg.BaseProperty ):
 class ConnectionProperty( ConnectionBaseProperty ):
     
     def BuildControl( self, parent, id ):
-        ctrl = ConnectionBaseProperty.BuildControl( self, parent, id )
+        height = parent.GetSize()[1]
+        ctrl = ConnectionBaseProperty.BuildControl( self, parent, id, height )
         
         comp = self.GetValue()
         if comp is not None:
@@ -198,14 +199,13 @@ class ConnectionProperty( ConnectionBaseProperty ):
 class ConnectionListProperty( ConnectionBaseProperty ):
     
     def BuildControl( self, parent, id ):
-        ctrl = ConnectionBaseProperty.BuildControl( self, parent, id )
+        ctrl = ConnectionBaseProperty.BuildControl( self, parent, id, -1 )
         
         comps = self.GetValue()
         if comps is not None:
             for i in range( len( comps ) ):
                 wrpr = base.game.nodeMgr.Wrap( comps[i] )
-                ctrl.Append( wrpr.GetName() )
-                ctrl.SetClientData( i, wrpr.data )
+                ctrl.Append( wrpr.GetName(), wrpr.data )
         
         return ctrl
     
@@ -219,7 +219,7 @@ class ConnectionListProperty( ConnectionBaseProperty ):
         
         lb = evt.GetEventObject()
         indices = lb.GetSelections()
-        delComps = [lb.GetClientData( i ) for i in range( len( indices ) )]
+        delComps = [lb.GetClientData( index ) for index in indices]
         oldComps = self.GetValue()
         newComps = [comp for comp in oldComps if comp not in delComps]
         self.SetValue( newComps )

@@ -40,12 +40,19 @@ class SceneParser( object ):
     def LoadComponent( self, elem, pComp ):
         wrprCls = base.game.nodeMgr.GetWrapperByName( elem.get( 'type' ) )
         if wrprCls is not None:
-            wrpr = wrprCls()
+            
+            # Get all arguments needed to create the node including the 
+            # parent.
             args = self.GetCreateArgs( elem.attrib )
             args['parent'] = pComp
-            comp = wrpr.Create( **args )
+            
+            # Create the node and load its properties.
+            wrpr = wrprCls.Create( **args )
             wrpr.SetParent( pComp )
-            self.nodes[elem.get( 'id' )] = comp
+            
+            id = elem.get( 'id' )
+            #wrpr.SetId( id )
+            self.nodes[id] = wrpr.data
             self.LoadProperties( wrpr, elem )
             
             # Store connections so we can set them up once the rest of
@@ -58,11 +65,11 @@ class SceneParser( object ):
                     uuid = cnctnElem.get( 'value' )
                     cnctnDict.setdefault( cType, [] )
                     cnctnDict[cType].append( uuid )
-                self.cnctns[comp] = cnctnDict
+                self.cnctns[wrpr.data] = cnctnDict
             
         # Recurse through hierarchy.
         for cElem in elem.findall( 'Component' ):
-            self.LoadComponent( cElem, comp )
+            self.LoadComponent( cElem, wrpr.data )
             
     def GetCreateArgs( self, attrib ):
         createArgs = attrib.copy()

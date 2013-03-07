@@ -3,7 +3,8 @@ from modelNode import ModelNode
 
 class BaseCamera( ModelNode ):
     
-    def Create( self, parent=None ):
-        self.SetupNodePath( base.camera )
-        self.data = base.camera
-        return base.camera
+    @classmethod
+    def Create( cls, *args, **kwargs ):
+        wrpr = cls( base.camera )
+        wrpr.SetupNodePath()
+        return wrpr

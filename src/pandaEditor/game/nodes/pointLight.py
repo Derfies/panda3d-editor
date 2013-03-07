@@ -7,16 +7,14 @@ from attributes import NodeAttribute as Attr
 
 class PointLight( Light ):
     
+    type_ = PL
+    
     def __init__( self, *args, **kwargs ):
-        kwargs.setdefault( 'cType', PL )
         Light.__init__( self, *args, **kwargs )
         
-        pAttr = Attr( 'PointLight' )
-        pAttr.children.extend( 
-            [
-                Attr( 'Attenuation', pm.Vec3, PL.getAttenuation, PL.setAttenuation ),
-                Attr( 'Point', pm.Point3, PL.getPoint, PL.setPoint ),
-                Attr( 'Specular Color', pm.Vec4, PL.getSpecularColor, PL.setSpecularColor )
-            ]
+        self.AddAttributes(
+            Attr( 'Attenuation', pm.Vec3, PL.getAttenuation, PL.setAttenuation ),
+            Attr( 'Point', pm.Point3, PL.getPoint, PL.setPoint ),
+            Attr( 'Specular Color', pm.Vec4, PL.getSpecularColor, PL.setSpecularColor ),
+            parent='PointLight'
         )
-        self.attributes.append( pAttr )

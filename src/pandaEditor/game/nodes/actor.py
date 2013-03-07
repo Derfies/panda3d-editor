@@ -15,13 +15,10 @@ class Actor( ModelRoot ):
     def __init__( self, *args, **kwargs ):
         ModelRoot.__init__( self, *args, **kwargs )
         
-        pAttr = Attr( 'Actor' )
-        pAttr.children.extend( 
-            [
-                PTAttr( 'Anim Names', dict, self.GetAnimDict, self.SetAnimDict, pyTagName=TAG_ACTOR )
-            ]
+        self.AddAttributes(
+            PTAttr( 'Anim Names', dict, self.GetAnimDict, self.SetAnimDict, pyTagName=TAG_ACTOR ),
+            parent='Actor'
         )
-        self.attributes.append( pAttr )
         
     def GetAnimDict( self, actor ):
         animDict = {}
@@ -40,15 +37,15 @@ class Actor( ModelRoot ):
             myDict[key] = pandaPath
             
         actor.loadAnims( myDict )
+    
+    @classmethod
+    def Create( cls, *args, **kwargs ):
+        wrpr = super( Actor, cls ).Create( *args, **kwargs )
         
-    def Create( self, *args, **kwargs ):
-        np = ModelRoot.Create( self, *args, **kwargs )
-        
-        actor = P3dActor( np )
-        actor.setTag( 'type', 'Actor' )
-        actor.setPythonTag( 'modelPath', str( np.node().getFullpath() ) )
-        actor.setTag( TAG_NODE_UUID, np.getTag( TAG_NODE_UUID ) )
-        self.data = actor.getGeomNode()
+        actor = P3dActor( wrpr.data )
+        actor.setTag( TAG_NODE_TYPE, 'Actor' )
+        actor.setPythonTag( 'modelPath', str( wrpr.data.node().getFullpath() ) )
+        actor.setTag( TAG_NODE_UUID, wrpr.data.getTag( TAG_NODE_UUID ) )
         actor.getGeomNode().setPythonTag( TAG_ACTOR, actor )
         
-        return actor
+        return cls( actor.getGeomNode() )

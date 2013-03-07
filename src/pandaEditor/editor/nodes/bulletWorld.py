@@ -1,16 +1,8 @@
-import panda3d.bullet as bllt
-import pandac.PandaModules as pm
 from panda3d.bullet import BulletWorld as BW
 
-from game.nodes.constants import *
-from pandaEditor import commands as cmds
 from game.nodes.attributes import Attribute as Attr
+from game.nodes.attributes import Connection as Cnnctn
 from game.nodes.bulletWorld import BulletWorld as GameBulletWorld
-
-
-BULLET_TYPES = [
-    bllt.BulletRigidBodyNode
-]
 
 
 class BulletWorld( GameBulletWorld ):
@@ -18,21 +10,14 @@ class BulletWorld( GameBulletWorld ):
     def __init__( self, *args, **kwargs ):
         GameBulletWorld.__init__( self, *args, **kwargs )
         
-        pAttr = self.FindProperty( 'bulletWorld' )
-        pAttr.children.extend( 
-            [
-                Attr( 'Num Rigid Bodies', int, BW.getNumRigidBodies, w=False )
-            ]
-        )
-            
-    def GetConnections( self ):
-        data = {}
+        i = self.attributes.index( self.FindProperty( 'rigidBody' ) )
+        self.AddAttributes( Attr( 'Num Rigid Bodies', int, BW.getNumRigidBodies, w=False ), index=i )
+    
+    def SetDefaultValues( self ):
+        GameBulletWorld.SetDefaultValues( self )
         
-        rigidBodies = self.data.getRigidBodies()
-        if rigidBodies:
-            data['rigidBody'] = []
-            for rigidBody in rigidBodies:
-                uuid = pm.NodePath( rigidBody ).getTag( TAG_NODE_UUID )
-                data['rigidBody'].append( uuid )
-        
-        return data
+        # Set this world as the default physics world if one has not already
+        # been set.
+        if base.scene.physicsWorld is None:
+            cnnctn = Cnnctn( 'PhysicsWorld', None, base.scene.GetPhysicsWorld, base.scene.SetPhysicsWorld, base.scene.ClearPhysicsWorld, srcComp=base.scene )
+            cnnctn.Connect( self.data )

@@ -85,12 +85,12 @@ def Select( nps ):
     wx.GetApp().doc.OnRefresh()
     
 
-def SetAttribute( comps, attr, val ):
+def SetAttribute( comps, attrs, val ):
     """
     Create the set attribute action, execute it and push it onto the undo
     queue.
     """
-    actns = [actions.SetAttribute( comp, attr, val ) for comp in comps]
+    actns = [actions.SetAttribute( comps[i], attrs[i], val ) for i in range( len( comps ) )]
     
     actn = actions.Composite( actns )
     wx.GetApp().actnMgr.Push( actn )
@@ -118,11 +118,13 @@ def Connect( tgtComps, cnnctn, fn ):
     wx.GetApp().doc.OnModified()
     
 
-def SetConnections( tgtComps, cnnctn ):
+def SetConnections( tgtComps, cnnctns ):
     """
     Create the connect action, execute it and push it onto the undo queue.
     """
-    actn = actions.SetConnections( tgtComps, cnnctn )
+    actns = [actions.SetConnections( tgtComps, cnnctn ) for cnnctn in cnnctns]
+    
+    actn = actions.Composite( actns )
     wx.GetApp().actnMgr.Push( actn )
     actn()
     wx.GetApp().doc.OnModified()

@@ -1,23 +1,15 @@
-class Connection( object ):
+from base import Base
+
+
+class Connection( Base ):
     
-    def __init__( self, label, cType, getFn, setFn, clearFn, srcComp, args=[] ):
-        self.label = label
-        self.type = cType
-        self.getFn = getFn
-        self.setFn = setFn
+    def __init__( self, label, type_, getFn, setFn, clearFn, srcComp=None, args=[] ):
+        Base.__init__( self, label, type_, getFn, setFn, srcComp=srcComp )
+        
         self.clearFn = clearFn
-        self.srcComp = srcComp
         self.args = args
         
-        self.children = []
-        
         self.cnnctn = True
-        self.w = True
-        
-        self.isList = False
-        
-        name = self.label.replace( ' ', '' )
-        self.name = name[0].lower() + name[1:]
               
     def GetSource( self ):
         return self.srcComp
@@ -54,12 +46,10 @@ class NodePathTargetConnection( Connection ):
 
 class ConnectionList( Connection ):
     
-    def __init__( self, label, cType, getFn, setFn, clearFn, removeFn, srcComp, args=[] ):
+    def __init__( self, label, cType, getFn, setFn, clearFn, removeFn, srcComp=None, args=[] ):
         self.removeFn = removeFn
         
-        self.isList = True
-        
-        Connection.__init__( self, label, cType, getFn, setFn, clearFn, srcComp, args=[] )
+        Connection.__init__( self, label, cType, getFn, setFn, clearFn, srcComp, args )
         
     def Set( self, tgtComps ):
         self.clearFn( self.GetSource() )

@@ -38,6 +38,7 @@ class Manager( object ):
         from bulletRigidBodyNode import BulletRigidBodyNode
         from bulletCharacterControllerNode import BulletCharacterControllerNode
         from bulletBoxShape import BulletBoxShape
+        from bulletPlaneShape import BulletPlaneShape
         from bulletCapsuleShape import BulletCapsuleShape
         
         self.nodeWrappers = {
@@ -75,6 +76,7 @@ class Manager( object ):
             'BulletRigidBodyNode':BulletRigidBodyNode,
             'BulletCharacterControllerNode':BulletCharacterControllerNode,
             'BulletBoxShape':BulletBoxShape,
+            'BulletPlaneShape':BulletPlaneShape,
             'BulletCapsuleShape':BulletCapsuleShape
         }
         
@@ -82,8 +84,7 @@ class Manager( object ):
         
     def Create( self, nTypeStr, *args ):
         wrprCls = self.nodeWrappers[nTypeStr]
-        wrpr = wrprCls()
-        return wrpr.Create( *args )
+        return wrprCls.Create( *args )
     
     def Wrap( self, comp ):
         """
@@ -94,10 +95,37 @@ class Manager( object ):
         wrprCls = self.GetWrapper( comp )
         if wrprCls is not None:
             return wrprCls( comp )
-        elif hasattr( comp, 'getPythonTag' ):
-            return self.nodeWrappers['NodePath']( comp )
         else:
-            return self.nodeWrappers['Base']( comp )
+            wrprCls = self.GetDefaultWrapper( comp )
+            return wrprCls( comp )
+        
+    def GetDefaultWrapper( self, comp ):
+        if hasattr( comp, 'getPythonTag' ):
+            return self.nodeWrappers['NodePath']
+        else:
+            return self.nodeWrappers['Base']
+        
+    def GetCommonWrapper( self, comps ):
+        
+        # Get method resolution orders for each wrapper for all the indicated
+        # components.
+        mros = []
+        for comp in comps:
+            wrprCls = self.GetWrapper( comp )
+            if wrprCls is not None:
+                mros.append( wrprCls.mro() )
+                
+        if not mros:
+            return self.GetDefaultWrapper( comp )
+                
+        # Intersect the mros to get the common classes.
+        cmnClasses = set( mros[0] ).intersection( *mros )
+        
+        # The result was unordered, so go find the first common class from
+        # one of the mros.
+        for cls in mros[0]:
+            if cls in cmnClasses:
+                return cls
         
     def GetWrapper( self, comp ):
         typeStr = self.GetTypeString( comp )

@@ -1,8 +1,8 @@
 import sys
 
 from constants import *
-import connections
-sys.modules['game.nodes.connections'] = connections
+import attributes
+sys.modules['game.nodes.attributes'] = attributes
 import base
 sys.modules['game.nodes.base'] = base
 import sceneRoot

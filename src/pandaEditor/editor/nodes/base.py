@@ -34,7 +34,7 @@ class Base( GameBase ):
         propDict = {}
         
         # Put this component's properties into key / value pairs.
-        props = self.GetAttributes( flat=True )
+        props = self.GetAttributes()
         props = [prop for prop in props if not hasattr( prop, 'cnnctn' )]
         for prop in props:
             if prop.w and prop.getFn is not None:

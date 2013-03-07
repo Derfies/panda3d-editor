@@ -9,15 +9,16 @@ from game.nodes.modelRoot import ModelRoot as GameModelRoot
 
 class ModelRoot( GameModelRoot ):
     
-    def Create( self, *args, **kwargs ):
-        np = GameModelRoot.Create( self, *args, **kwargs )
+    @classmethod
+    def Create( cls, *args, **kwargs ):
+        wrpr = GameModelRoot.Create( cls, *args, **kwargs )
         
         # Tag each descendant NodePath as a child of a model root. This edits
         # of these NodePaths to be saved out.
-        for childNp in np.findAllMatches( '**/*' ):
+        for childNp in wrpr.data.findAllMatches( '**/*' ):
             childNp.setPythonTag( TAG_MODEL_ROOT_CHILD, True )
         
-        return np
+        return wrpr
 
     def GetCreateArgs( self ):
         return {'modelPath':self.GetRelModelPath( self.data.node().getFullpath() )}

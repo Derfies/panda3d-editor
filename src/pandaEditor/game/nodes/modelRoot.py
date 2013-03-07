@@ -9,11 +9,10 @@ from attributes import NodeAttribute as Attr
 
 class ModelRoot( NodePath ):
     
-    def __init__( self, *args, **kwargs ):
-        kwargs.setdefault( 'cType', pm.ModelRoot )
-        NodePath.__init__( self, *args, **kwargs )
-        
-    def Create( self, *args, **kwargs ):
+    type_ = pm.ModelRoot
+    
+    @classmethod
+    def Create( cls, *args, **kwargs ):
         modelPath = kwargs['modelPath']
         filePath = pm.Filename.fromOsSpecific( modelPath )
         try:
@@ -31,8 +30,7 @@ class ModelRoot( NodePath ):
             nTypeStr = node.getTag( TAG_NODE_TYPE )
             wrprCls = base.game.nodeMgr.GetWrapperByName( nTypeStr )
             if wrprCls is not None:
-                wrpr = wrprCls( node )
-                wrpr.Create( inputNp=node )
+                wrprCls.Create( inputNp=node )
             
             # Recurse
             for child in node.getChildren():
@@ -40,10 +38,10 @@ class ModelRoot( NodePath ):
                 
         Recurse( np )
         
-        self.SetupNodePath( np )
-        self.data = np
+        wrpr = cls( np )
+        wrpr.SetupNodePath()
         
-        return np
+        return wrpr
     
     def AddChild( self, np ):
         """

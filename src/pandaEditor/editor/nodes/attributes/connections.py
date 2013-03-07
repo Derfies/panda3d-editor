@@ -1,8 +1,8 @@
-from game.nodes.connections import Connection as GameConnection
-from game.nodes.connections import NodePathTargetConnection as GameNodePathTargetConnection
-from game.nodes.connections import ConnectionList as GameConnectionList
-from game.nodes.connections import NodePathSourceConnectionList as GameNodePathSourceConnectionList
-from game.nodes.connections import NodePathTargetConnectionList as GameNodePathTargetConnectionList
+from game.nodes.attributes import Connection as GameConnection
+from game.nodes.attributes import NodePathTargetConnection as GameNodePathTargetConnection
+from game.nodes.attributes import ConnectionList as GameConnectionList
+from game.nodes.attributes import NodePathSourceConnectionList as GameNodePathSourceConnectionList
+from game.nodes.attributes import NodePathTargetConnectionList as GameNodePathTargetConnectionList
 
 
 class Connection( GameConnection ):

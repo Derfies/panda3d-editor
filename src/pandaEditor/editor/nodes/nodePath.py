@@ -19,41 +19,34 @@ class NodePath( GameNodePath ):
         
         # Find the index of the 'name' property so we can add position, 
         # rotation and scale properties immediately after it.
-        pAttr = self.FindProperty( 'nodePath' )
-        index = pAttr.children.index( self.FindProperty( 'name' ) )
+        i = self.attributes.index( self.FindProperty( 'name' ) )
         
-        # Add attributes for position, rotation and scale. These are
-        # implemented editor side only as we only need a matrix to xform the
-        # node. These are provided for the user's benefit only.
-        attr = Attr( 'Position', pm.Vec3, NP.getPos, NP.setPos, w=False )
-        attr.children.extend( 
-            [
-                Attr( 'X', float, NP.getX, NP.setX, w=False ),
-                Attr( 'Y', float, NP.getY, NP.setY, w=False ),
-                Attr( 'Z', float, NP.getZ, NP.setZ, w=False )
-            ]
+        # Add attributes for position, rotation and scale. These are 
+        # implemented editor side only as we only need a matrix to xform the 
+        # NodePath; they are for the user's benefit only.
+        self.AddAttributes( Attr( 'Position', pm.Vec3, NP.getPos, NP.setPos, w=False ), index=i + 1 )
+        self.AddAttributes( 
+            Attr( 'X', float, NP.getX, NP.setX, w=False ),
+            Attr( 'Y', float, NP.getY, NP.setY, w=False ),
+            Attr( 'Z', float, NP.getZ, NP.setZ, w=False ),
+            parent='Position'
         )
-        pAttr.children.insert( index + 1, attr )
         
-        attr = Attr( 'Rotation', pm.Vec3, NP.getHpr, NP.setHpr, w=False )
-        attr.children.extend( 
-            [
-                Attr( 'H', float, NP.getH, NP.setH, w=False ),
-                Attr( 'P', float, NP.getP, NP.setP, w=False ),
-                Attr( 'R', float, NP.getR, NP.setR, w=False )
-            ]
+        self.AddAttributes( Attr( 'Rotation', pm.Vec3, NP.getHpr, NP.setHpr, w=False ), index=i + 2 )
+        self.AddAttributes( 
+            Attr( 'H', float, NP.getH, NP.setH, w=False ),
+            Attr( 'P', float, NP.getP, NP.setP, w=False ),
+            Attr( 'R', float, NP.getR, NP.setR, w=False ),
+            parent='Rotation'
         )
-        pAttr.children.insert( index + 2, attr )
-         
-        attr = Attr( 'Scale', pm.Vec3, NP.getScale, NP.setScale, w=False )
-        attr.children.extend( 
-            [
-                Attr( 'Sx', float, NP.getSx, NP.setSx, w=False ),
-                Attr( 'Sy', float, NP.getSy, NP.setSy, w=False ),
-                Attr( 'Sz', float, NP.getSz, NP.setSz, w=False )
-            ]
+        
+        self.AddAttributes( Attr( 'Scale', pm.Vec3, NP.getScale, NP.setScale, w=False ), index=i + 3 )
+        self.AddAttributes( 
+            Attr( 'Sx', float, NP.getSx, NP.setSx, w=False ),
+            Attr( 'Sy', float, NP.getSy, NP.setSy, w=False ),
+            Attr( 'Sz', float, NP.getSz, NP.setSz, w=False ),
+            parent='Scale'
         )
-        pAttr.children.insert( index + 3, attr )
         
     @classmethod
     def SetPickable( cls, value=True ):
@@ -72,14 +65,14 @@ class NodePath( GameNodePath ):
         geo.node().adjustDrawMask( *base.GetEditorRenderMasks() )
         cls.geo = geo
         
-    def SetupNodePath( self, np ):
-        GameNodePath.SetupNodePath( self, np )
+    def SetupNodePath( self ):
+        GameNodePath.SetupNodePath( self )
         
         if self.geo is not None:
-            self.geo.copyTo( np )
+            self.geo.copyTo( self.data )
             
         if self.pickable:
-            np.setPythonTag( TAG_PICKABLE, self.pickable )
+            self.data.setPythonTag( TAG_PICKABLE, self.pickable )
             
     def OnSelect( self, np ):
         """Add a bounding box to the indicated node."""
@@ -207,7 +200,8 @@ class NodePath( GameNodePath ):
         else:
             return True
         
-    def FindChild( self, *args, **kwargs ):
-        np = GameNodePath.FindChild( self, *args, **kwargs )
+    @classmethod
+    def FindChild( cls, *args, **kwargs ):
+        np = super( NodePath, cls ).FindChild( *args, **kwargs )
         np.setPythonTag( TAG_MODIFIED, True )
         return np

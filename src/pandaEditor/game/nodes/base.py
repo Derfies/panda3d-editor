@@ -1,28 +1,23 @@
 class Base( object ):
     
-    def __init__( self, data=None, cType=None ):
+    initArgs = None
+    
+    def __init__( self, data ):
         self.data = data
-        self.type = cType
         
         self.attributes = []
         self.cnnctns = []
         self.children = []
         self.createArgs = {}
-        self.initArgs = None
-            
-        # Generate a default name from the node type.
-        if self.type is not None:
-            nodeName = self.type.__name__
-            self.nodeName = nodeName[0:1].lower() + nodeName[1:]
     
-    def Create( self, *args, **kwargs ):
-        if self.initArgs is None:
-            comp = self.type()
+    @classmethod
+    def Create( cls, *args, **kwargs ):
+        if cls.initArgs is None:
+            comp = cls.type_()
         else:
-            comp = self.type( *self.initArgs )
-        self.data = comp
+            comp = cls.type_( *cls.initArgs )
         
-        return comp
+        return cls( comp )
     
     def Detach( self ):
         base.scene.DeregisterComponent( self.data )
@@ -63,25 +58,15 @@ class Base( object ):
                 for val in vals:
                     cnnctn.Connect( val )
                 
-    def GetAttributes( self, flat=True, addons=False ):
+    def GetAttributes( self, addons=False ):
         """
         Return a flat list of all the attributes of this component, including
         all child attributes of attributes.
         """
-        def RecurseGet( cAttr, results ):
-            for child in cAttr.children:
-                results.append( child )
-                RecurseGet( child, results )
-        
         attrs = self.attributes[:]
-        
-        if flat:
-            for attr in self.attributes:
-                RecurseGet( attr, attrs )
-                
         if addons:
             for wrpr in self.GetAddons():
-                for attr in wrpr.GetAttributes( flat, addons ):
+                for attr in wrpr.GetAttributes( addons ):
                     attrs.append( attr )
                 
         return attrs
@@ -97,3 +82,11 @@ class Base( object ):
     
     def AddChild( self, comp ):
         pass
+    
+    def AddAttributes( self, *attrs, **kwargs ):
+        parent = kwargs.pop( 'parent', None )
+        index = kwargs.pop( 'index', len( self.attributes ) )
+        for i in range( len( attrs ) ):
+            attrs[i].parent = parent
+            attrs[i].srcComp = self.data
+            self.attributes.insert( index + i, attrs[i] )
