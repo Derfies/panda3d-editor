@@ -30,14 +30,14 @@ class DirectoryWatcher( threading.Thread ):
         
         if self.root:
             noval = [
-                ([setDict( path + '\\' + f ) for f in files if files], 
+                ([setDict( os.path.join( path, f ) ) for f in files if files], 
                  setDict( path )) 
                 for path, dirs, files in os.walk( dirPath, True )
             ]
         else:
             noval = [
-                ([setDict( path + '\\' + f ) for f in files if files], 
-                 [setDict( path + '\\' + f ) for f in dirs if dirs]) 
+                ([setDict( os.path.join( path, f ) ) for f in files if files], 
+                 [setDict( os.path.join( path, f ) ) for f in dirs if dirs]) 
                 for path, dirs, files in os.walk( dirPath, True )
             ]
             
