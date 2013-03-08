@@ -3,15 +3,14 @@ import pandac.PandaModules as pm
 import p3d
 import game
 from constants import *
-from primitiveNPO import PrimitiveNPO
 from game.nodes.nodePath import NodePath
 from game.nodes import NodePathObjectAttribute as NPOAttr
 
 
-class SphereNPO( PrimitiveNPO ):
+class SphereNPO( p3d.NodePathObject ):
     
     def __init__( self, *args, **kwargs ):
-        PrimitiveNPO.__init__( self, *args, **kwargs )
+        p3d.NodePathObject.__init__( self, *args, **kwargs )
         
         self._radius = 1
         self._numSegs = 16
@@ -73,5 +72,5 @@ class Sphere( NodePath ):
         return wrpr
     
     def Destroy( self ):
-        PrimitiveNPO.Break( self.data )
+        p3d.NodePathObject.Break( self.data )
         NodePath.Destroy( self )
