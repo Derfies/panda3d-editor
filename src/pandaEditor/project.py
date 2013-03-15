@@ -15,7 +15,7 @@ import utils
 PROJECT_DEF_NAME = 'project.xml'
 SHADER_FILE_NAME = 'shader.sha'
 
-MAPS = 'maps'
+SCENES = 'scenes'
 MODELS = 'models'
 SCRIPTS = 'scripts'
 PREFABS = 'prefabs'
@@ -60,13 +60,13 @@ import game
 # Create game base and load level
 game = game.Base()
 game.OnInit()
-game.Load( render, 'maps/test.xml' )
+game.Load( render, 'scenes/test.xml' )
 run()"""
     
     def New( self, dirPath, **kwargs ):
                  
         dirs = {
-            MAPS:kwargs.pop( 'maps', 'maps' ),
+            SCENES:kwargs.pop( 'scenes', 'scenes' ),
             MODELS:kwargs.pop( 'models', 'models' ),
             SCRIPTS:kwargs.pop( 'scripts', 'scripts' ),
             PREFABS:kwargs.pop( 'prefabs', 'prefabs' ),
@@ -153,9 +153,9 @@ run()"""
         else:
             return None
     
-    def GetMapsDirectory( self ):
-        """Return the full path to the maps directory."""
-        return self.GetDirectory( MAPS )
+    def GetScenesDirectory( self ):
+        """Return the full path to the scenes directory."""
+        return self.GetDirectory( SCENES )
     
     def GetModelsDirectory( self ):
         """Return the full path to the models directory."""
@@ -253,7 +253,7 @@ class """ + fileName + """( p3d ):
     require( 'audio' )
     require( 'bullet' )
     mainModule( 'main' )
-    dir( 'maps', newDir='maps' )
+    dir( 'scenes', newDir='scenes' )
     dir( 'models', newDir='models' )
     dir( 'sounds', newDir='sounds' )
     dir( 'scripts', newDir='scripts' )
@@ -305,3 +305,24 @@ class """ + fileName + """( p3d ):
         
         # Clean up
         #shutil.rmtree( tempDirPath )
+        
+    def GetRelModelPath( self, pandaPath ):
+        """
+        Attempt to find the indicated file path on one of the model search 
+        paths. If found then return a path relative to it. Also make sure to 
+        remove all extensions so we can load  both egg and bam files.
+        """
+        relPath = pm.Filename( pandaPath )
+        index = relPath.findOnSearchpath( pm.getModelPath().getValue() )
+        if index >= 0:
+            basePath = pm.getModelPath().getDirectories()[index]
+            relPath.makeRelativeTo( basePath )
+            
+        # Remove all extensions
+        modelPath = str( relPath )
+        while True:
+            modelPath, ext = os.path.splitext( modelPath )
+            if not ext:
+                break
+        
+        return modelPath

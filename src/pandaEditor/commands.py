@@ -1,4 +1,5 @@
 import wx
+import pandac.PandaModules as pm
 
 import actions
 
@@ -79,9 +80,9 @@ def Select( nps ):
         actions.Select( nps )
     ]
     
-    comp = actions.Composite( actns )
-    wx.GetApp().actnMgr.Push( comp )
-    comp()
+    actn = actions.Composite( actns )
+    wx.GetApp().actnMgr.Push( actn )
+    actn()
     wx.GetApp().doc.OnRefresh()
     
 
@@ -102,10 +103,59 @@ def Parent( nps, parent ):
     """
     Create the parent action, execute it and push it onto the undo queue.
     """
-    actn = actions.Parent( nps, parent )
+    actns = [actions.Parent( np, parent ) for np in nps]
+    
+    actn = actions.Composite( actns )
     wx.GetApp().actnMgr.Push( actn )
     actn()
     wx.GetApp().doc.OnModified()
+    
+
+def Group( nps ):
+    """
+    Create the group action, execute it and push it onto the undo queue.
+    """
+    grpNp = pm.NodePath( 'group' )
+    grpNp.reparentTo( base.scene.rootNp )
+    
+    actns = []
+    actns.append( actions.Add( grpNp ) )
+    actns.extend( [actions.Parent( np, grpNp ) for np in nps] )
+    actns.append( actions.Deselect( nps ) )
+    actns.append( actions.Select( [grpNp] ) )
+    
+    actn = actions.Composite( actns )
+    wx.GetApp().actnMgr.Push( actn )
+    actn()
+    wx.GetApp().doc.OnModified()
+    
+
+def Ungroup( nps ):
+    """
+    Create the ungroup action, execute it and push it onto the undo queue.
+    """
+    childNps = []
+    for np in nps:
+        wrpr = base.game.nodeMgr.Wrap( np )
+        childNps.extend( [cWrpr.data for cWrpr in wrpr.GetChildren()] )
+    removeNps = [np for np in nps if np.node().isOfType( pm.PandaNode )]
+    
+    actns = []
+    actns.append( actions.Deselect( nps ) )
+    actns.extend( [actions.Parent( childNp, base.scene.rootNp ) for childNp in childNps] )
+    actns.extend( [actions.Remove( np ) for np in removeNps] )
+    actns.append( actions.Select( childNps ) )
+    
+    actn = actions.Composite( actns )
+    wx.GetApp().actnMgr.Push( actn )
+    actn()
+    wx.GetApp().doc.OnModified()
+    
+    
+def Parent():pass
+
+
+def Unparent(): pass
     
 
 def Connect( tgtComps, cnnctn, fn ):

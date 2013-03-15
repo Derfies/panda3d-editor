@@ -99,7 +99,7 @@ class SceneGraphBasePanel( wx.Panel ):
     def OnMiddleDown( self, evt ):
         
         # Get the item under the mouse - bail if the item is bad
-        item = self.tc.HitTest( wx.Point( evt.GetX(), evt.GetY() ) )[0]
+        item = wxUtils.GetClickedItem( self.tc, evt )
         if item is None or not item.IsOk():
             return
         

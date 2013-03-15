@@ -11,9 +11,6 @@ class Base( object ):
     
     def RegisterNodeWrapper( self, typeStr, cls ):
         self.game.nodeMgr.nodeWrappers[typeStr] = cls
-        
-    def RegisterPyTagWrapper( self, typeStr, cls ):
-        self.game.nodeMgr.pyTagWrappers[typeStr] = cls
     
     def OnNodeDuplicate( self, np ):
         pass

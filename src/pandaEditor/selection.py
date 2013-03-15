@@ -20,8 +20,7 @@ class Selection( p3d.Object ):
         # and collision nodes
         bitMask = pm.GeomNode.getDefaultCollideMask() | pm.CollisionNode.getDefaultCollideMask()
         self.picker = p3d.MousePicker( 'picker', *args, fromCollideMask=bitMask, **kwargs )
-        self.picker.Start()
-        
+                
     def Get( self ):
         """Return the selected node paths."""
         return self.nps
@@ -31,7 +30,7 @@ class Selection( p3d.Object ):
         for np in self.nps:
             try:
                 wrpr = base.game.nodeMgr.Wrap( np )
-                wrpr.OnDeselect( np )
+                wrpr.OnDeselect()
             except AssertionError:
                 print 'Empty NodePath was unselected.'
         self.nps = []
@@ -42,7 +41,7 @@ class Selection( p3d.Object ):
         """
         for np in list( set( nps ) ):
             wrpr = base.game.nodeMgr.Wrap( np )
-            wrpr.OnSelect( np )
+            wrpr.OnSelect()
                 
             self.nps.append( np )
     
@@ -53,7 +52,7 @@ class Selection( p3d.Object ):
         """
         for np in nps:
             wrpr = base.game.nodeMgr.Wrap( np )
-            wrpr.OnDeselect( np )
+            wrpr.OnDeselect()
             
         self.nps = list( set( self.nps ) - set( nps ) )
     
@@ -61,7 +60,7 @@ class Selection( p3d.Object ):
         """Select parent node paths."""
         nps = []
         for np in self.nps:
-            if np.getParent() != render:
+            if np.getParent() != base.edRender:
                 nps.append( np.getParent() )
             else:
                 nps.append( np )
@@ -157,6 +156,7 @@ class Selection( p3d.Object ):
         """
         Returns the closest node under the mouse, or None if there isn't one.
         """
+        self.picker.OnUpdate( None )
         pickedNp = self.picker.GetFirstNodePath()
         if pickedNp is not None:
             return self.GetPickedNodePath( pickedNp )
@@ -175,5 +175,5 @@ class Selection( p3d.Object ):
         """Update the selection by running deselect and select handlers."""
         for np in self.nps:
             wrpr = base.game.nodeMgr.Wrap( np )
-            wrpr.OnDeselect( np )
-            wrpr.OnSelect( np )
+            wrpr.OnDeselect()
+            wrpr.OnSelect()

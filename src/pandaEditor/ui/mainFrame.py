@@ -41,6 +41,10 @@ ID_PROJ_BUILD = wx.NewId()
 
 ID_EDIT_UNDO = wx.NewId()
 ID_EDIT_REDO = wx.NewId()
+ID_EDIT_GROUP = wx.NewId()
+ID_EDIT_UNGROUP = wx.NewId()
+ID_EDIT_PARENT = wx.NewId()
+ID_EDIT_UNPARENT = wx.NewId()
 
 ID_MODIFY_PHYSICS = wx.NewId()
 
@@ -88,6 +92,14 @@ class MainFrame( wx.Frame ):
         self.app = wx.GetApp()
         self.preMaxPos = None
         self.preMaxSize = None
+        self.actns = {
+            ID_EDIT_UNDO:self.app.Undo,
+            ID_EDIT_REDO:self.app.Redo,
+            ID_EDIT_GROUP:self.app.Group,
+            ID_EDIT_UNGROUP:self.app.Ungroup,
+            ID_EDIT_PARENT:self.app.Parent,
+            ID_EDIT_UNPARENT:self.app.Unparent
+        }
         
         # Bind frame events
         self.Bind( wx.EVT_CLOSE, self.OnClose )
@@ -124,6 +136,7 @@ class MainFrame( wx.Frame ):
         self.BuildAuiManager()
         
         # Build menus and menu bar
+        self.mb = wx.MenuBar()
         self.BuildViewMenu()
         self.BuildCreateMenu()
         self.BuildWindowMenu()
@@ -134,14 +147,14 @@ class MainFrame( wx.Frame ):
         
     def _GetSavePath( self ):
                 
-        # Get default paths from current project directory, or the map's
+        # Get default paths from current project directory, or the scene's
         # current location on disk
         defaultDir = ''
         defaultFile = ''
         if self.app.doc.contents.filePath is not None:
             defaultDir, defaultFile = os.path.split( self.app.doc.contents.filePath )
         elif self.app.project.path is not None:
-            defaultDir = self.app.project.GetMapsDirectory()
+            defaultDir = self.app.project.GetScenesDirectory()
 
         # Open file browser
         filePath = wxUtils.FileSaveDialog( 'Save Scene As', WILDCARD_SCENE, defaultDir=defaultDir, defaultFile=defaultFile )
@@ -212,12 +225,12 @@ class MainFrame( wx.Frame ):
             
             # Get the start directory. This will be the current working 
             # directory if the project is not set.
-            mapsDirPath = self.app.project.GetMapsDirectory()
-            if mapsDirPath is None:
-                mapsDirPath = os.getcwd()
+            scnsDirPath = self.app.project.GetScenesDirectory()
+            if scnsDirPath is None:
+                scnsDirPath = os.getcwd()
                 
             filePath = wxUtils.FileOpenDialog( 'Open Scene', WILDCARD_SCENE,
-                                               defaultDir=mapsDirPath )
+                                               defaultDir=scnsDirPath )
             
         # Create new document
         if filePath:
@@ -278,11 +291,10 @@ class MainFrame( wx.Frame ):
         if filePath:
             self.app.project.Build( filePath )
             
-    def OnEditUndo( self, evt ):
-        self.app.Undo()
-        
-    def OnEditRedo( self, evt ):
-        self.app.Redo()
+    def OnSingleCommand( self, evt ):
+        id = evt.GetId()
+        fn = self.actns[id]
+        fn()
         
     def OnEngagePhysics( self, evt ):
         wrpr = base.game.nodeMgr.Wrap( base.scene.physicsWorld )
@@ -320,7 +332,7 @@ class MainFrame( wx.Frame ):
         comps = []
         for np in self.app.selection.nps:
             wrpr = base.game.nodeMgr.Wrap( np )
-            modelPath = wrpr.GetRelModelPath( np.node().getFullpath() )
+            modelPath = base.project.GetRelModelPath( np.node().getFullpath() )
             
             wrprCls = base.game.nodeMgr.nodeWrappers['Actor']
             wrpr = wrprCls.Create( modelPath=modelPath )
@@ -334,9 +346,9 @@ class MainFrame( wx.Frame ):
         """
         np = self.app.selection.nps[0]
         dirPath = self.app.project.GetPrefabsDirectory()
-        assetName = self.app.project.GetUniqueFileName( 'prefab.xml', os.listdir( dirPath ) )
+        assetName = self.app.project.GetUniqueAssetName( 'prefab.xml', dirPath )
         assetPath = os.path.join( dirPath, assetName )
-        self.app.scene.parser.Save( np, assetPath )
+        base.game.scnParser.Save( np, assetPath )
         
     def OnCreateCgShader( self, evt ):
         """
@@ -587,19 +599,33 @@ class MainFrame( wx.Frame ):
         
     def BuildEditActions( self ):
         """Add tools, set long help strings and bind toolbar events."""
-        actns = [
-            ActionItem( 'Undo', os.path.join( 'data', 'images', 'arrow-curve-flip.png' ), self.OnEditUndo, ID_EDIT_UNDO ),
-            ActionItem( 'Redo', os.path.join( 'data', 'images', 'arrow-curve.png' ), self.OnEditRedo, ID_EDIT_REDO )
+        commonActns = [
+            ActionItem( 'Undo', os.path.join( 'data', 'images', 'arrow-curve-flip.png' ), self.OnSingleCommand, ID_EDIT_UNDO ),
+            ActionItem( 'Redo', os.path.join( 'data', 'images', 'arrow-curve.png' ), self.OnSingleCommand, ID_EDIT_REDO )
+        ]
+        
+        grpActns = [
+            ActionItem( 'Group', '', self.OnSingleCommand, ID_EDIT_GROUP ),
+            ActionItem( 'Ungroup', '', self.OnSingleCommand, ID_EDIT_UNGROUP )
+        ]
+        
+        pntActns = [
+            ActionItem( 'Parent', '', self.OnSingleCommand, ID_EDIT_PARENT ),
+            ActionItem( 'Unparent', '', self.OnSingleCommand, ID_EDIT_UNPARENT )
         ]
         
         # Create edit menu
         self.mEdit = CustomMenu()
-        self.mEdit.AppendActionItems( actns, self )
+        self.mEdit.AppendActionItems( commonActns, self )
+        self.mEdit.AppendSeparator()
+        self.mEdit.AppendActionItems( grpActns, self )
+        #self.mEdit.AppendSeparator()
+        #self.mEdit.AppendActionItems( pntActns, self )
         
         # Create edit toolbar
         self.tbEdit = CustomAuiToolBar( self, -1, style=wx.aui.AUI_TB_DEFAULT_STYLE )
         self.tbEdit.SetToolBitmapSize( TBAR_ICON_SIZE )
-        self.tbEdit.AppendActionItems( actns )
+        self.tbEdit.AppendActionItems( commonActns )
         self.tbEdit.Realize()
         
     def BuildModifyActions( self ):
@@ -704,6 +730,12 @@ class MainFrame( wx.Frame ):
         mTex = CustomMenu()
         mTex.AppendActionItems( texActns, self )
         
+        shaActns = [
+            ActionItem( 'Shader', '', self.OnCreate, args='Shader' )
+        ]
+        mSha = CustomMenu()
+        mSha.AppendActionItems( shaActns, self )
+        
         bltActions = [
             ActionItem( 'World', '', self.OnCreate, args='BulletWorld' ),
             ActionItem( 'Debug Node', '', self.OnCreate, args='BulletDebugNode' ),
@@ -722,11 +754,10 @@ class MainFrame( wx.Frame ):
         self.mCreate.AppendSubMenu( mColl, '&Collision' )
         self.mCreate.AppendSubMenu( mLights, '&Lights' )
         self.mCreate.AppendSubMenu( mTex, '&Texture' )
+        self.mCreate.AppendSubMenu( mSha, '&Shader' )
         self.mCreate.AppendSubMenu( mBlt, '&Bullet' )
-        #self.mCreate.AppendSeparator()
-        #self.mCreate.AppendActionItem( ActionItem( 'Collision Node', '', self.OnCreate, args='CollisionNode' ), self )
-        #self.mCreate.AppendSeparator()
-        #self.mCreate.AppendActionItem( ActionItem( 'Prefab', '', self.OnCreatePrefab ), self )
+        self.mCreate.AppendSeparator()
+        self.mCreate.AppendActionItem( ActionItem( 'Prefab', '', self.OnCreatePrefab ), self )
         #self.mCreate.AppendSeparator()
         #self.mCreate.AppendActionItem( ActionItem( 'Cg Shader', '', self.OnCreateCgShader ), self )
         #self.mCreate.AppendActionItem( ActionItem( 'Glsl Shader', '', self.OnCreateGlslShader ), self )
@@ -738,15 +769,23 @@ class MainFrame( wx.Frame ):
             if paneDef[1]:
                 self.mWind.AppendCheckItem( id, paneDef[2].caption )
                 self.Bind( wx.EVT_MENU, self.OnShowHidePane, id=id )
+        self.mb.Append( self.mWind, '&Window' )
+                
+    def RebuildWindowMenu( self ):
+        self.Freeze()
+        index = self.mb.FindMenu( 'Window' )
+        self.mb.Remove( index )
+        self.BuildWindowMenu()
+        self.OnUpdateWindowMenu( None )
+        self.Thaw()
         
     def BuildMenuBar( self ):
-        """Build the meny bar and attach all menus to it."""
-        self.mb = wx.MenuBar()
+        """Build the menu bar and attach all menus to it."""
         self.mb.Append( self.mFile, '&File' )
         self.mb.Append( self.mEdit, '&Edit' )
         self.mb.Append( self.mView, '&View' )
         self.mb.Append( self.mCreate, '&Create' )
-        self.mb.Append( self.mWind, '&Window' )
+        
         self.SetMenuBar( self.mb )
         
     def BuildAuiManager( self ):
@@ -793,7 +832,7 @@ class MainFrame( wx.Frame ):
                 .ToolbarPane()
                 .Top()),
 
-            ID_WIND_VIEWPORT:(self.pnlViewport, True,
+            ID_WIND_VIEWPORT:(self.pnlViewport, False,
                 wx.aui.AuiPaneInfo()
                 .Name( 'pnlViewport' )
                 .Caption( 'Viewport' )

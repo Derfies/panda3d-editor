@@ -2,22 +2,11 @@ import os
 import sys
 import inspect
 
+import p3d
 from game.nodes.base import Base
 
 
 class Script( Base ):
-    
-    @staticmethod
-    def GetFileName( filePath ):
-        normPath = os.path.normpath( filePath )
-        head, tail = os.path.split( normPath )
-        return os.path.splitext( tail )[0]
-        
-    def SetParent( self, pObj ):
-        name = self.GetFileName( inspect.getfile( self.data.__class__ ) )
-        clsName = name[0].upper() + name[1:]
-        pObj.instances[clsName] = self.data
-        self.data.np = pObj.np
     
     @classmethod
     def Create( cls, *args, **kwargs ):
@@ -60,12 +49,32 @@ class Script( Base ):
         # the object
         clsName = name[0].upper() + name[1:]
         class_ = getattr( mod, clsName )
-        
-        # Save the instance by the class name
         instance = class_( clsName )
-        #self.data = instance
         
         return cls( instance )
+    
+    def Detach( self ):
+        
+        # Find the script in the list of instances for this PandaObject and
+        # remove it.
+        pObj = p3d.PandaObject.Get( self.data.np )
+        for name, inst in pObj.instances.items():
+            if inst == self.data:
+                del pObj.instances[name]
+                return
+    
+    @staticmethod
+    def GetFileName( filePath ):
+        normPath = os.path.normpath( filePath )
+        head, tail = os.path.split( normPath )
+        return os.path.splitext( tail )[0]
+        
+    def SetParent( self, pObj ):
+        if pObj is not None:
+            name = self.GetFileName( inspect.getfile( self.data.__class__ ) )
+            clsName = name[0].upper() + name[1:]
+            pObj.instances[clsName] = self.data
+            self.data.np = pObj.np
     
     def SetPropertyData( self, dataDict ):
         

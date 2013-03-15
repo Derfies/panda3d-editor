@@ -44,6 +44,7 @@ class App( p3d.wx.App ):
         
         # Create project manager
         self.project = Project( self )
+        base.project = self.project
         self.frame.SetProjectPath( self.frame.cfg.Read( 'projDirPath' ) )
         
         # Create grid
@@ -91,6 +92,8 @@ class App( p3d.wx.App ):
         self.accept( 'del', lambda fn: cmds.Remove( fn() ), [self.selection.Get] )
         self.accept( 'backspace', lambda fn: cmds.Remove( fn() ), [self.selection.Get] )
         self.accept( 'control-d', lambda fn: cmds.Duplicate( fn() ), [self.selection.Get] )
+        self.accept( 'control-g', lambda fn: cmds.Group( fn() ), [self.selection.Get] )
+        self.accept( 'control-s', self.frame.OnFileSave, [None] )
         self.accept( 'arrow_up', lambda fn: cmds.Select( fn() ), [self.selection.SelectParent] )
         self.accept( 'arrow_down', lambda fn: cmds.Select( fn() ), [self.selection.SelectChild] )
         self.accept( 'arrow_left', lambda fn: cmds.Select( fn() ), [self.selection.SelectPrev] )
@@ -263,6 +266,7 @@ class App( p3d.wx.App ):
         # Set the selection and picker root node to the scene's root node
         self.selection.rootNp = self.scene.rootNp
         self.selection.picker.rootNp = self.scene.rootNp
+        self.selection.marquee.rootNp = self.scene.rootNp
         self.selection.Clear()
         
         # Create the document wrapper if creating a new document
@@ -291,11 +295,9 @@ class App( p3d.wx.App ):
         cmds.Add( [wrpr.data] )
                 
     def AddShader( self, filePath, np=None ):
-        pandaPath = pm.Filename.fromOsSpecific( filePath )
-        shdr = pc.Shader.load( pandaPath )
-        
-        # BROKEN
-        self.SetAttribute( np.setShader, shdr, np.getShader(), np.clearShader )
+        wrpr = base.game.nodeMgr.Wrap( np )
+        prop = wrpr.FindProperty( 'shader' )
+        cmds.SetAttribute( [np], [prop], filePath )
         
     def OnProjectFilesModified( self, filePaths ):
         self.game.pluginMgr.OnProjectFilesModified( filePaths )
@@ -307,3 +309,19 @@ class App( p3d.wx.App ):
     def Redo( self ):
         self.actnMgr.Redo()
         self.doc.OnModified()
+        
+    def Group( self ):
+        nps = [comp for comp in self.selection.nps if type( comp ) == pm.NodePath]
+        if nps:
+            cmds.Group( nps )
+        
+    def Ungroup( self ):
+        nps = [comp for comp in self.selection.nps if type( comp ) == pm.NodePath]
+        if nps:
+            cmds.Ungroup( nps )
+        
+    def Parent( self ):
+        pass
+        
+    def Unparent( self ):
+        pass

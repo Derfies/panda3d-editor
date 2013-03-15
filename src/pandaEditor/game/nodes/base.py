@@ -47,7 +47,7 @@ class Base( object ):
         for key, val in propDict.items():
             attr = self.FindProperty( key )
             if attr is not None and attr.setFn is not None:
-                attr.Set( self.data, val )
+                attr.Set( val )
             else:
                 print 'Failed to set property: ', key
                 

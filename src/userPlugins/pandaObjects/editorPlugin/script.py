@@ -2,10 +2,14 @@ import inspect
 
 import pandac.PandaModules as pm
 
+import p3d
 from .. import gamePlugin as gp
 
 
 class Script( gp.Script ):
+    
+    def GetParent( self ):
+        return p3d.PandaObject.Get( self.data.np )
         
     def GetPropertyData( self ):
         
@@ -24,12 +28,7 @@ class Script( gp.Script ):
         return props
     
     def GetCreateArgs( self ):
-        pandaPath = pm.Filename.fromOsSpecific( inspect.getfile( self.data.__class__ ) )
-        
-        relPath = pm.Filename( pandaPath )
-        index = relPath.findOnSearchpath( pm.getModelPath().getValue() )
-        if index >= 0:
-            basePath = pm.getModelPath().getDirectories()[index]
-            relPath.makeRelativeTo( basePath )
-        
+        filePath = inspect.getfile( self.data.__class__ )
+        pandaPath = pm.Filename.fromOsSpecific( filePath )
+        relPath = base.project.GetRelModelPath( pandaPath )
         return {'filePath':str( relPath )}

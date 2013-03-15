@@ -7,6 +7,7 @@ import wx
 
 import p3d
 from .. import gamePlugin as gp
+from pandaEditor import commands as cmds, actions
 from wxExtra import utils as wxUtils, ActionItem, CustomAuiToolBar
 
 
@@ -24,28 +25,23 @@ class EditorPlugin( gp.GamePlugin ):
     def OnInit( self ):
         gp.GamePlugin.OnInit( self )
         
+        # Add new commands to command module.
+        setattr( cmds, 'AddScript', self.AddScript )
+        
         self.playing = False
         
-        self.app.fileTypes['.py'] = self.AddScript
-        self.app.fileTypes['.pyc'] = self.AddScript
-        
+        self.app.fileTypes['.py'] = self.DropScript
+        self.app.fileTypes['.pyc'] = self.DropScript
         self.app.accept( 'escape', self.OnPause )
         
         self.BuildPlaybackToolBar()
         
-        paneDefs = {    
-            ID_WIND_PLAY_TOOLBAR:(self.tbPlay, True,
-                wx.aui.AuiPaneInfo()
-                .Name( 'tbPlay' )
-                .Caption( 'Playback Toolbar' )
-                .ToolbarPane()
-                .Top())
-        }
-                
-        for paneDef in paneDefs.values():
-            self.ui._mgr.AddPane( paneDef[0], paneDef[2] )
-            
-        self.ui._mgr.Update()
+        panelInfo = ( wx.aui.AuiPaneInfo()
+                      .Name( 'tbPlay' )
+                      .Caption( 'Playback Toolbar' )
+                      .ToolbarPane()
+                      .Top() )
+        self.AddUiWindow( ID_WIND_PLAY_TOOLBAR, self.tbPlay, panelInfo )
         
     def BuildPlaybackToolBar( self ):
         """Build playback toolbar."""
@@ -58,40 +54,43 @@ class EditorPlugin( gp.GamePlugin ):
         self.tbPlay.SetToolBitmapSize( TBAR_ICON_SIZE )
         self.tbPlay.AppendActionItems( playbackActns )
         
-    def AddScript( self, filePath, np=None ):
+    def AddScript( self, np, filePath ):
         
-        # Bail if no node path was supplied.
-        if np is None:
+        # Try to load the script. Warn the user if the script fails in any 
+        # way.
+        try:
+            scriptWrprCls = base.game.nodeMgr.nodeWrappers['Script']
+            scriptWrpr = scriptWrprCls.Create( filePath=filePath )
+        except:
+            wxUtils.ErrorDialog( traceback.format_exc(), 'Script Error' )
             return
         
-        #for foo in base.game.nodeMgr.nodeWrappers:
-        #     print foo
-        
-        #pObjWrpr = gp.PandaObject()#
-        pObjWrprCls = base.game.nodeMgr.pyTagWrappers[p3d.TAG_PANDA_OBJECT]
-        #pObjWrpr = pObjWrprCls()
-        pObjWrpr = pObjWrprCls.Create()
+        # A NodePath needs a PandaObject as an anchor in order to attach a
+        # script to it. Create one if it doesn't already exist and add it to
+        # the list of undoable actions.
+        actns = []
+        pObjWrprCls = base.game.nodeMgr.nodeWrappers[p3d.TAG_PANDA_OBJECT]
+        pObj = p3d.PandaObject.Get( np )
+        if pObj is None:
+            pObjWrpr = pObjWrprCls.Create()
+            actns.append( actions.Add( pObjWrpr.data ) )
+        else:
+            pObjWrpr = pObjWrprCls( pObj )
         pObjWrpr.SetParent( np )
-        
-        #scriptWrpr = gp.Script()
-        scriptWrprCls = base.game.nodeMgr.pyTagWrappers['Script']
-        #scriptWrpr = scriptWrprCls()
-        scriptWrpr = scriptWrprCls.Create( filePath=filePath )
         scriptWrpr.SetParent( pObjWrpr.data )
+        actns.append( actions.Add( scriptWrpr.data ) )
         
-        self.app.doc.OnModified()
+        # Create a composite action, exectute it and push it onto the undo
+        # queue.
+        actn = actions.Composite( actns )
+        wx.GetApp().actnMgr.Push( actn )
+        actn()
+        wx.GetApp().doc.OnModified()
         
-        # Attempt to attach the script. Warn the user if the script fails in 
-        # any way.
-        #try:
-        #if True:
-        #    pObj = gp.PandaObject().Create( np )
-        #    pObj.AttachScript( filePath )
-        #except:
-        #    wxUtils.ErrorDialog( traceback.format_exc(), 'Script Error' )
-        #    return
-        
-        #self.app.doc.OnModified()
+    def DropScript( self, filePath, np=None ):
+        """Drag drop handler for attaching scripts to NodePaths."""
+        if np is not None:
+            cmds.AddScript( np, filePath )
         
     def OnPlay( self, evt=None ):
         
@@ -164,19 +163,3 @@ class EditorPlugin( gp.GamePlugin ):
         # Reload scripts
         if pyFilePaths:
             base.pandaMgr.ReloadScripts( pyFilePaths )
-        
-    def GetScriptRelPath( self, filePath ):
-        """
-        Attempt to find the indicated file path on one of the paths in 
-        sys.path. If found then return a path relative to it.
-        """
-        # TO DO: Still a bit funky how we do this as it could grab whatever
-        # sys.path that matches first, which won't necessarily be the one we
-        # want. Perhaps fix with extra config vars like getModelPath()?
-        filePath = os.path.normpath( filePath )
-        for sysPath in sys.path:
-            if sysPath in filePath:
-                filePath = os.path.relpath( filePath, sysPath )
-                break
-                        
-        return filePath

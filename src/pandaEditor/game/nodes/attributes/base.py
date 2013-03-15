@@ -28,12 +28,12 @@ class Base( object ):
             
         return src
         
-    def Get( self, comp ):
+    def Get( self ):
         args = self.getArgs[:]
         args.insert( 0, self.GetSource() )
         return self.getFn( *args )
     
-    def Set( self, comp, val ):
+    def Set( self, val ):
         args = self.setArgs[:]
         args.insert( 0, self.GetSource() )
         args.append( val )

@@ -16,7 +16,9 @@ class Manager( game.plugins.Manager ):
             cls = getattr( temp.editorPlugin, 'EditorPlugin' )
             return cls( self.game )
         except Exception, e:
-            traceback.print_exc()
+            return game.plugins.Manager.LoadPlugin( self, fileName )
+            #traceback.print_exc()
+        #return cls( self.game )
         
     def OnSceneClose( self ):
         for plugin in self.plugins:

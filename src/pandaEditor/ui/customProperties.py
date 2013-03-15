@@ -2,11 +2,11 @@ import os
 
 import wx
 import wx.lib.agw.floatspin as fs
+import wx.lib.mixins.listctrl as listmix
 import pandac.PandaModules as pm
 from panda3d.core import Filename
 
-#from propertiesPanel import ATTRIBUTE_TAG
-from wxExtra import wxpg, CompositeDropTarget
+from wxExtra import wxpg, CompositeDropTarget, utils as wxUtils
 
 
 class Float3Property( wxpg.BaseProperty ):
@@ -100,22 +100,7 @@ class FilePathProperty( wxpg.StringProperty ):
         
     def ValidateDropItem( self, *args ):
         return True
-        
-
-"""
-class AnimationDictProperty( wxpg.PyStringProperty ):
     
-    def __init__( self, *args, **kwargs ):
-        self.animDict = kwargs.pop( 'attr' )
-        wxpg.PyStringProperty.__init__( self, *args, **kwargs )
-        
-        for animName, animPath in self.animDict.items():
-            self.AddPrivateChild( wxpg.FileProperty( animName, wxpg.LABEL_AS_NAME, str( animPath ) ) )
-            
-    def GetValueAsString( self, argFlags ):
-        return ', '.join( self.animDict.keys() )
-"""
-
 
 class NodePathProperty( wxpg.StringProperty ):
     
@@ -234,20 +219,31 @@ class ConnectionListProperty( ConnectionBaseProperty ):
         self.PostChangedEvent()
         
 
+class AutoWidthListCtrl( wx.ListCtrl, listmix.ListCtrlAutoWidthMixin ):
+
+    def __init__( self, *args, **kwargs ):
+        wx.ListCtrl.__init__( self, *args, **kwargs )
+        listmix.ListCtrlAutoWidthMixin.__init__( self )
+        
+
 class DictProperty( wxpg.BaseProperty ):
     
     def BuildControl( self, parent, id ):
-        ctrl = wx.ListBox( parent, id, size=(-1,50), style=wx.LB_EXTENDED )
+        ctrl = AutoWidthListCtrl( parent, id, style=wx.LC_REPORT | wx.LC_EDIT_LABELS )
+        ctrl.InsertColumn( 0, 'Name' )
+        ctrl.InsertColumn( 1, 'Value' )
         ctrl.Enable( self.IsEnabled() )
         ctrl.Bind( wx.EVT_KEY_UP, self.OnDelete )
+        ctrl.Bind( wx.EVT_LIST_END_LABEL_EDIT, self.OnListEndLabelEdit )
         
         dt = CompositeDropTarget( ['filePath'], 
                                   self.OnDropItem, 
                                   self.ValidateDropItem )
         ctrl.SetDropTarget( dt )
 
-        for name in self.GetValue():
-            ctrl.Append( name )
+        for key, val in self.GetValue().items():
+            ctrl.InsertStringItem( 0, str( key ) )
+            ctrl.SetStringItem( 0, 1, str( val ) )
         
         return ctrl
     
@@ -262,4 +258,17 @@ class DictProperty( wxpg.BaseProperty ):
         key = os.path.split( arg )[-1].split( '.' )[0]
         myDict[key] = arg
         self.SetValue( myDict )
+        self.PostChangedEvent()
+        
+    def OnListEndLabelEdit( self, evt ):
+        
+        item = evt.GetItem()
+        ctrl = evt.GetEventObject()
+        oldKey = ctrl.GetItem( item.GetId() ).GetText()
+        newKey = item.GetText()
+        
+        pDict = self.GetValue()
+        val = pDict.pop( oldKey )
+        pDict[newKey] = val
+        self.SetValue( pDict )
         self.PostChangedEvent()

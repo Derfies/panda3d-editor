@@ -4,6 +4,8 @@ import p3d
 
 
 class Scene( p3d.Object ):
+        
+    cType = 'SceneRoot'
     
     def __init__( self, *args, **kwargs ):
         p3d.Object.__init__( self, *args, **kwargs )

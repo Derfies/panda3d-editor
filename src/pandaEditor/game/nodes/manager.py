@@ -80,8 +80,6 @@ class Manager( object ):
             'BulletCapsuleShape':BulletCapsuleShape
         }
         
-        self.pyTagWrappers = {}
-        
     def Create( self, nTypeStr, *args ):
         wrprCls = self.nodeWrappers[nTypeStr]
         return wrprCls.Create( *args )
@@ -137,19 +135,28 @@ class Manager( object ):
     def GetWrapperByName( self, cType ):
         if cType in self.nodeWrappers:
             return self.nodeWrappers[cType]
-        elif cType in self.pyTagWrappers:
-            return self.pyTagWrappers[cType]
         
         return None
         
     def GetTypeString( self, comp ):
-        """Return the type of the component as a string."""
+        """
+        Return the type of the component as a string. Components are 
+        identified in the following method (in order):
+        
+        - If the component has the class variable 'cType' then this string
+        will be used as the type.
+        - Use the component's type's name as the type.
+        - If this is 'NodePath' then look for a overriding tag on the node
+        for the type.
+        - If this tag is missing, use the NodePath's node as the type.
+        """
+        if hasattr( comp.__class__, 'cType' ):
+            return comp.cType
+        
         typeStr = type( comp ).__name__
         if typeStr == 'NodePath':
             typeStr = comp.node().getTag( TAG_NODE_TYPE )
             if not typeStr:
                 typeStr = type( comp.node() ).__name__
-        elif comp is base.scene:
-            typeStr = 'SceneRoot'
-        
+                
         return typeStr

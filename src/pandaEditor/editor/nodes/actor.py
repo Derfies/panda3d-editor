@@ -15,4 +15,4 @@ class Actor( GameActor ):
         return wrpr
     
     def GetCreateArgs( self ):
-        return {'modelPath':self.GetRelModelPath( self.data.getPythonTag( 'modelPath' ) )}
+        return {'modelPath':base.project.GetRelModelPath( self.data.getPythonTag( 'modelPath' ) )}

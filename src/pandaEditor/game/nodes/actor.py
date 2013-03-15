@@ -7,27 +7,27 @@ from modelRoot import ModelRoot
 from attributes import Attribute as Attr, PyTagAttribute as PTAttr
 
 
-TAG_ACTOR = 'p3d_actor'
-
-
 class Actor( ModelRoot ):
     
     def __init__( self, *args, **kwargs ):
         ModelRoot.__init__( self, *args, **kwargs )
         
         self.AddAttributes(
-            PTAttr( 'Anim Names', dict, self.GetAnimDict, self.SetAnimDict, pyTagName=TAG_ACTOR ),
+            PTAttr( 'Anims', dict, self.GetAnimDict, self.SetAnimDict, pyTagName=TAG_ACTOR ),
             parent='Actor'
         )
         
     def GetAnimDict( self, actor ):
         animDict = {}
         for name in P3dActor.getAnimNames( actor ):
-            animDict[name] = actor.getAnimFilename( name ) 
+            filePath = actor.getAnimFilename( name )
+            animDict[name] = base.project.GetRelModelPath( filePath )
             
         return animDict
         
     def SetAnimDict( self, actor, animDict ):
+        actor.removeAnimControlDict()
+        
         myDict = {}
         for key, value in animDict.items():
             try:

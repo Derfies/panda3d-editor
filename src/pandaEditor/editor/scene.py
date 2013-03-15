@@ -7,10 +7,9 @@ import nodes
 
 class Scene( game.Scene ):
     
-    def __init__( self, app, *args, **kwargs ):
-        game.Scene.__init__( self, app, *args, **kwargs )
+    def __init__( self, *args, **kwargs ):
+        game.Scene.__init__( self, *args, **kwargs )
         
-        self.app = app
         self.cnnctns = {}
         
         self.filePath = kwargs.pop( 'filePath', None )
@@ -57,9 +56,6 @@ class Scene( game.Scene ):
         # in order to remove and recreate the default node set.
         if self.rootNp is render:
             base.Reset()
-            
-            # Reset references to render
-            self.app.selection.marquee.rootNp = render
         
         self.rootNp.removeNode()
     

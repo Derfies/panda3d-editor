@@ -10,6 +10,15 @@ class PandaObject( Base ):
     def Create( cls, *args, **kwargs ):
         return cls( p3d.PandaObject() )
     
+    def Detach( self ):
+        
+        # Remove the NodePath's tag referencing the PandaObject. Also remove
+        # the PandaObject tag from the list of tags on this NodePath.
+        self.data.np.clearPythonTag( p3d.TAG_PANDA_OBJECT )
+        pyTag = self.data.np.getPythonTag( game.nodes.TAG_PYTHON_TAGS )
+        if pyTag is not None:
+            pyTag.remove( p3d.TAG_PANDA_OBJECT )
+    
     def Destroy( self ):
         p3d.PandaObject.Break( self.data.np )
         self.data = None
@@ -23,10 +32,7 @@ class PandaObject( Base ):
         return attrs
     
     def GetPObjInstance( self, pObj, clsName ):
-        #print 'np: ', np
-        #print 'clsName: ', clsName
         return pObj.instances[clsName]
-        #return p3d.PandaObject.Get( np ).instances[clsName]
     
     def GetProps( self, instance ):
         props = {}
@@ -40,13 +46,19 @@ class PandaObject( Base ):
         children = []
         
         # Create wrappers for each script attached to the object.
-        wrprCls = base.game.nodeMgr.pyTagWrappers['Script']
+        wrprCls = base.game.nodeMgr.nodeWrappers['Script']
         for name, instance in self.data.instances.items():
             children.append( wrprCls( instance ) )
             
         return children
     
+    def GetParent( self ):
+        return self.data.np
+    
     def SetParent( self, pNp ):
+        if pNp is None:
+            return
+        
         self.data.AttachToNodePath( pNp )
         
         pyTag = pNp.getPythonTag( game.nodes.TAG_PYTHON_TAGS )

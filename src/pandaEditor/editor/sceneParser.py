@@ -18,6 +18,7 @@ class SceneParser( game.SceneParser ):
             float:str,
             int:str,
             str:str,
+            unicode:str,
             type:self.GetName,
             pm.Vec2:p3d.FloatTuple2Str,
             pm.LVecBase2f:p3d.FloatTuple2Str,

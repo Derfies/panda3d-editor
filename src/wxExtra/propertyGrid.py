@@ -204,7 +204,8 @@ class StringProperty( BaseProperty ):
     def BuildControl( self, parent, id ):
         ctrl = wx.TextCtrl( parent, id, value=str( self.GetValue() ) )
         ctrl.Enable( self.IsEnabled() )
-        ctrl.Bind( wx.EVT_TEXT, self.OnChanged )
+        ctrl.Bind( wx.EVT_TEXT_ENTER, self.OnChanged )
+        ctrl.Bind( wx.EVT_KILL_FOCUS, self.OnChanged )
         return ctrl
     
 

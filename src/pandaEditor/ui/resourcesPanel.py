@@ -4,7 +4,7 @@ import wx
 from wx.lib.pubsub import Publisher as pub
 
 import p3d
-from wxExtra import DirTreeCtrl
+from wxExtra import DirTreeCtrl, utils as wxUtils
 
 
 class ResourcesPanel( wx.Panel ):
@@ -39,6 +39,8 @@ class ResourcesPanel( wx.Panel ):
             self.dtc.Bind( wx.EVT_KEY_UP, p3d.wx.OnKeyUp )
             self.dtc.Bind( wx.EVT_KEY_DOWN, p3d.wx.OnKeyDown )
             self.dtc.Bind( wx.EVT_LEFT_UP, p3d.wx.OnLeftUp )
+            self.dtc.Bind( wx.EVT_RIGHT_DOWN, self.OnRightDown )
+            self.dtc.Bind( wx.EVT_RIGHT_UP, self.OnRightUp )
             self.dtc.Bind( wx.EVT_MIDDLE_DOWN, self.OnMiddleDown )
             self.dtc.Bind( wx.EVT_LEFT_DCLICK, self.OnLeftDClick )
             self.dtc.Bind( wx.EVT_TREE_END_LABEL_EDIT, self.OnTreeEndLabelEdit )
@@ -54,10 +56,43 @@ class ResourcesPanel( wx.Panel ):
             
         self.bs1.Layout()
         
+    def OnRightDown( self, evt ):
+        """
+        This method does nothing. Oddly enough, *not* binding RightDown seems
+        to affect RightUp's behaviour, and we only trap half the mouse up 
+        events.
+        """
+        pass
+        
+    def OnRightUp( self, evt ):
+        
+        # Get the item under the mouse - bail if the item is not ok
+        itemId = wxUtils.GetClickedItem( self.dtc, evt )
+        if itemId is None or not itemId.IsOk():
+            return
+        
+        menu = wx.Menu()
+        mItem = wx.MenuItem( menu, wx.NewId(), 'Open in Explorer' )
+        menu.AppendItem( mItem )
+        wxUtils.IdBind( menu, wx.EVT_MENU, mItem.GetId(), self.OnOpenFile, itemId )
+        self.PopupMenu( menu )
+        menu.Destroy()
+        
+    def OnOpenFile( self, evt, itemId ):
+        systems = {
+            'nt': os.startfile,
+            'posix': lambda foldername: os.system( 'xdg-open "%s"' % foldername ),
+            'os2': lambda foldername: os.system( 'open "%s"' % foldername )
+        }
+        
+        filePath = self.dtc.GetItemPath( itemId )
+        dirPath = os.path.split( filePath )[0]
+        systems.get( os.name, os.startfile )( dirPath )
+        
     def OnMiddleDown( self, evt ):
         
         # Get the item under the mouse - bail if the item is not ok
-        itemId = self.dtc.HitTest( wx.Point( evt.GetX(), evt.GetY() ) )[0]
+        itemId = wxUtils.GetClickedItem( self.dtc, evt )
         if itemId is None or not itemId.IsOk():
             return
         
@@ -76,7 +111,7 @@ class ResourcesPanel( wx.Panel ):
     def OnLeftDClick( self, evt ):
         
         # Load items
-        itemId = self.dtc.HitTest( wx.Point( evt.GetX(), evt.GetY() ) )[0]
+        itemId = wxUtils.GetClickedItem( self.dtc, evt )
         filePath = self.dtc.GetItemPath( itemId )
         ext = os.path.splitext( os.path.basename( self.dtc.GetItemText( itemId ) ) )[1]
         if ext == '.xml':

@@ -14,6 +14,7 @@ class SceneParser( object ):
             'float':float,
             'int':int,
             'str':str,
+            'unicode':str,
             'LVector2f':p3d.Str2Vec2,
             'LVecBase2f':p3d.Str2Vec2,
             'LVector3f':p3d.Str2Vec3,

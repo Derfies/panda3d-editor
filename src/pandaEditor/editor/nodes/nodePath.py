@@ -74,21 +74,21 @@ class NodePath( GameNodePath ):
         if self.pickable:
             self.data.setPythonTag( TAG_PICKABLE, self.pickable )
             
-    def OnSelect( self, np ):
+    def OnSelect( self ):
         """Add a bounding box to the indicated node."""
-        bbox = DirectBoundingBox( np, (1, 1, 1, 1) )
+        bbox = DirectBoundingBox( self.data, (1, 1, 1, 1) )
         bbox.show()
         bbox.lines.setPythonTag( TAG_IGNORE, True )
         bbox.lines.node().adjustDrawMask( *base.GetEditorRenderMasks() )
-        np.setPythonTag( TAG_BBOX, bbox )
+        self.data.setPythonTag( TAG_BBOX, bbox )
         return bbox
     
-    def OnDeselect( self, np ):
+    def OnDeselect( self ):
         """Remove the bounding box from the indicated node."""
-        bbox = np.getPythonTag( TAG_BBOX )
+        bbox = self.data.getPythonTag( TAG_BBOX )
         if bbox is not None:
             bbox.lines.removeNode()
-        np.clearPythonTag( TAG_BBOX )
+        self.data.clearPythonTag( TAG_BBOX )
     
     def OnDelete( self, np ):
         pass
@@ -96,7 +96,7 @@ class NodePath( GameNodePath ):
     def GetTags( self ):
         tags = self.data.getPythonTag( TAG_PYTHON_TAGS )
         if tags is not None:
-            return [tag for tag in tags if tag in base.game.nodeMgr.pyTagWrappers]
+            return [tag for tag in tags if tag in base.game.nodeMgr.nodeWrappers]
         
         return []
     
@@ -116,7 +116,7 @@ class NodePath( GameNodePath ):
         # Add wrappers for python objects.
         for tag in self.GetTags():
             pyObj = self.data.getPythonTag( tag )
-            pyObjWrpr = base.game.nodeMgr.pyTagWrappers[tag]
+            pyObjWrpr = base.game.nodeMgr.nodeWrappers[tag]
             children.append( pyObjWrpr( pyObj ) )
             
         return children

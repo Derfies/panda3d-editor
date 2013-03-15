@@ -1,5 +1,6 @@
 import uuid
 
+import panda3d.core as pc
 import pandac.PandaModules as pm
 from pandac.PandaModules import NodePath as NP
 
@@ -22,17 +23,9 @@ class NodePath( Base ):
             Attr( 'Matrix', pm.Mat4, NP.getMat, NP.setMat ),
             CnnctnList( 'Lights', pm.Light, self.GetLights, NP.setLight, NP.clearLight, NP.clearLight ),
             Cnnctn( 'Texture', pm.Texture, NP.getTexture, NP.setTexture, NP.clearTexture, args=[1] ),
+            Cnnctn( 'Shader', pc.Filename, self.GetShader, self.SetShader, NP.clearShader ),
             parent='NodePath'
         )
-        
-    def GetLights( self, data ):
-        lgts = []
-        
-        lgtAttrib = data.getAttrib( pm.LightAttrib )
-        if lgtAttrib is not None:
-            lgts = lgtAttrib.getOnLights()
-        
-        return lgts
     
     @classmethod
     def Create( cls, *args, **kwargs ):
@@ -90,3 +83,30 @@ class NodePath( Base ):
             np = np.getChildren()[index]
                     
         return np
+    
+    def GetShader( self, np ):
+        shader = np.getShader()
+        if shader is None:
+            return ''
+        
+        return shader.getFilename()
+        
+    def SetShader( self, np, filePath ):
+        try:
+            pandaPath = pc.Filename.fromOsSpecific( filePath )
+        except TypeError:
+            pandaPath = filePath
+        shader = pc.Shader.load( pandaPath )
+        if shader is not None:
+            np.setShader( shader )
+        else:
+            np.clearShader()
+        
+    def GetLights( self, data ):
+        lgts = []
+        
+        lgtAttrib = data.getAttrib( pm.LightAttrib )
+        if lgtAttrib is not None:
+            lgts = lgtAttrib.getOnLights()
+        
+        return lgts

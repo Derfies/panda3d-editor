@@ -21,3 +21,9 @@ class Base( OldBase ):
     
     def OnProjectFilesModified( self, filePaths ):
         pass
+    
+    def AddUiWindow( self, id, ctrl, auiInfo, showInWindowMenu=True ):
+        self.app.frame.paneDefs[id] = (ctrl, showInWindowMenu, auiInfo)
+        self.app.frame.RebuildWindowMenu()
+        self.ui._mgr.AddPane( ctrl, auiInfo )
+        self.ui._mgr.Update()

@@ -4,6 +4,8 @@ from pandaManager import PandaManager as pMgr
 
 class PandaBehaviour( SingleTask ):
     
+    cType = 'Script'
+    
     def __init__( self, *args, **kwargs ):
         SingleTask.__init__( self, *args, **kwargs )
         

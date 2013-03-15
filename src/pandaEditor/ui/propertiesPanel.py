@@ -234,7 +234,7 @@ class PropertiesPanel( wx.Panel ):
             if attr.type in self.propMap:
                 propCls = self.propMap[attr.type]
                 if attr.type is not None:
-                    prop = propCls( attr.label, '', attr.Get( nps[0] ) )
+                    prop = propCls( attr.label, '', attr.Get() )
                     if attr.setFn is None:
                         prop.Enable( False )
                 else:

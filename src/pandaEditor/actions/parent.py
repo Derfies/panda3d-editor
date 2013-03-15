@@ -3,16 +3,14 @@ from base import Base
 
 class Parent( Base ):
     
-    def __init__( self, nps, parent ):
-        self.nps = nps
+    def __init__( self, np, parent ):
+        self.np = np
         self.parent = parent
         
-        self.oldParents = [np.getParent() for np in self.nps]
+        self.oldParent = np.getParent()
     
     def Undo( self ):
-        for i in range( len( self.nps ) ):
-            self.nps[i].wrtReparentTo( self.oldParents[i] )
+        self.np.wrtReparentTo( self.oldParent )
     
     def Redo( self ):
-        for np in self.nps:
-            np.wrtReparentTo( self.parent )
+        self.np.wrtReparentTo( self.parent )

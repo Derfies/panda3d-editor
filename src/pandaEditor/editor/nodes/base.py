@@ -38,7 +38,7 @@ class Base( GameBase ):
         props = [prop for prop in props if not hasattr( prop, 'cnnctn' )]
         for prop in props:
             if prop.w and prop.getFn is not None:
-                propDict[prop.name] = prop.Get( self.data )
+                propDict[prop.name] = prop.Get()
             
         return propDict
     
@@ -72,10 +72,10 @@ class Base( GameBase ):
     def SetModified( self, val ):
         pass
     
-    def OnSelect( self, comp ):
+    def OnSelect( self ):
         pass
     
-    def OnDeselect( self, comp ):
+    def OnDeselect( self ):
         pass
     
     def OnDragDrop( self, dragComp, dropComp ):

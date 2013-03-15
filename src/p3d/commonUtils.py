@@ -69,3 +69,36 @@ def GetInvertedMatrix( mat ):
     invMat = pm.Mat4()
     invMat.invertFrom( mat )
     return invMat
+    
+
+def RebuildGeomNodesToColPolys( incomingNodes ):
+    """
+    Converts GeomNodes into CollisionPolys in a straight 1-to-1 conversion 
+
+    Returns a new NodePath containing the CollisionNodes 
+    """
+    parent = pm.NodePath( 'cGeomConversionParent' ) 
+    for c in incomingNodes:
+        gni = 0 
+        geomNode = c.node() 
+        for g in range( geomNode.getNumGeoms() ): 
+            geom = geomNode.getGeom( g ).decompose() 
+            vdata = geom.getVertexData() 
+            vreader = pm.GeomVertexReader(vdata, 'vertex') 
+            cChild = pm.CollisionNode( 'cGeom-%s-gni%i' % ( c.getName(), gni ) ) 
+            gni += 1 
+            for p in range( geom.getNumPrimitives() ): 
+                prim = geom.getPrimitive( p ) 
+                for p2 in range( prim.getNumPrimitives() ): 
+                    s = prim.getPrimitiveStart( p2 ) 
+                    e = prim.getPrimitiveEnd( p2 ) 
+                    v = [] 
+                    for vi in range( s, e ): 
+                        vreader.setRow( prim.getVertex( vi ) ) 
+                        v.append( vreader.getData3f() ) 
+                    colPoly = pm.CollisionPolygon( *v ) 
+                    cChild.addSolid( colPoly ) 
+
+            parent.attachNewNode( cChild ) 
+
+    return parent 

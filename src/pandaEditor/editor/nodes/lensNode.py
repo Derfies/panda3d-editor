@@ -16,17 +16,17 @@ class LensNode( GameLensNode ):
         i = self.attributes.index( self.FindProperty( 'fov' ) )
         self.AddAttributes( Attr( 'Show Frustum', bool, self.GetFrustumVisible, self.SetFrustumVisible, w=False ), index=i + 1 )
         
-    def OnSelect( self, np ):
+    def OnSelect( self ):
         """
         Selection handler. Make sure to disable the frustum if it was shown
         before running the select handler as the frustum will change the size
         of the bounding box.
         """
-        frusVis = self.GetFrustumVisible( np )
+        frusVis = self.GetFrustumVisible( self.data )
         if frusVis:
-            self.SetFrustumVisible( np, False )
+            self.SetFrustumVisible( self.data, False )
             
-        GameLensNode.OnSelect( self, np )
+        GameLensNode.OnSelect( self )
         
         if frusVis:
             self.SetFrustumVisible( np, True )
