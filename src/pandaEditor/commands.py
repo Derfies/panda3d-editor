@@ -111,6 +111,9 @@ def Parent( nps, parent ):
     wx.GetApp().doc.OnModified()
     
 
+def Unparent(): pass
+    
+
 def Group( nps ):
     """
     Create the group action, execute it and push it onto the undo queue.
@@ -150,12 +153,6 @@ def Ungroup( nps ):
     wx.GetApp().actnMgr.Push( actn )
     actn()
     wx.GetApp().doc.OnModified()
-    
-    
-def Parent():pass
-
-
-def Unparent(): pass
     
 
 def Connect( tgtComps, cnnctn, fn ):
