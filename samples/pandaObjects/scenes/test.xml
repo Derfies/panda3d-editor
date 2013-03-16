@@ -1,22 +1,22 @@
 <Scene>
     <Component type="SceneRoot">
-        <Component id="cfb1d4ce-a59e-42dc-b4b4-8701c9a5704b" type="Render">
+        <Component id="408191a0-5b09-41a8-adf4-52fb7ab6f2c8" type="Render">
             <Item name="name" type="str" value="render" />
             <Item name="matrix" type="LMatrix4f" value="1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0" />
-            <Component id="d213c8ba-dda1-419e-9096-bb2e16cdf59a" type="BaseCamera">
+            <Component id="56952d78-66ac-4a13-ad62-4f396087e2a2" type="BaseCamera">
                 <Item name="name" type="str" value="camera" />
                 <Item name="matrix" type="LMatrix4f" value="1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0" />
-                <Component id="07bc4538-5b8d-4804-9bd5-a768b9683131" type="BaseCam">
-                    <Item name="fov" type="LVecBase2f" value="53.0328788757 30.0" />
+                <Component id="0c93e337-327e-46de-a88b-5c60e7ff1221" type="BaseCam">
+                    <Item name="fov" type="LVecBase2f" value="46.6236228943 30.0" />
                     <Item name="name" type="str" value="cam" />
                     <Item name="matrix" type="LMatrix4f" value="1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0" />
                 </Component>
             </Component>
-            <Component id="b7c7673a-f877-41c8-aa14-ee28d844f7b5" modelPath="models/box" type="ModelRoot">
+            <Component id="8ba59421-841e-4d8d-a9a0-92e28eafc0c7" modelPath="models/box" type="ModelRoot">
                 <Item name="name" type="str" value="box" />
                 <Item name="matrix" type="LMatrix4f" value="1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0" />
                 <Component type="PandaObject">
-                    <Component filePath="scripts/sine.pyc" type="Script">
+                    <Component filePath="scripts/sine" type="Script">
                         <Item name="amplitude" type="int" value="10" />
                     </Component>
                 </Component>

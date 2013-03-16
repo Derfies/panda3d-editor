@@ -110,3 +110,10 @@ class NodePath( Base ):
             lgts = lgtAttrib.getOnLights()
         
         return lgts
+    
+    def GetActor( self ):
+        """
+        Return the actor part of this NodePath if there is one, return None
+        otherwise.
+        """
+        return self.data.getPythonTag( TAG_ACTOR )

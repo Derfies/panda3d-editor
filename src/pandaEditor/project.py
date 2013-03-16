@@ -60,7 +60,7 @@ import game
 # Create game base and load level
 game = game.Base()
 game.OnInit()
-game.Load( render, 'scenes/test.xml' )
+game.Load( 'scenes/test.xml' )
 run()"""
     
     def New( self, dirPath, **kwargs ):

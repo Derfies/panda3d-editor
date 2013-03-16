@@ -7,7 +7,7 @@ import p3d
 import game
 from constants import *
 from game.nodes.constants import *
-from editor.nodes.constants import *
+#from editor.nodes.constants import *
 from game.nodes.nodePath import NodePath
 from game.nodes.collisionNode import CollisionNode
 from game.nodes.bulletRigidBodyNode import BulletRigidBodyNode
@@ -65,6 +65,6 @@ class EmbeddedBulletTriangleMeshShape( BulletRigidBodyNode ):
         wrpr = cls( np )
         id = str( uuid.uuid4() )
         wrpr.data.setTag( TAG_NODE_UUID, id )
-        np.setPythonTag( TAG_MODIFIED, True )
+        #np.setPythonTag( TAG_MODIFIED, True )
         
         return wrpr
