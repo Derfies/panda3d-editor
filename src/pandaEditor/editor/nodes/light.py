@@ -10,5 +10,5 @@ class Light( GameLight ):
     def SetDefaultValues( self ):
         GameLight.SetDefaultValues( self )
         
-        cnnctn = CnnctnL( 'Light', pm.Light, self.GetLights, NP.setLight, NP.clearLight, NP.clearLight, base.scene.rootNp )
+        cnnctn = CnnctnL( 'Lights', pm.Light, self.GetLights, NP.setLight, NP.clearLight, NP.clearLight, base.scene.rootNp )
         cnnctn.Connect( self.data )
