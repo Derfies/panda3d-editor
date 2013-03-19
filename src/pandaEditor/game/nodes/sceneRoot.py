@@ -23,3 +23,8 @@ class SceneRoot( Base ):
         
         # SceneRoot is a special node which shouldn't be parented to anything.
         pass
+    
+    def SetId( self, id ):
+        
+        # SceneRoot is a special node doesn't need an id.
+        pass
