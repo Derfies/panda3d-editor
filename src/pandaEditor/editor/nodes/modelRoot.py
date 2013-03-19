@@ -11,7 +11,7 @@ class ModelRoot( GameModelRoot ):
     
     @classmethod
     def Create( cls, *args, **kwargs ):
-        wrpr = GameModelRoot.Create( cls, *args, **kwargs )
+        wrpr = super( ModelRoot, cls ).Create( *args, **kwargs )
         
         # Tag each descendant NodePath as a child of a model root. This edits
         # of these NodePaths to be saved out.
