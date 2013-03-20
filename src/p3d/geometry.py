@@ -280,8 +280,8 @@ def Sphere( radius=1.0, numSegs=16, degrees=360,
     for z in range( 1, len( zPoints ) - 2 ):
         rad1 = zPoints[z][1] * radius
         rad2 = zPoints[z+1][1] * radius
-        offset1 = axis * zPoints[z][0]
-        offset2 = axis * zPoints[z+1][0]
+        offset1 = axis * zPoints[z][0] * radius
+        offset2 = axis * zPoints[z+1][0] * radius
         
         for i in range( len( points ) - 1 ):
             
@@ -314,13 +314,13 @@ def Sphere( radius=1.0, numSegs=16, degrees=360,
             cross = ( b - c ).cross( a - c )
             for i in range( 6 ):
                 gvwN.addData3f( cross )
-            
+                
     # Get points
     rad1 = zPoints[1][1] * radius
     for m in [1, -2]:
-        offset1 = axis * zPoints[m][0]
+        offset1 = axis * zPoints[m][0] * radius
         
-        clampedM = max( -1, min( m, 1 ) )
+        clampedM = max( -1, min( m, 1 ) ) * radius
         
         for i in range( len( points ) - 1 ):
             p1 = pm.Point3(points[i][0], points[i][1], 0) * rad1
