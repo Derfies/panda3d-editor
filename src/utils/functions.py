@@ -16,3 +16,7 @@ def Indent( elem, level=0, indent='    ' ):
     else:
         if level and ( not elem.tail or not elem.tail.strip() ):
             elem.tail = i
+            
+            
+def GetLowerCamelCase( name ):
+    return name[0].lower() + name[1:]

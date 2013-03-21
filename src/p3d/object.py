@@ -1,7 +1,7 @@
 from direct.showbase.DirectObject import DirectObject
 
 
-class Object( DirectObject ):
+class Object( DirectObject, object ):
     
     def __init__( self, *args, **kwargs ):
         DirectObject.__init__( self )

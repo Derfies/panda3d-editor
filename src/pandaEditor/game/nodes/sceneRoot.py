@@ -1,3 +1,5 @@
+from panda3d.bullet import BulletWorld as BW
+
 from base import Base
 from game.nodes.attributes import NodePathTargetConnection as Cnnctn
 
@@ -8,13 +10,14 @@ class SceneRoot( Base ):
         Base.__init__( self, *args, **kwargs )
         
         self.AddAttributes(
-            Cnnctn( 'PhysicsWorld', None, base.scene.GetPhysicsWorld, base.scene.SetPhysicsWorld, base.scene.ClearPhysicsWorld )
+            Cnnctn( 'PhysicsWorld', BW, base.scene.GetPhysicsWorld, 
+                    base.scene.SetPhysicsWorld, base.scene.ClearPhysicsWorld ),
+            parent='Scene'
         )
     
     @classmethod
     def Create( cls, *args, **kwargs ):
-        wrpr = cls( base.scene )
-        return wrpr
+        return cls( base.scene )
     
     def AddChild( self, comp ):
         self.data.RegisterComponent( comp )

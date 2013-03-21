@@ -19,11 +19,11 @@ class SceneGraphBasePanel( wx.Panel ):
     def __init__( self, *args, **kwargs ):
         wx.Panel.__init__( self, *args, **kwargs )
         
-        self.filter = None
+        self.filter = pm.PandaNode
         self._updating = False
         self.dragNps = []
         
-        # Build menu
+        # Build display filter menu.
         fileMenu = fm.FlatMenu()
         item = fm.FlatMenuItem( fileMenu, DISPLAY_NODEPATHS, '&NodePaths Only', '', wx.ITEM_CHECK )
         item.Check()
@@ -75,6 +75,13 @@ class SceneGraphBasePanel( wx.Panel ):
         self.SetSizer( self.bs1 )
         
     def OnFlatMenuSelected( self, evt ):
+        
+        # Set the filter based on the flat menu selection.
+        self.filter = None
+        val = self.fm.FindMenuItem( DISPLAY_NODEPATHS ).IsChecked()
+        if val:
+            self.filter = pm.PandaNode
+            
         wx.GetApp().doc.OnRefresh()
         
     def OnTreeBeginLabelEdit( self, evt ):
@@ -203,12 +210,6 @@ class SceneGraphBasePanel( wx.Panel ):
                 itemsDict[item.GetData()] = item
             return itemsDict
         
-        # Set the filter based on the flat menu selection.
-        self.filter = None
-        val = self.fm.FindMenuItem( DISPLAY_NODEPATHS ).IsChecked()
-        if val:
-            self.filter = pm.PandaNode
-        
         # Get map of node paths to items before populating the tree control
         oldItems = GetItemsDict()
 
@@ -217,9 +218,12 @@ class SceneGraphBasePanel( wx.Panel ):
         self._nps = {}
         rItem = self.tc.AddRoot( 'root' )
         wrpr = base.game.nodeMgr.Wrap( base.scene )
-        for cWrpr in wrpr.GetChildren(): 
-            self.AddItem( cWrpr, rItem )
-        
+        if self.filter is None:
+            self.AddItem( wrpr, rItem )
+        else:
+            for cWrpr in wrpr.GetChildren(): 
+                self.AddItem( cWrpr, rItem )
+            
         # Get map of node paths to items after populating the tree control
         newItems = GetItemsDict()
         

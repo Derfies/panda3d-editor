@@ -1,16 +1,17 @@
+import utils
 from game.nodes.base import Base as GameBase
 
 
 class Base( GameBase ):
-        
-    def ValidateDragDrop( self, dragComp, dropComp ):
-        return False
     
     def GetName( self ):
         try:
             return self.data.getName()
         except:
-            return type( self.data ).__name__
+            return utils.GetLowerCamelCase( type( self.data ).__name__ )
+        
+    def ValidateDragDrop( self, dragComp, dropComp ):
+        return False
         
     def GetPropertyData( self ):
         propDict = {}

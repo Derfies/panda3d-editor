@@ -95,9 +95,6 @@ class NodePath( GameNodePath ):
     def OnDelete( self, np ):
         pass
     
-    def GetName( self ):
-        return self.data.getName()
-    
     def GetCreateArgs( self ):
         args = GameNodePath.GetCreateArgs( self )
         

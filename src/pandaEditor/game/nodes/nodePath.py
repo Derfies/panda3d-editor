@@ -4,6 +4,7 @@ import panda3d.core as pc
 import pandac.PandaModules as pm
 from pandac.PandaModules import NodePath as NP
 
+import utils
 from base import Base
 from constants import *
 from attributes import NodePathAttribute as Attr
@@ -35,8 +36,7 @@ class NodePath( Base ):
         """
         if 'path' not in kwargs:
             if cls.initArgs is None:
-                strType = cls.type_.__name__
-                initArgs = [strType[0:1].lower() + strType[1:]]
+                initArgs = [utils.GetLowerCamelCase( cls.type_.__name__ )]
             else:
                 initArgs = cls.initArgs
             

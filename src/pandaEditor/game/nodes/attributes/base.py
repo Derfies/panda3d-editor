@@ -1,3 +1,6 @@
+import utils
+
+
 class Base( object ):
     
     def __init__( self, label, type_=None, getFn=None, setFn=None, srcFn=None, 
@@ -16,7 +19,7 @@ class Base( object ):
         self.parent = parent
         
         name = self.label.replace( ' ', '' )
-        self.name = name[0].lower() + name[1:]
+        self.name = utils.GetLowerCamelCase( name )
         
     def GetSource( self ):
         if self.srcFn is None:
