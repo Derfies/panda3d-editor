@@ -14,15 +14,6 @@ class NodePathAttribute( Base ):
         return self.srcComp
     
 
-class NodePathObjectAttribute( Base ):
-    
-    def __init__( self, label, pType, name ):
-        Base.__init__( self, label, pType, getattr, setattr, None, [name], [name], None )
-    
-    def GetSource( self ):
-        return p3d.NodePathObject.Get( self.srcComp )
-    
-
 class PyTagAttribute( Base ):
     
     def __init__( self, *args, **kwargs ):
@@ -31,3 +22,12 @@ class PyTagAttribute( Base ):
     
     def GetSource( self ):
         return self.srcComp.getPythonTag( self.pyTagName )
+    
+
+class NodePathObjectAttribute( PyTagAttribute ):
+    
+    def __init__( self, label, pType, name, pyTagName=None ):
+        if pyTagName is None:
+            pyTagName = p3d.NodePathObject.pyTagName
+        PyTagAttribute.__init__( self, label, pType, getattr, setattr, None, 
+                                 [name], [name], None, pyTagName=pyTagName )
