@@ -235,6 +235,8 @@ class App( p3d.wx.App ):
         nps = [comp for comp in self.selection.nps if type( comp ) == pm.NodePath]
         if nps:
             base.edCamera.Frame( nps )
+        else:
+            base.edCamera.Frame( [base.scene.rootNp] )
             
     def OnUpdate( self, msg ):
         """
