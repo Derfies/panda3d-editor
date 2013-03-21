@@ -9,6 +9,8 @@ import sceneRoot
 sys.modules['game.nodes.sceneRoot'] = sceneRoot
 import nodePath
 sys.modules['game.nodes.nodePath'] = nodePath
+import showbaseDefault
+sys.modules['game.nodes.showbaseDefault'] = showbaseDefault
 import modelRoot
 sys.modules['game.nodes.modelRoot'] = modelRoot
 import actor
