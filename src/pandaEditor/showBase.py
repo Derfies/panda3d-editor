@@ -97,6 +97,10 @@ class ShowBase( P3dShowBase.ShowBase ):
         self.dr.setClearColor( self.getBackgroundColor() )
         self.dr.setSort( 1 )
         self.dr.setActive( False )
+        
+        self.dr2d = base.cam2d.node().getDisplayRegion( 0 )
+        self.dr2d.setActive( False )
+        
         self.edDr = self.win.makeDisplayRegion( 0, 1, 0, 1 )
         self.edDr.setCamera( self.edCamera )
         
@@ -158,20 +162,30 @@ class ShowBase( P3dShowBase.ShowBase ):
             
     def Reset( self ):
         """Remove all default nodes and recreate them."""
-        # Remove cam node and camera
-        self.cam.removeNode()
-        self.cam = None
-        self.camera.removeNode()
-        self.camera = None
+        # Remove all default nodes and set them to None so they are recreated
+        # properly.
+        for name in ['cam', 'camera', 'cam2d', 'camera2d']:
+            np = getattr( self, name )
+            np.removeNode()
+            setattr( self, name, None )
         
-        # Recreate all default nodes. Remove the new display region created
-        # by makeCamera() and connect the new camera to the existing one.
+        # Set up render and render2d again, forcing their new values into
+        # builtins.
         self.setupRender()
-        self.makeCamera( self.win )
-        dr = self.cam.node().getDisplayRegion( 0 )
-        self.win.removeDisplayRegion( dr ) 
-        self.dr.setCamera( self.cam )
+        self.setupRender2d()
         __builtins__['render'] = self.render
+        __builtins__['render2d'] = self.render2d
+        __builtins__['aspect2d'] = self.aspect2d
+        __builtins__['pixel2d'] = self.pixel2d
+        
+        self.makeCamera( self.win )
+        self.makeCamera2d( self.win )
+        __builtins__['camera'] = self.camera
+        
+        for cam, dr in {self.cam:self.dr, self.cam2d:self.dr2d}.items():
+            defaultDr = cam.node().getDisplayRegion( 0 )
+            self.win.removeDisplayRegion( defaultDr ) 
+            dr.setCamera( cam )
         
         # Set up masks
         self.SetupCameraMask()
@@ -190,3 +204,42 @@ class ShowBase( P3dShowBase.ShowBase ):
             
     def EnableEditorMouse( self ):
         self.edMouseWatcher.reparentTo( self.edMouseWatcherParent )
+        
+    def LayoutGameView( self ):
+        """Deactivate both display regions and enable mouse."""
+        self.DisableEditorMouse()
+        
+        self.dr.setActive( True )
+        self.dr.setDimensions( 0, 1, 0, 1 )
+        self.dr2d.setActive( True )
+        self.dr2d.setDimensions( 0, 1, 0, 1 )
+        
+        self.edRender2d.hide()
+        self.edPixel2d.hide()
+            
+    def LayoutEditorView( self ):
+        """Deactivate both display regions and enable mouse."""
+        self.EnableEditorMouse()
+        
+        self.dr.setActive( False )
+        self.dr2d.setActive( False )
+        
+        self.edDr.setActive( True )
+        self.edRender2d.show()
+        self.edPixel2d.show()
+            
+    def LayoutBothView( self ):
+        """Deactivate both display regions and enable mouse."""
+        self.EnableEditorMouse()
+        
+        self.dr.setActive( True )
+        self.dr.setDimensions( 0.65, 1, 0.65, 1 )
+        
+        self.dr2d.setActive( True )
+        self.dr2d.setDimensions( 0.65, 1, 0.65, 1 )
+        
+        self.edDr.setActive( True )
+        self.edRender2d.show()
+        self.edPixel2d.show()
+        
+        

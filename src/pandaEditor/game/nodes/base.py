@@ -1,3 +1,6 @@
+import copy
+
+
 class Base( object ):
     
     initArgs = None
@@ -25,8 +28,37 @@ class Base( object ):
     def Destroy( self ):
         pass
     
-    def Duplicate( self, np, dupeNp ):
-        pass
+    def Duplicate( self ):
+        dupeComp = copy.copy( self.data )
+        base.scene.RegisterComponent( dupeComp )
+        self.FixUpDuplicateChildren( self.data, dupeComp )
+        return dupeComp
+    
+    def GetId( self ):
+        if self.data in base.scene.comps:
+            return base.scene.comps[self.data]
+        
+        return None
+    
+    def SetId( self, id ):
+        base.scene.comps[self.data] = id
+        
+    def GetType( self ):
+        return type( self ).__name__
+        
+    def GetParent( self ):
+        return base.game.nodeMgr.Wrap( base.scene )
+    
+    def SetParent( self, pComp ):
+        if pComp is not None:
+            wrpr = base.game.nodeMgr.Wrap( pComp )
+            wrpr.AddChild( self.data )
+    
+    def GetChildren( self ):
+        return [] 
+    
+    def GetAddons( self ):
+        return []
     
     def FindProperty( self, name ):
         for attr in self.GetAttributes():
@@ -37,11 +69,6 @@ class Base( object ):
         for cnnctn in self.GetAllConnections():
             if cnnctn.name == name:
                 return cnnctn
-    
-    def SetParent( self, pComp ):
-        if pComp is not None:
-            wrpr = base.game.nodeMgr.Wrap( pComp )
-            wrpr.AddChild( self.data )
     
     def SetPropertyData( self, propDict ):
         for key, val in propDict.items():
@@ -90,3 +117,16 @@ class Base( object ):
             attrs[i].parent = parent
             attrs[i].srcComp = self.data
             self.attributes.insert( index + i, attrs[i] )
+            
+    def FixUpDuplicateChildren( self, origComp, dupeComp ):
+        dupeWrpr = base.game.nodeMgr.Wrap( dupeComp )
+        dupeWrpr.OnDuplicate( origComp, dupeComp )
+        
+        cDupeWrprs = dupeWrpr.GetChildren()
+        origWrpr = base.game.nodeMgr.Wrap( origComp )
+        cOrigWrprs = origWrpr.GetChildren()
+        for i in range( len( cDupeWrprs ) ):
+            self.FixUpDuplicateChildren( cOrigWrprs[i].data, cDupeWrprs[i].data )
+            
+    def OnDuplicate( self, origComp, dupeComp ):
+        pass

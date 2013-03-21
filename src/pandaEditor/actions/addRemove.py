@@ -11,34 +11,30 @@ class AddRemove( Base ):
     
     def _AddComponent( self ):
         
-        # Attach the component back to its old parent and set it's id back.
+        # Attach the component back to its old parent and set its id back.
         wrpr = base.game.nodeMgr.Wrap( self.comp )
         wrpr.SetParent( self.pComp )
         if self.id is not None:
             wrpr.SetId( self.id )
         
-        # Reconnect the component to other elements in the scene.
+        # Reestablish the connections the component has with the other 
+        # components in the scene.
         for cnnctn in self.cnnctns:
             cnnctn.Connect( self.comp )
         self.cnnctns = []
         
     def _RemoveComponent( self ):
         
-        # Break all connections for the nodes we are trying to remove, then
-        # detach them from the scene.
+        # Break all connections for the component we are removing, then store
+        # those connections so we can reconnect them if this action is undone.
         wrpr = base.game.nodeMgr.Wrap( self.comp )
         id = wrpr.GetId()
-        if id in base.scene.cnnctns:
-            for tup in base.scene.cnnctns[id].values():
-                for items in tup:
-                    comp, cnnctn = items
-                    cnnctn.Break( self.comp )
-                    self.cnnctns.append( cnnctn )
-                    
-            del base.scene.cnnctns[id]
+        for cnnctn in base.scene.GetConnections( id ):
+            cnnctn.Break( self.comp )
+            self.cnnctns.append( cnnctn )
         
         # Store the parent and id, then detach the component from the scene.
-        self.pComp = wrpr.GetParent()
+        self.pComp = wrpr.GetParent().data
         self.id = wrpr.GetId()
         wrpr.Detach()
     

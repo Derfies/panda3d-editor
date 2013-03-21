@@ -7,21 +7,21 @@ class Manager( object ):
         from base import Base
         from sceneRoot import SceneRoot
         
-        from nodePath import NodePath
-        from render import Render
-        from actor import Actor
         from pandaNode import PandaNode
-        from camera import Camera
-        from baseCam import BaseCam
+        from nodePath import NodePath
         from modelNode import ModelNode
-        from baseCamera import BaseCamera
+        from camera import Camera
+        
+        from showbaseDefault import Render, BaseCamera, BaseCam
+        from showbaseDefault import Render2d, Aspect2d, Pixel2d, Camera2d
+        from showbaseDefault import Cam2d
+        
         from modelRoot import ModelRoot
+        from actor import Actor
         
         from collisionNode import CollisionNode
-        from collisionSolids import CollisionBox
-        from collisionSolids import CollisionRay
-        from collisionSolids import CollisionSphere
-        from collisionSolids import CollisionInvSphere
+        from collisionSolids import CollisionBox, CollisionRay
+        from collisionSolids import CollisionSphere, CollisionInvSphere
         from collisionSolids import CollisionTube
 
         from light import Light
@@ -45,13 +45,20 @@ class Manager( object ):
             'Base':Base,
             'SceneRoot':SceneRoot,
             
-            'NodePath':NodePath,
             'PandaNode':PandaNode,
-            'Render':Render,
-            'Camera':Camera,
-            'BaseCam':BaseCam,
+            'NodePath':NodePath,
             'ModelNode':ModelNode,
+            'Camera':Camera,
+            
+            'Render':Render,
             'BaseCamera':BaseCamera,
+            'BaseCam':BaseCam,
+            'Render2d':Render2d,
+            'Pixel2d':Pixel2d,
+            'Aspect2d':Aspect2d,
+            'Camera2d':Camera2d,
+            'Cam2d':Cam2d,
+            
             'ModelRoot':ModelRoot,
             'Actor':Actor,
             

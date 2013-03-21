@@ -7,6 +7,8 @@ import wx
 
 import p3d
 from .. import gamePlugin as gp
+from ..gamePlugin.pandaObject import PandaObjectNPO
+from ..gamePlugin.constants import *
 from pandaEditor import commands as cmds, actions
 from wxExtra import utils as wxUtils, ActionItem, CustomAuiToolBar
 
@@ -27,6 +29,10 @@ class EditorPlugin( gp.GamePlugin ):
         
         # Add new commands to command module.
         setattr( cmds, 'AddScript', self.AddScript )
+        
+        # DEBUG
+        #pub.subscribe( self.OnUpdate, 'projectFilesAdded' )
+        #self.'projectFilesModified'
         
         self.playing = False
         
@@ -69,8 +75,8 @@ class EditorPlugin( gp.GamePlugin ):
         # script to it. Create one if it doesn't already exist and add it to
         # the list of undoable actions.
         actns = []
-        pObjWrprCls = base.game.nodeMgr.nodeWrappers[p3d.TAG_PANDA_OBJECT]
-        pObj = p3d.PandaObject.Get( np )
+        pObjWrprCls = base.game.nodeMgr.nodeWrappers[TAG_PANDA_OBJECT]
+        pObj = PandaObjectNPO.Get( np )
         if pObj is None:
             pObjWrpr = pObjWrprCls.Create()
             actns.append( actions.Add( pObjWrpr.data ) )
@@ -79,6 +85,9 @@ class EditorPlugin( gp.GamePlugin ):
         pObjWrpr.SetParent( np )
         scriptWrpr.SetParent( pObjWrpr.data )
         actns.append( actions.Add( scriptWrpr.data ) )
+        
+        # DEBUG
+        #base.pandaMgr.RegisterScript( filePath, pObjWrpr.data )
         
         # Create a composite action, exectute it and push it onto the undo
         # queue.
@@ -148,7 +157,7 @@ class EditorPlugin( gp.GamePlugin ):
         self.tbPlay.Refresh()
         
     def OnProjectFilesModified( self, filePaths ):
-        
+        #print 'update!!'
         # Don't reload files during playback. They will be reloaded once
         # playback is finished anyway when the scene is reloaded.
         if self.playing:
@@ -159,6 +168,8 @@ class EditorPlugin( gp.GamePlugin ):
         for filePath in filePaths:
             if os.path.splitext( filePath )[1] == '.py':
                 pyFilePaths.append( filePath )
+                
+        print 'relaodig: ', pyFilePaths
         
         # Reload scripts
         if pyFilePaths:

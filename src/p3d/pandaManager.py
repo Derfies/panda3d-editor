@@ -37,9 +37,17 @@ class PandaManager( object ):#utils.Singleton ):
         Register the script and the instance. Make sure to register the .py 
         file, not a .pyo or .pyc file.
         """
-        filePath = os.path.splitext( filePath )[0] + '.py'
+        filePath = os.path.splitext( filePath )[0]# + '.py'
         self.pObjs.setdefault( filePath, weakref.WeakSet( [] ) )
         self.pObjs[filePath].add( pObj )
+        
+    def DeregisterScript( self, scriptPath ):
+        filePath = os.path.splitext( scriptPath )[0]
+        if filePath in self.pObjs:
+            print 'degister: ', filePath
+            del self.pObjs[filePath]
+        else:
+            print 'couldnt find: ', filePath
         
     def ReloadScripts( self, scriptPaths ):
         """
@@ -50,4 +58,5 @@ class PandaManager( object ):#utils.Singleton ):
         scriptPaths = set( scriptPaths ) & set( self.pObjs.keys() )
         for scriptPath in scriptPaths:
             for pObj in self.pObjs[scriptPath]:
-                pObj.ReloadScript( scriptPath )
+                pObjWrpr = base.game.nodeMgr.Wrap( pObj )
+                pObjWrpr.ReloadScript( scriptPath )

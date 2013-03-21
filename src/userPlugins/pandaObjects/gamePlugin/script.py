@@ -3,6 +3,7 @@ import sys
 import inspect
 
 import p3d
+from pandaObject import PandaObjectNPO
 from game.nodes.base import Base
 
 
@@ -57,17 +58,20 @@ class Script( Base ):
         
         # Find the script in the list of instances for this PandaObject and
         # remove it.
-        pObj = p3d.PandaObject.Get( self.data.np )
+        pObj = PandaObjectNPO.Get( self.data.np )
         for name, inst in pObj.instances.items():
             if inst == self.data:
                 del pObj.instances[name]
                 return
-    
-    @staticmethod
-    def GetFileName( filePath ):
-        normPath = os.path.normpath( filePath )
-        head, tail = os.path.split( normPath )
-        return os.path.splitext( tail )[0]
+            
+    def SetId( self, id ):
+        
+        # Scripts don't need ids.
+        pass
+        
+    def GetParent( self ):
+        np = p3d.PandaObject.Get( self.data.np )
+        return base.game.nodeMgr.Wrap( np )
         
     def SetParent( self, pObj ):
         if pObj is not None:
@@ -75,6 +79,12 @@ class Script( Base ):
             clsName = name[0].upper() + name[1:]
             pObj.instances[clsName] = self.data
             self.data.np = pObj.np
+            
+    @staticmethod
+    def GetFileName( filePath ):
+        normPath = os.path.normpath( filePath )
+        head, tail = os.path.split( normPath )
+        return os.path.splitext( tail )[0]
     
     def SetPropertyData( self, dataDict ):
         

@@ -53,7 +53,7 @@ class SceneParser( game.SceneParser ):
         elem = pElem
         if wrpr.IsSaveable():
             elem = et.SubElement( pElem, name )
-            elem.set( 'type', type( wrpr ).__name__ )
+            elem.set( 'type', wrpr.GetType() )
             id = wrpr.GetId()
             if id is not None:
                 elem.set( 'id', id )

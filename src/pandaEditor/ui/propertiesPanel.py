@@ -4,6 +4,7 @@ from wx.lib.pubsub import Publisher as pub
 import pandac.PandaModules as pm
 from panda3d.core import Filename
 
+import p3d
 from .. import commands as cmds
 import customProperties as custProps
 
@@ -46,6 +47,20 @@ class PropertyGrid( wxpg.PropertyGrid ):
         # Store the property plus all its children in the long label dict
         allProps = self._propsByLongLabel
         allChildren = self.GetAllChildren( prop )
+        #self._propsByLongLabel = dict( allProps.items() + allChildren.items() )
+        
+        def Rec( prop, res ):
+            res.append( prop )
+            for cProp in prop.GetChildren():
+                Rec( cProp, res )
+        
+        cProps = []
+        Rec( prop, cProps )
+        
+        allProps = self._propsByLongLabel
+        allChildren = {}
+        for cProp in cProps:
+            allChildren[self.GetPropertyLongLabel( cProp )] = cProp
         self._propsByLongLabel = dict( allProps.items() + allChildren.items() )
         
     def Clear( self ):
@@ -178,6 +193,7 @@ class PropertiesPanel( wx.Panel ):
         wx.Panel.__init__( self, *args, **kwargs )
         
         self.propExps = {}
+        self.refocus = False
         
         # Define how each type of value should be edited
         self.propMap = {
@@ -275,6 +291,8 @@ class PropertiesPanel( wx.Panel ):
         if not nps:
             return
         
+        self.refocus = True
+        
         # Get the node property from the property and set it.
         prop = evt.GetProperty()
         attrs = prop.GetAttribute( ATTRIBUTE_TAG )
@@ -289,24 +307,39 @@ class PropertiesPanel( wx.Panel ):
         # Get the scroll position.
         x, y = self.pg.GetViewStart()
         
-        # Get property expanded states
+        # Get property expanded states and which property was focused.
         allProps = self.pg.GetPropertiesDictionary()
         for propLongLbl, prop in allProps.items():
             self.propExps[propLongLbl] = prop.IsExpanded()
+            
+        focusProp = self.pg.GetFocusedProperty()
+        if focusProp is not None:
+            focusPropLbl = self.pg.GetPropertyLongLabel( focusProp )
+            focusIndex = self.pg.GetFocusedPropertyControl()
         
         # Clear and rebuild property grid
         self.BuildPropertyGrid( msg.data )
         
-        # Set expanded states back
+        # Set all property expanded states back.
         for propLongLbl, expanded in self.propExps.items():
             prop = self.pg.GetPropertyByLongLabel( propLongLbl )
             if prop is not None:
                 prop.SetExpanded( expanded )
         
-        # Get the scroll position back.
+        # Set the focused property back.
+        if self.refocus and focusProp is not None:
+            focusProp = self.pg.GetPropertyByLongLabel( focusPropLbl )
+            if focusProp is not None:
+                focusProp.SetFocus( focusIndex )
+            else:
+                print 'Missed focus'
+        
+        # Set the scroll position back.
         self.pg.Scroll( x, y )
         
         self.pg.Thaw()
+        
+        self.refocus = False
         
     def OnSelectionModified( self, msg ):
         """

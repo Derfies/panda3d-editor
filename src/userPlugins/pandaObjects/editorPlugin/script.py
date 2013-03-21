@@ -7,9 +7,6 @@ from .. import gamePlugin as gp
 
 
 class Script( gp.Script ):
-    
-    def GetParent( self ):
-        return p3d.PandaObject.Get( self.data.np )
         
     def GetPropertyData( self ):
         
@@ -28,7 +25,11 @@ class Script( gp.Script ):
         return props
     
     def GetCreateArgs( self ):
-        filePath = inspect.getfile( self.data.__class__ )
+        filePath = self.GetScriptPath()#inspect.getfile( self.data.__class__ )
         pandaPath = pm.Filename.fromOsSpecific( filePath )
         relPath = base.project.GetRelModelPath( pandaPath )
         return {'filePath':str( relPath )}
+    
+    def GetScriptPath( self ):
+        filePath = inspect.getfile( self.data.__class__ )
+        return filePath

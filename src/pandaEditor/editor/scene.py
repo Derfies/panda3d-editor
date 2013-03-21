@@ -16,15 +16,24 @@ class Scene( game.Scene ):
         p3d.Object.__init__( self, *args, **kwargs )
         self.rootNp.reparentTo( base.edRender )
         
-        # Tag default nodes
-        render.setTag( game.nodes.TAG_NODE_TYPE, 'Render' )
-        base.cam.setTag( game.nodes.TAG_NODE_TYPE, 'BaseCam' )
-        base.camera.setTag( game.nodes.TAG_NODE_TYPE, 'BaseCamera' )
-        
-        # Call create to run editor create methods.
-        base.game.nodeMgr.Create( 'Render' )
-        base.game.nodeMgr.Create( 'BaseCam' )
-        base.game.nodeMgr.Create( 'BaseCamera' )
+        # 'Create' the default NodePaths that come from showbase. Calling the
+        # create method in this way doesn't generate any new NodePaths, it
+        # will simply return those the default showbase creates when it starts
+        # up. Tag them so their type is overriden and the component manager
+        # wraps them appropriately.
+        defaultCompTypes = [
+            'Render',
+            'BaseCamera',
+            'BaseCam',
+            'Render2d',
+            'Aspect2d',
+            'Pixel2d',
+            'Camera2d',
+            'Cam2d'          
+        ]
+        for cType in defaultCompTypes:
+            wrpr = base.game.nodeMgr.Create( cType )
+            wrpr.data.setTag( game.nodes.TAG_NODE_TYPE, cType )
         
     def Load( self, **kwargs ):
         """Recreate a scene graph from file."""
@@ -58,19 +67,47 @@ class Scene( game.Scene ):
             base.Reset()
         
         self.rootNp.removeNode()
+        
+    def GetConnections( self, compId ):
+        """Return all connections for the indicated component."""
+        cnnctns = []
+        
+        for id in self.cnnctns:
+            if id == compId:
+                cnnctns.extend( self.cnnctns[id] )
+        
+        return cnnctns
     
-    def DuplicateNodePaths( self, nps ):
-        """Duplicate node paths."""
-        dupeNps = []
+    def RegisterConnection( self, comp, cnnctn ):
+        """
+        Register a connection to its target component. This allows us to find
+        a connection and break it when a component is deleted.
+        """
+        compId = base.game.nodeMgr.Wrap( comp ).GetId()
+        self.cnnctns.setdefault( compId, [] )
+        cnnctnLabels = [cnnctn.label for cnnctn in self.cnnctns[compId]]
+        if cnnctn.label not in cnnctnLabels:
+            self.cnnctns[compId].append( cnnctn )
+    
+    def DeregisterConnection( self, comp, cnnctn ):
+        compId = base.game.nodeMgr.Wrap( comp ).GetId()
+        if compId in self.cnnctns:
+            del self.cnnctns[compId]
         
-        for np in nps:
+    def ClearConnections( self, comp ):
+        delIds = []
+        for id, cnnctns in self.cnnctns.items():
             
-            # Copy the node, parenting to the same parent as the original
-            dupeNp = np.copyTo( np.getParent() )
-            dupeNps.append( dupeNp )
-        
-            # Call duplicate methods for any wrappers
-            wrpr = base.game.nodeMgr.Wrap( np )
-            wrpr.Duplicate( np, dupeNp )
-        
-        return dupeNps
+            delCnnctns = []
+            for cnnctn in cnnctns:
+                if cnnctn.srcComp == comp:
+                    delCnnctns.append( cnnctn )
+                    
+            for delCnnctn in delCnnctns:
+                cnnctns.remove( delCnnctn )
+                
+            if not cnnctns:
+                delIds.append( id )
+                
+        for delId in delIds:
+            del self.cnnctns[delId]

@@ -57,58 +57,74 @@ class Selection( p3d.Object ):
         self.nps = list( set( self.nps ) - set( nps ) )
     
     def SelectParent( self ):
-        """Select parent node paths."""
-        nps = []
-        for np in self.nps:
-            if np.getParent() != base.edRender:
-                nps.append( np.getParent() )
+        """
+        Return a list of parent components from the selection. Include the
+        original component if no suitable parent is found.
+        """
+        comps = []
+        for comp in self.nps:
+            wrpr = base.game.nodeMgr.Wrap( comp )
+            pWrpr = wrpr.GetParent()
+            if pWrpr.data != base.scene:
+                comps.append( pWrpr.data )
             else:
-                nps.append( np )
-        return nps
+                comps.append( comp )
+        return comps
         
     def SelectChild( self ):
-        """Select child node paths."""
-        nps = []
-        for np in self.nps:
-            children = np.getChildren()
-            isIgnore = [child.getPythonTag( editor.nodes.TAG_IGNORE ) for child in children]
-            if children and not isIgnore[0]:
-                nps.append( children[0] )
+        """
+        Return a list of child components from the selection. Include the
+        original component if no children are found.
+        """
+        comps = []
+        for comp in self.nps:
+            wrpr = base.game.nodeMgr.Wrap( comp )
+            cWrprs = wrpr.GetChildren()
+            if cWrprs:
+                comps.append( cWrprs[0].data )
             else:
-                nps.append( np )
-        return nps
+                comps.append( comp )
+        return comps
             
     def SelectPrev( self ):
-        """Select previous node paths."""
-        nps = []
-        for np in self.nps:
-            
-            # Find where the child appears in the list
-            children = list( np.getParent().getChildren() )
-            index = children.index( np ) - 1
-            
-            # Wrap around if the index has gone below zero
+        """
+        For each component in the selection, return the component that appears
+        one before in the parent's list of children. 
+        """
+        comps = []
+        for comp in self.nps:
+            wrpr = base.game.nodeMgr.Wrap( comp )
+            pWrpr = wrpr.GetParent()
+            cComps = [cWrpr.data for cWrpr in pWrpr.GetChildren()]
+                
+            # Get the index of the child before this one - wrap around if the 
+            # index has gone below zero.
+            index = cComps.index( comp ) - 1
             if index < 0:
-                index = len( children ) - 1
+                index = len( cComps ) - 1
             
-            nps.append( children[index] )
-        return nps
+            comps.append( cComps[index] )
+        return comps
         
     def SelectNext( self ):
-        """Select next node paths."""
-        nps = []
-        for np in self.nps:
+        """
+        For each component in the selection, return the component that appears
+        one after in the parent's list of children. 
+        """
+        comps = []
+        for comp in self.nps:
+            wrpr = base.game.nodeMgr.Wrap( comp )
+            pWrpr = wrpr.GetParent()
+            cComps = [cWrpr.data for cWrpr in pWrpr.GetChildren()]
             
-            # Find where the child appears in the list
-            children = list( np.getParent().getChildren() )
-            index = children.index( np ) + 1
-            
-            # Wrap around if the index has gone below zero
-            if index > len( children ) - 1:
+            # Get the index of the child after this one - wrap around if the 
+            # index has gone over the number of children.
+            index = cComps.index( comp ) + 1
+            if index > len( cComps ) - 1:
                 index = 0
             
-            nps.append( children[index] )
-        return nps
+            comps.append( cComps[index] )
+        return comps
     
     def StartDragSelect( self, append=False ):
         """

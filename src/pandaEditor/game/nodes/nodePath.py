@@ -44,29 +44,82 @@ class NodePath( Base ):
             wrpr.SetupNodePath()
         else:
             wrpr = cls( cls.FindChild( kwargs['path'], kwargs['parent'] ) )
-            
         return wrpr
     
     def Detach( self ):
         self.data.detachNode()
     
     def Destroy( self ):
-        Base.Destroy( self )
         
-        base.game.pluginMgr.OnNodeDestroy( self.data )
+        # Iterate through all addons and destroy them.
+        for addon in self.GetAddons():
+            addon.Destroy()
+            
+        self.data.removeNode()
         
-    def Duplicate( self, np, dupeNp ):
-        Base.Duplicate( self, np, dupeNp )
+    def Duplicate( self ):
+        dupeNp = self.data.copyTo( self.data.getParent() )
+        dupeNp.setName( self.data.getName() + '_1' )
+        self.FixUpDuplicateChildren( self.data, dupeNp )
+        return dupeNp
+    
+    def GetId( self ):
+        return self.data.getTag( TAG_NODE_UUID )
         
-        for child in self.children:
-            child.Duplicate( np, dupeNp )
-        base.game.pluginMgr.OnNodeDuplicate( self.data )
+    def SetId( self, id ):
+        self.data.setTag( TAG_NODE_UUID, id )
+    
+    def GetParent( self ):
+        return base.game.nodeMgr.Wrap( self.data.getParent() )
+    
+    def GetChildren( self ):
+        """Return a list of wrappers for the children of this NodePath."""
+        children = [
+            base.game.nodeMgr.Wrap( cNp ) 
+            for cNp in self.data.getChildren()
+        ]
+        return children
+    
+    def GetTags( self ):
+        tags = self.data.getPythonTag( TAG_PYTHON_TAGS )
+        if tags is not None:
+            return [tag for tag in tags if tag in base.game.nodeMgr.nodeWrappers]
         
-        # Give a new uuid to the duplicate node.
-        dupeWrpr = base.game.nodeMgr.Wrap( dupeNp )
-        dupeWrpr.SetupNodePath()
+        return []
+    
+    def GetAddons( self ):
+        addons = []
+        
+        # Add wrappers for python objects.
+        for tag in self.GetTags():
+            pyObj = self.data.getPythonTag( tag )
+            pyObjWrpr = base.game.nodeMgr.Wrap( pyObj )
+            addons.append( pyObjWrpr )
+            
+        return addons
+    
+    def OnDuplicate( self, origNp, dupeNp ):
+        
+        # If the original NodePath had an id then generate a new one for the 
+        # duplicate.
+        wrpr = base.game.nodeMgr.Wrap( origNp )
+        if wrpr.GetId():
+            self.CreateNewId()
+            
+        # Duplicate all addons / objects attached to this NodePath with python
+        # tags and set them to the new NodePath.
+        for tag in self.GetTags():
+            pyObj = origNp.getPythonTag( tag )
+            pyObjWrpr = base.game.nodeMgr.Wrap( pyObj )
+            dupePyObj = pyObjWrpr.Duplicate()
+            self.data.setPythonTag( tag, dupePyObj )
+        
+        return origNp
         
     def SetupNodePath( self ):
+        self.CreateNewId()
+        
+    def CreateNewId( self ):
         id = str( uuid.uuid4() )
         self.data.setTag( TAG_NODE_UUID, id )
         

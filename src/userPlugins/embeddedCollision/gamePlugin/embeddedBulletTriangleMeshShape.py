@@ -1,4 +1,5 @@
 import uuid
+import copy
 
 import panda3d.bullet as blt
 import pandac.PandaModules as pm
@@ -26,14 +27,15 @@ class EmbeddedBulletTriangleMeshShape( BulletRigidBodyNode ):
     
     @classmethod
     def Create( cls, *args, **kwargs ):
-        print '**CREATE METHOD***'
+        #print '**CREATE METHOD***'
         if 'inputNp' in kwargs:
             inputNp = kwargs['inputNp']
-            print 'using: ', inputNp
+            #print 'using: ', inputNp
         elif 'path' in kwargs:
-            #print 'pathed'
+            #print 'path: ', kwargs['path']
+            #print 'parent: ', kwargs['parent']
             inputNp = cls( cls.FindChild( kwargs['path'], kwargs['parent'] ) )
-            print 'using: ', inputNp.data
+            #print 'returning: ', inputNp.data
             return inputNp
         
         # Get all geom nodes at this level and below.
@@ -63,8 +65,29 @@ class EmbeddedBulletTriangleMeshShape( BulletRigidBodyNode ):
         
         inputNp.detachNode()
         wrpr = cls( np )
-        id = str( uuid.uuid4() )
-        wrpr.data.setTag( TAG_NODE_UUID, id )
-        #np.setPythonTag( TAG_MODIFIED, True )
+        wrpr.CreateNewId()
         
         return wrpr
+    
+    def OnDuplicate( self, origNp, dupeNp ):
+        
+        # Duplicate doesn't work for rigid body nodes...
+        foo = blt.BulletRigidBodyNode( origNp.getName() )
+        bar = pm.NodePath( foo )
+        bar.reparentTo( self.data.getParent() )
+        self.data.detachNode()
+        
+        self.data = bar
+        self.data.setTag( game.nodes.TAG_NODE_TYPE, TAG_EMBEDDED_BULLET_TRIANGLE_MESH_SHAPE )
+        #self.SetupNodePath()
+        #print 'DUPE: ', self.data
+        #print 'new: ', dupeNp, ' : ', self.data
+        #print 'from: ', dupeNp
+        for shape in origNp.node().getShapes():
+            copShape = copy.copy( shape )
+            self.data.node().addShape( copShape )
+        
+        BulletRigidBodyNode.OnDuplicate( self, origNp, dupeNp )
+        
+        return self.data
+        

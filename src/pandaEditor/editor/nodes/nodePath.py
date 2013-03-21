@@ -1,3 +1,5 @@
+import copy
+
 import pandac.PandaModules as pm
 from pandac.PandaModules import NodePath as NP
 from direct.directtools.DirectSelection import DirectBoundingBox
@@ -93,43 +95,6 @@ class NodePath( GameNodePath ):
     def OnDelete( self, np ):
         pass
     
-    def GetTags( self ):
-        tags = self.data.getPythonTag( TAG_PYTHON_TAGS )
-        if tags is not None:
-            return [tag for tag in tags if tag in base.game.nodeMgr.nodeWrappers]
-        
-        return []
-    
-    def GetChildren( self ):
-        children = []
-        
-        # Add wrappers for child NodePaths.
-        for np in self.data.getChildren():
-            if not np.getPythonTag( TAG_IGNORE ):
-                children.append( base.game.nodeMgr.Wrap( np ) )
-            
-        return children
-    
-    def GetAddons( self ):
-        children = []
-        
-        # Add wrappers for python objects.
-        for tag in self.GetTags():
-            pyObj = self.data.getPythonTag( tag )
-            pyObjWrpr = base.game.nodeMgr.nodeWrappers[tag]
-            children.append( pyObjWrpr( pyObj ) )
-            
-        return children
-        
-    def GetId( self ):
-        return self.data.getTag( TAG_NODE_UUID )
-    
-    def SetId( self, id ):
-        self.data.setTag( TAG_NODE_UUID, id )
-    
-    def GetParent( self ):
-        return self.data.getParent()
-    
     def GetName( self ):
         return self.data.getName()
     
@@ -140,7 +105,7 @@ class NodePath( GameNodePath ):
         # position in the hierarchy to the list of create arguments.
         if self.GetModified():
             modelRoot = self.data.findNetPythonTag( TAG_PICKABLE )
-            
+           
             def Rec( tgtNp, np, path ):
                 if np.compareTo( tgtNp ) != 0:
                     path.insert( 0, np.getName() )
@@ -190,9 +155,7 @@ class NodePath( GameNodePath ):
         return self.data.node().isOfType( cType )
             
     def SetDefaultValues( self ):
-        
-        # Set default parent.
-        self.data.reparentTo( render )
+        pass
         
     def IsSaveable( self ):
         if self.data.getPythonTag( TAG_MODEL_ROOT_CHILD ):
@@ -205,3 +168,30 @@ class NodePath( GameNodePath ):
         np = super( NodePath, cls ).FindChild( *args, **kwargs )
         np.setPythonTag( TAG_MODIFIED, True )
         return np
+    
+    def GetDefaultParent( self ):
+        return base.render
+    
+    def GetChildren( self ):
+        """
+        Return a list of wrappers for the children of this NodePath, ignoring
+        those NodePaths tagged with TAG_IGNORE (like editor only geometry).
+        """
+        children = [
+            cWrpr 
+            for cWrpr in GameNodePath.GetChildren( self ) 
+            if not cWrpr.data.getPythonTag( TAG_IGNORE )
+        ]
+        return children
+    
+    def OnDuplicate( self, origNp, dupeNp ):
+        GameNodePath.OnDuplicate( self, origNp, dupeNp )
+        
+        wrpr = base.game.nodeMgr.Wrap( origNp )
+        cnnctns = base.scene.GetConnections( wrpr.GetId() )
+        for cnnctn in cnnctns:
+            newCnnctn = copy.copy( cnnctn )
+            newCnnctn.Connect( self.data )
+        
+        self.data.setPythonTag( TAG_MODIFIED, origNp.getPythonTag( TAG_MODIFIED ) )
+        

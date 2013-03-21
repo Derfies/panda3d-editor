@@ -1,0 +1,5 @@
+import sys
+
+import embeddedBulletTriangleMeshShape
+sys.modules['embeddedCollision.gamePlugin.embeddedBulletTriangleMeshShape'] = embeddedBulletTriangleMeshShape
+from editorPlugin import EditorPlugin

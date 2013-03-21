@@ -338,6 +338,7 @@ class MainFrame( wx.Frame ):
             wrpr = wrprCls.Create( modelPath=modelPath )
             wrpr.data.setTransform( np.getTransform() )
             wrpr.SetDefaultValues()
+            wrpr.SetParent( wrpr.GetDefaultParent() )
             cmds.Replace( np, wrpr.data )
         
     def OnCreatePrefab( self, evt ):
@@ -387,30 +388,12 @@ class MainFrame( wx.Frame ):
         self.app.SetActiveGizmo( arg )
         
     def OnLayout( self, evt ):
-        
-        # Deactivate both display regions and enable mouse.
-        base.dr.setActive( False )
-        base.edDr.setActive( False )
-        base.EnableEditorMouse()
-        base.edRender2d.show()
-        base.edPixel2d.show()
-        
-        # Show either the game or editor viewport, or in the case of showing
-        # both put the game viewport in the upper right hand corner. Disable
-        # the mouse when in game view.
         if evt.GetId() == ID_LAYOUT_GAME:
-            base.dr.setActive( True )
-            base.dr.setDimensions( 0, 1, 0, 1 )
-            base.edRender2d.hide()
-            base.edPixel2d.hide()
-            base.DisableEditorMouse()
+            base.LayoutGameView()
         elif evt.GetId() == ID_LAYOUT_EDITOR:
-            base.edDr.setActive( True )
-            base.edDr.setDimensions( 0, 1, 0, 1 )
+            base.LayoutEditorView()
         elif evt.GetId() == ID_LAYOUT_BOTH:
-            base.dr.setActive( True )
-            base.edDr.setActive( True )
-            base.dr.setDimensions( 0.65, 1, 0.65, 1 )
+            base.LayoutBothView()
         
     def OnUpdateWindowMenu( self, evt ):
         """
