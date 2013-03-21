@@ -9,31 +9,40 @@ from panda3d.core import Filename
 from wxExtra import wxpg, CompositeDropTarget, utils as wxUtils
 
 
+class AutoWidthListCtrl( wx.ListCtrl, listmix.ListCtrlAutoWidthMixin ):
+
+    def __init__( self, *args, **kwargs ):
+        wx.ListCtrl.__init__( self, *args, **kwargs )
+        listmix.ListCtrlAutoWidthMixin.__init__( self )
+    
+
 class Float3Property( wxpg.BaseProperty ):
     
     def __init__( self, *args, **kwargs ):
         wxpg.BaseProperty.__init__( self, *args, **kwargs )
         
-        self._ctrls = []
         self._count = 3
         self._cast = pm.Vec3 # HAXXOR
         
-    def BuildControl( self, parent, id ):
-        ctrl = wx.BoxSizer( wx.HORIZONTAL )
+    def BuildControl( self, parent ):
+        bs = wx.BoxSizer( wx.HORIZONTAL )
         for i in range( self._count ):
-            spin = fs.FloatSpin( parent, id, value=self._value[i], digits=3 )
-            spin.Enable( self.IsEnabled() )
-            spin.Bind( fs.EVT_FLOATSPIN, self.OnChanged )
-            ctrl.Add( spin, 1, wx.EXPAND )
-            self._ctrls.append( spin )
-        
-        return ctrl
+            rndValue = round( self._value[i], 3 )
+            ctrl = wx.TextCtrl( parent, i, value=str( rndValue ), 
+                                validator=wxpg.FloatValidator() )
+            self.AppendControl( ctrl )
+            bs.Add( ctrl, 1, wx.EXPAND )
+        return bs
     
     def SetValueFromEvent( self, evt ):
-        ctrl = evt.GetEventObject()
-        index = self._ctrls.index( ctrl )
         self._value = self._cast( self._value )
-        self._value[index] = ctrl.GetValue()
+        ctrl = evt.GetEventObject()
+        index = ctrl.GetId()
+        try:
+            val = float( ctrl.GetValue() )
+        except ValueError:
+            val = 0
+        self._value[index] = val
         
 
 class Float2Property( Float3Property ):
@@ -104,13 +113,13 @@ class FilePathProperty( wxpg.StringProperty ):
 
 class NodePathProperty( wxpg.StringProperty ):
     
-    def BuildControl( self, parent, id ):
+    def BuildControl( self, parent ):
         np = self.GetValue()
         text = ''
         if np is not None:
             text = np.getName()
         
-        ctrl = wx.TextCtrl( parent, id, value=text )
+        ctrl = wx.TextCtrl( parent, -1, value=text )
         ctrl.Bind( wx.EVT_TEXT, self.OnChanged )
         
         dt = CompositeDropTarget( ['nodePath', 'filePath'], 
@@ -132,8 +141,8 @@ class NodePathProperty( wxpg.StringProperty ):
 
 class ConnectionBaseProperty( wxpg.BaseProperty ):
     
-    def BuildControl( self, parent, id, height ):
-        ctrl = wx.ListBox( parent, id, size=wx.Size( -1, height ), style=wx.LB_EXTENDED )
+    def BuildControl( self, parent, height ):
+        ctrl = wx.ListBox( parent, -1, size=wx.Size( -1, height ), style=wx.LB_EXTENDED )
         ctrl.Enable( self.IsEnabled() )
         ctrl.Bind( wx.EVT_KEY_UP, self.OnDelete )
         
@@ -156,9 +165,9 @@ class ConnectionBaseProperty( wxpg.BaseProperty ):
 
 class ConnectionProperty( ConnectionBaseProperty ):
     
-    def BuildControl( self, parent, id ):
+    def BuildControl( self, parent ):
         height = parent.GetSize()[1]
-        ctrl = ConnectionBaseProperty.BuildControl( self, parent, id, height )
+        ctrl = ConnectionBaseProperty.BuildControl( self, parent, height )
         
         comp = self.GetValue()
         if comp is not None:
@@ -183,8 +192,8 @@ class ConnectionProperty( ConnectionBaseProperty ):
 
 class ConnectionListProperty( ConnectionBaseProperty ):
     
-    def BuildControl( self, parent, id ):
-        ctrl = ConnectionBaseProperty.BuildControl( self, parent, id, -1 )
+    def BuildControl( self, parent ):
+        ctrl = ConnectionBaseProperty.BuildControl( self, parent, -1 )
         
         comps = self.GetValue()
         if comps is not None:
@@ -219,17 +228,10 @@ class ConnectionListProperty( ConnectionBaseProperty ):
         self.PostChangedEvent()
         
 
-class AutoWidthListCtrl( wx.ListCtrl, listmix.ListCtrlAutoWidthMixin ):
-
-    def __init__( self, *args, **kwargs ):
-        wx.ListCtrl.__init__( self, *args, **kwargs )
-        listmix.ListCtrlAutoWidthMixin.__init__( self )
-        
-
 class DictProperty( wxpg.BaseProperty ):
     
-    def BuildControl( self, parent, id ):
-        ctrl = AutoWidthListCtrl( parent, id, style=wx.LC_REPORT | wx.LC_EDIT_LABELS )
+    def BuildControl( self, parent ):
+        ctrl = AutoWidthListCtrl( parent, -1, style=wx.LC_REPORT | wx.LC_EDIT_LABELS )
         ctrl.InsertColumn( 0, 'Name' )
         ctrl.InsertColumn( 1, 'Value' )
         ctrl.Enable( self.IsEnabled() )

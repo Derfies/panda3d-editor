@@ -1,7 +1,9 @@
+import string
+
 import wx
 import wx.lib.intctrl
 import wx.lib.agw.floatspin as fs
-import  wx.lib.scrolledpanel as scrolled
+import wx.lib.scrolledpanel as scrolled
 from wx.lib.embeddedimage import PyEmbeddedImage
 from wx.lib.newevent import NewEvent
 
@@ -31,6 +33,56 @@ wxEVT_PG_RIGHT_CLICK = wx.NewEventType()
 EVT_PG_RIGHT_CLICK = wx.PyEventBinder( wxEVT_PG_RIGHT_CLICK, 0 )
 
 
+class FloatValidator( wx.PyValidator ):
+    def __init__( self, *args, **kwargs ):
+        wx.PyValidator.__init__( self, *args, **kwargs )
+        self.Bind( wx.EVT_CHAR, self.OnChar )
+
+    def Clone( self ):
+        return FloatValidator()
+
+    def Validate( self, win ):
+        tc = self.GetWindow()
+        val = tc.GetValue()
+        
+        for x in val:
+            if x not in string.digits:
+                return False
+
+        return True
+
+    def OnChar( self, event ):
+        key = event.GetKeyCode()
+        char = chr( key )
+        
+        okKeys = [
+            wx.WXK_DELETE, 
+            wx.WXK_NUMPAD_ENTER, 
+            wx.WXK_RETURN, 
+            wx.WXK_TAB,
+            wx.WXK_NUMPAD_SUBTRACT,
+            wx.WXK_SUBTRACT
+        ]
+        
+        if key < wx.WXK_SPACE or key in okKeys or key > 255 or char == '-':
+            event.Skip()
+            return
+
+        # Allow the key stroke if is is a number or if this is the first 
+        # decimal point we have encountered.
+        val = self.GetWindow().GetValue()
+        if char in string.digits or ( char == '.' and '.' not in val ):
+            event.Skip()
+            return
+
+        if not wx.Validator_IsSilent():
+            wx.Bell()
+
+        # Returning without calling even.Skip eats the event before it
+        # gets to the text control
+        return
+    
+
 class PropertyGridEvent( wx.PyCommandEvent ):
     
     def __init__( self, evtType ):
@@ -58,6 +110,7 @@ class BaseProperty( object ):
         self._enabled = True
         self._children = []
         self._attrs = {}
+        self._ctrls = []
         
     def GetLabel( self ):
         return self._label
@@ -145,6 +198,49 @@ class BaseProperty( object ):
         fn = lambda : self.GetGrid().GetEventHandler().ProcessEvent( evt )
         wx.CallAfter( fn )
         
+    def SetFocus( self, index ):
+        index = max( 0, index )
+        if self._ctrls:
+            wx.CallAfter( self._ctrls[index].SetFocus )
+            
+    def AppendControl( self, ctrl ):
+        ctrl.Enable( self.IsEnabled() )
+        if isinstance( ctrl, wx.TextCtrl ):
+            ctrl.Bind( wx.EVT_KILL_FOCUS, self.OnKillFocus )
+            ctrl.Bind( wx.EVT_CHILD_FOCUS, self.OnChildFocus )
+            ctrl.Bind( wx.EVT_TEXT_ENTER, self.OnChanged )
+        elif isinstance( ctrl, wx.CheckBox ):
+            ctrl.Bind( wx.EVT_CHECKBOX, self.OnChanged )
+        self._ctrls.append( ctrl )
+        
+    def OnKillFocus( self, evt ):
+        """
+        Bind a control's wx.EVT_KILL_FOCUS event to this method so that the 
+        control's value is updated if it loses focus after being changed. This
+        will also dehighlight the field.
+        """
+        ctrl = evt.GetEventObject()
+        if ctrl.IsModified():
+            self.OnChanged( evt )
+        else:
+            ctrl.SetSelection( 0, 0 )
+    
+    def OnChildFocus( self, evt ):
+        """
+        Bind a control's wx.EVT_CHILD_FOCUS event to this method so that the
+        text is immediately highlighted when the user clicks inside the field.
+        """
+        def SetSelection( ctrl ):
+            try:
+                ctrl.SetSelection( -1, -1 )
+            except:
+                pass
+            
+        ctrl = evt.GetEventObject()
+        self.GetGrid().SetFocusedProperty( self )
+        self.GetGrid().SetFocusedPropertyControl( ctrl.GetId() )
+        wx.CallAfter( SetSelection, ctrl )
+        
 
 class PropertyCategory( BaseProperty ):
     
@@ -156,58 +252,51 @@ class PropertyCategory( BaseProperty ):
     
 
 class BoolProperty( BaseProperty ):
-    
-    def __init__( self, *args, **kwargs ):
-        BaseProperty.__init__( self, *args, **kwargs )
         
     def SetValueFromEvent( self, evt ):
         self._value = evt.IsChecked()
         
-    def BuildControl( self, parent, id ):
-        ctrl = wx.CheckBox( parent, id, style=wx.ALIGN_RIGHT )
+    def BuildControl( self, parent ):
+        ctrl = wx.CheckBox( parent, -1, style=wx.ALIGN_RIGHT )
         ctrl.SetValue( self.GetValue() )
-        ctrl.Enable( self.IsEnabled() )
-        ctrl.Bind( wx.EVT_CHECKBOX, self.OnChanged )
+        self.AppendControl( ctrl )
         return ctrl
     
 
 class IntProperty( BaseProperty ):
-    
-    def __init__( self, *args, **kwargs ):
-        BaseProperty.__init__( self, *args, **kwargs )
         
-    def BuildControl( self, parent, id ):
-        ctrl = wx.lib.intctrl.IntCtrl( parent, id )
+    def BuildControl( self, parent ):
+        ctrl = wx.lib.intctrl.IntCtrl( parent, -1 )
         ctrl.SetValue( self.GetValue() )
-        ctrl.Enable( self.IsEnabled() )
-        ctrl.Bind( wx.lib.intctrl.EVT_INT, self.OnChanged )
+        self.AppendControl( ctrl )
         return ctrl
         
 
 class FloatProperty( BaseProperty ):
-    
-    def __init__( self, *args, **kwargs ):
-        BaseProperty.__init__( self, *args, **kwargs )
         
-    def BuildControl( self, parent, id ):
-        ctrl = fs.FloatSpin( parent, id, value=self.GetValue(), digits=3 )
-        ctrl.Enable( self.IsEnabled() )
-        ctrl.Bind( fs.EVT_FLOATSPIN, self.OnChanged )
+    def BuildControl( self, parent ):
+        rndValue = round( self._value, 3 )
+        ctrl = wx.TextCtrl( parent, -1, value=str( rndValue ), 
+                                validator=FloatValidator() )
+        self.AppendControl( ctrl )
         return ctrl
+    
+    def SetValueFromEvent( self, evt ):
+        ctrl = evt.GetEventObject()
+        try:
+            val = float( ctrl.GetValue() )
+        except ValueError:
+            val = 0
+        self.SetValue( val )
     
 
 class StringProperty( BaseProperty ):
-    
-    def __init__( self, *args, **kwargs ):
-        BaseProperty.__init__( self, *args, **kwargs )
         
-    def BuildControl( self, parent, id ):
-        ctrl = wx.TextCtrl( parent, id, value=str( self.GetValue() ) )
-        ctrl.Enable( self.IsEnabled() )
-        ctrl.Bind( wx.EVT_TEXT_ENTER, self.OnChanged )
-        ctrl.Bind( wx.EVT_KILL_FOCUS, self.OnChanged )
+    def BuildControl( self, parent ):
+        ctrl = wx.TextCtrl( parent, -1, value=str( self.GetValue() ) )
+        self.AppendControl( ctrl )
         return ctrl
-    
+            
 
 class ToggleIcon( wx.Panel ):
     def __init__( self, parent, id, bitmapTrue, bitmapFalse, pos=wx.DefaultPosition ):
@@ -224,10 +313,7 @@ class ToggleIcon( wx.Panel ):
         self._hover = False
         self._state = False
 
-        #self.SetBackgroundColour( self.Parent.GetBackgroundColour() )
-
         self.Bind( wx.EVT_PAINT, self.OnPaint )
-        #self.Bind( wx.EVT_SIZE, self.OnSize )
         self.Bind( wx.EVT_LEFT_DOWN, self.OnButton )
     
     def SetState( self, flag=True ):
@@ -256,9 +342,6 @@ class ToggleIcon( wx.Panel ):
                 dc.DrawBitmap( self._bitmapTrue, 0, 0, True )
             else:
                 dc.DrawBitmap( self._bitmapFalse, 0, 0, True )
-
-    #def OnSize(self, event):
-    #    self.Refresh()
 
     def OnButton( self, evt ):
         if self.IsEnabled():
@@ -318,7 +401,7 @@ class CollapsiblePanel( BasePanel ):
         self.sizer.Add( self.sizer2, 1, wx.EXPAND )
         
         # Create the control
-        ctrl = self.prop.BuildControl( self, -1 )
+        ctrl = self.prop.BuildControl( self )
         if ctrl is not None:
             self.sizer2.Add( ctrl, 4, wx.RIGHT, 5 )
         
@@ -327,7 +410,6 @@ class CollapsiblePanel( BasePanel ):
     def BuildButton( self ):
         self.but = ToggleIcon( self, -1, collapse.GetBitmap(), expand.GetBitmap() )
         self.but.SetBackgroundColour( self.GetBackgroundColour() )
-        #self.but.SetState( not self.hidden )
         self.but.Bind( EVT_ICON_TOGGLE, self.OnButton )
         self.sizer2.Prepend( self.but, 0, wx.ALIGN_CENTER, 0 )
         
@@ -385,6 +467,7 @@ class PropertyGrid( scrolled.ScrolledPanel ):
         self._props = []
         self.panel = BasePanel( self, BaseProperty( '', '', None ), self )
         self._currParent = self.panel
+        self._focusProp = None
         
         # Build sizer
         self.sizer = wx.BoxSizer( wx.VERTICAL )
@@ -400,16 +483,9 @@ class PropertyGrid( scrolled.ScrolledPanel ):
         if type( prop ) == PropertyCategory:
             self._currParent = self.panel
             
-        # DEBUG
+        # Default the parent to the currect parent.
         if parent is None:
             parent = self._currParent
-        
-        #pnl = CollapsiblePanel( self, prop, self._currParent )
-        #self._currParent.AddWindow( pnl )
-        #prop.SetWindow( pnl )
-        #prop.SetGrid( self )
-        #prop.SetParent( self._currParent.prop )
-        #self._props.append( prop )
         
         pnl = CollapsiblePanel( self, prop, parent )
         parent.AddWindow( pnl )
@@ -421,14 +497,6 @@ class PropertyGrid( scrolled.ScrolledPanel ):
         # Set current parent if the property was a category
         if type( prop ) == PropertyCategory:
             self._currParent = pnl
-            
-    #def Append2( self, prop, parent ):
-    #    pnl = CollapsiblePanel( self, prop, parent )
-    #    parent.AddWindow( pnl )
-    #    prop.SetWindow( pnl )
-    #    prop.SetGrid( self )
-    #    prop.SetParent( parent.prop )
-    #    self._props.append( prop )
             
     def RecurseLayout( self, ctrl=None ):
         """
@@ -449,3 +517,15 @@ class PropertyGrid( scrolled.ScrolledPanel ):
         received focus.
         """
         pass
+    
+    def GetFocusedProperty( self ):
+        return self._focusProp
+    
+    def SetFocusedProperty( self, prop ):
+        self._focusProp = prop
+        
+    def GetFocusedPropertyControl( self ):
+        return self._focusPropIndex
+        
+    def SetFocusedPropertyControl( self, index ):
+        self._focusPropIndex = index
