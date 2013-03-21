@@ -3,35 +3,28 @@ import pandac.PandaModules as pm
 import p3d
 import game
 from constants import *
-from game.nodes.nodePath import NodePath
+from primitive import Primitive, PrimitiveNPO
 from game.nodes import NodePathObjectAttribute as NPOAttr
 
 
-class BoxNPO( p3d.NodePathObject ):
+class BoxNPO( PrimitiveNPO ):
+    
+    width = property( PrimitiveNPO.attrgetter( '_width' ), 
+                      PrimitiveNPO.attrsetter( '_width' ) )
+    depth = property( PrimitiveNPO.attrgetter( '_depth' ), 
+                      PrimitiveNPO.attrsetter( '_depth' ) )
+    height = property( PrimitiveNPO.attrgetter( '_height' ), 
+                       PrimitiveNPO.attrsetter( '_height' ) )
+    origin = property( PrimitiveNPO.attrgetter( '_origin' ), 
+                       PrimitiveNPO.attrsetter( '_origin' ) )
     
     def __init__( self, *args, **kwargs ):
-        p3d.NodePathObject.__init__( self, *args, **kwargs )
+        PrimitiveNPO.__init__( self, *args, **kwargs )
         
         self._width = 1
         self._depth = 1
         self._height = 1
         self._origin = pm.Point3(0, 0, 0)
-        
-    def attrgetter( attr ):
-        def get_any( self ):
-            return getattr( self, attr )
-        return get_any
-        
-    def attrsetter( attr ):
-        def set_any( self, value ):
-            setattr( self, attr, value )
-            self.Rebuild()
-        return set_any
-
-    width = property( attrgetter( '_width' ), attrsetter( '_width' ) )
-    depth = property( attrgetter( '_depth' ), attrsetter( '_depth' ) )
-    height = property( attrgetter( '_height' ), attrsetter( '_height' ) )
-    origin = property( attrgetter( '_origin' ), attrsetter( '_origin' ) )
         
     def Rebuild( self ):
         """Rebulid the box and update geoms."""
@@ -41,21 +34,22 @@ class BoxNPO( p3d.NodePathObject ):
         self.np.node().addGeomsFrom( boxGeom )
     
 
-class Box( NodePath ):
+class Box( Primitive ):
     
     def __init__( self, *args, **kwargs ):
-        NodePath.__init__( self, *args, **kwargs )
+        Primitive.__init__( self, *args, **kwargs )
         
-        self.AddAttributes(
-            NPOAttr( 'Width', float, 'width' ),
-            NPOAttr( 'Depth', float, 'depth' ),
-            NPOAttr( 'Height', float, 'height' ),
-            NPOAttr( 'Origin', pm.Point3, 'origin' ),
-            parent='Box'
+        datas = (
+            ('Width', float, 'width'),
+            ('Depth', float, 'depth'),
+            ('Height', float, 'height'),
+            ('Origin', pm.Point3, 'origin')
         )
-    
+        for data in datas:
+            self.AddAttributes( NPOAttr( *data, pyTagName=TAG_PRIMITIVE_OBJECT ), parent='Box' )
+        
     def SetupNodePath( self ):
-        NodePath.SetupNodePath( self )
+        Primitive.SetupNodePath( self )
         
         self.data.setName( 'box' )
         self.data.setTag( game.nodes.TAG_NODE_TYPE, TAG_BOX )
@@ -66,7 +60,3 @@ class Box( NodePath ):
         wrpr = cls( pm.NodePath( p3d.geometry.Box() ) )
         wrpr.SetupNodePath()
         return wrpr
-    
-    def Destroy( self ):
-        p3d.NodePathObject.Break( self.data )
-        NodePath.Destroy( self )

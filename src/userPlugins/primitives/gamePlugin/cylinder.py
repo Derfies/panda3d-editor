@@ -3,14 +3,27 @@ import pandac.PandaModules as pm
 import p3d
 import game
 from constants import *
-from game.nodes.nodePath import NodePath
+from primitive import Primitive, PrimitiveNPO
 from game.nodes import NodePathObjectAttribute as NPOAttr
 
 
-class CylinderNPO( p3d.NodePathObject ):
+class CylinderNPO( PrimitiveNPO ):
+    
+    radius = property( PrimitiveNPO.attrgetter( '_radius' ), 
+                       PrimitiveNPO.attrsetter( '_radius' ) )
+    height = property( PrimitiveNPO.attrgetter( '_height' ), 
+                       PrimitiveNPO.attrsetter( '_height' ) )
+    numSegs = property( PrimitiveNPO.attrgetter( '_numSegs' ), 
+                        PrimitiveNPO.attrsetter( '_numSegs' ) )
+    degrees = property( PrimitiveNPO.attrgetter( '_degrees' ), 
+                        PrimitiveNPO.attrsetter( '_degrees' ) )
+    axis = property( PrimitiveNPO.attrgetter( '_axis' ), 
+                     PrimitiveNPO.attrsetter( '_axis' ) )
+    origin = property( PrimitiveNPO.attrgetter( '_origin' ), 
+                       PrimitiveNPO.attrsetter( '_origin' ) )
     
     def __init__( self, *args, **kwargs ):
-        p3d.NodePathObject.__init__( self, *args, **kwargs )
+        PrimitiveNPO.__init__( self, *args, **kwargs )
         
         self._radius = 1
         self._height = 2
@@ -19,50 +32,33 @@ class CylinderNPO( p3d.NodePathObject ):
         self._axis = pm.Vec3(0, 0, 1)
         self._origin = pm.Point3(0, 0, 0)
         
-    def attrgetter( attr ):
-        def get_any( self ):
-            return getattr( self, attr )
-        return get_any
-        
-    def attrsetter( attr ):
-        def set_any( self, value ):
-            setattr( self, attr, value )
-            self.Rebuild()
-        return set_any
-
-    radius = property( attrgetter( '_radius' ), attrsetter( '_radius' ) )
-    height = property( attrgetter( '_height' ), attrsetter( '_height' ) )
-    numSegs = property( attrgetter( '_numSegs' ), attrsetter( '_numSegs' ) )
-    degrees = property( attrgetter( '_degrees' ), attrsetter( '_degrees' ) )
-    axis = property( attrgetter( '_axis' ), attrsetter( '_axis' ) )
-    origin = property( attrgetter( '_origin' ), attrsetter( '_origin' ) )
-        
     def Rebuild( self ):
-        """Rebulid the cone and update geoms."""
+        """Rebulid the cylinder and update geoms."""
         self.np.node().removeAllGeoms()
-        coneGeom = p3d.geometry.Cylinder( self._radius, self._height, 
-                                          self._numSegs, self._degrees, 
-                                          self._axis, self._origin )
-        self.np.node().addGeomsFrom( coneGeom )
+        cylinderGeom = p3d.geometry.Cylinder( self._radius, self._height, 
+                                              self._numSegs, self._degrees, 
+                                              self._axis, self._origin )
+        self.np.node().addGeomsFrom( cylinderGeom )
     
 
-class Cylinder( NodePath ):
+class Cylinder( Primitive ):
     
     def __init__( self, *args, **kwargs ):
-        NodePath.__init__( self, *args, **kwargs )
+        Primitive.__init__( self, *args, **kwargs )
         
-        self.AddAttributes(
-            NPOAttr( 'Radius', float, 'radius' ),
-            NPOAttr( 'Height', float, 'height' ),
-            NPOAttr( 'NumSegs', int, 'numSegs' ),
-            NPOAttr( 'Degrees', int, 'degrees' ),
-            NPOAttr( 'Axis', pm.Vec3, 'axis' ),
-            NPOAttr( 'Origin', pm.Point3, 'origin' ),
-            parent='Cylinder'
+        datas = (
+            ('Radius', float, 'radius'),
+            ('Height', float, 'height'),
+            ('NumSegs', int, 'numSegs'),
+            ('Degrees', int, 'degrees'),
+            ('Axis', pm.Vec3, 'axis'),
+            ('Origin', pm.Point3, 'origin' ),
         )
+        for data in datas:
+            self.AddAttributes( NPOAttr( *data, pyTagName=TAG_PRIMITIVE_OBJECT ), parent='Cylinder' )
         
     def SetupNodePath( self ):
-        NodePath.SetupNodePath( self )
+        Primitive.SetupNodePath( self )
         
         self.data.setName( 'cylinder' )
         self.data.setTag( game.nodes.TAG_NODE_TYPE, TAG_CYLINDER )
@@ -73,7 +69,3 @@ class Cylinder( NodePath ):
         wrpr = cls( pm.NodePath( p3d.geometry.Cylinder() ) )
         wrpr.SetupNodePath()
         return wrpr
-    
-    def Destroy( self ):
-        p3d.NodePathObject.Break( self.data )
-        NodePath.Destroy( self )
