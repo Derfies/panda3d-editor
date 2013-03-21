@@ -35,21 +35,27 @@ def Remove( comps ):
     wx.GetApp().doc.OnModified()
     
 
-def Duplicate( nps ):
+def Duplicate( comps ):
     """
-    Duplicate the indicated node paths once they've been deselected, then
-    create an add action and push it onto the undo queue.
+    Create the duplicate composite action, execute it and push it onto the 
+    undo queue.
     """
-    # Record the current selection then clear it
-    selNps = base.selection.nps
+    selComps = base.selection.nps
     base.selection.Clear()
     
-    # Duplicate the indicated node paths
-    dupeNps = base.scene.DuplicateNodePaths( selNps )
+    dupeComps = []
+    for comp in comps:
+        wrpr = base.game.nodeMgr.Wrap( comp )
+        dupeComps.append( wrpr.Duplicate() )
+        
+    actns = []
+    actns.append( actions.Deselect( selComps ) )
+    actns.extend( [actions.Add( dupeComp ) for dupeComp in dupeComps] )
+    actns.append( actions.Select( dupeComps ) )
     
-    # Reset the selection and run add
-    base.selection.Add( selNps )
-    Add( dupeNps )
+    actn = actions.Composite( actns )
+    wx.GetApp().actnMgr.Push( actn )
+    actn()
     wx.GetApp().doc.OnModified()
     
 
@@ -70,14 +76,14 @@ def Replace( fromComp, toComp ):
     wx.GetApp().doc.OnModified()
     
 
-def Select( nps ):
+def Select( comps ):
     """
     Create the select composite action, execute it and push it onto the
     undo queue.
     """
     actns = [
         actions.Deselect( base.selection.nps ), 
-        actions.Select( nps )
+        actions.Select( comps )
     ]
     
     actn = actions.Composite( actns )
@@ -99,11 +105,11 @@ def SetAttribute( comps, attrs, val ):
     wx.GetApp().doc.OnModified()
     
 
-def Parent( nps, parent ):
+def Parent( comps, pComp ):
     """
     Create the parent action, execute it and push it onto the undo queue.
     """
-    actns = [actions.Parent( np, parent ) for np in nps]
+    actns = [actions.Parent( comp, pComp ) for comp in comps]
     
     actn = actions.Composite( actns )
     wx.GetApp().actnMgr.Push( actn )
@@ -118,8 +124,14 @@ def Group( nps ):
     """
     Create the group action, execute it and push it onto the undo queue.
     """
+    # Find the lowest common ancestor for all NodePaths - this will be the
+    # parent for the group NodePath.
+    cmmnNp = nps[0].getParent()
+    for np in nps:
+        cmmnNp = cmmnNp.getCommonAncestor( np )
+    
     grpNp = pm.NodePath( 'group' )
-    grpNp.reparentTo( base.scene.rootNp )
+    grpNp.reparentTo( cmmnNp )
     
     actns = []
     actns.append( actions.Add( grpNp ) )
@@ -137,17 +149,22 @@ def Ungroup( nps ):
     """
     Create the ungroup action, execute it and push it onto the undo queue.
     """
-    childNps = []
+    pNps = []
+    cNpSets = []
     for np in nps:
         wrpr = base.game.nodeMgr.Wrap( np )
-        childNps.extend( [cWrpr.data for cWrpr in wrpr.GetChildren()] )
-    removeNps = [np for np in nps if np.node().isOfType( pm.PandaNode )]
+        pNps.append( wrpr.GetParent().data )
+        cNpSets.append( [cWrpr.data for cWrpr in wrpr.GetChildren()] )
+        
+    # Remove those nodes which were empty NodePaths.
+    rmvNps = [np for np in nps if np.node().isExactType( pm.PandaNode )]
     
     actns = []
     actns.append( actions.Deselect( nps ) )
-    actns.extend( [actions.Parent( childNp, base.scene.rootNp ) for childNp in childNps] )
-    actns.extend( [actions.Remove( np ) for np in removeNps] )
-    actns.append( actions.Select( childNps ) )
+    for i, cNps in enumerate( cNpSets ):
+        actns.extend( [actions.Parent( cNp, pNps[i] ) for cNp in cNps] )
+    actns.extend( [actions.Remove( np ) for np in rmvNps] )
+    actns.append( actions.Select( [cNp for cNps in cNpSets for cNp in cNps] ) )
     
     actn = actions.Composite( actns )
     wx.GetApp().actnMgr.Push( actn )
