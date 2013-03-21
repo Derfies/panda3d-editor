@@ -50,8 +50,9 @@ class SceneGraphBasePanel( wx.Panel ):
         self.tc.AddRoot( 'root' )
         
         # Bind tree control events
+        self.tc.Bind( wx.EVT_TREE_BEGIN_LABEL_EDIT, self.OnTreeBeginLabelEdit )
         self.tc.Bind( wx.EVT_TREE_END_LABEL_EDIT, self.OnTreeEndLabelEdit )
-        self.tc.Bind( wx.EVT_TREE_ITEM_ACTIVATED, self.OnTreeItemActivated )
+        self.tc.Bind( wx.EVT_LEFT_DCLICK, self.OnLeftDClick )
         self.tc.Bind( wx.EVT_KEY_UP, p3d.wx.OnKeyUp )
         self.tc.Bind( wx.EVT_KEY_DOWN, p3d.wx.OnKeyDown )
         self.tc.Bind( wx.EVT_LEFT_UP, p3d.wx.OnLeftUp )
@@ -75,6 +76,18 @@ class SceneGraphBasePanel( wx.Panel ):
         
     def OnFlatMenuSelected( self, evt ):
         wx.GetApp().doc.OnRefresh()
+        
+    def OnTreeBeginLabelEdit( self, evt ):
+        """
+        Highlight the text of the tree item label as soon as the edit process
+        has started. This must be done with CallAfter otherwise GetEditControl
+        will return None.
+        """
+        def HighlightText( tc ):
+            ctrl = tc.GetEditControl()
+            ctrl.SetSelection( -1, -1 )
+            
+        wx.CallAfter( HighlightText, self.tc )
             
     def OnTreeEndLabelEdit( self, evt ):
         """Change the component's name to that of the new item's name."""
@@ -90,11 +103,10 @@ class SceneGraphBasePanel( wx.Panel ):
             return
         wx.CallAfter( SetComponentName, comp, name )
         
-    def OnTreeItemActivated( self, evt ):
-        """Put the event item into label edit mode."""
-        flags = self.tc.GetAGWWindowStyleFlag()
-        if flags & ct.TR_EDIT_LABELS:
-            self.tc.EditLabel( evt.GetItem() )
+    def OnLeftDClick( self, evt ):
+        item = wxUtils.GetClickedItem( self.tc, evt )
+        if item is not None:
+            self.tc.EditLabel( item )
             
     def OnMiddleDown( self, evt ):
         
@@ -220,8 +232,8 @@ class SceneGraphBasePanel( wx.Panel ):
                 self.tc.Expand( newItems[np] )
             
             # Set selection states back
-            if np in newItems and oldItem.IsSelected():
-                self.tc.SelectItem( newItems[np] )
+            #if np in newItems and oldItem.IsSelected():
+            #    self.tc.SelectItem( newItems[np] )
                 
         self.tc.Thaw()
         self._updating = False
