@@ -52,7 +52,7 @@ class SceneParser( object ):
             wrpr.SetParent( pComp )
             
             id = elem.get( 'id' )
-            #wrpr.SetId( id )
+            wrpr.SetId( id )
             self.nodes[id] = wrpr.data
             self.LoadProperties( wrpr, elem )
             
