@@ -7,19 +7,25 @@ class NodePathObject( object ):
     remove it.
     """
     
-    tagName = 'NodePathObject'
+    pyTagName = 'NodePathObject'
     
-    def __init__( self, np ):
-        self.np = np
-        self.np.setPythonTag( NodePathObject.tagName, self )
+    def __init__( self, np=None ):
+        self.np = None
+        
+        if np is not None:
+            self.Attach( np )
         
     def __del__( self ):
-        print NodePathObject.tagName, ' : ', self.np.getName(), ' DELETED'
+        print self.pyTagName, ' : ', self.np.getName(), ' DELETED'
+        
+    def Attach( self, np ):
+        self.np = np
+        self.np.setPythonTag( self.pyTagName, self )
         
     @classmethod
     def Get( cls, np ):
-        return np.getPythonTag( cls.tagName )
+        return np.getPythonTag( cls.pyTagName )
     
     @classmethod
     def Break( cls, np ):
-        np.clearPythonTag( cls.tagName )
+        np.clearPythonTag( cls.pyTagName )
