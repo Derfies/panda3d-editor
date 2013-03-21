@@ -1,19 +1,12 @@
 import os
 
 import wx
-import wx.lib.agw.floatspin as fs
 import wx.lib.mixins.listctrl as listmix
 import pandac.PandaModules as pm
 from panda3d.core import Filename
 
 from wxExtra import wxpg, CompositeDropTarget, utils as wxUtils
-
-
-class AutoWidthListCtrl( wx.ListCtrl, listmix.ListCtrlAutoWidthMixin ):
-
-    def __init__( self, *args, **kwargs ):
-        wx.ListCtrl.__init__( self, *args, **kwargs )
-        listmix.ListCtrlAutoWidthMixin.__init__( self )
+from wxExtra import CustomListCtrl
     
 
 class Float3Property( wxpg.BaseProperty ):
@@ -144,7 +137,7 @@ class ConnectionBaseProperty( wxpg.BaseProperty ):
     def BuildControl( self, parent, height ):
         ctrl = wx.ListBox( parent, -1, size=wx.Size( -1, height ), style=wx.LB_EXTENDED )
         ctrl.Enable( self.IsEnabled() )
-        ctrl.Bind( wx.EVT_KEY_UP, self.OnDelete )
+        ctrl.Bind( wx.EVT_KEY_UP, self.OnKeyUp )
         
         dt = CompositeDropTarget( ['nodePath'], 
                                   self.OnDropItem, 
@@ -152,6 +145,9 @@ class ConnectionBaseProperty( wxpg.BaseProperty ):
         ctrl.SetDropTarget( dt )
         
         return ctrl
+    
+    def OnKeyUp( self, evt ):
+        pass
     
     def ValidateDropItem( self, x, y ):
         for comp in wx.GetApp().frame.pnlSceneGraph.dragNps:
@@ -177,7 +173,7 @@ class ConnectionProperty( ConnectionBaseProperty ):
         
         return ctrl
         
-    def OnDelete( self, evt ):
+    def OnKeyUp( self, evt ):
         if evt.GetKeyCode() not in [wx.WXK_DELETE, wx.WXK_BACK]:
             return
         
@@ -203,7 +199,7 @@ class ConnectionListProperty( ConnectionBaseProperty ):
         
         return ctrl
     
-    def OnDelete( self, evt ):
+    def OnKeyUp( self, evt ):
         """
         Remove those components that were selected in the list box from this
         property's value.
@@ -212,8 +208,7 @@ class ConnectionListProperty( ConnectionBaseProperty ):
             return
         
         lb = evt.GetEventObject()
-        indices = lb.GetSelections()
-        delComps = [lb.GetClientData( index ) for index in indices]
+        delComps = [lb.GetClientData( index ) for index in lb.GetSelections()]
         oldComps = self.GetValue()
         newComps = [comp for comp in oldComps if comp not in delComps]
         self.SetValue( newComps )
@@ -231,11 +226,11 @@ class ConnectionListProperty( ConnectionBaseProperty ):
 class DictProperty( wxpg.BaseProperty ):
     
     def BuildControl( self, parent ):
-        ctrl = AutoWidthListCtrl( parent, -1, style=wx.LC_REPORT | wx.LC_EDIT_LABELS )
+        ctrl = CustomListCtrl( parent, -1, style=wx.LC_REPORT | wx.LC_EDIT_LABELS )
         ctrl.InsertColumn( 0, 'Name' )
         ctrl.InsertColumn( 1, 'Value' )
         ctrl.Enable( self.IsEnabled() )
-        ctrl.Bind( wx.EVT_KEY_UP, self.OnDelete )
+        ctrl.Bind( wx.EVT_KEY_UP, self.OnKeyUp )
         ctrl.Bind( wx.EVT_LIST_END_LABEL_EDIT, self.OnListEndLabelEdit )
         
         dt = CompositeDropTarget( ['filePath'], 
@@ -252,8 +247,20 @@ class DictProperty( wxpg.BaseProperty ):
     def ValidateDropItem( self, x, y ):
         return True
     
-    def OnDelete( self, evt ):
-        pass
+    def OnKeyUp( self, evt ):
+        if evt.GetKeyCode() not in [wx.WXK_DELETE, wx.WXK_BACK]:
+            return
+        
+        # Get the names of the items selected, then remove these keys from 
+        # the dictionary.
+        ctrl = evt.GetEventObject()
+        keys = [item.GetText() for item in ctrl.GetAllItems()]
+        myDict = dict( self.GetValue() )
+        for index in ctrl.GetSelections():
+            del myDict[keys[index]]
+        
+        self.SetValue( myDict )
+        self.PostChangedEvent()
     
     def OnDropItem( self, arg ):
         myDict = dict( self.GetValue() )
