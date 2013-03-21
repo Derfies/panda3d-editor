@@ -59,7 +59,16 @@ class NodePath( Base ):
         
     def Duplicate( self ):
         dupeNp = self.data.copyTo( self.data.getParent() )
-        dupeNp.setName( self.data.getName() + '_1' )
+        
+        # Make sure the duplicated NodePath has a unique name to all its 
+        # siblings.
+        siblingNames = [
+            np.getName() 
+            for np in self.data.getParent().getChildren()
+        ]
+        dupeNp.setName( utils.GetUniqueName( self.data.getName(), 
+                                             siblingNames ) )
+        
         self.FixUpDuplicateChildren( self.data, dupeNp )
         return dupeNp
     
