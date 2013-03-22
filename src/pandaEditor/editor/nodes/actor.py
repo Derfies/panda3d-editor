@@ -3,6 +3,7 @@ import os
 import pandac.PandaModules as pm
 
 from constants import *
+from game.nodes.constants import *
 from game.nodes.actor import Actor as GameActor
 
 
@@ -14,5 +15,10 @@ class Actor( GameActor ):
         wrpr.data.setPythonTag( TAG_PICKABLE, True )
         return wrpr
     
+    def Duplicate( self ):
+        dupeNp = GameActor.Duplicate( self )
+        dupeNp.setPythonTag( TAG_PICKABLE, True )
+        return dupeNp
+    
     def GetCreateArgs( self ):
-        return {'modelPath':base.project.GetRelModelPath( self.data.getPythonTag( 'modelPath' ) )}
+        return {'modelPath':base.project.GetRelModelPath( self.data.getPythonTag( TAG_MODEL_PATH ) )}
