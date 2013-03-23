@@ -131,10 +131,10 @@ class EditorPlugin( gp.GamePlugin ):
         
         # Set up a new scene and load the contents of the temp scene saved
         # before the user pressed play
-        oldPath = self.app.scene.filePath
+        oldPath = self.app.doc.filePath
         self.app.CreateScene( TEMP_SCENE_PATH, newDoc=False )
         self.app.scene.Load( filePath=TEMP_SCENE_PATH )
-        self.app.scene.filePath = oldPath
+        self.app.doc.filePath = oldPath
         
         # Set the document contents back to the temp scene we loaded
         self.app.doc.contents = self.app.scene

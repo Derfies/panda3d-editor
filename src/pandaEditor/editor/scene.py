@@ -12,10 +12,6 @@ class Scene( game.Scene ):
         
         self.cnnctns = {}
         
-        self.filePath = kwargs.pop( 'filePath', None )
-        p3d.Object.__init__( self, *args, **kwargs )
-        self.rootNp.reparentTo( base.edRender )
-        
         # 'Create' the default NodePaths that come from showbase. Calling the
         # create method in this way doesn't generate any new NodePaths, it
         # will simply return those the default showbase creates when it starts
@@ -35,20 +31,12 @@ class Scene( game.Scene ):
             wrpr = base.game.nodeMgr.Create( cType )
             wrpr.data.setTag( game.nodes.TAG_NODE_TYPE, cType )
         
-    def Load( self, **kwargs ):
+    def Load( self, filePath ):
         """Recreate a scene graph from file."""
-        filePath = kwargs.get( 'filePath', self.filePath )
-        if filePath is None:
-            return False
-        
         base.game.scnParser.Load( self.rootNp, filePath )
     
-    def Save( self, **kwargs ):
+    def Save( self, filePath ):
         """Save a scene graph to file."""
-        filePath = kwargs.get( 'filePath', self.filePath )
-        if filePath is None:
-            return False
-        
         base.game.scnParser.Save( self, filePath )
         
     def Close( self ):

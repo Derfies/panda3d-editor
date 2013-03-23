@@ -5,24 +5,26 @@ from wx.lib.pubsub import Publisher as pub
 
 class Document( object ):
 
-    def __init__( self, contents ):
+    def __init__( self, filePath, contents ):
+        self.filePath = filePath
         self.contents = contents
         
         self.dirty = False
         self.title = self.GetTitle()
         
     def GetTitle( self ):
-        if self.contents.filePath is not None:
-            return os.path.basename( self.contents.filePath )
+        if self.filePath is not None:
+            return os.path.basename( self.filePath )
         else:
             return 'untitled'
 
     def Load( self ):
-        self.contents.Load()
+        self.contents.Load( self.filePath )
         self.OnRefresh()
 
-    def Save( self, *args ):
-        self.contents.Save( *args )
+    def Save( self, **kwargs ):
+        filePath = kwargs.pop( 'filePath', self.filePath )
+        self.contents.Save( filePath )
         self.title = self.GetTitle()
         self.dirty = False
         self.OnRefresh()

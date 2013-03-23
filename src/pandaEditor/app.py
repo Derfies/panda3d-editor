@@ -262,7 +262,8 @@ class App( p3d.wx.App ):
             self.scene.Close()
             
         # Create a new scene
-        self.scene = editor.Scene( self, filePath=filePath, camera=base.edCamera )
+        self.scene = editor.Scene()
+        self.scene.rootNp.reparentTo( base.edRender )
         
         # Set the selection and picker root node to the scene's root node
         self.selection.rootNp = self.scene.rootNp
@@ -272,7 +273,7 @@ class App( p3d.wx.App ):
         
         # Create the document wrapper if creating a new document
         if newDoc:
-            self.doc = ui.Document( self.scene )
+            self.doc = ui.Document( filePath, self.scene )
         
     def OnDragDrop( self, filePath ):
         
