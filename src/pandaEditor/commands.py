@@ -10,7 +10,7 @@ def Add( comps ):
     queue.
     """
     actns = []
-    actns.append( actions.Deselect( base.selection.nps ) )
+    actns.append( actions.Deselect( base.selection.comps ) )
     actns.extend( [actions.Add( comp ) for comp in comps] )
     actns.append( actions.Select( comps ) )
     
@@ -40,7 +40,7 @@ def Duplicate( comps ):
     Create the duplicate composite action, execute it and push it onto the 
     undo queue.
     """
-    selComps = base.selection.nps
+    selComps = base.selection.comps
     base.selection.Clear()
     
     dupeComps = []
@@ -82,7 +82,7 @@ def Select( comps ):
     undo queue.
     """
     actns = [
-        actions.Deselect( base.selection.nps ), 
+        actions.Deselect( base.selection.comps ), 
         actions.Select( comps )
     ]
     

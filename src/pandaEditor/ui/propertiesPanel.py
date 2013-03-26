@@ -192,6 +192,7 @@ class PropertiesPanel( wx.Panel ):
     def __init__( self, *args, **kwargs ):
         wx.Panel.__init__( self, *args, **kwargs )
         
+        self.app = wx.GetApp()
         self.propExps = {}
         self.refocus = False
         
@@ -229,21 +230,22 @@ class PropertiesPanel( wx.Panel ):
         self.bs1.Add( self.pg, 1, wx.EXPAND )
         self.SetSizer( self.bs1 )
         
-    def BuildPropertyGrid( self, nps ):
+    def BuildPropertyGrid( self, wrprs ):
         """
         Build the properties for the grid based on the contents of nps.
         """
         self.pg.Clear()
         
         # Bail if there are no selected NodePaths.
-        if not nps:
+        if not wrprs:
             return
         
         self.propAttrMap = {}
                         
         # Build all properties from attributes.
-        wrprCls = base.game.nodeMgr.GetCommonWrapper( nps )
-        wrprs = [wrprCls( comp ) for comp in nps]
+        comps = self.app.selection.comps
+        wrprCls = base.game.nodeMgr.GetCommonWrapper( comps )
+        wrprs = [wrprCls( comp ) for comp in comps]
         for i, attr in enumerate( wrprs[0].GetAttributes( addons=True ) ):
             
             # Find the correct property to display this attribute
@@ -287,8 +289,8 @@ class PropertiesPanel( wx.Panel ):
         into the grid.
         """
         # Should probably never get here...
-        nps = wx.GetApp().selection.nps
-        if not nps:
+        comps = self.app.selection.comps
+        if not comps:
             return
         
         self.refocus = True
@@ -297,7 +299,7 @@ class PropertiesPanel( wx.Panel ):
         prop = evt.GetProperty()
         attrs = prop.GetAttribute( ATTRIBUTE_TAG )
         if not hasattr( attrs[0], 'cnnctn' ):
-            cmds.SetAttribute( nps, attrs, prop.GetValue() )
+            cmds.SetAttribute( comps, attrs, prop.GetValue() )
         else:
             cmds.SetConnections( prop.GetValue(), attrs )
         

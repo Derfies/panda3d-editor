@@ -19,9 +19,10 @@ class SceneGraphBasePanel( wx.Panel ):
     def __init__( self, *args, **kwargs ):
         wx.Panel.__init__( self, *args, **kwargs )
         
+        self.app = wx.GetApp()
         self.filter = pm.PandaNode
         self._updating = False
-        self.dragNps = []
+        self.dragComps = []
         
         # Build display filter menu.
         fileMenu = fm.FlatMenu()
@@ -82,7 +83,7 @@ class SceneGraphBasePanel( wx.Panel ):
         if val:
             self.filter = pm.PandaNode
             
-        wx.GetApp().doc.OnRefresh()
+        sefl.app.doc.OnRefresh()
         
     def OnTreeBeginLabelEdit( self, evt ):
         """
@@ -129,10 +130,10 @@ class SceneGraphBasePanel( wx.Panel ):
         
         # If the item under the middle mouse click is part of the selection
         # then use the whole selection, otherwise just use the item.
-        if item.GetData() in wx.GetApp().selection.nps:
-            self.dragNps = wx.GetApp().selection.nps
+        if item.GetData() in self.app.selection.comps:
+            self.dragComps = self.app.selection.comps
         else:
-            self.dragNps = [item.GetData()]
+            self.dragComps = [item.GetData()]
         
         # Create the drop source and begin the drag and drop operation
         ds = wx.DropSource( self )
@@ -140,7 +141,7 @@ class SceneGraphBasePanel( wx.Panel ):
         ds.DoDragDrop( wx.Drag_AllowMove )
         
         # Clear drag node paths
-        self.dragNps = []
+        self.dragComps = []
             
     def ValidateDropItem( self, x, y ):
         """Perform validation procedures."""
@@ -150,9 +151,9 @@ class SceneGraphBasePanel( wx.Panel ):
         
         wrpr = base.game.nodeMgr.Wrap( dropItem.GetData() )
         if wx.GetMouseState().CmdDown():
-            return wrpr.ValidateDragDrop( self.dragNps, dropItem.GetData() )
+            return wrpr.ValidateDragDrop( self.dragComps, dropItem.GetData() )
         else:
-            return wrpr.GetPossibleConnections( self.dragNps )
+            return wrpr.GetPossibleConnections( self.dragComps )
             
     def OnDropItem( self, str ):
         
@@ -161,10 +162,10 @@ class SceneGraphBasePanel( wx.Panel ):
         wrpr = base.game.nodeMgr.Wrap( dropItem.GetData() )
         self.data = {}
         if wx.GetMouseState().CmdDown():
-            wrpr.OnDragDrop( self.dragNps, wrpr.data )
+            wrpr.OnDragDrop( self.dragComps, wrpr.data )
         else:
             menu = wx.Menu()
-            for cnnctn in wrpr.GetPossibleConnections( self.dragNps ):
+            for cnnctn in wrpr.GetPossibleConnections( self.dragComps ):
                 mItem = wx.MenuItem( menu, wx.NewId(), cnnctn.label )
                 menu.AppendItem( mItem )
                 self.Bind( wx.EVT_MENU, self.OnConnect, id=mItem.GetId() )
@@ -176,7 +177,7 @@ class SceneGraphBasePanel( wx.Panel ):
         menu = evt.GetEventObject()
         mItem = menu.FindItemById( evt.GetId() )
         cnnctn = self.data[evt.GetId()]
-        cmds.Connect( self.dragNps, cnnctn, cnnctn.Connect )
+        cmds.Connect( self.dragComps, cnnctn, cnnctn.Connect )
         
     def AddItem( self, wrpr, pItem ):
         """
@@ -190,7 +191,7 @@ class SceneGraphBasePanel( wx.Panel ):
             
         item = self.tc.AppendItem( pItem, wrpr.GetName() )
         item.SetData( wrpr.data )
-        self._nps[wrpr.data] = item
+        self._comps[wrpr.data] = item
         
         for cWrpr in wrpr.GetChildren():
             self.AddItem( cWrpr, item )
@@ -215,7 +216,7 @@ class SceneGraphBasePanel( wx.Panel ):
 
         # Clear existing items and repopulate tree control
         self.tc.DeleteAllItems()
-        self._nps = {}
+        self._comps = {}
         rItem = self.tc.AddRoot( 'root' )
         wrpr = base.game.nodeMgr.Wrap( base.scene )
         if self.filter is None:

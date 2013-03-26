@@ -11,7 +11,8 @@ class Selection( p3d.Object ):
     def __init__( self, *args, **kwargs ):
         p3d.Object.__init__( self, *args, **kwargs )
         
-        self.nps = []
+        self.comps = []
+        self.wrprs = []
         
         # Create a marquee
         self.marquee = p3d.Marquee( 'marquee', *args, **kwargs )
@@ -22,39 +23,45 @@ class Selection( p3d.Object ):
         self.picker = p3d.MousePicker( 'picker', *args, fromCollideMask=bitMask, **kwargs )
                 
     def Get( self ):
-        """Return the selected node paths."""
-        return self.nps
+        """Return the selected components."""
+        return self.comps
+    
+    def GetNodePaths( self ):
+        nps = [
+            wrpr.data 
+            for wrpr in self.wrprs
+            if type( wrpr.data  ) == pm.NodePath
+        ]
+        return nps
     
     def Clear( self ):
         """Clear the selection list and run deselect handlers."""
-        for np in self.nps:
-            try:
-                wrpr = base.game.nodeMgr.Wrap( np )
-                wrpr.OnDeselect()
-            except AssertionError:
-                print 'Empty NodePath was unselected.'
-        self.nps = []
+        for wrpr in self.wrprs:
+            wrpr.OnDeselect()
+        self.comps = []
+        self.wrprs = []
     
-    def Add( self, nps ):
+    def Add( self, comps ):
         """
-        Add the indicated node paths to the selection and run select handlers.
+        Add the indicated components to the selection and run select handlers.
         """
-        for np in list( set( nps ) ):
-            wrpr = base.game.nodeMgr.Wrap( np )
+        for comp in list( set( comps ) ):
+            wrpr = base.game.nodeMgr.Wrap( comp )
             wrpr.OnSelect()
                 
-            self.nps.append( np )
+            self.comps.append( comp )
+            self.wrprs.append( wrpr )
     
-    def Remove( self, nps ):
+    def Remove( self, comps ):
         """
-        Remove those node paths that were in the selection and run deselect
+        Remove those components that were in the selection and run deselect
         handlers.
         """
-        for np in nps:
-            wrpr = base.game.nodeMgr.Wrap( np )
+        for wrpr in self.wrprs:
             wrpr.OnDeselect()
             
-        self.nps = list( set( self.nps ) - set( nps ) )
+        self.comps = list( set( self.comps ) - set( comps ) )
+        self.wrprs = [base.game.nodeMgr.Wrap( comp ) for comp in self.comps]
     
     def SelectParent( self ):
         """
@@ -62,13 +69,12 @@ class Selection( p3d.Object ):
         original component if no suitable parent is found.
         """
         comps = []
-        for comp in self.nps:
-            wrpr = base.game.nodeMgr.Wrap( comp )
+        for wrpr in self.wrprs:
             pWrpr = wrpr.GetParent()
             if pWrpr.data != base.scene:
                 comps.append( pWrpr.data )
             else:
-                comps.append( comp )
+                comps.append( wrpr.data )
         return comps
         
     def SelectChild( self ):
@@ -77,13 +83,12 @@ class Selection( p3d.Object ):
         original component if no children are found.
         """
         comps = []
-        for comp in self.nps:
-            wrpr = base.game.nodeMgr.Wrap( comp )
+        for wrpr in self.wrprs:
             cWrprs = wrpr.GetChildren()
             if cWrprs:
                 comps.append( cWrprs[0].data )
             else:
-                comps.append( comp )
+                comps.append( wrpr.data )
         return comps
             
     def SelectPrev( self ):
@@ -92,14 +97,13 @@ class Selection( p3d.Object ):
         one before in the parent's list of children. 
         """
         comps = []
-        for comp in self.nps:
-            wrpr = base.game.nodeMgr.Wrap( comp )
+        for wrpr in self.wrprs:
             pWrpr = wrpr.GetParent()
             cComps = [cWrpr.data for cWrpr in pWrpr.GetChildren()]
                 
             # Get the index of the child before this one - wrap around if the 
             # index has gone below zero.
-            index = cComps.index( comp ) - 1
+            index = cComps.index( wrpr.data ) - 1
             if index < 0:
                 index = len( cComps ) - 1
             
@@ -112,14 +116,13 @@ class Selection( p3d.Object ):
         one after in the parent's list of children. 
         """
         comps = []
-        for comp in self.nps:
-            wrpr = base.game.nodeMgr.Wrap( comp )
+        for wrpr in self.wrprs:
             pWrpr = wrpr.GetParent()
             cComps = [cWrpr.data for cWrpr in pWrpr.GetChildren()]
             
             # Get the index of the child after this one - wrap around if the 
             # index has gone over the number of children.
-            index = cComps.index( comp ) + 1
+            index = cComps.index( wrpr.data ) + 1
             if index > len( cComps ) - 1:
                 index = 0
             
@@ -159,7 +162,7 @@ class Selection( p3d.Object ):
         # In append mode we want to add / remove items from the current
         # selection
         if self.append:
-            for selfNp in self.nps:
+            for selfNp in self.comps:
                 if selfNp in nps:
                     nps.remove( selfNp )
                 else:
@@ -189,7 +192,6 @@ class Selection( p3d.Object ):
         
     def Update( self ):
         """Update the selection by running deselect and select handlers."""
-        for np in self.nps:
-            wrpr = base.game.nodeMgr.Wrap( np )
+        for wrpr in self.wrprs:
             wrpr.OnDeselect()
             wrpr.OnSelect()

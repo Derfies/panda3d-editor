@@ -34,7 +34,7 @@ class Document( object ):
         Broadcast the update message without setting the dirty flag. Methods
         subscribed to this message will rebuild ui widgets completely.
         """
-        pub.sendMessage( 'Update', base.selection.nps )
+        pub.sendMessage( 'Update', base.selection.wrprs )
 
     def OnModified( self, arg=None ):
         """
@@ -42,4 +42,4 @@ class Document( object ):
         subscribed to this message will rebuild ui widgets completely.
         """
         self.dirty = True
-        pub.sendMessage( 'Update', base.selection.nps )
+        pub.sendMessage( 'Update', base.selection.wrprs )

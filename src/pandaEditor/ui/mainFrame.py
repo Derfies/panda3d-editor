@@ -330,22 +330,21 @@ class MainFrame( wx.Frame ):
         a more concise way of storing this information.
         """
         comps = []
-        for np in self.app.selection.nps:
-            wrpr = base.game.nodeMgr.Wrap( np )
-            modelPath = base.project.GetRelModelPath( np.node().getFullpath() )
+        for wrpr in self.app.selection.wrprs:
+            modelPath = base.project.GetRelModelPath( wrpr.data.node().getFullpath() )
             
             wrprCls = base.game.nodeMgr.nodeWrappers['Actor']
-            wrpr = wrprCls.Create( modelPath=modelPath )
-            wrpr.data.setTransform( np.getTransform() )
-            wrpr.SetDefaultValues()
-            wrpr.SetParent( wrpr.GetDefaultParent() )
-            cmds.Replace( np, wrpr.data )
+            aWrpr = wrprCls.Create( modelPath=modelPath )
+            aWrpr.data.setTransform( wrpr.data.getTransform() )
+            aWrpr.SetDefaultValues()
+            aWrpr.SetParent( wrpr.GetDefaultParent() )
+            cmds.Replace( wrpr.data, aWrpr.data )
         
     def OnCreatePrefab( self, evt ):
         """
         Create a new prefab for the selected object in the prefab directory.
         """
-        np = self.app.selection.nps[0]
+        np = self.app.selection.GetNodePaths()[0]
         dirPath = self.app.project.GetPrefabsDirectory()
         assetName = self.app.project.GetUniqueAssetName( 'prefab.xml', dirPath )
         assetPath = os.path.join( dirPath, assetName )

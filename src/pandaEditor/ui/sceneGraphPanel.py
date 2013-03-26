@@ -26,8 +26,8 @@ class SceneGraphPanel( SceneGraphBasePanel ):
         # Set selected items
         items = self.GetValidSelections()
         if items:
-            nps = [item.GetData() for item in items]
-            cmds.Select( nps )
+            comps = [item.GetData() for item in items]
+            cmds.Select( comps )
             
     def OnUpdate( self, msg ):
         """
@@ -37,5 +37,5 @@ class SceneGraphPanel( SceneGraphBasePanel ):
         """
         SceneGraphBasePanel.OnUpdate( self, msg )
 
-        items = [self._nps[np] for np in msg.data if np in self._nps]
+        items = [self._comps[wrpr.data] for wrpr in msg.data if wrpr.data in self._comps]
         self.SelectItems( items )

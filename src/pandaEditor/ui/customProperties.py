@@ -126,7 +126,7 @@ class NodePathProperty( wxpg.StringProperty ):
         return True
     
     def OnDropItem( self, arg ):
-        np = wx.GetApp().frame.pnlSceneGraph.dragNps[0]
+        np = wx.GetApp().frame.pnlSceneGraph.dragComps[0]
         self.SetValue( np )
         
         self.PostChangedEvent()
@@ -150,7 +150,7 @@ class ConnectionBaseProperty( wxpg.BaseProperty ):
         pass
     
     def ValidateDropItem( self, x, y ):
-        for comp in wx.GetApp().frame.pnlSceneGraph.dragNps:
+        for comp in wx.GetApp().frame.pnlSceneGraph.dragComps:
             cnnctn = self.GetAttribute( 'attr' )[0]
             wrpr = base.game.nodeMgr.Wrap( comp )
             if wrpr.IsOfType( cnnctn.type ):
@@ -181,7 +181,7 @@ class ConnectionProperty( ConnectionBaseProperty ):
         self.PostChangedEvent()
     
     def OnDropItem( self, arg ):
-        val = wx.GetApp().frame.pnlSceneGraph.dragNps[0]
+        val = wx.GetApp().frame.pnlSceneGraph.dragComps[0]
         self.SetValue( val )
         self.PostChangedEvent()
         
@@ -218,7 +218,7 @@ class ConnectionListProperty( ConnectionBaseProperty ):
         val = self.GetValue()
         if val is None:
             val = []
-        val.extend( wx.GetApp().frame.pnlSceneGraph.dragNps )
+        val.extend( wx.GetApp().frame.pnlSceneGraph.dragComps )
         self.SetValue( val )
         self.PostChangedEvent()
         

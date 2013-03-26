@@ -184,7 +184,7 @@ class App( p3d.wx.App ):
             # Don't perform selection if there are no nodes and the selection
             # is currently empty.
             selNodes = self.selection.StopDragSelect()
-            if self.selection.nps or selNodes:
+            if self.selection.comps or selNodes:
                 cmds.Select( selNodes )
         elif self.gizmoMgr.IsDragging() or self.gizmo:
             self.StopTransform()
@@ -232,7 +232,7 @@ class App( p3d.wx.App ):
         Call frame selection on the camera if there are some node paths in the 
         selection.
         """
-        nps = [comp for comp in self.selection.nps if type( comp ) == pm.NodePath]
+        nps = self.selection.GetNodePaths()
         if nps:
             base.edCamera.Frame( nps )
         else:
@@ -244,7 +244,7 @@ class App( p3d.wx.App ):
         selected nodes are attached to the managed gizmos, then refresh the
         active one.
         """
-        nps = [comp for comp in self.selection.nps if type( comp ) == pm.NodePath]
+        nps = self.selection.GetNodePaths()
         self.gizmoMgr.AttachNodePaths( nps )
         self.gizmoMgr.RefreshActiveGizmo()
         self.selection.Update()
@@ -258,6 +258,7 @@ class App( p3d.wx.App ):
             self.actnMgr.Reset()
         
         # Close the current scene if there is one
+        self.selection.Clear()
         if hasattr( self, 'scene' ):
             self.scene.Close()
             
@@ -269,7 +270,6 @@ class App( p3d.wx.App ):
         self.selection.rootNp = self.scene.rootNp
         self.selection.picker.rootNp = self.scene.rootNp
         self.selection.marquee.rootNp = self.scene.rootNp
-        self.selection.Clear()
         
         # Create the document wrapper if creating a new document
         if newDoc:
@@ -322,12 +322,12 @@ class App( p3d.wx.App ):
         self.doc.OnModified()
         
     def Group( self ):
-        nps = [comp for comp in self.selection.nps if type( comp ) == pm.NodePath]
+        nps = self.selection.GetNodePaths()
         if nps:
             cmds.Group( nps )
         
     def Ungroup( self ):
-        nps = [comp for comp in self.selection.nps if type( comp ) == pm.NodePath]
+        nps = self.selection.GetNodePaths()
         if nps:
             cmds.Ungroup( nps )
         
