@@ -1,5 +1,6 @@
 import math
 
+import pandac.PandaModules as pm
 from pandac.PandaModules import Camera as PCamera, Vec3, Quat, NodePath, LineSegs, PerspectiveLens
 
 import p3d
@@ -150,33 +151,35 @@ class Camera( NodePath, p3d.SingleTask ):
         
     def Frame( self, nps ):
         
-        # Create a bounding volume which includes all node paths
-        parent = self.rootNp.attachNewNode( 'parent' )
-        dupeNps = []
+        # Get a list of bounding spheres for each NodePath in world space.
+        allBnds = []
+        allCntr = pm.Vec3()
         for np in nps:
-            dupeNp = np.copyTo( parent )
-            dupeNp.setTransform( np.getTransform( parent ) )
-            dupeNps.append( dupeNp )
-        bounds = parent.getBounds()
-        parent.removeNode()
+            bnds = np.getBounds()
+            if bnds.isInfinite():
+                continue
+            mat = np.getParent().getMat( self.rootNp )
+            bnds.xform( mat )
+            allBnds.append( bnds )
+            allCntr += bnds.getCenter()
         
-        # Bail if the bounds are infinite
-        if bounds.isInfinite():
-            return
+        # Now create a bounding sphere at the center point of all the 
+        # NodePaths and extend it to encapsulate each one.
+        bnds = pm.BoundingSphere( pm.Point3( allCntr / len( nps ) ), 0 )
+        for bnd in allBnds:
+            bnds.extendBy( bnd )
         
-        # Move the camera and the target the the bounding center
-        self.target.setPos( bounds.getCenter() )
-        self.setPos( bounds.getCenter() )
+        # Move the camera and the target the the bounding sphere's center.
+        self.target.setPos( bnds.getCenter() )
+        self.setPos( bnds.getCenter() )
 
-        # Now move the camera back so the view accomodates all object(s)
+        # Now move the camera back so the view accomodates all NodePaths.
         # Default the bounding radius to something reasonable if the object
-        # has no size
+        # has no size.
         fov = self.GetLens().getFov()
-        radius = bounds.getRadius()
-        if not radius:
-            radius = 0.5
-        distance = radius / math.tan( math.radians( min( fov[0], fov[1] ) * 0.5 ) )
-        self.setY( self, -distance )
+        radius = bnds.getRadius() or 0.5
+        dist = radius / math.tan( math.radians( min( fov[0], fov[1] ) * 0.5 ) )
+        self.setY( self, -dist )
         
     def cameraMovement( self, task ):
         x,y,z = self.cube.getPos()
