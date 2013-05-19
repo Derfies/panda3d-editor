@@ -9,6 +9,7 @@ from base import Base
 from constants import *
 from attributes import NodePathAttribute as Attr
 from game.nodes.attributes import Connection as Cnnctn
+from game.nodes.attributes import NodePathTargetConnection as NPTCnnctn
 from game.nodes.attributes import ConnectionList as CnnctnList
 
 
@@ -24,6 +25,7 @@ class NodePath( Base ):
             Attr( 'Matrix', pm.Mat4, NP.getMat, NP.setMat ),
             CnnctnList( 'Lights', pm.Light, self.GetLights, NP.setLight, NP.clearLight, NP.clearLight ),
             Cnnctn( 'Texture', pm.Texture, NP.getTexture, NP.setTexture, NP.clearTexture, args=[1] ),
+            NPTCnnctn( 'Fog ', pm.Fog, NP.getFog, NP.setFog, NP.clearFog ),
             Cnnctn( 'Shader', pc.Filename, self.GetShader, self.SetShader, NP.clearShader ),
             parent='NodePath'
         )

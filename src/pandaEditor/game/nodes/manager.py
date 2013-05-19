@@ -18,6 +18,7 @@ class Manager( object ):
         
         from modelRoot import ModelRoot
         from actor import Actor
+        from fog import Fog
         
         from collisionNode import CollisionNode
         from collisionSolids import CollisionBox, CollisionRay
@@ -61,6 +62,7 @@ class Manager( object ):
             
             'ModelRoot':ModelRoot,
             'Actor':Actor,
+            'Fog':Fog,
             
             'CollisionNode':CollisionNode,
             'CollisionBox':CollisionBox,

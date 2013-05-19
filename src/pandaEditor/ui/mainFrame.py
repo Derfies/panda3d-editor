@@ -694,7 +694,7 @@ class MainFrame( wx.Frame ):
         mLights = CustomMenu()
         mLights.AppendActionItems( lightActns, self )
         
-        mCollActns = [
+        collActns = [
             ActionItem( 'Node', '', self.OnCreate, args='CollisionNode' ),
             ActionItem( 'Box', '', self.OnCreate, args='CollisionBox' ),
             ActionItem( 'Ray', '', self.OnCreate, args='CollisionRay' ),
@@ -703,7 +703,7 @@ class MainFrame( wx.Frame ):
             ActionItem( 'Tube', '', self.OnCreate, args='CollisionTube' )
         ]
         mColl = CustomMenu()
-        mColl.AppendActionItems( mCollActns, self )
+        mColl.AppendActionItems( collActns, self )
         
         texActns = [
             ActionItem( 'Texture', '', self.OnCreate, args='Texture' )#,
@@ -733,6 +733,7 @@ class MainFrame( wx.Frame ):
         self.mCreate = CustomMenu()
         self.mCreate.AppendActionItem( ActionItem( 'Panda Node', '', self.OnCreate, args='PandaNode' ), self )
         self.mCreate.AppendActionItem( ActionItem( 'Actor', '', self.OnCreateActor ), self )
+        self.mCreate.AppendActionItem( ActionItem( 'Fog', '', self.OnCreate, args='Fog' ), self )
         self.mCreate.AppendSubMenu( mColl, '&Collision' )
         self.mCreate.AppendSubMenu( mLights, '&Lights' )
         self.mCreate.AppendSubMenu( mTex, '&Texture' )
