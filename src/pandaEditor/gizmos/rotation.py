@@ -1,6 +1,6 @@
 import math
 
-from pandac.PandaModules import Mat4, Vec3, Point3, Plane
+from pandac.PandaModules import Mat4, Vec3, Point3, Plane, NodePath
 from pandac.PandaModules import CollisionSphere, CollisionPolygon
 from pandac.PandaModules import BillboardEffect
 
@@ -16,9 +16,6 @@ class Rotation( Base ):
     def __init__( self, *args, **kwargs ):
         Base.__init__( self, *args, **kwargs )
         
-        # Create the camera helper
-        self.cameraHelper = self.rootNp.attachNewNode( 'cameraHelper' )
-        
         # Create the 'ball' border
         self.border = self.CreateCircle( GREY, 1 )
         
@@ -27,29 +24,38 @@ class Rotation( Base ):
         self.collSphere = CollisionSphere( 0, 1 )
         
         # Create x, y, z and camera normal axes
-        self.axes.append( self.CreateRing( Vec3(1, 0, 0), RED, self.camera ) )
-        self.axes.append( self.CreateRing( Vec3(0, 1, 0), GREEN, self.cameraHelper ) )
-        self.axes.append( self.CreateRing( Vec3(0, 0, 1), BLUE, self.camera ) )
+        self.axes.append( self.CreateRing( Vec3(1, 0, 0), RED, 
+                                           Vec3(0, 0, 90) ) )
+        self.axes.append( self.CreateRing( Vec3(0, 1, 0), GREEN, 
+                                           Vec3(0, 90, 0) ) )
+        self.axes.append( self.CreateRing( Vec3(0, 0, 1), BLUE, 
+                                           Vec3(0, 0, 0) ) )
         
         # DEBUG
         self.foobar = self.CreateCamCircle( TEAL, 1.2 )
         self.axes.append( self.foobar )
     
-    def CreateRing( self, vector, colour, lookAt ):
-        
-        # Create the billboard effect
-        bbe = BillboardEffect.make( vector, False, True, 0, lookAt, (0, 0, 0) )
+    def CreateRing( self, vector, colour, rot ):
         
         # Create an arc
         arc = Arc( numSegs=32, degrees=180, axis=Vec3(0, 0, 1) )
         arc.setH( 180 )
-        arc.setEffect( bbe )
         
         # Create the axis from the arc
         axis = Axis( self.name, vector, colour )
         axis.AddGeometry( arc, sizeStyle=SCALE )
         axis.AddCollisionSolid( self.collSphere, sizeStyle=SCALE )
         axis.reparentTo( self )
+        
+        # Create the billboard effect and apply it to the arc. We need an
+        # extra NodePath to help the billboard effect so it orients properly.
+        hlpr = NodePath( 'helper' )
+        hlpr.setHpr( rot )
+        hlpr.reparentTo( self )
+        arc.reparentTo( hlpr )
+        bbe = BillboardEffect.make( Vec3(0, 0, 1), False, True, 0, 
+                                    self.camera, (0, 0, 0) )
+        arc.setEffect( bbe )
         
         return axis
     
@@ -113,11 +119,6 @@ class Rotation( Base ):
         
     def Update( self, task ):
         Base.Update( self, task )
-        
-        # Update the position of the camera helper based on the position of
-        # the camera
-        finalMat = self.camera.getMat( self ) * Mat4().scaleMat( 1, 1, -1 )
-        self.cameraHelper.setMat( self, finalMat )
         
         # DEBUG - make the camera normal collision plane look at the camera.
         # Probably should be a better way to do this.
