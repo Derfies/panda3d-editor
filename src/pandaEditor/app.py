@@ -203,6 +203,8 @@ class App( p3d.wx.App ):
         selection modified message while transfoming.
         """
         self.gizmo = True
+        self._xformTask = taskMgr.add( self.doc.OnSelectionModified, 
+                                       'SelectionModified' )
             
     def StopTransform( self ):
         """
@@ -210,6 +212,11 @@ class App( p3d.wx.App ):
         message task. Also create a transform action and push it onto the undo 
         queue.
         """
+        # Remove the transform task
+        if self._xformTask in taskMgr.getAllTasks():
+            taskMgr.remove( self._xformTask )
+            self._xformTask = None
+            
         actGizmo = self.gizmoMgr.GetActiveGizmo()
         actns = []
         for i, np in enumerate( actGizmo.attachedNps ):

@@ -43,3 +43,12 @@ class Document( object ):
         """
         self.dirty = True
         pub.sendMessage( 'Update', base.selection.wrprs )
+        
+    def OnSelectionModified( self, task ):
+        """
+        Broadcast the update selection message. Methods subscribed to this
+        message should be quick and not force full rebuilds of ui widgets
+        considering how quickly the selection is likely to change.
+        """
+        pub.sendMessage( 'SelectionModified', base.selection.wrprs )
+        return task.cont

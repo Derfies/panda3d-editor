@@ -348,11 +348,11 @@ class PropertiesPanel( wx.Panel ):
         Update the position, rotation and scale properties during the 
         transform operation.
         """
-        np = msg.data[0]
+        wrpr = msg.data[0]
         labelFnDict = {
-            'Position':np.getPos,
-            'Rotation':np.getHpr,
-            'Scale':np.getScale
+            'Position':wrpr.data.getPos,
+            'Rotation':wrpr.data.getHpr,
+            'Scale':wrpr.data.getScale
         }
         
         # Set the value of each property to the result returned from calling
