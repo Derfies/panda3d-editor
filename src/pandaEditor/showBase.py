@@ -211,6 +211,7 @@ class ShowBase( P3dShowBase.ShowBase ):
         
         self.dr.setActive( True )
         self.dr.setDimensions( 0, 1, 0, 1 )
+        self.dr.setSort( 20 )
         self.dr2d.setActive( True )
         self.dr2d.setDimensions( 0, 1, 0, 1 )
         
@@ -234,6 +235,7 @@ class ShowBase( P3dShowBase.ShowBase ):
         
         self.dr.setActive( True )
         self.dr.setDimensions( 0.65, 1, 0.65, 1 )
+        self.dr.setSort( 20 )
         
         self.dr2d.setActive( True )
         self.dr2d.setDimensions( 0.65, 1, 0.65, 1 )
@@ -241,5 +243,3 @@ class ShowBase( P3dShowBase.ShowBase ):
         self.edDr.setActive( True )
         self.edRender2d.show()
         self.edPixel2d.show()
-        
-        

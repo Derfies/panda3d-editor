@@ -17,6 +17,7 @@ import commands as cmds
 from showBase import ShowBase
 from selection import Selection
 from project import Project
+from assetManager import AssetManager
     
 
 class App( p3d.wx.App ):
@@ -115,6 +116,10 @@ class App( p3d.wx.App ):
         # Start with a new scene
         self.CreateScene()
         self.doc.OnRefresh()
+        
+        # Create the asset manager
+        self.assetMgr = AssetManager()
+        base.assetMgr = self.assetMgr
         
         return True
     
@@ -318,6 +323,7 @@ class App( p3d.wx.App ):
         cmds.SetAttribute( [np], [prop], filePath )
         
     def OnProjectFilesModified( self, filePaths ):
+        self.assetMgr.OnAssetModified( filePaths )
         self.game.pluginMgr.OnProjectFilesModified( filePaths )
         
     def Undo( self ):
