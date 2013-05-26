@@ -83,7 +83,7 @@ class SceneGraphBasePanel( wx.Panel ):
         if val:
             self.filter = pm.PandaNode
             
-        sefl.app.doc.OnRefresh()
+        self.app.doc.OnRefresh()
         
     def OnTreeBeginLabelEdit( self, evt ):
         """
