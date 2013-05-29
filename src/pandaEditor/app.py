@@ -26,6 +26,7 @@ class App( p3d.wx.App ):
     
     def OnInit( self ):
         self.gizmo = False
+        self._xformTask = None
         
         # Bind publisher events
         pub.subscribe( self.OnUpdate, 'Update' )
