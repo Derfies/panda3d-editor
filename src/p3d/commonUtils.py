@@ -1,4 +1,5 @@
 import pandac.PandaModules as pm
+from direct.directtools.DirectUtil import ROUND_TO
 
 import os
 
@@ -102,3 +103,24 @@ def RebuildGeomNodesToColPolys( incomingNodes ):
             parent.attachNewNode( cChild ) 
 
     return parent 
+    
+
+def ScalePoint( pnt, scl, invert=False ):
+    """
+    Return the indicated point xformed by a matrix constructed by the
+    indicated scale. Invert the scale matrix if required.
+    """
+    sclMat = pm.Mat4().scaleMat( scl )
+    if invert:
+        sclMat.invertInPlace()
+    return sclMat.xformPoint( pnt )
+    
+
+def SnapPoint( pnt, amt ):
+    """
+    Return a new point based on the indicated point but snapped to the nearest
+    indicated amount.
+    """
+    return pm.Vec3( ROUND_TO( pnt[0], amt ),
+                    ROUND_TO( pnt[1], amt ),
+                    ROUND_TO( pnt[2], amt ) )
