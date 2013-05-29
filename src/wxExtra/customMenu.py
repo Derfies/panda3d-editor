@@ -56,3 +56,7 @@ class CustomMenu( wx.Menu ):
         """Enable or disable all tools in the toolbar."""
         for item in self.GetMenuItems():
             item.Enable( state )
+            
+    def Clear( self ):
+        for item in self.GetMenuItems():
+            self.DeleteItem( item )
