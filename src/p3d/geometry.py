@@ -442,9 +442,7 @@ class Polygon( pm.NodePath ):
         
 
 def Line( start, end, thickness=1.0 ):
-    
     """Return a geom node representing a simple line."""
-    
     # Create line segments
     ls = pm.LineSegs()
     ls.setThickness( thickness )
@@ -482,3 +480,27 @@ def QuadWireframe( egg ):
         return geo
     
     return RecursePoly( egg, pm.GeomNode( 'quadWireframe' ) )
+    
+
+def Axes( thickness=1, length=25 ):
+    """Class representing the viewport camera axes."""
+    # Build line segments
+    ls = pm.LineSegs()
+    ls.setThickness( thickness )
+    
+    # X Axis - Red
+    ls.setColor( 1.0, 0.0, 0.0, 1.0 )
+    ls.moveTo( 0.0, 0.0, 0.0 )
+    ls.drawTo( length, 0.0, 0.0 )
+    
+    # Y Axis - Green
+    ls.setColor( 0.0, 1.0, 0.0, 1.0 )
+    ls.moveTo( 0.0,0.0,0.0 )
+    ls.drawTo( 0.0, length, 0.0 )
+    
+    # Z Axis - Blue
+    ls.setColor( 0.0, 0.0, 1.0, 1.0 )
+    ls.moveTo( 0.0,0.0,0.0 )
+    ls.drawTo( 0.0, 0.0, length )
+    
+    return ls.create()

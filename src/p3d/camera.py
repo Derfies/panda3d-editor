@@ -23,37 +23,6 @@ class Camera( NodePath, p3d.SingleTask ):
             NodePath.__init__( self, 'target' )
             
             self.defaultPos = pos
-            
-    class Axes( NodePath ):
-        
-        """Class representing the viewport camera axes."""
-        
-        def __Create( self, thickness, length ):
-            
-            # Build line segments
-            ls = LineSegs()
-            ls.setThickness( thickness )
-            
-            # X Axis - Red
-            ls.setColor( 1.0, 0.0, 0.0, 1.0 )
-            ls.moveTo( 0.0, 0.0, 0.0 )
-            ls.drawTo( length, 0.0, 0.0 )
-            
-            # Y Axis - Green
-            ls.setColor( 0.0, 1.0, 0.0, 1.0 )
-            ls.moveTo( 0.0,0.0,0.0 )
-            ls.drawTo( 0.0, length, 0.0 )
-            
-            # Z Axis - Blue
-            ls.setColor( 0.0, 0.0, 1.0, 1.0 )
-            ls.moveTo( 0.0,0.0,0.0 )
-            ls.drawTo( 0.0, 0.0, length )
-            
-            return ls.create()
-        
-        def __init__( self, thickness=1, length=25 ):
-            ls = self.__Create( thickness, length )
-            NodePath.__init__( self, ls )
     
     def __init__( self, name='camera', *args, **kwargs ):
         pos = kwargs.pop( 'pos', (0, 0, 0) )
@@ -86,7 +55,7 @@ class Camera( NodePath, p3d.SingleTask ):
         
         # Create camera styles
         if self.style & CAM_VIEWPORT_AXES:
-            self.axes = self.Axes()
+            self.axes = pm.NodePath( p3d.geometry.Axes() )
             self.axes.reparentTo( self.rootP2d )
         
         # Create camera target
