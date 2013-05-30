@@ -18,6 +18,7 @@ from baseDialog import BaseDialog
 from resourcesPanel import ResourcesPanel
 from propertiesPanel import PropertiesPanel
 from sceneGraphPanel import SceneGraphPanel
+from preferencesFrame import PreferencesFrame
 from lightLinkerPanel import LightLinkerPanel
 from projectSettingsPanel import ProjectSettingsPanel
 
@@ -66,6 +67,7 @@ ID_LAYOUT_GAME = wx.NewId()
 ID_LAYOUT_EDITOR = wx.NewId() 
 ID_LAYOUT_BOTH = wx.NewId() 
 
+ID_WIND_PANEL = wx.NewId()
 ID_WIND_FILE_TOOLBAR = wx.NewId()
 ID_WIND_EDIT_TOOLBAR = wx.NewId()
 ID_WIND_MODIFY_TOOLBAR = wx.NewId()
@@ -77,6 +79,7 @@ ID_WIND_LIGHT_LINKER = wx.NewId()
 ID_WIND_PROPERTIES = wx.NewId()
 ID_WIND_RESOURCES = wx.NewId()
 ID_WIND_LOG = wx.NewId()
+ID_WIND_PREFERENCES = wx.NewId()
 
 ID_PLAY = wx.NewId()
 ID_PAUSE = wx.NewId()
@@ -141,6 +144,10 @@ class MainFrame( wx.Frame ):
         self.BuildCreateMenu()
         self.BuildWindowMenu()
         self.BuildMenuBar()
+        
+        # Populate the panels menu bar with items representing each floating
+        # panel.
+        self.RebuildPanelMenu()
         
         # Update the view menu based on the perspective saved in preferences
         self.OnUpdateWindowMenu( None )
@@ -405,13 +412,13 @@ class MainFrame( wx.Frame ):
             # after the event
             for id in self.paneDefs:
                 pane = self.paneDefs[id][0]
-                if self.mWind.FindItemById( id ) and self._mgr.GetPane( pane ).IsShown():
-                    self.mWind.Check( id, True )
+                if self.mPnl.FindItemById( id ) and self._mgr.GetPane( pane ).IsShown():
+                    self.mPnl.Check( id, True )
                     
         # Uncheck all menus
         for id in self.paneDefs:
-            if self.mWind.FindItemById( id ):
-                self.mWind.Check( id, False )
+            if self.mPnl.FindItemById( id ):
+                self.mPnl.Check( id, False )
         
         # Call after or IsShown() won't return a useful value 
         wx.CallAfter( UpdateWindowMenu )
@@ -524,6 +531,15 @@ class MainFrame( wx.Frame ):
         self.tbXform.ToggleTool( ID_XFORM_WORLD, val )
             
         self.tbXform.Refresh()
+        
+    def OnShowPreferences( self, evt ):
+        try:
+            self.frmPrefs.Close()
+        except:
+            pass
+        self.frmPrefs = PreferencesFrame( self )
+        self.frmPrefs.Center()
+        self.frmPrefs.Show()
         
     def OnMove( self, evt ):
         """
@@ -747,19 +763,22 @@ class MainFrame( wx.Frame ):
         
     def BuildWindowMenu( self ):
         """Build show / hide controls for panes."""
-        self.mWind = wx.Menu()
+        self.mPnl = CustomMenu()
+        
+        self.mWind = CustomMenu()
+        self.mWind.AppendMenu( ID_WIND_PANEL, '&Panel', self.mPnl )
+        self.mWind.AppendActionItem( ActionItem( 'Preferences', '', self.OnShowPreferences, ID_WIND_PREFERENCES ), self )
+                
+    def RebuildPanelMenu( self ):
+        self.Freeze()
+        
+        self.mPnl.Clear()
         for id, paneDef in self.paneDefs.items():
             if paneDef[1]:
-                self.mWind.AppendCheckItem( id, paneDef[2].caption )
+                self.mPnl.AppendCheckItem( id, paneDef[2].caption )
                 self.Bind( wx.EVT_MENU, self.OnShowHidePane, id=id )
-        self.mb.Append( self.mWind, '&Window' )
-                
-    def RebuildWindowMenu( self ):
-        self.Freeze()
-        index = self.mb.FindMenu( 'Window' )
-        self.mb.Remove( index )
-        self.BuildWindowMenu()
         self.OnUpdateWindowMenu( None )
+        
         self.Thaw()
         
     def BuildMenuBar( self ):
@@ -768,6 +787,7 @@ class MainFrame( wx.Frame ):
         self.mb.Append( self.mEdit, '&Edit' )
         self.mb.Append( self.mView, '&View' )
         self.mb.Append( self.mCreate, '&Create' )
+        self.mb.Append( self.mWind, '&Window' )
         
         self.SetMenuBar( self.mb )
         

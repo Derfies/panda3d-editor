@@ -24,6 +24,6 @@ class Base( OldBase ):
     
     def AddUiWindow( self, id, ctrl, auiInfo, showInWindowMenu=True ):
         self.app.frame.paneDefs[id] = (ctrl, showInWindowMenu, auiInfo)
-        self.app.frame.RebuildWindowMenu()
+        self.app.frame.RebuildPanelMenu()
         self.ui._mgr.AddPane( ctrl, auiInfo )
         self.ui._mgr.Update()

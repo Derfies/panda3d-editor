@@ -27,9 +27,7 @@ class ShowBase( P3dShowBase.ShowBase ):
         self.forcedAspectWins = []
         self.forcedAspectWins.append( (self.win, self.edCamera, self.edPixel2d) )
         
-        # Set up masks for camera and render
-        self.SetupCameraMask()
-        self.SetupRenderMask()
+        self.Reset()
         
     def SetupEdRender( self ):
         """
@@ -37,7 +35,6 @@ class ShowBase( P3dShowBase.ShowBase ):
         nodes out of the scene.
         """
         self.edRender = pm.NodePath( 'edRender' )
-        self.edRender.setShaderAuto()
         render.reparentTo( self.edRender )
         
     def SetupEdRender2d( self ):
@@ -82,6 +79,7 @@ class ShowBase( P3dShowBase.ShowBase ):
             'camera', 
             style=p3d.CAM_VIEWPORT_AXES,
             speed=0.5, 
+            pos=(56, 56, 42),
             rootNp=self.edRender,
             rootP2d=self.edPixel2d,
             win=self.win,
@@ -95,14 +93,17 @@ class ShowBase( P3dShowBase.ShowBase ):
         self.dr = base.cam.node().getDisplayRegion( 0 )
         self.dr.setClearColorActive( True )
         self.dr.setClearColor( self.getBackgroundColor() )
-        self.dr.setSort( 1 )
         self.dr.setActive( False )
+        self.dr.setSort( 20 )
         
         self.dr2d = base.cam2d.node().getDisplayRegion( 0 )
         self.dr2d.setActive( False )
+        self.dr2d.setSort( 21 )
         
         self.edDr = self.win.makeDisplayRegion( 0, 1, 0, 1 )
         self.edDr.setCamera( self.edCamera )
+        self.edDr.setClearColorActive( True )
+        self.edDr.setClearColor( (0.63, 0.63, 0.63, 0) )
         
     def windowEvent( self, *args, **kwargs ):
         """
@@ -190,6 +191,9 @@ class ShowBase( P3dShowBase.ShowBase ):
         # Set up masks
         self.SetupCameraMask()
         self.SetupRenderMask()
+        
+        # Set auto shader.
+        render.setShaderAuto()
             
     def ResetModelPath( self ):
         """
@@ -211,7 +215,6 @@ class ShowBase( P3dShowBase.ShowBase ):
         
         self.dr.setActive( True )
         self.dr.setDimensions( 0, 1, 0, 1 )
-        self.dr.setSort( 20 )
         self.dr2d.setActive( True )
         self.dr2d.setDimensions( 0, 1, 0, 1 )
         
@@ -235,7 +238,6 @@ class ShowBase( P3dShowBase.ShowBase ):
         
         self.dr.setActive( True )
         self.dr.setDimensions( 0.65, 1, 0.65, 1 )
-        self.dr.setSort( 20 )
         
         self.dr2d.setActive( True )
         self.dr2d.setDimensions( 0.65, 1, 0.65, 1 )

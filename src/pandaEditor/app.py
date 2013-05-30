@@ -51,9 +51,18 @@ class App( p3d.wx.App ):
         
         # Create grid
         self.grid = DirectGrid( 
-            parent=base.edRender, 
-            planeColor=(0.5, 0.5, 0.5, 0.5) 
+            gridSize=20.0,
+            gridSpacing=1.0,
+            planeColor=(0.5, 0.5, 0.5, 0.0),
+            parent=base.edRender
         )
+        self.grid.snapMarker.hide()
+        self.grid.centerLines.setColor( (0, 0, 0, 0) )
+        self.grid.centerLines.setThickness( 2 )
+        self.grid.majorLines.setColor( (0.25, 0.25, 0.25, 0) )
+        self.grid.majorLines.setThickness( 1 )
+        self.grid.minorLines.setColor( (0.5, 0.5, 0.5, 0) )
+        self.grid.updateGrid()
         
         # Create frame rate meter
         self.frameRate = p3d.FrameRate()
