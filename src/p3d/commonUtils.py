@@ -107,8 +107,8 @@ def RebuildGeomNodesToColPolys( incomingNodes ):
 
 def ScalePoint( pnt, scl, invert=False ):
     """
-    Return the indicated point xformed by a matrix constructed by the
-    indicated scale. Invert the scale matrix if required.
+    Return a new point based on the indicated point xformed by a matrix 
+    constructed by the indicated scale. Invert the scale matrix if required.
     """
     sclMat = pm.Mat4().scaleMat( scl )
     if invert:
@@ -124,3 +124,15 @@ def SnapPoint( pnt, amt ):
     return pm.Vec3( ROUND_TO( pnt[0], amt ),
                     ROUND_TO( pnt[1], amt ),
                     ROUND_TO( pnt[2], amt ) )
+                    
+
+def ClosestPointToLine( c, a, b ):
+    """Returns the closest point on line ab to input point c."""
+    u = ( c[0] - a[0] ) * ( b[0] - a[0] ) + ( c[1] - a[1] ) * ( b[1] - a[1] ) + ( c[2] - a[2] ) * ( b[2] - a[2] )
+    u = u / ( ( a - b ).length() * ( a - b ).length() )
+
+    x = a[0] + u * ( b[0] - a[0] )
+    y = a[1] + u * ( b[1] - a[1] )
+    z = a[2] + u * ( b[2] - a[2] )
+
+    return pm.Point3(x, y, z)
