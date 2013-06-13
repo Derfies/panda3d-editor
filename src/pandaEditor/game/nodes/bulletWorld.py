@@ -34,7 +34,7 @@ class BulletWorld( Base ):
         for i in range( comp.getNumRigidBodies() ):
             comp.removeRigidBody( comp.getRigidBody( 0 ) )
             
-    def ClearCharacters( comp ):
+    def ClearCharacters( self, comp ):
         for i in range( comp.getNumCharacters() ):
             comp.removeRigidBody( comp.getCharacter( 0 ) )
             
