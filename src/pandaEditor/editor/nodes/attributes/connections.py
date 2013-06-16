@@ -5,25 +5,26 @@ from game.nodes.attributes import NodePathSourceConnectionList as GameNodePathSo
 from game.nodes.attributes import NodePathTargetConnectionList as GameNodePathTargetConnectionList
 
 
-class Connection( GameConnection ):
+class RegisterMixin( object ):
     
     def Set( self, tgtComp ):
         base.scene.ClearConnections( self.srcComp )
         
-        GameConnection.Set( self, tgtComp )
+        super( RegisterMixin, self ).Set( tgtComp )
     
     def Connect( self, tgtComp ):
-        GameConnection.Connect( self, tgtComp )
+        super( RegisterMixin, self ).Connect( tgtComp )
         
         base.scene.RegisterConnection( tgtComp, self )
         
     def Break( self, tgtComp ):
-        GameConnection.Break( self, tgtComp )
+        super( RegisterMixin, self ).Break( tgtComp )
         
         base.scene.DeregisterConnection( tgtComp, self )
         
 
-class NodePathTargetConnection( GameNodePathTargetConnection, Connection ): pass
-class ConnectionList( GameConnectionList, Connection ): pass
-class NodePathSourceConnectionList( GameNodePathSourceConnectionList, ConnectionList ): pass
-class NodePathTargetConnectionList( GameNodePathTargetConnectionList, ConnectionList ): pass
+class Connection( RegisterMixin, GameConnection ): pass
+class NodePathTargetConnection( RegisterMixin, GameNodePathTargetConnection ): pass
+class ConnectionList( RegisterMixin, GameConnectionList ): pass
+class NodePathSourceConnectionList( RegisterMixin, GameNodePathSourceConnectionList ): pass
+class NodePathTargetConnectionList( RegisterMixin, GameNodePathTargetConnectionList ): pass
