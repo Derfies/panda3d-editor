@@ -1,6 +1,8 @@
+import pandac.PandaModules as pm
 from pandac.PandaModules import Point3, Vec3, Plane, NodePath
 
 import p3d
+from p3d import commonUtils as utils
 from constants import *
 
 
@@ -25,24 +27,20 @@ class Base( NodePath, p3d.SingleTask ):
         
     def OnUpdate( self, task ):
         """
-        Main update task used by the gizmo which is added and removed from the
-        task manager whenever a gizmo is stopped and started.
+        Update method called every frame. Run the transform method if the user
+        is dragging, and keep it the same size on the screen.
         """
-        # Increate gizmo side by distance to camera so it always appears the
-        # same size
-        scale = ( self.getPos() - self.camera.getPos() ).length() / 10
-        self.setScale( scale )
-        
-        # Call transform if the mouse is down
         if self.dragging:
             self.Transform()
+            
+        scale = ( self.getPos() - self.camera.getPos() ).length() / 10
+        self.setScale( scale )
     
     def OnStart( self ):
         """
         Starts the gizmo adding the task to the task manager, refreshing it
         and deselecting all axes except the default one.
         """
-        # Refresh the gizmo
         self.Refresh()
         
         # Select the default axis, deselect all others
@@ -52,7 +50,6 @@ class Base( NodePath, p3d.SingleTask ):
             else:
                 axis.Deselect()
                 
-        # Accept events
         self.AcceptEvents()
         
     def OnStop( self ):
@@ -171,7 +168,7 @@ class Base( NodePath, p3d.SingleTask ):
         self.planar = planar
         self.dragging = True
         
-        # Store the attached node path's transforms
+        # Store the attached node path's transforms.
         self.initNpXforms = [np.getTransform() for np in self.attachedNps]
         
         # Reset colours and deselect all axes, then get the one which the
@@ -184,7 +181,8 @@ class Base( NodePath, p3d.SingleTask ):
             axis.Select()
             
             # Get the initial point where the mouse clicked the axis
-            self.initMousePoint = self.GetAxisPoint( axis )
+            self.startAxisPoint = self.GetAxisPoint( axis )
+            self.lastAxisPoint = self.GetAxisPoint( axis )
             
     def OnMouse2Down( self ):
         """
@@ -195,7 +193,8 @@ class Base( NodePath, p3d.SingleTask ):
         if axis is not None and self.attachedNps and self.mouseWatcherNode.hasMouse():
             self.dragging = True
             self.initNpXforms = [np.getTransform() for np in self.attachedNps]
-            self.initMousePoint = self.GetAxisPoint( axis )
+            self.startAxisPoint = self.GetAxisPoint( axis )
+            self.lastAxisPoint = self.GetAxisPoint( axis )
         
     def OnNodeMouseOver( self, collEntry ):
         """Highlights the different axes as the mouse passes over them."""
@@ -212,42 +211,32 @@ class Base( NodePath, p3d.SingleTask ):
         axis = self.GetAxis( collEntry )
         if axis is not None:
             axis.Highlight()
+            
+    def GetMousePlaneCollisionPoint( self, pos, nrml ):
+        """
+        Return the collision point of a ray fired through the mouse and a
+        plane with the specified normal.
+        """
+        # Fire a ray from the camera through the mouse 
+        mp = self.mouseWatcherNode.getMouse()
+        p1 = Point3()
+        p2 = Point3()
+        self.camera.node().getLens().extrude( mp, p1, p2 )
+        p1 = self.rootNp.getRelativePoint( self.camera, p1 )
+        p2 = self.rootNp.getRelativePoint( self.camera, p2 )
+        
+        # Get the point of intersection with a plane with the normal
+        # specified
+        p = Point3()
+        Plane( nrml, pos ).intersectsLine( p, p1, p2 )
+        
+        return p
     
     def GetAxisPoint( self, axis ):
-        
-        def GetMousePlaneCollisionPoint( planeNormal ):
-            """
-            Return the collision point of a ray fired through the mouse and a
-            plane with the specified normal.
-            """
-            # Fire a ray from the camera through the mouse 
-            mp = self.mouseWatcherNode.getMouse()
-            p1 = Point3()
-            p2 = Point3()
-            self.camera.node().getLens().extrude( mp, p1, p2 )
-            p1 = self.rootNp.getRelativePoint( self.camera, p1 )
-            p2 = self.rootNp.getRelativePoint( self.camera, p2 )
-            
-            # Get the point of intersection with a plane with the normal
-            # specified
-            p = Point3()
-            Plane( planeNormal, self.getPos() ).intersectsLine( p, p1, p2 )
-            
-            return p
-        
-        def ClosestPointToLine( c, a, b ):
-    
-            """Returns the closest point on line ab to input point c."""
-
-            u = ( c[0] - a[0] ) * ( b[0] - a[0] ) + ( c[1] - a[1] ) * ( b[1] - a[1] ) + ( c[2] - a[2] ) * ( b[2] - a[2] )
-            u = u / ( ( a - b ).length() * ( a - b ).length() )
-
-            x = a[0] + u * ( b[0] - a[0] )
-            y = a[1] + u * ( b[1] - a[1] )
-            z = a[2] + u * ( b[2] - a[2] )
-
-            return Point3(x, y, z)
-        
+        """
+        Return the point of intersection for the mouse picker ray and the axis
+        in the gizmo root node space.
+        """
         # Get the axis vector - by default this is the selected axis'
         # vector unless we need to use the camera's look vector
         if axis.vector == CAMERA_VECTOR:
@@ -259,7 +248,7 @@ class Base( NodePath, p3d.SingleTask ):
         # planar mode use the axis vector as the plane normal, otherwise
         # get the normal of a plane along the selected axis
         if self.planar or axis.planar:
-            return GetMousePlaneCollisionPoint( axisVector )
+            return self.GetMousePlaneCollisionPoint( self.getPos(), axisVector )
         else:
             
             # Get the cross of the camera vector and the axis vector - a
@@ -269,5 +258,6 @@ class Base( NodePath, p3d.SingleTask ):
             
             # Cross this back with the axis to get a plane's normal
             planeNormal = camAxisCross.cross( axisVector )
-            p = GetMousePlaneCollisionPoint( planeNormal )
-            return ClosestPointToLine( p, self.getPos(), self.getPos() + axisVector )
+            p = self.GetMousePlaneCollisionPoint( self.getPos(), planeNormal )
+            return utils.ClosestPointToLine( p, self.getPos(), self.getPos() + 
+                                             axisVector )

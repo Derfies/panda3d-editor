@@ -199,7 +199,7 @@ class Rotation( Base ):
         # otherwise use the surface normal from the collision with the sphere
         axis = self.GetSelectedAxis()
         if axis is not None and axis.vector == CAMERA_VECTOR:
-            self.startVec = self.getRelativeVector( self.rootNp, self.initMousePoint - self.getPos() )
+            self.startVec = self.getRelativeVector( self.rootNp, self.startAxisPoint - self.getPos() )
         else:
             self.startVec = self.initCollEntry.getSurfaceNormal( self )
         
@@ -211,7 +211,7 @@ class Rotation( Base ):
              self.collEntry.getIntoNode() != self.initCollEntry.getIntoNode() ):
             self.startVec = self.getRelativeVector( self.rootNp, self.GetAxisPoint( self.foobar ) - self.getPos() )
         else:
-            self.startVec = self.getRelativeVector( self.rootNp, self.initMousePoint - self.getPos() )
+            self.startVec = self.getRelativeVector( self.rootNp, self.startAxisPoint - self.getPos() )
     
     def OnNodeMouseOver( self, collEntry ):
         Base.OnNodeMouseOver( self, collEntry )

@@ -54,12 +54,12 @@ class Scale( Base ):
         # compensate for how big the gizmo is on the screen
         axis = self.GetSelectedAxis()
         axisPoint = self.GetAxisPoint( axis )
-        distance = ( axisPoint - self.initMousePoint ).length() / self.getScale()[0]
+        distance = ( axisPoint - self.startAxisPoint ).length() / self.getScale()[0]
         
         # Using length() will give us a positive number, which doesn't work if
         # we're trying to scale down the object. Get the sign for the distance
         # from the dot of the axis and the mouse direction
-        mousePoint = self.getRelativePoint( self.rootNp, axisPoint ) - self.getRelativePoint( self.rootNp, self.initMousePoint )
+        mousePoint = self.getRelativePoint( self.rootNp, axisPoint ) - self.getRelativePoint( self.rootNp, self.startAxisPoint )
         direction = axis.vector.dot( mousePoint )
         sign = math.copysign( 1, direction )
         distance = distance * sign

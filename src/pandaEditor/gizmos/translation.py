@@ -1,11 +1,14 @@
-from pandac.PandaModules import Mat4, Vec3, Point3
-from pandac.PandaModules import CollisionTube, CollisionSphere, NodePath
+import pandac.PandaModules as pm
+from direct.directtools.DirectUtil import ROUND_TO
 
-from p3d import commonUtils
+from p3d import commonUtils as utils
 from p3d.geometry import Cone, Square, Line
 from axis import Axis
 from base import Base
 from constants import *
+
+
+TOL = 0.1
 
 
 class Translation( Base ):
@@ -13,34 +16,40 @@ class Translation( Base ):
     def __init__( self, *args, **kwargs ):
         Base.__init__( self, *args, **kwargs )
         
-        # Create x, y, z and camera normal axes
-        self.axes.append( self.CreateArrow( Vec3(1, 0, 0), RED ) )
-        self.axes.append( self.CreateArrow( Vec3(0, 1, 0), GREEN ) )
-        self.axes.append( self.CreateArrow( Vec3(0, 0, 1), BLUE ) )
-        self.axes.append( self.CreateSquare( Vec3(0, 0, 0), TEAL ) )
+        self._snp = False
+        self._snpAmt = 0.5
         
-    def CreateArrow( self, vector, colour ):
+        # Create x, y, z and camera normal axes
+        self.axes.append( self.CreateArrow( pm.Vec3(1, 0, 0), RED ) )
+        self.axes.append( self.CreateArrow( pm.Vec3(0, 1, 0), GREEN ) )
+        self.axes.append( self.CreateArrow( pm.Vec3(0, 0, 1), BLUE ) )
+        #self.axes.append( self.CreateArrow( pm.Vec3(1, 1, 0), YELLOW ) )
+        #self.axes.append( self.CreateArrow( pm.Vec3(-2, 1, 0), TEAL ) )
+        self.axes.append( self.CreateSquare( pm.Vec3(0, 0, 0), TEAL ) )
+        
+    def CreateArrow( self, vec, colour ):
         
         # Create the geometry and collision
-        line = NodePath( Line( (0, 0, 0), vector ) )
-        cone = NodePath( Cone( 0.05, 0.25, axis=vector, origin=vector * 0.125 ) )
-        collTube = CollisionTube( (0,0,0), Point3( vector ) * 0.95, 0.05 )
+        vec.normalize()
+        line = pm.NodePath( Line( (0, 0, 0), vec ) )
+        cone = pm.NodePath( Cone( 0.05, 0.25, axis=vec, origin=vec * 0.125 ) )
+        collTube = pm.CollisionTube( (0,0,0), pm.Point3( vec ) * 0.95, 0.05 )
         
         # Create the axis, add the geometry and collision
-        axis = Axis( self.name, vector, colour )
+        axis = Axis( self.name, vec, colour )
         axis.AddGeometry( line, sizeStyle=SCALE )
-        axis.AddGeometry( cone, vector, colour )
+        axis.AddGeometry( cone, vec, colour )
         axis.AddCollisionSolid( collTube, sizeStyle=TRANSLATE_POINT_B )
         axis.reparentTo( self )
         
         return axis
     
-    def CreateSquare( self, vector, colour ):
+    def CreateSquare( self, vec, colour ):
         
         # Create the geometry and collision
-        self.square = NodePath( Square( 0.2, 0.2, Vec3(0, 1, 0) ) )
+        self.square = pm.NodePath( Square( 0.2, 0.2, pm.Vec3(0, 1, 0) ) )
         self.square.setBillboardPointEye()
-        collSphere = CollisionSphere( 0, 0.125 )
+        collSphere = pm.CollisionSphere( 0, 0.125 )
         
         # Create the axis, add the geometry and collision
         axis = Axis( self.name, CAMERA_VECTOR, colour, planar=True, default=True )
@@ -50,50 +59,109 @@ class Translation( Base ):
         
         return axis
     
+    def _Snap( self, vec ):
+        if vec.length():
+            snpLen = ROUND_TO( vec.length(), self._snpAmt )
+            snapVec = vec / vec.length() * snpLen
+            return snapVec
+        else:
+            return pm.Vec3( 0 )
+    
     def Transform( self ):
-        
-        # Get the point where the mouse clicked the axis
         axis = self.GetSelectedAxis()
         axisPoint = self.GetAxisPoint( axis )
         
-        # Get the gizmo's translation matrix and transform it
-        newTransMat = Mat4().translateMat( self.initXform.getPos() - self.getPos() + axisPoint - self.initMousePoint )
-        self.setMat( self.getMat() * newTransMat )
+        # Calculate delta and snapping.
+        d = axisPoint - self.lastAxisPoint
+        lastSnap = self._Snap( self._s )
+        self._s += d
+        thisSnap = self._Snap( self._s )
         
-        # Get the attached node path's translation matrix
-        transVec = axisPoint - self.initMousePoint
-        if axis.vector != CAMERA_VECTOR:
-            transVec = self.getRelativeVector( self.rootNp, transVec ) * self.getScale()[0]
-        newTransMat = Mat4().translateMat( transVec )
-        
-        # Transform attached node paths
-        for i, np in enumerate( self.attachedNps ):
+        if self._snp:
             
-            # Perform transforms in local or world space
-            if self.local and axis.vector != CAMERA_VECTOR:
-                transMat, rotMat, scaleMat = commonUtils.GetTrsMatrices( self.initNpXforms[i] )
-                np.setMat( scaleMat * newTransMat * rotMat * transMat )
+            # If snapping in planar mode or using the camera axis, snap to a
+            # point on the ground plane.
+            if axis.vector == CAMERA_VECTOR or self.planar:
+                pnt = self.GetMousePlaneCollisionPoint( pm.Point3( 0 ), 
+                                                        pm.Vec3( 0, 0, 1 ) )
+                pnt = utils.SnapPoint( pnt, self._snpAmt )
+                
+                self.setPos( render, pnt )
+                for np in self.attachedNps:
+                    np.setPos( render, pnt )
+                    
+                return
+                
+            # If snapping in world space, construct a plane where the mouse
+            # clicked the axis and move all NodePaths so they intersect it.
+            elif not self.local:
+                pnt = utils.SnapPoint( self.startAxisPoint + d, self._snpAmt )
+                pl = pm.Plane( axis.vector, pm.Point3( pnt ) )
+                
+                self.setPos( render, pl.project( self.getPos( render ) ) )
+                for np in self.attachedNps:
+                    np.setPos( render, pl.project( np.getPos( render ) ) )
+                    
+                return
+            
+            # Gone over the snap threshold - set the delta to the snap amount.
+            elif thisSnap.compareTo( lastSnap, TOL ):
+                d.normalize()
+                d *= self._snpAmt
+                
+                # BUG - need to resize to compensate for cam dist?
+                
+            # In snapping mode but haven't gone past the snap threshold.
             else:
-                np.setMat( self.initNpXforms[i].getMat() * newTransMat )
+                d = pm.Vec3( 0 )
             
+        d = self.getRelativeVector( self.rootNp, d )
+        self.setMat( pm.Mat4().translateMat( d ) * self.getMat() )
+        
+        # Adjust the size of delta by the gizmo size to get real world units.
+        d = utils.ScalePoint( d, self.getScale() )
+        
+        # Hack for fixing camera vector xforming in local mode.
+        if self.local and axis.vector == CAMERA_VECTOR:
+            d = self.rootNp.getRelativeVector( self, d )
+            d = utils.ScalePoint( d, self.getScale(), True )
+        
+        # Xform attached NodePaths.
+        for np in ( self.attachedNps ):
+            if self.local and axis.vector != CAMERA_VECTOR:
+                sclD = utils.ScalePoint( d, np.getScale( self.rootNp ), True )
+                np.setMat( pm.Mat4().translateMat( sclD ) * np.getMat() )
+            else:
+                np.setMat( self.rootNp, np.getMat( self.rootNp ) * 
+                           pm.Mat4().translateMat( d ) )
+        
+        self.lastAxisPoint = axisPoint
+        
     def OnNodeMouse1Down( self, planar, collEntry ):
         Base.OnNodeMouse1Down( self, planar, collEntry )
         
-        # Store the gizmo's initial transform
-        self.initXform = self.getTransform()
+        self._s = pm.Vec3( 0 )
         
         # If in planar mode, clear the billboard effect on the center square
         # and make it face the selected axis
         axis = self.GetSelectedAxis()
         if self.planar and not axis.planar:
             self.square.clearBillboard()
-            self.square.lookAt( self, Point3( axis.vector ) )
+            self.square.lookAt( self, pm.Point3( axis.vector ) )
         else:
-            self.square.setHpr( Vec3(0, 0, 0) )
+            self.square.setHpr( pm.Vec3(0, 0, 0) )
             self.square.setBillboardPointEye()
             
     def OnMouse2Down( self ):
         Base.OnMouse2Down( self )
         
-        # Store the gizmo's initial transform
-        self.initXform = self.getTransform()
+        self._s = pm.Vec3( 0 )
+        
+    def AcceptEvents( self ):
+        Base.AcceptEvents( self )
+        
+        self.accept( 'x', self.SetSnap, [True] )
+        self.accept( 'x-up', self.SetSnap, [False] )
+        
+    def SetSnap( self, val ):
+        self._snp = val
