@@ -338,10 +338,12 @@ class MainFrame( wx.Frame ):
         """
         comps = []
         for wrpr in self.app.selection.wrprs:
-            modelPath = base.project.GetRelModelPath( wrpr.data.node().getFullpath() )
+            attr = wrpr.FindProperty( 'modelPath' )
+            if attr is None:
+                continue
             
             wrprCls = base.game.nodeMgr.nodeWrappers['Actor']
-            aWrpr = wrprCls.Create( modelPath=modelPath )
+            aWrpr = wrprCls.Create( modelPath=attr.Get() )
             aWrpr.data.setTransform( wrpr.data.getTransform() )
             aWrpr.SetDefaultValues()
             aWrpr.SetParent( wrpr.GetDefaultParent() )
@@ -739,9 +741,9 @@ class MainFrame( wx.Frame ):
             ActionItem( 'Debug Node', '', self.OnCreate, args='BulletDebugNode' ),
             ActionItem( 'Rigid Body Node', '', self.OnCreate, args='BulletRigidBodyNode' ),
             ActionItem( 'Character Controller Node', '', self.OnCreate, args='BulletCharacterControllerNode' ),
-            #ActionItem( 'Capsule Shape', '', self.OnCreate, args='BulletCapsuleShape' ),
             ActionItem( 'Box Shape', '', self.OnCreate, args='BulletBoxShape' ),
-            ActionItem( 'Plane Shape', '', self.OnCreate, args='BulletPlaneShape' )
+            ActionItem( 'Plane Shape', '', self.OnCreate, args='BulletPlaneShape' ),
+            ActionItem( 'Capsule Shape', '', self.OnCreate, args='BulletCapsuleShape' )
         ]
         mBlt = CustomMenu()
         mBlt.AppendActionItems( bltActions, self )
