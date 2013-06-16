@@ -4,7 +4,8 @@ import utils
 class Base( object ):
     
     def __init__( self, label, type_=None, getFn=None, setFn=None, srcFn=None, 
-                  getArgs=[], setArgs=[], srcArgs=[], w=True, srcComp=None, parent=None ):
+                  getArgs=[], setArgs=[], srcArgs=[], w=True, srcComp=None, 
+                  parent=None, initDefault=None, initName=None ):
         self.label = label
         self.type = type_
         self.getFn = getFn
@@ -18,8 +19,15 @@ class Base( object ):
         self.srcComp = srcComp
         self.parent = parent
         
+        self.initDefault = initDefault
+        self.initName = initName
+        
         name = self.label.replace( ' ', '' )
         self.name = utils.GetLowerCamelCase( name )
+        
+        if initName is None:
+            initName = self.name
+        self.initName = initName
         
     def GetSource( self ):
         if self.srcFn is None:
