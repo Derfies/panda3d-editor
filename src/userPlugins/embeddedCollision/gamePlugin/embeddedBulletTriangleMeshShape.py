@@ -27,16 +27,13 @@ class EmbeddedBulletTriangleMeshShape( BulletRigidBodyNode ):
     
     @classmethod
     def Create( cls, *args, **kwargs ):
-        #print '**CREATE METHOD***'
         if 'inputNp' in kwargs:
             inputNp = kwargs['inputNp']
-            #print 'using: ', inputNp
         elif 'path' in kwargs:
-            #print 'path: ', kwargs['path']
-            #print 'parent: ', kwargs['parent']
             inputNp = cls( cls.FindChild( kwargs['path'], kwargs['parent'] ) )
-            #print 'returning: ', inputNp.data
             return inputNp
+        else:
+            return cls( pm.NodePath( blt.BulletRigidBodyNode( '' ) ) )
         
         # Get all geom nodes at this level and below.
         #geomNps = inputNp.findAllMatches( '**/+GeomNode' )
