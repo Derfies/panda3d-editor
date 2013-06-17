@@ -1,3 +1,5 @@
+import pandac.PandaModules as pm
+
 from .. import gamePlugin as gp
 from p3d import commonUtils as cUtils
 
@@ -21,3 +23,8 @@ class Script( gp.Script ):
                 props[pName] = prop
                 
         return props
+    
+    def GetScriptPath( self, data ):
+        filePath = gp.Script.GetScriptPath( self, data )
+        pandaPath = pm.Filename.fromOsSpecific( filePath )
+        return base.project.GetRelModelPath( pandaPath )

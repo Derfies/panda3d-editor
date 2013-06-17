@@ -21,5 +21,5 @@ class ModelRoot( GameModelRoot ):
         return wrpr
     
     def GetFullPath( self, node ):
-        relPath = base.project.GetRelModelPath( node.getFullpath() )
-        return relPath
+        pandaPath = GameModelRoot.GetFullPath( self, node )
+        return base.project.GetRelModelPath( pandaPath )

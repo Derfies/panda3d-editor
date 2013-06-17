@@ -110,7 +110,6 @@ class Script( Base ):
                 setattr( self.data, pName, pVal )
     
     def GetScriptPath( self, data ):
-        filePath = inspect.getfile( data.__class__ )
-        return filePath
+        return inspect.getfile( data.__class__ )
     
     
