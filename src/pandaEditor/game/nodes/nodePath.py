@@ -4,9 +4,11 @@ import panda3d.core as pc
 import pandac.PandaModules as pm
 from pandac.PandaModules import NodePath as NP
 
+import p3d
 import utils
 from base import Base
 from constants import *
+from p3d import commonUtils as cUtils
 from attributes import NodePathAttribute as Attr
 from game.nodes.attributes import Connection as Cnnctn
 from game.nodes.attributes import NodePathTargetConnection as NPTCnnctn
@@ -21,7 +23,7 @@ class NodePath( Base ):
         Base.__init__( self, *args, **kwargs )
         
         self.AddAttributes(
-            Attr( 'Name', str, NP.getName, NP.setName ),
+            Attr( 'Name', str, NP.getName, NP.setName, initDefault='' ),
             Attr( 'Matrix', pm.Mat4, NP.getMat, NP.setMat ),
             CnnctnList( 'Lights', pm.Light, self.GetLights, NP.setLight, NP.clearLight, NP.clearLight ),
             Cnnctn( 'Texture', pm.Texture, NP.getTexture, NP.setTexture, NP.clearTexture, args=[1] ),
@@ -36,16 +38,14 @@ class NodePath( Base ):
         Create a NodePath with the indicated type and name, set it up and
         return it.
         """
-        if 'path' not in kwargs:
-            if cls.initArgs is None:
-                initArgs = [utils.GetLowerCamelCase( cls.type_.__name__ )]
-            else:
-                initArgs = cls.initArgs
-            
-            wrpr = cls( pm.NodePath( cls.type_( *initArgs ) ) )
+        path = kwargs.pop( 'path', None )
+        if path is None:
+            wrpr = super( NodePath, cls ).Create( *args, **kwargs )
+            wrpr.SetData( pm.NodePath( wrpr.data ) )
             wrpr.SetupNodePath()
         else:
-            wrpr = cls( cls.FindChild( kwargs['path'], kwargs['parent'] ) )
+            wrpr = cls( cls.FindChild( path, kwargs.pop( 'parent' ) ) )
+            
         return wrpr
     
     def Detach( self ):
@@ -59,17 +59,18 @@ class NodePath( Base ):
             
         self.data.removeNode()
         
-    def Duplicate( self ):
+    def Duplicate( self, uniqueName=True ):
         dupeNp = self.data.copyTo( self.data.getParent() )
         
         # Make sure the duplicated NodePath has a unique name to all its 
         # siblings.
-        siblingNames = [
-            np.getName() 
-            for np in self.data.getParent().getChildren()
-        ]
-        dupeNp.setName( utils.GetUniqueName( self.data.getName(), 
-                                             siblingNames ) )
+        if uniqueName:
+            siblingNames = [
+                np.getName() 
+                for np in self.data.getParent().getChildren()
+            ]
+            dupeNp.setName( utils.GetUniqueName( self.data.getName(), 
+                                                 siblingNames ) )
         
         self.FixUpDuplicateChildren( self.data, dupeNp )
         return dupeNp

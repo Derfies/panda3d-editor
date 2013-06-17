@@ -1,9 +1,14 @@
 import copy
 
+import panda3d.core as pc
+import pandac.PandaModules as pm
+
+import p3d
+import utils
+from p3d import commonUtils as cUtils
+
 
 class Base( object ):
-    
-    initArgs = None
     
     def __init__( self, data ):
         self.data = data
@@ -15,12 +20,24 @@ class Base( object ):
     
     @classmethod
     def Create( cls, *args, **kwargs ):
-        if cls.initArgs is None:
-            comp = cls.type_()
-        else:
-            comp = cls.type_( *cls.initArgs )
+        wrpr = cls( None )
         
-        return cls( comp )
+        createKwargs = {}
+        for attr in wrpr.GetCreateAttributes():
+            if attr.name in kwargs:
+                val = cUtils.UnserializeFromString( kwargs[attr.name], attr.type )
+                if val is not None:
+                    createKwargs[attr.name] = val
+            else:
+                createKwargs[attr.initName] = attr.initDefault
+        
+        # Default create args to a string of the class name.
+        if 'name' in createKwargs and not createKwargs['name']:
+            createKwargs['name'] = utils.GetLowerCamelCase( cls.type_.__name__ )
+        
+        wrpr.SetData( cls.type_( **createKwargs ) )
+        
+        return wrpr
     
     def Detach( self ):
         base.scene.DeregisterComponent( self.data )
@@ -74,7 +91,9 @@ class Base( object ):
         for key, val in propDict.items():
             attr = self.FindProperty( key )
             if attr is not None and attr.setFn is not None:
-                attr.Set( val )
+                val = cUtils.UnserializeFromString( val, attr.type )
+                if val is not None:
+                    attr.Set( val )
             else:
                 print 'Failed to set property: ', key
                 
@@ -130,3 +149,17 @@ class Base( object ):
             
     def OnDuplicate( self, origComp, dupeComp ):
         pass
+    
+    def SetData( self, data ):
+        self.data = data
+        for attr in self.attributes:
+            attr.srcComp = data
+            
+    def GetCreateAttributes( self ):
+        attrs = []
+        
+        for attr in self.GetAttributes():
+            if attr.initDefault is not None:
+                attrs.append( attr )
+                        
+        return attrs

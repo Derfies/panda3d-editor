@@ -2,12 +2,23 @@ import os
 import sys
 import inspect
 
+import pandac.PandaModules as pm
+
 import p3d
+from p3d import commonUtils as cUtils
 from pandaObject import PandaObjectNPO
 from game.nodes.base import Base
+from game.nodes.attributes import Attribute as Attr
 
 
 class Script( Base ):
+    
+    def __init__( self, *args, **kwargs ):
+        Base.__init__( self, *args, **kwargs )
+        
+        self.AddAttributes(
+            Attr( 'FilePath', str, self.GetScriptPath, initDefault='' )
+        )
     
     @classmethod
     def Create( cls, *args, **kwargs ):
@@ -86,8 +97,20 @@ class Script( Base ):
         head, tail = os.path.split( normPath )
         return os.path.splitext( tail )[0]
     
-    def SetPropertyData( self, dataDict ):
+    def SetPropertyData( self, propDict ):
         
         # Set the instance variables from the supplied dictionary.
-        for key, value in dataDict.items():
-            setattr( self.data, key, value )
+        for pName, pVal in propDict.items():
+            if not hasattr( self.data.__class__, pName ):
+                continue
+            
+            pType = getattr( self.data.__class__, pName )
+            pVal = cUtils.UnserializeFromString( pVal, pType )
+            if pVal is not None:
+                setattr( self.data, pName, pVal )
+    
+    def GetScriptPath( self, data ):
+        filePath = inspect.getfile( data.__class__ )
+        return filePath
+    
+    

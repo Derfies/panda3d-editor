@@ -27,17 +27,14 @@ class EditorPlugin( gp.GamePlugin ):
     def OnInit( self ):
         gp.GamePlugin.OnInit( self )
         
+        self.playing = False
+        
         # Add new commands to command module.
         setattr( cmds, 'AddScript', self.AddScript )
         
-        # DEBUG
-        #pub.subscribe( self.OnUpdate, 'projectFilesAdded' )
-        #self.'projectFilesModified'
+        self.AddDragDropFileTypeHandler( '.py', self.DropScript )
+        self.AddDragDropFileTypeHandler( '.pyc', self.DropScript )
         
-        self.playing = False
-        
-        self.app.fileTypes['.py'] = self.DropScript
-        self.app.fileTypes['.pyc'] = self.DropScript
         self.app.accept( 'escape', self.OnPause )
         
         self.BuildPlaybackToolBar()
@@ -85,9 +82,6 @@ class EditorPlugin( gp.GamePlugin ):
         pObjWrpr.SetParent( np )
         scriptWrpr.SetParent( pObjWrpr.data )
         actns.append( actions.Add( scriptWrpr.data ) )
-        
-        # DEBUG
-        #base.pandaMgr.RegisterScript( filePath, pObjWrpr.data )
         
         # Create a composite action, exectute it and push it onto the undo
         # queue.
@@ -143,21 +137,19 @@ class EditorPlugin( gp.GamePlugin ):
     def OnUpdate( self, msg ):
         
         # Disable all toolbar tools
-        #self.ui.tbFile.EnableAllTools( False )
         self.tbPlay.EnableAllTools( False )
         
         # Enable the pause tool if in play mode
         if self.playing:
             self.tbPlay.EnableTool( ID_PAUSE, True )
         else:
-            #self.ui.tbFile.EnableAllTools( True )
             self.tbPlay.EnableTool( ID_PLAY, True )
         
         # Refresh toolbars in order to show changes
         self.tbPlay.Refresh()
         
     def OnProjectFilesModified( self, filePaths ):
-        #print 'update!!'
+        
         # Don't reload files during playback. They will be reloaded once
         # playback is finished anyway when the scene is reloaded.
         if self.playing:
@@ -168,8 +160,6 @@ class EditorPlugin( gp.GamePlugin ):
         for filePath in filePaths:
             if os.path.splitext( filePath )[1] == '.py':
                 pyFilePaths.append( filePath )
-                
-        print 'relaodig: ', pyFilePaths
         
         # Reload scripts
         if pyFilePaths:

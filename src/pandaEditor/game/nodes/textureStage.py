@@ -8,7 +8,6 @@ from attributes import Attribute as Attr
 class TextureStage( Base ):
     
     type_ = TS
-    initArgs = ['textureStage']
     
     def __init__( self, *args, **kwargs ):
         Base.__init__( self, *args, **kwargs )

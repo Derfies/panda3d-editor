@@ -1,9 +1,5 @@
-import inspect
-
-import pandac.PandaModules as pm
-
-import p3d
 from .. import gamePlugin as gp
+from p3d import commonUtils as cUtils
 
 
 class Script( gp.Script ):
@@ -11,10 +7,12 @@ class Script( gp.Script ):
     def GetPropertyData( self ):
         
         # Put all instance variables into a dictionary and return it.
-        dataDict = {}
+        propDict = {'filePath':self.GetScriptPath( self.data )}
         for pName, pType in self.GetProps().items():
-            dataDict[pName] = getattr( self.data, pName )
-        return dataDict
+            propStr = cUtils.SerializeToString( getattr( self.data, pName ) )
+            if propStr is not None:
+                propDict[pName] = propStr
+        return propDict
     
     def GetProps( self ):
         props = {}
@@ -23,13 +21,3 @@ class Script( gp.Script ):
                 props[pName] = prop
                 
         return props
-    
-    def GetCreateArgs( self ):
-        filePath = self.GetScriptPath()#inspect.getfile( self.data.__class__ )
-        pandaPath = pm.Filename.fromOsSpecific( filePath )
-        relPath = base.project.GetRelModelPath( pandaPath )
-        return {'filePath':str( relPath )}
-    
-    def GetScriptPath( self ):
-        filePath = inspect.getfile( self.data.__class__ )
-        return filePath

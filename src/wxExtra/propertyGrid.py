@@ -213,6 +213,9 @@ class BaseProperty( object ):
             ctrl.Bind( wx.EVT_CHECKBOX, self.OnChanged )
         self._ctrls.append( ctrl )
         
+    def GetControls( self ):
+        return self._ctrls
+        
     def OnKillFocus( self, evt ):
         """
         Bind a control's wx.EVT_KILL_FOCUS event to this method so that the 
@@ -252,14 +255,21 @@ class PropertyCategory( BaseProperty ):
     
 
 class BoolProperty( BaseProperty ):
+    
+    def SetValue( self, val ):
+        BaseProperty.SetValue( self, val )
+        
+        ctrl = self.GetControls()[0]
+        ctrl.SetValue( self.GetValue() )
         
     def SetValueFromEvent( self, evt ):
         self._value = evt.IsChecked()
         
     def BuildControl( self, parent ):
         ctrl = wx.CheckBox( parent, -1, style=wx.ALIGN_RIGHT )
-        ctrl.SetValue( self.GetValue() )
+        #ctrl.SetValue( self.GetValue() )
         self.AppendControl( ctrl )
+        self.SetValue( self.GetValue() )
         return ctrl
     
 

@@ -95,24 +95,29 @@ class NodePath( GameNodePath ):
     def OnDelete( self, np ):
         pass
     
-    def GetCreateArgs( self ):
-        args = GameNodePath.GetCreateArgs( self )
+    def GetPath( self ):
+        modelRoot = self.data.findNetPythonTag( TAG_PICKABLE )
         
-        # If this node is a child of a model root, make sure to add its
-        # position in the hierarchy to the list of create arguments.
+        def Rec( tgtNp, np, path ):
+            if np.compareTo( tgtNp ) != 0:
+                path.insert( 0, np.getName() )
+                Rec( tgtNp, np.getParent(), path )
+        
+        path = []
+        Rec( modelRoot, self.data, path )
+        return '|'.join( path )
+    
+    def GetAttrib( self ):
+        """
+        If this node is a child of a model root, make sure to add its position
+        in the hierarchy to the attrib dictionary.
+        """
+        attrib = GameNodePath.GetAttrib( self )
+        
         if self.GetModified():
-            modelRoot = self.data.findNetPythonTag( TAG_PICKABLE )
-           
-            def Rec( tgtNp, np, path ):
-                if np.compareTo( tgtNp ) != 0:
-                    path.insert( 0, np.getName() )
-                    Rec( tgtNp, np.getParent(), path )
+            attrib['path'] = self.GetPath()
             
-            path = []
-            Rec( modelRoot, self.data, path )
-            args['path'] = '|'.join( path )
-            
-        return args
+        return attrib
     
     def GetModified( self ):
         return self.data.getPythonTag( TAG_MODIFIED )
@@ -185,7 +190,7 @@ class NodePath( GameNodePath ):
         GameNodePath.OnDuplicate( self, origNp, dupeNp )
         
         wrpr = base.game.nodeMgr.Wrap( origNp )
-        cnnctns = base.scene.GetConnections( wrpr.GetId() )
+        cnnctns = base.scene.GetOutgoingConnections( wrpr )
         for cnnctn in cnnctns:
             newCnnctn = copy.copy( cnnctn )
             newCnnctn.Connect( self.data )

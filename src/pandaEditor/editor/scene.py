@@ -56,15 +56,30 @@ class Scene( game.Scene ):
         
         self.rootNp.removeNode()
         
-    def GetConnections( self, compId ):
-        """Return all connections for the indicated component."""
-        cnnctns = []
+    def GetOutgoingConnections( self, wrpr ):
+        """
+        Return all outgoing connections for the indicated component wrapper.
+        """
+        outCnnctns = []
         
-        for id in self.cnnctns:
-            if id == compId:
-                cnnctns.extend( self.cnnctns[id] )
+        id = wrpr.GetId()
+        if id in self.cnnctns:
+            outCnnctns.extend( self.cnnctns[id] )
         
-        return cnnctns
+        return outCnnctns
+    
+    def GetIncomingConnections( self, wrpr ):
+        """
+        Return all incoming connections for the indicated component wrapper.
+        """
+        incCnnctns = []
+        
+        for id, cnnctns in self.cnnctns.items():
+            for cnnctn in cnnctns:
+                if cnnctn.srcComp == wrpr.data:
+                    incCnnctns.append( cnnctn )
+        
+        return incCnnctns
     
     def RegisterConnection( self, comp, cnnctn ):
         """

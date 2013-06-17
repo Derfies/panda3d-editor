@@ -27,3 +27,10 @@ class Base( OldBase ):
         self.app.frame.RebuildPanelMenu()
         self.ui._mgr.AddPane( ctrl, auiInfo )
         self.ui._mgr.Update()
+        
+    def AddDragDropFileTypeHandler( self, ext, fn ):
+        if ext not in self.app.dDropMgr.fileTypes:
+            self.app.dDropMgr.fileTypes[ext] = fn
+        else:
+            raise Warning( ext + ' already has a file type handler' )
+        

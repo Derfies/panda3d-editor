@@ -41,7 +41,7 @@ class PandaObject( Base ):
             try:
                 instance.ignoreAll()
             except Exception, e:
-                print e
+                print 'Could not ignore: ', e
             del self.data.instances[clsName]
 
         PandaObjectNPO.Break( self.data.np )
@@ -59,7 +59,7 @@ class PandaObject( Base ):
         pass
     
     def GetType( self ):
-        print 'using: ', TAG_PANDA_OBJECT
+        #print 'using: ', TAG_PANDA_OBJECT
         return TAG_PANDA_OBJECT
         
     def GetParent( self ):
@@ -91,9 +91,14 @@ class PandaObject( Base ):
     
     def GetAttributes( self, *args, **kwargs ):
         attrs = []
-        for name, instance in self.data.instances.items():
-            for pName, pType in self.GetProps( instance ).items():
-                attrs.append( Attr( pName, pType, getattr, setattr, self.GetPObjInstance, [pName], [pName], [name], w=False, parent=name,srcComp=self.data ) )
+        
+        if self.data is not None:
+            for name, instance in self.data.instances.items():
+                for pName, pType in self.GetProps( instance ).items():
+                    attrs.append( Attr( pName, pType, getattr, setattr, 
+                                        self.GetPObjInstance, [pName], [pName], 
+                                        [name], w=False, parent=name,
+                                        srcComp=self.data ) )
         
         return attrs
     
@@ -107,9 +112,6 @@ class PandaObject( Base ):
                 props[pName] = prop
                 
         return props
-        
-    def GetEveryAttribute( self ):
-        return self.GetAllAttributes()
     
     def ReloadScript( self, scriptPath ):
         

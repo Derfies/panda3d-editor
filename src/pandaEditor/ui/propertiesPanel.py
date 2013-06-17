@@ -249,7 +249,7 @@ class PropertiesPanel( wx.Panel ):
         for i, attr in enumerate( wrprs[0].GetAttributes( addons=True ) ):
             
             # Find the correct property to display this attribute
-            if attr.type in self.propMap:
+            if attr.type in self.propMap and attr.getFn is not None:
                 propCls = self.propMap[attr.type]
                 if attr.type is not None:
                     prop = propCls( attr.label, '', attr.Get() )

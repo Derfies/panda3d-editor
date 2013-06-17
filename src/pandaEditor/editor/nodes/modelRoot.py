@@ -19,6 +19,7 @@ class ModelRoot( GameModelRoot ):
             childNp.setPythonTag( TAG_MODEL_ROOT_CHILD, True )
         
         return wrpr
-
-    def GetCreateArgs( self ):
-        return {'modelPath':base.project.GetRelModelPath( self.data.node().getFullpath() )}
+    
+    def GetFullPath( self, node ):
+        relPath = base.project.GetRelModelPath( node.getFullpath() )
+        return relPath

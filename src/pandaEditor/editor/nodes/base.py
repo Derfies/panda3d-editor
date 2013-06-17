@@ -1,4 +1,5 @@
 import utils
+from p3d import commonUtils as cUtils
 from game.nodes.base import Base as GameBase
 
 
@@ -12,6 +13,21 @@ class Base( GameBase ):
         
     def ValidateDragDrop( self, dragComp, dropComp ):
         return False
+    
+    def GetAttrib( self ):
+        """
+        Return a dictionary with bare minimum data for a component - its type
+        and id.
+        """
+        attrib = {}
+        
+        id = self.GetId()
+        if id is not None:
+            attrib['id'] = id
+            
+        attrib['type'] = self.GetType()
+        
+        return attrib
         
     def GetPropertyData( self ):
         propDict = {}
@@ -21,7 +37,9 @@ class Base( GameBase ):
         props = [prop for prop in props if not hasattr( prop, 'cnnctn' )]
         for prop in props:
             if prop.w and prop.getFn is not None:
-                propDict[prop.name] = prop.Get()
+                propStr = cUtils.SerializeToString( prop.Get() )
+                if propStr is not None:
+                    propDict[prop.name] = propStr
             
         return propDict
     
@@ -45,9 +63,6 @@ class Base( GameBase ):
             cnnctnDict[cnnctn.name] = ids
             
         return cnnctnDict
-    
-    def GetCreateArgs( self ):
-        return {}
     
     def GetModified( self ):
         return False

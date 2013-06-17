@@ -20,5 +20,7 @@ class Actor( GameActor ):
         dupeNp.setPythonTag( TAG_PICKABLE, True )
         return dupeNp
     
-    def GetCreateArgs( self ):
-        return {'modelPath':base.project.GetRelModelPath( self.data.getPythonTag( TAG_MODEL_PATH ) )}
+    def GetFullPath( self, node ):
+        modelPath = node.getPythonTag( TAG_MODEL_PATH )
+        relPath = base.project.GetRelModelPath( modelPath )
+        return relPath

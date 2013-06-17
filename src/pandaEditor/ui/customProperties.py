@@ -20,12 +20,18 @@ class Float3Property( wxpg.BaseProperty ):
     def BuildControl( self, parent ):
         bs = wx.BoxSizer( wx.HORIZONTAL )
         for i in range( self._count ):
-            rndValue = round( self._value[i], 3 )
-            ctrl = wx.TextCtrl( parent, i, value=str( rndValue ), 
-                                validator=wxpg.FloatValidator() )
+            ctrl = wx.TextCtrl( parent, i, validator=wxpg.FloatValidator() )
             self.AppendControl( ctrl )
             bs.Add( ctrl, 1, wx.EXPAND )
+        self.SetValue( self._value )
         return bs
+    
+    def SetValue( self, val ):
+        wxpg.BaseProperty.SetValue( self, val )
+        
+        for i, ctrl in enumerate( self.GetControls() ):
+            rndVal = round( val[i], 3 )
+            ctrl.SetValue( str( rndVal ) )
     
     def SetValueFromEvent( self, evt ):
         self._value = self._cast( self._value )

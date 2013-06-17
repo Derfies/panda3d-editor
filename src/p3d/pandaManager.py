@@ -57,6 +57,7 @@ class PandaManager( object ):#utils.Singleton ):
         """
         scriptPaths = set( scriptPaths ) & set( self.pObjs.keys() )
         for scriptPath in scriptPaths:
+            print 'Reloading script: ', scriptPath
             for pObj in self.pObjs[scriptPath]:
                 pObjWrpr = base.game.nodeMgr.Wrap( pObj )
                 pObjWrpr.ReloadScript( scriptPath )

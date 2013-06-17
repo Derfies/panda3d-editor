@@ -1,6 +1,5 @@
-import os
-
 import pandac.PandaModules as pm
+from pandac.PandaModules import ModelRoot as MR
 
 from constants import *
 from nodePath import NodePath
@@ -11,19 +10,30 @@ class ModelRoot( NodePath ):
     
     type_ = pm.ModelRoot
     
+    def __init__( self, *args, **kwargs ):
+        NodePath.__init__( self, *args, **kwargs )
+        
+        self.AddAttributes(
+            Attr( 'ModelPath', pm.Filename, self.GetFullPath, initDefault='' ),
+            parent='ModelRoot'
+        )
+    
     @classmethod
     def Create( cls, *args, **kwargs ):
-        modelPath = kwargs['modelPath']
-        filePath = pm.Filename.fromOsSpecific( modelPath )
-        try:
-            np = loader.loadModel( filePath )
-        except:
+        modelPath = kwargs.pop( 'modelPath', '' )
+        if not modelPath:
+            np = pm.NodePath( pm.ModelRoot( '' ) )
+        else:
+            filePath = pm.Filename.fromOsSpecific( modelPath )
             try:
-                np = loader.loadModel( filePath + '.bam' )
-            except IOError:
-                print 'Failed to load: ', filePath
-                np = pm.NodePath( pm.ModelRoot( '' ) )
-        np.setName( filePath.getBasenameWoExtension() )
+                np = loader.loadModel( filePath )
+            except:
+                try:
+                    np = loader.loadModel( filePath + '.bam' )
+                except IOError:
+                    print 'Failed to load: ', filePath
+                    np = pm.NodePath( pm.ModelRoot( '' ) )
+            np.setName( filePath.getBasenameWoExtension() )
         
         wrpr = cls( np )
         wrpr.SetupNodePath()
@@ -53,3 +63,6 @@ class ModelRoot( NodePath ):
         """
         if not np.getPythonTag( TAG_MODEL_ROOT_CHILD ):
             np.reparentTo( self.data )
+            
+    def GetFullPath( self, node ):
+        return MR.getFullpath( node )

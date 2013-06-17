@@ -14,10 +14,11 @@ import editor
 import gizmos
 import actions
 import commands as cmds
+from project import Project
 from showBase import ShowBase
 from selection import Selection
-from project import Project
 from assetManager import AssetManager
+from dragDropManager import DragDropManager
     
 
 class App( p3d.wx.App ):
@@ -50,19 +51,7 @@ class App( p3d.wx.App ):
         self.frame.SetProjectPath( self.frame.cfg.Read( 'projDirPath' ) )
         
         # Create grid
-        self.grid = DirectGrid( 
-            gridSize=20.0,
-            gridSpacing=1.0,
-            planeColor=(0.5, 0.5, 0.5, 0.0),
-            parent=base.edRender
-        )
-        self.grid.snapMarker.hide()
-        self.grid.centerLines.setColor( (0, 0, 0, 0) )
-        self.grid.centerLines.setThickness( 2 )
-        self.grid.majorLines.setColor( (0.25, 0.25, 0.25, 0) )
-        self.grid.majorLines.setThickness( 1 )
-        self.grid.minorLines.setColor( (0.5, 0.5, 0.5, 0) )
-        self.grid.updateGrid()
+        self.SetupGrid()
         
         # Create frame rate meter
         self.frameRate = p3d.FrameRate()
@@ -93,7 +82,9 @@ class App( p3d.wx.App ):
         )
         base.selection = self.selection
         
-        # Create actions manager which will control the undo queue.
+        # Create our managers.
+        self.assetMgr = AssetManager()
+        self.dDropMgr = DragDropManager()
         self.actnMgr = actions.Manager()
         
         # Bind events
@@ -111,14 +102,6 @@ class App( p3d.wx.App ):
         self.accept( 'arrow_right', lambda fn: cmds.Select( fn() ), [self.selection.SelectNext] )
         self.accept( 'projectFilesModified', self.OnProjectFilesModified )
         
-        # DEBUG
-        self.fileTypes = {
-            '.egg':self.AddModel,
-            '.bam':self.AddModel,
-            '.pz':self.AddModel,
-            '.sha':self.AddShader
-        }
-        
         # Create a "game"
         self.game = editor.Base()
         self.game.OnInit()
@@ -127,11 +110,23 @@ class App( p3d.wx.App ):
         self.CreateScene()
         self.doc.OnRefresh()
         
-        # Create the asset manager
-        self.assetMgr = AssetManager()
-        base.assetMgr = self.assetMgr
-        
         return True
+    
+    def SetupGrid( self ):
+        """Create the grid and set up its appearance."""
+        self.grid = DirectGrid( 
+            gridSize=20.0,
+            gridSpacing=1.0,
+            planeColor=(0.5, 0.5, 0.5, 0.0),
+            parent=base.edRender
+        )
+        self.grid.snapMarker.hide()
+        self.grid.centerLines.setColor( (0, 0, 0, 0) )
+        self.grid.centerLines.setThickness( 2 )
+        self.grid.majorLines.setColor( (0.25, 0.25, 0.25, 0) )
+        self.grid.majorLines.setThickness( 1 )
+        self.grid.minorLines.setColor( (0.5, 0.5, 0.5, 0) )
+        self.grid.updateGrid()
     
     def SetupGizmoManager( self ):
         """Create gizmo manager."""
@@ -301,13 +296,7 @@ class App( p3d.wx.App ):
         
         # Get the object under the mouse, if any
         np = self.selection.GetNodePathUnderMouse()
-        self.AddFile( filePath, np )
-        
-    def AddFile( self, filePath, np=None ):
-        ext = os.path.splitext( filePath )[1]
-        if ext in self.fileTypes:
-            fn = self.fileTypes[ext]
-            fn( filePath, np )
+        self.dDropMgr.DoFileDrop( filePath, np )
         
     def AddModel( self, filePath, np=None ):
         self.AddComponent( 'ModelRoot', modelPath=filePath )
@@ -326,11 +315,50 @@ class App( p3d.wx.App ):
                 eWrpr = base.game.nodeMgr.Wrap( np )
                 eWrpr.SetDefaultValues()
         cmds.Add( [wrpr.data] )
+        
+        return wrpr
                 
     def AddShader( self, filePath, np=None ):
         wrpr = base.game.nodeMgr.Wrap( np )
         prop = wrpr.FindProperty( 'shader' )
         cmds.SetAttribute( [np], [prop], filePath )
+        
+    def AddTexture( self, filePath, np=None ):
+        pandaPath = pm.Filename.fromOsSpecific( filePath )
+        
+        theTex = None
+        if pm.TexturePool.hasTexture( pandaPath ):
+            print 'found in pool'
+            for tex in pm.TexturePool.findAllTextures():
+                if tex.getFilename() == pandaPath:
+                    theTex = tex
+        
+        # Try to find it in the scene.
+        #for foo in base.scene.comps.keys():
+        #    print type( foo ) , ' : ', foo
+        print theTex
+        if theTex is not None and theTex in base.scene.comps.keys():
+            print 'found in scene'
+            if np is not None:
+                npWrpr = base.game.nodeMgr.Wrap( np )
+                npWrpr.FindProperty( 'texture' ).Set( theTex )
+                
+        else:
+            
+            print 'creating new'
+            wrpr = self.AddComponent( 'Texture' )
+            #wrpr = base.game.nodeMgr.Wrap( loader.loadTexture( pandaPath ) )
+            #wrpr.SetDefaultValues()
+            #wrpr.SetParent( wrpr.GetDefaultParent() )
+            wrpr.FindProperty( 'fullPath' ).Set( pandaPath )
+            #pm.TexturePool.addTexture( wrpr.data )
+            
+            if np is not None:
+                npWrpr = base.game.nodeMgr.Wrap( np )
+                npWrpr.FindProperty( 'texture' ).Set( wrpr.data )
+            
+            
+            #cmds.Connect( 
         
     def OnProjectFilesModified( self, filePaths ):
         self.assetMgr.OnAssetModified( filePaths )

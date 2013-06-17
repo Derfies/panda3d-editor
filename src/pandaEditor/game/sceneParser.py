@@ -1,30 +1,9 @@
-import panda3d.core as pc
 import xml.etree.ElementTree as et
-
-import p3d
 
 
 class SceneParser( object ):
     
     """A class to load map files into Panda3D."""
-    
-    def __init__( self ):
-        self.loadCastFnMap = {
-            'bool':p3d.Str2Bool,
-            'float':float,
-            'int':int,
-            'str':str,
-            'unicode':str,
-            'LVector2f':p3d.Str2Vec2,
-            'LVecBase2f':p3d.Str2Vec2,
-            'LVector3f':p3d.Str2Vec3,
-            'LVecBase3f':p3d.Str2Vec3,
-            'LVector4f':p3d.Str2Vec4,
-            'LVecBase4f':p3d.Str2Vec4,
-            'LPoint3f':p3d.Str2Point3,
-            'LMatrix4f':p3d.Str2Mat4,
-            'Filename':str
-        }
     
     def Load( self, rootNp, filePath ):
         """Load the scene from an xml file."""
@@ -37,15 +16,25 @@ class SceneParser( object ):
             
         # Load connections
         self.LoadConnections()
+        
+    def GetCreateKwargs( self, wrprCls, elem ):
+        kwargs = {}
+        
+        for attr in wrprCls( None ).GetCreateAttributes():
+            pElem = elem.find( ".//Item[@name='" + attr.name + "']" )
+            if pElem is not None:
+                kwargs[attr.initName] = pElem.get( 'value' )
+                
+        return kwargs
             
     def LoadComponent( self, elem, pComp ):
         wrprCls = base.game.nodeMgr.GetWrapperByName( elem.get( 'type' ) )
         if wrprCls is not None:
             
-            # Get all arguments needed to create the node including the 
-            # parent.
-            args = self.GetCreateArgs( elem.attrib )
-            args['parent'] = pComp
+            args = self.GetCreateKwargs( wrprCls, elem )
+            if 'path' in elem.attrib:
+                args['parent'] = pComp
+                args['path'] = elem.attrib['path']
             
             # Create the node and load its properties.
             wrpr = wrprCls.Create( **args )
@@ -72,12 +61,6 @@ class SceneParser( object ):
         for cElem in elem.findall( 'Component' ):
             self.LoadComponent( cElem, wrpr.data )
             
-    def GetCreateArgs( self, attrib ):
-        createArgs = attrib.copy()
-        createArgs.pop( 'id', None )
-        createArgs.pop( 'type' )
-        return createArgs
-            
     def LoadProperties( self, wrpr, elem ):
         
         # Pull all properties from the xml for this component, then get the 
@@ -85,18 +68,14 @@ class SceneParser( object ):
         propElems = elem.findall( 'Item' )
         propDict = {}
         for propElem in propElems:
-            propType = propElem.get( 'type' )
-            if propType in self.loadCastFnMap:
-                castFn = self.loadCastFnMap[propType]
-                propDict[propElem.get( 'name' )] = castFn( propElem.get( 'value' ) )
-            elif propType == 'dict':
-                itemDict = {}
-                for itemElem in propElem.findall( 'Item' ):
-                    castFn = self.loadCastFnMap[itemElem.get( 'type' )]
-                    itemDict[itemElem.get( 'name' )] = castFn( itemElem.get( 'value' ) )
-                propDict[propElem.get( 'name' )] = itemDict
+            cElems = propElem.findall( 'Item' )
+            if not cElems:
+                propDict[propElem.get( 'name' )] = propElem.get( 'value' )
             else:
-                print 'Could not load attribute: ', propElem.get( 'name' ), ' : of type: ', propType
+                itemDict = {}
+                for itemElem in cElems:
+                    itemDict[itemElem.get( 'name' )] = itemElem.get( 'value' )
+                propDict[propElem.get( 'name' )] = itemDict
         
         wrpr.SetPropertyData( propDict )
         

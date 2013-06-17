@@ -28,8 +28,7 @@ class AddRemove( Base ):
         # Break all connections for the component we are removing, then store
         # those connections so we can reconnect them if this action is undone.
         wrpr = base.game.nodeMgr.Wrap( self.comp )
-        id = wrpr.GetId()
-        for cnnctn in base.scene.GetConnections( id ):
+        for cnnctn in base.scene.GetOutgoingConnections( wrpr ):
             cnnctn.Break( self.comp )
             self.cnnctns.append( cnnctn )
         

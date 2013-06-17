@@ -12,13 +12,16 @@ from attributes import Attribute as Attr
 class CollisionBox( Base ):
     
     type_ = CB
-    initArgs = [pm.Point3( 0 ), 0.5]
     
     def __init__( self, *args, **kwargs ):
         Base.__init__( self, *args, **kwargs )
         
         self.AddAttributes(
-            Attr( 'Center', pm.Point3, CB.getCenter, CB.setCenter ),
+            Attr( 'X', float, initDefault=0.5 ),
+            Attr( 'Y', float, initDefault=0.5 ),
+            Attr( 'Z', float, initDefault=0.5 ),
+            Attr( 'Center', pm.Point3, CB.getCenter, CB.setCenter, 
+                  initDefault=pm.Point3( 0 ) ),
             parent='CollisionBox'
         )
     
@@ -26,14 +29,15 @@ class CollisionBox( Base ):
 class CollisionRay( Base ):
     
     type_ = CR
-    initArgs = [pm.Point3( 0, 0, 0 ), pm.Vec3( 0, 0, 1 )]
     
     def __init__( self, *args, **kwargs ):
         Base.__init__( self, *args, **kwargs )
         
         self.AddAttributes(
-            Attr( 'Origin', pm.Point3, CR.getOrigin, CR.setOrigin ),
-            Attr( 'Direction', pm.Vec3, CR.getDirection, CR.setDirection ),
+            Attr( 'Origin', pm.Point3, CR.getOrigin, CR.setOrigin, 
+                  initDefault=pm.Point3( 0 ) ),
+            Attr( 'Direction', pm.Vec3, CR.getDirection, CR.setDirection,
+                  initDefault=pm.Vec3( 0, 0, 1 ) ),
             parent='CollisionRay'
         )
     
@@ -41,14 +45,15 @@ class CollisionRay( Base ):
 class CollisionSphere( Base ):
     
     type_ = CS
-    initArgs = [pm.Point3( 0 ), 0.5]
     
     def __init__( self, *args, **kwargs ):
         Base.__init__( self, *args, **kwargs )
         
         self.AddAttributes(
-            Attr( 'Center', pm.Point3, CS.getCenter, CS.setCenter ),
-            Attr( 'Radius', float, CS.getRadius, CS.setRadius ),
+            Attr( 'Center', pm.Point3, CS.getCenter, CS.setCenter, 
+                  initDefault=pm.Point3( 0 ) ),
+            Attr( 'Radius', float, CS.getRadius, CS.setRadius,
+                  initDefault=0.5 ),
             parent='CollisionSphere'
         )
         
@@ -61,14 +66,16 @@ class CollisionInvSphere( CollisionSphere ):
 class CollisionTube( Base ):
     
     type_ = CT
-    initArgs = [pm.Point3( 0, 0, 0 ), pm.Point3( 0, 0, 1 ),0.5]
     
     def __init__( self, *args, **kwargs ):
         Base.__init__( self, *args, **kwargs )
         
         self.AddAttributes(
-            Attr( 'Point A', pm.Point3, CT.getPointA, CT.setPointA ),
-            Attr( 'Point B', pm.Point3, CT.getPointB, CT.setPointB ),
-            Attr( 'Radius', float, CT.getRadius, CT.setRadius ),
+            Attr( 'Point A', pm.Point3, CT.getPointA, CT.setPointA, 
+                  initDefault=pm.Point3( 0 ), initName='a' ),
+            Attr( 'Point B', pm.Point3, CT.getPointB, CT.setPointB, 
+                  initDefault=pm.Point3( 0, 0, 1 ), initName='db' ),
+            Attr( 'Radius', float, CT.getRadius, CT.setRadius, 
+                  initDefault=0.5 ),
             parent='CollisionTube'
         )

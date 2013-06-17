@@ -1,41 +1,10 @@
 import xml.etree.ElementTree as et
 
-import panda3d.core as pc
-import pandac.PandaModules as pm
-
-import p3d
 import game
 import utils
 
 
 class SceneParser( game.SceneParser ):
-    
-    def __init__( self, *args, **kwargs ):
-        game.SceneParser.__init__( self, *args, **kwargs )
-        
-        self.saveCastFnMap = {
-            bool:str,
-            float:str,
-            int:str,
-            str:str,
-            unicode:str,
-            type:self.GetName,
-            pm.Vec2:p3d.FloatTuple2Str,
-            pm.LVecBase2f:p3d.FloatTuple2Str,
-            pm.Vec3:p3d.FloatTuple2Str,
-            pm.LVecBase3f:p3d.FloatTuple2Str,
-            pm.Vec4:p3d.FloatTuple2Str,
-            pm.LVecBase4f:p3d.FloatTuple2Str,
-            pm.Point2:p3d.FloatTuple2Str,
-            pm.Point3:p3d.FloatTuple2Str,
-            pm.Point4:p3d.FloatTuple2Str,
-            pm.Mat4:p3d.Mat42Str,
-            pm.LMatrix4f:p3d.Mat42Str,
-            pc.Filename:str
-        }
-        
-    def GetName( self, ttype ):
-        return ttype.__name__
     
     def Save( self, scene, filePath ):
         """Save the scene out to an xml file."""
@@ -48,17 +17,16 @@ class SceneParser( game.SceneParser ):
         utils.Indent( tree.getroot() )
         tree.write( filePath )
     
-    def SaveComponent( self, wrpr, pElem, name='Component' ):
+    def SaveComponent( self, wrpr, pElem ):
         """Serialise a component to an xml element."""
         elem = pElem
         if wrpr.IsSaveable():
-            elem = et.SubElement( pElem, name )
-            elem.set( 'type', wrpr.GetType() )
-            id = wrpr.GetId()
-            if id is not None:
-                elem.set( 'id', id )
-            for key, value in wrpr.GetCreateArgs().items():
-                elem.set( key, value )
+            
+            # Write out component header data, then properties and 
+            # connections.
+            elem = et.SubElement( pElem, 'Component' )
+            for pName, pVal in wrpr.GetAttrib().items():
+                elem.set( pName, pVal )
             self.SaveProperties( wrpr, elem )
             self.SaveConnections( wrpr, elem )
         
@@ -75,29 +43,33 @@ class SceneParser( game.SceneParser ):
         Get a dictionary representing all the properties for the component
         then serialise it.
         """
+        # Get a dictionary with all default values.
+        try:
+            defWrpr = wrpr.__class__.Create()
+            defPropDict = defWrpr.GetPropertyData()
+        except:
+            defPropDict = {}
+        
         propDict = wrpr.GetPropertyData()
-        for key, value in propDict.items():
-            if type( value ) in self.saveCastFnMap:
-                castFn = self.saveCastFnMap[type( value )]
-                subElem = et.SubElement( elem, 'Item' )
-                subElem.set( 'name', key )
-                subElem.set( 'value', castFn( value ) )
-                subElem.set( 'type', type( value ).__name__ )
-            elif type( value ) == dict:
-                subElem = et.SubElement( elem, 'Item' )
-                subElem.set( 'name', key )
-                subElem.set( 'type', 'dict' )
-                for key, val in value.items():
-                    subElem.append( self.SaveItem( key, val ) )
+        for pName, pVal in propDict.items():
+            if not type( pVal ) == dict:
+                
+                # Compare the value to the default - serialise if they are
+                # different.
+                if pName in defPropDict and pVal == defPropDict[pName]:
+                    continue
+                
+                elem.append( self.SaveItem( pName, pVal ) )
             else:
-                print 'Could not save attribute: ', key, ' : of type: ', type( value )
+                subElem = et.SubElement( elem, 'Item' )
+                subElem.set( 'name', pName )
+                for key, val in pVal.items():
+                    subElem.append( self.SaveItem( key, val ) )
                 
     def SaveItem( self, name, value ):
-        castFn = self.saveCastFnMap[type( value )]
         elem = et.Element( 'Item' )
         elem.set( 'name', name )
-        elem.set( 'type', type( value ).__name__ )
-        elem.set( 'value', castFn( value ) )
+        elem.set( 'value', value )
         return elem
                 
     def SaveConnections( self, wrpr, elem ):
