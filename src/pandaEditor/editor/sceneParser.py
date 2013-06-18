@@ -44,11 +44,7 @@ class SceneParser( game.SceneParser ):
         then serialise it.
         """
         # Get a dictionary with all default values.
-        try:
-            defWrpr = wrpr.__class__.Create()
-            defPropDict = defWrpr.GetPropertyData()
-        except:
-            defPropDict = {}
+        defPropDict = wrpr.__class__.GetDefaultPropertyData()
         
         propDict = wrpr.GetPropertyData()
         for pName, pVal in propDict.items():

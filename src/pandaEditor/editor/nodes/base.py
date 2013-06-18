@@ -112,3 +112,11 @@ class Base( GameBase ):
     
     def GetDefaultParent( self ):
         return base.scene
+    
+    @classmethod
+    def GetDefaultPropertyData( cls ):
+        try:
+            defPropDict = cls.Create().GetPropertyData()
+        except:
+            defPropDict = {}
+        return defPropDict
