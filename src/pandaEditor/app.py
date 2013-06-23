@@ -292,15 +292,6 @@ class App( p3d.wx.App ):
         if newDoc:
             self.doc = ui.Document( filePath, self.scene )
         
-    def OnDragDrop( self, filePath ):
-        
-        # Get the object under the mouse, if any
-        np = self.selection.GetNodePathUnderMouse()
-        self.dDropMgr.DoFileDrop( filePath, np )
-        
-    def AddModel( self, filePath, np=None ):
-        self.AddComponent( 'ModelRoot', modelPath=filePath )
-        
     def AddComponent( self, typeStr, *args, **kwargs ):
         wrprCls = base.game.nodeMgr.GetWrapperByName( typeStr )
         wrpr = wrprCls.Create( *args, **kwargs )
@@ -317,48 +308,6 @@ class App( p3d.wx.App ):
         cmds.Add( [wrpr.data] )
         
         return wrpr
-                
-    def AddShader( self, filePath, np=None ):
-        wrpr = base.game.nodeMgr.Wrap( np )
-        prop = wrpr.FindProperty( 'shader' )
-        cmds.SetAttribute( [np], [prop], filePath )
-        
-    def AddTexture( self, filePath, np=None ):
-        pandaPath = pm.Filename.fromOsSpecific( filePath )
-        
-        theTex = None
-        if pm.TexturePool.hasTexture( pandaPath ):
-            print 'found in pool'
-            for tex in pm.TexturePool.findAllTextures():
-                if tex.getFilename() == pandaPath:
-                    theTex = tex
-        
-        # Try to find it in the scene.
-        #for foo in base.scene.comps.keys():
-        #    print type( foo ) , ' : ', foo
-        print theTex
-        if theTex is not None and theTex in base.scene.comps.keys():
-            print 'found in scene'
-            if np is not None:
-                npWrpr = base.game.nodeMgr.Wrap( np )
-                npWrpr.FindProperty( 'texture' ).Set( theTex )
-                
-        else:
-            
-            print 'creating new'
-            wrpr = self.AddComponent( 'Texture' )
-            #wrpr = base.game.nodeMgr.Wrap( loader.loadTexture( pandaPath ) )
-            #wrpr.SetDefaultValues()
-            #wrpr.SetParent( wrpr.GetDefaultParent() )
-            wrpr.FindProperty( 'fullPath' ).Set( pandaPath )
-            #pm.TexturePool.addTexture( wrpr.data )
-            
-            if np is not None:
-                npWrpr = base.game.nodeMgr.Wrap( np )
-                npWrpr.FindProperty( 'texture' ).Set( wrpr.data )
-            
-            
-            #cmds.Connect( 
         
     def OnProjectFilesModified( self, filePaths ):
         self.assetMgr.OnAssetModified( filePaths )

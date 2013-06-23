@@ -7,6 +7,7 @@ from wx.lib.pubsub import Publisher as pub
 
 import p3d
 from .. import commands as cmds
+from customDropTarget import CustomDropTarget
 from wxExtra import utils as wxUtils
 from wxExtra import CustomTreeCtrl, CompositeDropTarget
 
@@ -22,7 +23,6 @@ class SceneGraphBasePanel( wx.Panel ):
         self.app = wx.GetApp()
         self.filter = pm.PandaNode
         self._updating = False
-        self.dragComps = []
         
         # Build display filter menu.
         fileMenu = fm.FlatMenu()
@@ -60,9 +60,7 @@ class SceneGraphBasePanel( wx.Panel ):
         self.tc.Bind( wx.EVT_MIDDLE_DOWN, self.OnMiddleDown )
         
         # Build tree control drop target
-        self.dt = CompositeDropTarget( ['filePath', 'nodePath'], 
-                                       self.OnDropItem, 
-                                       self.ValidateDropItem )
+        self.dt = CustomDropTarget( ['filePath', 'nodePath'], self )
         self.tc.SetDropTarget( self.dt )
                 
         # Bind publisher events
@@ -123,61 +121,20 @@ class SceneGraphBasePanel( wx.Panel ):
         if item is None or not item.IsOk():
             return
         
-        # Create a custom data object that we can drop onto the toolbar
-        # which contains the tool's id as a string
-        do = wx.CustomDataObject( 'NodePath' )
-        do.SetData( str( item.GetData() ) )
-        
         # If the item under the middle mouse click is part of the selection
         # then use the whole selection, otherwise just use the item.
         if item.GetData() in self.app.selection.comps:
-            self.dragComps = self.app.selection.comps
+            dragComps = self.app.selection.comps
         else:
-            self.dragComps = [item.GetData()]
+            dragComps = [item.GetData()]
+        self.app.dDropMgr.Start( self, dragComps, item.GetData() )
         
-        # Create the drop source and begin the drag and drop operation
-        ds = wx.DropSource( self )
-        ds.SetData( do )
-        ds.DoDragDrop( wx.Drag_AllowMove )
-        
-        # Clear drag node paths
-        self.dragComps = []
-            
-    def ValidateDropItem( self, x, y ):
-        """Perform validation procedures."""
+    def GetDroppedObject( self, x, y ):
         dropItem = self.tc.HitTest( wx.Point( x, y ) )[0]
         if dropItem is None:
-            return False
-        
-        wrpr = base.game.nodeMgr.Wrap( dropItem.GetData() )
-        if wx.GetMouseState().CmdDown():
-            return wrpr.ValidateDragDrop( self.dragComps, dropItem.GetData() )
+            return None
         else:
-            return wrpr.GetPossibleConnections( self.dragComps )
-            
-    def OnDropItem( self, str ):
-        
-        # Get the item at the drop point
-        dropItem = self.tc.HitTest( wx.Point( self.dt.x, self.dt.y ) )[0]
-        wrpr = base.game.nodeMgr.Wrap( dropItem.GetData() )
-        self.data = {}
-        if wx.GetMouseState().CmdDown():
-            wrpr.OnDragDrop( self.dragComps, wrpr.data )
-        else:
-            menu = wx.Menu()
-            for cnnctn in wrpr.GetPossibleConnections( self.dragComps ):
-                mItem = wx.MenuItem( menu, wx.NewId(), cnnctn.label )
-                menu.AppendItem( mItem )
-                self.Bind( wx.EVT_MENU, self.OnConnect, id=mItem.GetId() )
-                self.data[mItem.GetId()] = cnnctn
-            self.PopupMenu( menu )
-            menu.Destroy()
-        
-    def OnConnect( self, evt ):
-        menu = evt.GetEventObject()
-        mItem = menu.FindItemById( evt.GetId() )
-        cnnctn = self.data[evt.GetId()]
-        cmds.Connect( self.dragComps, cnnctn, cnnctn.Connect )
+            return dropItem.GetData()
         
     def AddItem( self, wrpr, pItem ):
         """

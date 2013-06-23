@@ -8,4 +8,5 @@ from propertiesPanel import PropertiesPanel
 from resourcesPanel import ResourcesPanel
 from sceneGraphBasePanel import SceneGraphBasePanel
 from sceneGraphPanel import SceneGraphPanel
+from customDropTarget import CustomDropTarget
 import customProperties

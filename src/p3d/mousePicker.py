@@ -40,15 +40,18 @@ class MousePicker( p3d.SingleTask ):
         for eventName in eventNames:
             self.accept( eventName, self.FireEvent, [eventName] )
     
-    def OnUpdate( self, task ):
+    def OnUpdate( self, task, x=None, y=None ):
         
         # Update the ray's position
         if self.mouseWatcherNode.hasMouse():
             mp = self.mouseWatcherNode.getMouse()
-            self.pickerRay.setFromLens( self.camera.node(), mp.getX(), mp.getY() )
+            x, y = mp.getX(), mp.getY()
+        if x is None or y is None:
+            return
+        self.pickerRay.setFromLens( self.camera.node(), x, y )
         
         # Traverse the hierarchy and find collisions
-        self.collTrav.traverse( self.rootNp )  
+        self.collTrav.traverse( self.rootNp )
         if self.collHandler.getNumEntries():
             
             # If we have hit something, sort the hits so that the closest is first

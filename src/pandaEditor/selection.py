@@ -182,6 +182,14 @@ class Selection( p3d.Object ):
         else:
             return None
         
+    def GetNodePathAtPosition( self, x, y ):
+        self.picker.OnUpdate( None, x, y )
+        pickedNp = self.picker.GetFirstNodePath()
+        if pickedNp is not None:
+            return self.GetPickedNodePath( pickedNp )
+        else:
+            return None
+        
     def GetPickedNodePath( self, np ):
         if np.getPythonTag( editor.nodes.TAG_IGNORE ):
             return np.findNetPythonTag( editor.nodes.TAG_PICKABLE )

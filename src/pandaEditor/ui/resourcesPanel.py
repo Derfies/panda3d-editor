@@ -12,6 +12,8 @@ class ResourcesPanel( wx.Panel ):
     def __init__( self, *args, **kwargs ):
         wx.Panel.__init__( self, *args, **kwargs )
         
+        self.app = wx.GetApp()
+        
         # Bind project file events
         pub.subscribe( self.OnUpdate, 'projectFilesAdded' )
         pub.subscribe( self.OnUpdate, 'projectFilesRemoved' )
@@ -96,17 +98,10 @@ class ResourcesPanel( wx.Panel ):
         if itemId is None or not itemId.IsOk():
             return
         
-        # Select it
+        # Select it and start drag and drop operations.
         self.dtc.SelectItem( itemId )
-        
-        # Create a custom data object that contains the full path of the item
-        do = wx.CustomDataObject( 'filePath' )
-        do.SetData( str( self.dtc.GetItemPath( itemId ) ) )
-        
-        # Create the drop source and begin the drag and drop operation
-        ds = wx.DropSource( self )
-        ds.SetData( do )
-        ds.DoDragDrop( wx.Drag_AllowMove )
+        self.app.dDropMgr.Start( self, [self.dtc.GetItemPath( itemId )], 
+                                 self.dtc.GetItemPyData( itemId ) )
         
     def OnLeftDClick( self, evt ):
         
@@ -115,7 +110,7 @@ class ResourcesPanel( wx.Panel ):
         filePath = self.dtc.GetItemPath( itemId )
         ext = os.path.splitext( os.path.basename( self.dtc.GetItemText( itemId ) ) )[1]
         if ext == '.xml':
-            wx.GetApp().frame.OnFileOpen( None, filePath )
+            self.app.frame.OnFileOpen( None, filePath )
         elif ext == '.py':
             os.startfile( filePath )
             
