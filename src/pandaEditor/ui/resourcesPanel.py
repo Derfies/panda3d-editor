@@ -101,7 +101,7 @@ class ResourcesPanel( wx.Panel ):
         # Select it and start drag and drop operations.
         self.dtc.SelectItem( itemId )
         self.app.dDropMgr.Start( self, [self.dtc.GetItemPath( itemId )], 
-                                 self.dtc.GetItemPyData( itemId ) )
+                                 self.dtc.GetItemPath( itemId ) )
         
     def OnLeftDClick( self, evt ):
         
