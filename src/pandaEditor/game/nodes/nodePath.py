@@ -82,7 +82,10 @@ class NodePath( Base ):
         self.data.setTag( TAG_NODE_UUID, id )
     
     def GetParent( self ):
-        return base.game.nodeMgr.Wrap( self.data.getParent() )
+        if not self.data.getParent().isEmpty():
+            return base.game.nodeMgr.Wrap( self.data.getParent() )
+        else:
+            return None
     
     def GetChildren( self ):
         """Return a list of wrappers for the children of this NodePath."""
