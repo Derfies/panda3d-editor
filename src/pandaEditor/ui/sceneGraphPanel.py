@@ -36,6 +36,10 @@ class SceneGraphPanel( SceneGraphBasePanel ):
         iterate through the entire tree to find the items we need.
         """
         SceneGraphBasePanel.OnUpdate( self, msg )
-
-        items = [self._comps[wrpr.data] for wrpr in msg.data if wrpr.data in self._comps]
+        
+        items = [
+            self._comps[wrpr.data] 
+            for wrpr in base.selection.wrprs 
+            if wrpr.data in self._comps
+        ]
         self.SelectItems( items )
