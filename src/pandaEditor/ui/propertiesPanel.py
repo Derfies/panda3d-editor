@@ -320,7 +320,7 @@ class PropertiesPanel( wx.Panel ):
             focusIndex = self.pg.GetFocusedPropertyControl()
         
         # Clear and rebuild property grid
-        self.BuildPropertyGrid( msg.data )
+        self.BuildPropertyGrid( base.selection.wrprs )
         
         # Set all property expanded states back.
         for propLongLbl, expanded in self.propExps.items():
@@ -348,7 +348,7 @@ class PropertiesPanel( wx.Panel ):
         Update the position, rotation and scale properties during the 
         transform operation.
         """
-        wrpr = msg.data[0]
+        wrpr = base.selection.wrprs[0]
         labelFnDict = {
             'Position':wrpr.data.getPos,
             'Rotation':wrpr.data.getHpr,
