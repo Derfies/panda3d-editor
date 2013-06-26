@@ -1,23 +1,30 @@
 <Scene>
     <Component type="SceneRoot">
+        <Component id="a59fde69-4178-4fd2-8760-aef257314a8c" type="Render2d">
+            <Component id="0d02c05b-7d8d-4293-9b9a-0c1cd829a006" type="Aspect2d">
+                <Item name="matrix" value="1.51714289188 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0" />
+            </Component>
+            <Component id="0d46a518-ea37-4de7-acbf-4c058afafa98" type="Pixel2d">
+                <Item name="matrix" value="0.00224719103426 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 0.00458715576679 0.0 -1.0 0.0 1.0 1.0" />
+            </Component>
+            <Component id="b5c6b333-aeda-458f-8652-6392fb494efb" type="Camera2d">
+                <Component id="16c119a2-073c-4201-a71c-89d80838f858" type="Cam2d" />
+            </Component>
+        </Component>
         <Component id="408191a0-5b09-41a8-adf4-52fb7ab6f2c8" type="Render">
-            <Item name="name" type="str" value="render" />
-            <Item name="matrix" type="LMatrix4f" value="1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0" />
             <Component id="56952d78-66ac-4a13-ad62-4f396087e2a2" type="BaseCamera">
-                <Item name="name" type="str" value="camera" />
-                <Item name="matrix" type="LMatrix4f" value="1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0" />
                 <Component id="0c93e337-327e-46de-a88b-5c60e7ff1221" type="BaseCam">
-                    <Item name="fov" type="LVecBase2f" value="46.6236228943 30.0" />
-                    <Item name="name" type="str" value="cam" />
-                    <Item name="matrix" type="LMatrix4f" value="1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0" />
+                    <Item name="fov" value="46.6236228943 30.0" />
+                    <Item name="matrix" value="1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 -8.18685245514 0.0 1.0" />
                 </Component>
             </Component>
-            <Component id="8ba59421-841e-4d8d-a9a0-92e28eafc0c7" modelPath="models/box" type="ModelRoot">
-                <Item name="name" type="str" value="box" />
-                <Item name="matrix" type="LMatrix4f" value="1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0" />
+            <Component id="8ba59421-841e-4d8d-a9a0-92e28eafc0c7" type="ModelRoot">
+                <Item name="modelPath" value="models/box" />
+                <Item name="name" value="box" />
                 <Component type="PandaObject">
-                    <Component filePath="scripts/sine" type="Script">
-                        <Item name="amplitude" type="int" value="10" />
+                    <Component type="Script">
+                        <Item name="amplitude" value="10.0" />
+                        <Item name="filePath" value="scripts/sine" />
                     </Component>
                 </Component>
             </Component>
