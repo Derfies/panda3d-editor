@@ -2,8 +2,6 @@ import os
 import copy
 import inspect
 
-import wx
-
 import p3d
 import game
 from constants import *
@@ -131,10 +129,10 @@ class PandaObject( Base ):
             scriptWrprCls = base.game.nodeMgr.nodeWrappers['Script']
             scriptWrpr = scriptWrprCls.Create( filePath=scriptPath )
         except:
-            wxUtils.ErrorDialog( traceback.format_exc(), 'Script Error' )
-            return
+            return False
         
         scriptWrpr.SetParent( self.data )
+        return True
         
     def OnDuplicate( self, origComp, dupeComp ):
         dupeComp.instances = {}
