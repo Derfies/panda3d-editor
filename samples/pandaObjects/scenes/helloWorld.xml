@@ -1,0 +1,46 @@
+<Scene>
+    <Component type="SceneRoot">
+        <Component id="1d036ca9-2959-4e0d-8e14-b4ceb2faf20a" type="Render2d">
+            <Component id="ca21dfed-cdc4-4fb4-9ac5-c5d4b287613c" type="Aspect2d">
+                <Item name="matrix" value="0.489887654781 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 1.0" />
+            </Component>
+            <Component id="d0dd9fc9-7db2-487f-8a44-68dc1b446853" type="Pixel2d">
+                <Item name="matrix" value="0.00189573457465 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 0.00458715576679 0.0 -1.0 0.0 1.0 1.0" />
+            </Component>
+            <Component id="c092c718-cf5b-4d6b-899b-5c2f1a593635" type="Camera2d">
+                <Component id="eeca79a7-64c3-41d5-bcee-0185d5d3025f" type="Cam2d" />
+            </Component>
+        </Component>
+        <Component id="f55b0bf7-48e9-42d6-a483-d4f66ee4ced9" type="Render">
+            <Component id="6a5ea68f-b708-4801-a5a3-d4be9babce0d" type="BaseCamera">
+                <Component type="PandaObject">
+                    <Component type="Script">
+                        <Item name="filePath" value="scripts/cameraSpin" />
+                    </Component>
+                </Component>
+                <Component id="19bbacce-7dd4-48f7-8adb-d3a7a527b1fc" type="BaseCam">
+                    <Item name="fov" value="46.6236228943 23.8401145935" />
+                </Component>
+            </Component>
+            <Component id="86bf422c-e5c1-443e-a85d-90ec681278f6" type="Actor">
+                <Item name="modelPath" value="models/panda-model" />
+                <Item name="anims">
+                    <Item name="walk" value="models/panda-walk4" />
+                </Item>
+                <Item name="name" value="panda_walk_character" />
+                <Item name="matrix" value="0.00499999988824 0.0 0.0 0.0 0.0 0.00499999988824 0.0 0.0 0.0 0.0 0.00499999988824 0.0 0.0 0.0 0.0 1.0" />
+                <Component type="PandaObject">
+                    <Component type="Script">
+                        <Item name="animName" value="walk" />
+                        <Item name="filePath" value="scripts/pandaWalk" />
+                    </Component>
+                </Component>
+            </Component>
+            <Component id="c211a5fb-33ed-4803-9931-7270c87defcc" type="ModelRoot">
+                <Item name="modelPath" value="models/environment" />
+                <Item name="name" value="environment" />
+                <Item name="matrix" value="0.25 0.0 0.0 0.0 0.0 0.25 0.0 0.0 0.0 0.0 0.25 0.0 -8.0 42.0 0.0 1.0" />
+            </Component>
+        </Component>
+    </Component>
+</Scene>
