@@ -18,7 +18,7 @@ class PandaWalk( p3d.PandaBehaviour ):
         # Find the panda actor placed in the scene.
         pandaWrpr = base.game.nodeMgr.Wrap( render.find( 'panda_walk_character' ) )
         self.pandaActor = pandaWrpr.GetActor()
-        self.pandaActor.loop( 'walk' )
+        self.pandaActor.loop( self.animName )
         
         # Create the four lerp intervals needed for the panda to
         # walk back and forth.
