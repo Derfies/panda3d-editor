@@ -1,3 +1,3 @@
-from base import Base as Attribute
+from base import Base
 from properties import *
 from connections import *
