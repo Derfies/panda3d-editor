@@ -57,9 +57,9 @@ class SceneParser( object ):
                     cnctnDict[cType].append( uuid )
                 self.cnctns[wrpr.data] = cnctnDict
             
-        # Recurse through hierarchy.
-        for cElem in elem.findall( 'Component' ):
-            self.LoadComponent( cElem, wrpr.data )
+            # Recurse through hierarchy.
+            for cElem in elem.findall( 'Component' ):
+                self.LoadComponent( cElem, wrpr.data )
             
     def LoadProperties( self, wrpr, elem ):
         
