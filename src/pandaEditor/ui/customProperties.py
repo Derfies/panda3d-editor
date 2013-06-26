@@ -239,7 +239,7 @@ class DictProperty( wxpg.BaseProperty ):
         ctrl.Bind( wx.EVT_KEY_UP, self.OnKeyUp )
         ctrl.Bind( wx.EVT_LIST_END_LABEL_EDIT, self.OnListEndLabelEdit )
         
-        dt = CompositeDropTarget( ['filePath'], 
+        dt = CompositeDropTarget( ['nodePath'], 
                                   self.OnDropItem, 
                                   self.ValidateDropItem )
         ctrl.SetDropTarget( dt )
