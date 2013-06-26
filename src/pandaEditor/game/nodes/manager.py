@@ -1,93 +1,58 @@
+import inspect
+
 from constants import *
+
+
+WRAPPER_MODULE_NAMES = [
+    'base',
+    'sceneRoot',
+    
+    'pandaNode',
+    'nodePath',
+    'modelNode',
+    'camera',
+    'showbaseDefault',
+    'modelRoot',
+    'actor',
+    'fog',
+    
+    'collisionNode',
+    'collisionSolids',
+
+    'light',
+    'ambientLight',
+    'pointLight',
+    'directionalLight',
+    'spotlight',
+    
+    'texture',
+    'textureStage',
+    
+    'bulletWorld',
+    'bulletDebugNode',
+    'bulletRigidBodyNode',
+    'bulletCharacterControllerNode',
+    'bulletBoxShape',
+    'bulletPlaneShape',
+    'bulletCapsuleShape'
+]
 
 
 class Manager( object ):
     
     def __init__( self ):
-        from base import Base
-        from sceneRoot import SceneRoot
+        self.nodeWrappers = {}
         
-        from pandaNode import PandaNode
-        from nodePath import NodePath
-        from modelNode import ModelNode
-        from camera import Camera
-        
-        from showbaseDefault import Render, BaseCamera, BaseCam
-        from showbaseDefault import Render2d, Aspect2d, Pixel2d, Camera2d
-        from showbaseDefault import Cam2d
-        
-        from modelRoot import ModelRoot
-        from actor import Actor
-        from fog import Fog
-        
-        from collisionNode import CollisionNode
-        from collisionSolids import CollisionBox, CollisionRay
-        from collisionSolids import CollisionSphere, CollisionInvSphere
-        from collisionSolids import CollisionTube
-
-        from light import Light
-        from ambientLight import AmbientLight
-        from pointLight import PointLight
-        from directionalLight import DirectionalLight
-        from spotlight import Spotlight
-        
-        from texture import Texture
-        from textureStage import TextureStage
-        
-        from bulletWorld import BulletWorld
-        from bulletDebugNode import BulletDebugNode
-        from bulletRigidBodyNode import BulletRigidBodyNode
-        from bulletCharacterControllerNode import BulletCharacterControllerNode
-        from bulletBoxShape import BulletBoxShape
-        from bulletPlaneShape import BulletPlaneShape
-        from bulletCapsuleShape import BulletCapsuleShape
-        
-        self.nodeWrappers = {
-            'Base':Base,
-            'SceneRoot':SceneRoot,
-            
-            'PandaNode':PandaNode,
-            'NodePath':NodePath,
-            'ModelNode':ModelNode,
-            'Camera':Camera,
-            
-            'Render':Render,
-            'BaseCamera':BaseCamera,
-            'BaseCam':BaseCam,
-            'Render2d':Render2d,
-            'Pixel2d':Pixel2d,
-            'Aspect2d':Aspect2d,
-            'Camera2d':Camera2d,
-            'Cam2d':Cam2d,
-            
-            'ModelRoot':ModelRoot,
-            'Actor':Actor,
-            'Fog':Fog,
-            
-            'CollisionNode':CollisionNode,
-            'CollisionBox':CollisionBox,
-            'CollisionRay':CollisionRay,
-            'CollisionSphere':CollisionSphere,
-            'CollisionInvSphere':CollisionInvSphere,
-            'CollisionTube':CollisionTube,
-            
-            'Light':Light,
-            'AmbientLight':AmbientLight,
-            'PointLight':PointLight,
-            'DirectionalLight':DirectionalLight,
-            'Spotlight':Spotlight,
-            
-            'Texture':Texture,
-            'TextureStage':TextureStage,
-            
-            'BulletWorld':BulletWorld,
-            'BulletDebugNode':BulletDebugNode,
-            'BulletRigidBodyNode':BulletRigidBodyNode,
-            'BulletCharacterControllerNode':BulletCharacterControllerNode,
-            'BulletBoxShape':BulletBoxShape,
-            'BulletPlaneShape':BulletPlaneShape,
-            'BulletCapsuleShape':BulletCapsuleShape
-        }
+        # Load component wrapper classes from the list of module names and 
+        # store them in the nodeWrapper dictionary. This needs to be done when
+        # this class is instantiated - not when the module is imported - so
+        # the editor classes are loaded beforehand.
+        for modName in WRAPPER_MODULE_NAMES:
+            mod = __import__( modName, globals() )
+            for mem in inspect.getmembers( mod, inspect.isclass ):
+                cls = mem[1]
+                if cls.__module__ == mod.__name__:
+                    self.nodeWrappers[cls.__name__] = cls
         
     def Create( self, nTypeStr, *args ):
         wrprCls = self.nodeWrappers[nTypeStr]
@@ -123,7 +88,7 @@ class Manager( object ):
                 mros.append( wrprCls.mro() )
                 
         if not mros:
-            return self.GetDefaultWrapper( comp )
+            return self.GetDefaultWrapper( comps[0] )
                 
         # Intersect the mros to get the common classes.
         cmnClasses = set( mros[0] ).intersection( *mros )

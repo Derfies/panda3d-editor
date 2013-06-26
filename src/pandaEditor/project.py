@@ -223,7 +223,7 @@ run()"""
         process to run. Remember to replace backslashes with forward ones.
         """
         reqSysPaths = []
-        for mod in [game, p3d]:
+        for mod in [p3d]:
             modPath = os.path.dirname( mod.__file__ )
             modLoc = os.path.dirname( modPath ).replace( '\\', '/' )
             reqSysPaths.append( modLoc )
@@ -257,6 +257,7 @@ class """ + fileName + """( p3d ):
     dir( 'models', newDir='models' )
     dir( 'sounds', newDir='sounds' )
     dir( 'scripts', newDir='scripts' )
+    dir( 'game', newDir='game' )
     dir( 'userPlugins', newDir='userPlugins' )"""
             
     def Build( self, buildPath ):
@@ -268,10 +269,15 @@ class """ + fileName + """( p3d ):
             print 'Already a directory named ', tempDirPath
             return False
                               
-        # Copy the entire project the temp location
+        # Copy the entire project to the temp location.
         shutil.copytree( self.path, tempDirPath )
         
-        # Now copy the plugin module
+        # Copy the game module over to the temp project.
+        gamePath = os.path.split( game.__file__ )[0]
+        gameDestPath = os.path.join( tempDirPath, 'game' )
+        shutil.copytree( gamePath, gameDestPath )
+        
+        # Now copy the plugin module.
         pluginsPath = self.app.game.pluginMgr.GetPluginsPath()
         if pluginsPath is not None:
             pluginDestPath = os.path.join( tempDirPath, 'userPlugins' )
@@ -292,19 +298,20 @@ class """ + fileName + """( p3d ):
         file.writelines( scriptLines )
         file.close()
         
-        # DEBUG
         # Turn scripts into a module otherwise ppackage won't find it.
         scriptsPath = os.path.join( tempDirPath, 'scripts', '__init__.py' )
         file = open( scriptsPath, 'w' )
         file.close()
         
-        # Run the script with ppackage
-        subprocess.Popen( ['ppackage', '-i', buildDirPath, 'build.pdef'], 
-                          #stdout=sys.stdout, stderr=sys.stderr,
-                          cwd=tempDirPath )
-        
-        # Clean up
-        #shutil.rmtree( tempDirPath )
+        # Run the script with ppackage, then remove the copied project once
+        # it's built.
+        def Cleanup():
+            if os.path.exists( tempDirPath ):
+                shutil.rmtree( tempDirPath )
+            
+        cmd = ('ppackage', '-i', buildDirPath, 'build.pdef')
+        utils.PopenAndCall( Cleanup, True, cmd, stdout=subprocess.PIPE, 
+                            stderr=subprocess.STDOUT, cwd=tempDirPath )
         
     def GetRelModelPath( self, pandaPath ):
         """
