@@ -1,3 +1,7 @@
+import threading
+import subprocess
+
+
 def Indent( elem, level=0, indent='    ' ):
     """
     Function used to 'prettify' output xml from cElementTree's tree.getroot() 
@@ -50,3 +54,29 @@ def GetUniqueName( name, elems ):
             break
         
     return newName
+    
+
+def PopenAndCall( OnExit, printStdout, *popenArgs, **popenKWArgs ):
+    """
+    Runs a subprocess.Popen, and then calls the function onExit when the
+    subprocess completes.
+
+    Use it exactly the way you'd normally use subprocess.Popen, except include 
+    q callable to execute as the first argument. onExit is a callable object, 
+    and *popenArgs and **popenKWArgs are simply passed up to subprocess.Popen.
+    """
+    def RunInThread( OnExit, printStdout, popenArgs, popenKWArgs ):
+        proc = subprocess.Popen( *popenArgs, **popenKWArgs )
+        proc.wait()
+        if printStdout:
+            print proc.stdout.read()
+        OnExit()
+        return
+
+    thread = threading.Thread( target=RunInThread,
+                               args=( OnExit, printStdout, popenArgs, 
+                                      popenKWArgs ) )
+    thread.start()
+    
+    # Return immediately after the thread starts.
+    return thread 
