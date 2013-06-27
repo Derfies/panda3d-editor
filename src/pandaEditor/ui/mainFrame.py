@@ -295,8 +295,17 @@ class MainFrame( wx.Frame ):
     def OnFileBuildProject( self, evt ):
         """Build the current project to a p3d file."""
         filePath = wxUtils.FileSaveDialog( 'Build Project', WILDCARD_P3D )
-        if filePath:
-            self.app.project.Build( filePath )
+        if not filePath:
+            return
+        
+        if filePath and os.path.exists( filePath ):
+
+            # Warn user if the chosen file path already exists
+            msg = ''.join( ['The file "', filePath, '" already exists.\nDo you want to replace it?'] )
+            if wxUtils.YesNoDialog( msg, 'Replace File?', wx.ICON_WARNING ) == wx.ID_NO:
+                return
+            
+        self.app.project.Build( filePath )
             
     def OnSingleCommand( self, evt ):
         id = evt.GetId()
