@@ -22,6 +22,9 @@ class SceneRoot( Base ):
     def AddChild( self, comp ):
         self.data.RegisterComponent( comp )
         
+    def GetParent( self ):
+        return None
+        
     def SetParent( self, pComp ):
         
         # SceneRoot is a special node which shouldn't be parented to anything.

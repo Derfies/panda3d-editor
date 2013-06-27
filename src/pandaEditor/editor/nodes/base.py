@@ -128,5 +128,7 @@ class Base( GameBase ):
         components.
         """
         pWrpr = self.GetParent()
+        if pWrpr is None:
+            return None
         cComps = [cWrpr.data for cWrpr in pWrpr.GetChildren()]
         return cComps.index( self.data )
