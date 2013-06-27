@@ -163,4 +163,16 @@ class EditorPlugin( gp.GamePlugin ):
         
         # Reload scripts
         if pyFilePaths:
-            base.pandaMgr.ReloadScripts( pyFilePaths )
+            
+            for pyFilePath in pyFilePaths:
+                print 'Reloading script: ', pyFilePath
+            
+            nps = [
+                np 
+                for np in base.scene.rootNp.findAllMatches( '**/*' )
+                if np.getPythonTag( TAG_PANDA_OBJECT ) is not None
+            ]
+            for np in nps:
+                pObjWrpr = base.game.nodeMgr.Wrap( PandaObjectNPO.Get( np ) )
+                for pyFilePath in pyFilePaths:
+                    pObjWrpr.ReloadScript( pyFilePath )
