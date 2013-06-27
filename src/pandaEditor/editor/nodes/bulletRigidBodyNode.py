@@ -20,9 +20,7 @@ class BulletRigidBodyNode( GameBulletRigidBodyNode ):
         
         # Attempt to connect this node to the physics world if here is one.
         if base.scene.physicsWorld is not None:
-            cnnctn = CnnctnList( 'Rigid Body', None, BW.getRigidBodies, BW.attachRigidBody, self.ClearRigidBodies, BW.removeRigidBody, base.scene.physicsWorld )
+            cnnctn = CnnctnList( 'Rigid Body', None, None, BW.attachRigidBody, 
+                                 None, BW.removeRigidBody, 
+                                 base.scene.physicsWorld )
             cnnctn.Connect( self.data )
-            
-    def ClearRigidBodies( self, comp ):
-        for i in range( comp.getNumRigidBodies() ):
-            comp.removeRigidBody( comp.getRigidBody( 0 ) )

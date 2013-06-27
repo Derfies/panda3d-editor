@@ -36,7 +36,7 @@ class BulletWorld( Base ):
             
     def ClearCharacters( self, comp ):
         for i in range( comp.getNumCharacters() ):
-            comp.removeRigidBody( comp.getCharacter( 0 ) )
+            comp.removeCharacter( comp.getCharacter( 0 ) )
             
     def GetDebugNode( self, args ):
         pass

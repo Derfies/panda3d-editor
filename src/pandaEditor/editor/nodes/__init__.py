@@ -23,3 +23,5 @@ import bulletWorld
 sys.modules['game.nodes.bulletWorld'] = bulletWorld
 import bulletRigidBodyNode
 sys.modules['game.nodes.bulletRigidBodyNode'] = bulletRigidBodyNode
+import bulletCharacterControllerNode
+sys.modules['game.nodes.bulletCharacterControllerNode'] = bulletCharacterControllerNode
