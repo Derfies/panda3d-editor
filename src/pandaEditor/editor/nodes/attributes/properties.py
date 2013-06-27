@@ -9,6 +9,9 @@ from game.nodes.attributes import NodePathObjectAttribute as GameNodePathObjectA
 class SerializeMixin( object ):
     
     def SerializeToString( self ):
+        if self.getFn is None:
+            return None
+            
         pVal = self.Get()
         if type( pVal ) == dict:
             propDict = {}

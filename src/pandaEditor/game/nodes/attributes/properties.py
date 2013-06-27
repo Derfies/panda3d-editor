@@ -5,10 +5,16 @@ from p3d import commonUtils as cUtils
 
 class UnserializeMixin( object ):
     
-    def UnserializeFromString( self, string ):
-        val = cUtils.UnserializeFromString( string, self.type )
-        if val is not None:
-            self.Set( val )
+    def UnserializeFromString( self, valStr ):
+        if self.setFn is None:
+            return None
+        
+        if self.type == dict:
+            self.Set( valStr )
+        else:
+            val = cUtils.UnserializeFromString( valStr, self.type )
+            if val is not None:
+                self.Set( val )
     
 
 class Attribute( UnserializeMixin, Base ):pass

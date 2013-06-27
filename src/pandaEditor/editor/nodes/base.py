@@ -30,14 +30,15 @@ class Base( GameBase ):
         return attrib
         
     def GetPropertyData( self ):
+        """
+        Return a dictionary of all properties as key / value pairs. Make sure
+        that values have been serialised to string.
+        """
         propDict = {}
         
-        # Put this component's properties into key / value pairs.
-        props = self.GetAttributes()
-        props = [prop for prop in props if not hasattr( prop, 'cnnctn' )]
-        for prop in props:
-            if prop.w and prop.getFn is not None:
-                propStr = cUtils.SerializeToString( prop.Get() )
+        for prop in self.GetAttributes():
+            if prop.w and not hasattr( prop, 'cnnctn' ) :
+                propStr = prop.SerializeToString()
                 if propStr is not None:
                     propDict[prop.name] = propStr
             
@@ -120,3 +121,12 @@ class Base( GameBase ):
         except:
             defPropDict = {}
         return defPropDict
+    
+    def GetSiblingIndex( self ):
+        """
+        Return the position of of this wrapper's component amongst its sibling
+        components.
+        """
+        pWrpr = self.GetParent()
+        cComps = [cWrpr.data for cWrpr in pWrpr.GetChildren()]
+        return cComps.index( self.data )

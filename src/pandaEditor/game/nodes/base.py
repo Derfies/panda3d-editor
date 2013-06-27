@@ -88,14 +88,15 @@ class Base( object ):
                 return cnnctn
     
     def SetPropertyData( self, propDict ):
-        for key, val in propDict.items():
-            attr = self.FindProperty( key )
-            if attr is not None and attr.setFn is not None:
-                val = cUtils.UnserializeFromString( val, attr.type )
-                if val is not None:
-                    attr.Set( val )
-            else:
-                print 'Failed to set property: ', key
+        """
+        Set the wrapper's properties from a dictionary of key / value pairs.
+        Values will be strings so we must ask the property to unserialize 
+        them first.
+        """
+        for pName, pValStr in propDict.items():
+            prop = self.FindProperty( pName )
+            if prop is not None:
+                prop.UnserializeFromString( pValStr )
                 
     def SetConnectionData( self, cnctnDict ):
         for key, vals in cnctnDict.items():
