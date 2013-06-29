@@ -53,7 +53,7 @@ class AssetManager( object ):
         # Find all instances of this model in the scene graph.
         nps = [
             np 
-            for np in base.scene.rootNp.findAllMatches( '+ModelRoot' )
+            for np in base.scene.rootNp.findAllMatches( '**/+ModelRoot' )
             if np.node().getFullpath() == pandaPath
         ]
         
@@ -103,7 +103,7 @@ class AssetManager( object ):
                 if path in outCnnctns:
                     for cnnctn in outCnnctns[path]:
                         cnnctn.Connect( cWrpr.data )
-                        print 'Relinking: ', cnnctn.label, ' to: ', cWrpr.data
+                        #print 'Relinking: ', cnnctn.label, ' to: ', cWrpr.data
                         
                 if path in inCnnctns:
                     cWrpr.SetModified( True )
@@ -116,7 +116,7 @@ class AssetManager( object ):
                         except TypeError:
                             cnnctn.Connect( comps )
                           
-                        print 'Relinking: ', cnnctn.label, ' to: ', cWrpr.data
+                        #print 'Relinking: ', cnnctn.label, ' to: ', cWrpr.data
                         
                 # Fix up name and ids.
                 cWrpr.SetId( oldIds[path] )
