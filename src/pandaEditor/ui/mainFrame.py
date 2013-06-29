@@ -387,8 +387,9 @@ class MainFrame( wx.Frame ):
         pane = self.paneDefs[evt.GetId()][0]
         self._mgr.GetPane( pane ).Show( evt.Checked() )
         
-        # Make sure to call or else we won't see any changes
+        # Make sure to call or else we won't see any changes.
         self._mgr.Update()
+        self.app.doc.OnRefresh()
         
     def OnXformSetActiveGizmo( self, evt ):
         if evt.GetId() == ID_XFORM_WORLD:
