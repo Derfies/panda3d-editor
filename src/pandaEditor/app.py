@@ -190,12 +190,7 @@ class App( p3d.wx.App ):
         is being used.
         """
         if self.selection.marquee.IsRunning():
-            
-            # Don't perform selection if there are no nodes and the selection
-            # is currently empty.
-            selNodes = self.selection.StopDragSelect()
-            if self.selection.comps or selNodes:
-                cmds.Select( selNodes )
+            cmds.Select( self.selection.StopDragSelect() )
         elif self.gizmoMgr.IsDragging() or self.gizmo:
             self.StopTransform()
             
@@ -242,7 +237,8 @@ class App( p3d.wx.App ):
         
         # Call OnModified next frame. Not sure why but if we call it straight
         # away it causes a small jitter when xforming...
-        taskMgr.doMethodLater( 0, self.doc.OnModified, 'dragDrop' )
+        taskMgr.doMethodLater( 0, self.doc.OnModified, 'dragDrop', 
+                               [actGizmo.attachedNps] )
         
     def FrameSelection( self ):
         """

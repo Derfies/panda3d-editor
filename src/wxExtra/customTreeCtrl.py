@@ -13,19 +13,21 @@ class CustomTreeCtrl( ct.CustomTreeCtrl ):
         self.SetFirstGradientColour( wx.Color(46, 46, 46) )
         self.SetSecondGradientColour( wx.Color(123, 123, 123) )
     
-    def GetItemChildren( self, pItem ):
+    def GetItemChildren( self, pItem, recursively=False ):
         """
         wxPython's standard tree control does not have a get item children
         method by default.
         """
-        children = []
+        cItems = []
         
-        item, cookie = self.GetFirstChild( pItem )
-        while item is not None and item.IsOk():
-            children.append( item )
-            item = self.GetNextSibling( item )
+        cItem, cookie = self.GetFirstChild( pItem )
+        while cItem is not None and cItem.IsOk():
+            cItems.append( cItem )
+            if recursively:
+                cItems.extend( self.GetItemChildren( cItem, True ) )
+            cItem = self.GetNextSibling( cItem )
             
-        return children
+        return cItems
     
     def FindItemByText( self, text ):
         """
@@ -53,3 +55,32 @@ class CustomTreeCtrl( ct.CustomTreeCtrl ):
         allItems = []
         GetChildren( self.GetRootItem(), allItems )
         return allItems
+    
+    def SetItemParent( self, item, pItem, index=None, delete=True ):
+        """
+        Set the indicated item to the indicated parent item. Since the 
+        TreeCtrl has no native way to do this, we have to delete the item
+        then recreate it and all its children from scratch.
+        """
+        if index is None:
+            index = self.GetChildrenCount( pItem )
+        newItem = self.InsertItem( pItem, index, self.GetItemText( item ) )
+        
+        # Rebuild all decendants.
+        for cItem in self.GetItemChildren( item ):
+            self.SetItemParent( cItem, newItem, delete=False )
+        
+        # Set new items properties to match the old items properties.
+        #self.SetPyData( newItem, self.GetPyData( item ) )
+        newItem.SetData( item.GetData() )
+        if item.IsExpanded():
+            newItem.Expand()
+        if item.IsSelected():
+            newItem.SetHilight( True )
+            
+        # As this is a tree we only have to delete the first item. Recursive
+        # calls to this method don't need to call this.
+        if delete:
+            self.Delete( item )
+        
+        return newItem

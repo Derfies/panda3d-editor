@@ -54,7 +54,8 @@ class LightLinkerPanel( wx.Panel ):
             light = items[0].GetData()
             
             npItems = []
-            for item in self.pnlRight.tc.GetAllItems():
+            rItem = self.pnlRight.tc.GetRootItem()
+            for item in self.pnlRight.tc.GetItemChildren( rItem, True ):
                 attrib = item.GetData().getAttrib( pm.LightAttrib )
                 if attrib is not None and light in attrib.getOnLights():
                     npItems.append( item )
@@ -68,9 +69,6 @@ class LightLinkerPanel( wx.Panel ):
         Set relationship with those items selected in the left list with those
         the user has selected in the right list.
         """
-        if self.pnlRight._updating:
-            return
-        
         # Get the light NodePath selected in the left panel
         items = self.pnlLeft.GetValidSelections()
         if not items:

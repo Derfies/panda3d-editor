@@ -20,9 +20,9 @@ class SceneGraphBasePanel( wx.Panel ):
     def __init__( self, *args, **kwargs ):
         wx.Panel.__init__( self, *args, **kwargs )
         
+        self._comps = {}
         self.app = wx.GetApp()
         self.filter = pm.PandaNode
-        self._updating = False
         
         # Build display filter menu.
         fileMenu = fm.FlatMenu()
@@ -139,37 +139,84 @@ class SceneGraphBasePanel( wx.Panel ):
     def AddItem( self, wrpr, pItem ):
         """
         Traverse the scene from the root node, creating tree items for each
-        node path encountered.
+        component encountered.
         """
         # Bail if there is a filter set and the node is not derived from
         # that type.
         if self.filter is not None and not wrpr.IsOfType( self.filter ):
             return
             
-        item = self.tc.AppendItem( pItem, wrpr.GetName() )
-        item.SetData( wrpr.data )
+        item = self.tc.AppendItem( pItem, wrpr.GetName(), data=wrpr.data )
         self._comps[wrpr.data] = item
         
         for cWrpr in wrpr.GetChildren():
             self.AddItem( cWrpr, item )
+            
+    def RemoveItem( self, wrpr, delete=True ):
+        if wrpr.data in self._comps:
+            if delete:
+                self.tc.Delete( self._comps[wrpr.data] )
+            del self._comps[wrpr.data]
+            
+        for cWrpr in wrpr.GetChildren():
+            self.RemoveItem( cWrpr, False )
+            
+    def RefreshItem( self, wrpr ):
+        pWrpr = wrpr.GetParent()
+        if pWrpr is None:
+            return
+        
+        if pWrpr.data in self._comps:
+            newItem = self.tc.SetItemParent( self._comps[wrpr.data], 
+                                             self._comps[pWrpr.data], 
+                                             wrpr.GetSiblingIndex() )
+            self.tc.SetItemText( newItem, wrpr.GetName() )
+            self.UpdateItemData( newItem )
+            
+    def UpdateItemData( self, item ):
+        data = self.tc.GetPyData( item )
+        self._comps[data] = item
+            
+        for cItem in self.tc.GetItemChildren( item ):
+            self.UpdateItemData( cItem )
         
     def OnUpdate( self, msg ):
         """
-        Update the tree control by removing all items and replacing them.
+        Update the contents of the TreeCtrl to reflect the contents of the 
+        scene. If msg.data is not None, it will contain only the components
+        which have changed. This means we don't have to do a full rebuild of
+        the tree which can be time consuming.
         """
-        self._updating = True
-        self.tc.Freeze()
+        # No need to refresh a panel if it is hidden.
+        if not self.IsShownOnScreen():
+            return
         
-        def GetItemsDict():
+        if msg.data is None:
             
-            # Return a dictionary mapping each node path to its tree item.
-            itemsDict = {}
-            for item in self.tc.GetAllItems():
-                itemsDict[item.GetData()] = item
-            return itemsDict
-        
+            # No components were specified - do a full rebuild.
+            self.Rebuild()
+        else:
+            for comp in msg.data:
+                wrpr = base.game.nodeMgr.Wrap( comp )
+                pWrpr = wrpr.GetParent()
+                if wrpr.data in self._comps:
+                    if pWrpr is None and wrpr.data != base.scene:
+                        
+                        # Component has no parent - remove it.
+                        self.RemoveItem( wrpr )
+                    else:
+                        
+                        # Component found in the tree - refresh it.
+                        self.RefreshItem( wrpr )
+                elif pWrpr.data in self._comps:
+                    
+                    # Component not found in the tree - add it.
+                    self.AddItem( wrpr, self._comps[pWrpr.data] )
+    
+    def Rebuild( self ):
+        """Do a complete rebuild of the scene graph."""
         # Get map of node paths to items before populating the tree control
-        oldItems = GetItemsDict()
+        oldItems = self.GetItemsDictionary()
 
         # Clear existing items and repopulate tree control
         self.tc.DeleteAllItems()
@@ -183,46 +230,40 @@ class SceneGraphBasePanel( wx.Panel ):
                 self.AddItem( cWrpr, rItem )
             
         # Get map of node paths to items after populating the tree control
-        newItems = GetItemsDict()
+        newItems = self.GetItemsDictionary()
+        self.SetExpandedState( oldItems, newItems )
         
-        # Set item states back
-        sels = []
-        for np, oldItem in oldItems.items():
-            
-            # Set expanded states back
-            if np in newItems and oldItem.IsExpanded():
-                self.tc.Expand( newItems[np] )
-            
-            # Set selection states back
-            #if np in newItems and oldItem.IsSelected():
-            #    self.tc.SelectItem( newItems[np] )
-                
-        self.tc.Thaw()
-        self._updating = False
-        
-    def SelectItems( self, items, unselect=True ):
+    def GetItemsDictionary( self ):
         """
-        The tree control tries to redraw every time we call SelectItem() which
-        can cause flickering (even when frozen!) when iterating through a 
-        list. Disconnecting the event handler seems to stop the internal 
-        redrawing, at least until we get a SelectItems() method.
+        Return a dictionary mapping the scene's components to the item that
+        represents them in the tree.
         """
-        self.Freeze()
-        self.tc.SetEvtHandlerEnabled( False )
+        expDict = {}
+        for item in self.tc.GetItemChildren( self.tc.GetRootItem() ):
+            expDict[item.GetData()] = item
+        return expDict
+    
+    def SetExpandedState( self, oldItems, newItems ):
+        """Set item expanded states back."""
+        for comp, oldItem in oldItems.items():
+            if comp in newItems and oldItem.IsExpanded():
+                newItem = newItems[comp]
+                if newItem == self.tc.GetRootItem():
+                    continue
+                self.tc.Expand( newItem )
         
-        # Deselect all if indicated
-        if unselect:
-            self.tc.UnselectAll()
-            
-        # Iterate over list and select
+    def SelectItems( self, items ):
+        """
+        Iterate over list and hilight them. Make sure the TreeCtrl is open at 
+        the last item the user selected.
+        """
+        self.tc.UnselectAll()
         for item in items:
-            self.tc.SelectItem( item )
-        
-        # Make sure to call refresh at least once since we disabled the event
-        # handler that would normally do this!
-        self.tc.SetEvtHandlerEnabled( True )
-        self.tc.Refresh()
-        self.Thaw()
+            item.SetHilight()
+            
+        if items:
+            self.tc.CalculatePositions() 
+            self.tc.EnsureVisible( items[-1] )
         
     def GetValidSelections( self ):
         """

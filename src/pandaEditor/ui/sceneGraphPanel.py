@@ -1,5 +1,4 @@
 import wx
-from wx.lib.pubsub import Publisher as pub
 
 from .. import commands as cmds
 from sceneGraphBasePanel import SceneGraphBasePanel
@@ -16,30 +15,39 @@ class SceneGraphPanel( SceneGraphBasePanel ):
     def OnTreeSelChanged( self, evt ):
         """
         Tree item selection handler. If the selection of the tree changes,
-        tell the app to select those node paths.
+        tell the app to select those components.
         """
-        # Bail if we got here by setting the item inside the OnUpdateSelection
-        # method, we get stuck in an infinite loop otherwise.
-        if self._updating:
-            return
-        
-        # Set selected items
+        def IndexInSelection( x, comps ):
+            """
+            Sort components by their position in the selection, if they appear
+            there. This will make the new selection order closer to the 
+            original.
+            """
+            if x in base.selection.comps:
+                i = base.selection.comps.index( x )
+            else:
+                i = len(  base.selection.comps )
+            return i
+            
         items = self.GetValidSelections()
         if items:
             comps = [item.GetData() for item in items]
+            comps.sort( key=lambda x: IndexInSelection( x, comps ) )
             cmds.Select( comps )
             
     def OnUpdate( self, msg ):
         """
-        Select those items which correlate to the selected node paths. As long
-        as our __nps dictionary is kept up to date we shouldn't have to
-        iterate through the entire tree to find the items we need.
+        Update the TreeCtrl then hilight those items whose components are 
+        selected.
         """
-        SceneGraphBasePanel.OnUpdate( self, msg )
+        self.tc.Freeze()
         
+        SceneGraphBasePanel.OnUpdate( self, msg )
         items = [
-            self._comps[wrpr.data] 
-            for wrpr in base.selection.wrprs 
-            if wrpr.data in self._comps
+            self._comps[comp] 
+            for comp in base.selection.comps 
+            if comp in self._comps
         ]
         self.SelectItems( items )
+        
+        self.tc.Thaw()

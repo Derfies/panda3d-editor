@@ -45,10 +45,14 @@ class Selection( p3d.Object ):
         """
         Add the indicated components to the selection and run select handlers.
         """
-        for comp in list( set( comps ) ):
+        for comp in comps:
+            
+            # Skip components already selected.
+            if comp in self.comps:
+                continue
+            
             wrpr = base.game.nodeMgr.Wrap( comp )
             wrpr.OnSelect()
-                
             self.comps.append( comp )
             self.wrprs.append( wrpr )
     
@@ -60,7 +64,7 @@ class Selection( p3d.Object ):
         for wrpr in self.wrprs:
             wrpr.OnDeselect()
             
-        self.comps = list( set( self.comps ) - set( comps ) )
+        self.comps = [comp for comp in self.comps if comp not in comps]
         self.wrprs = [base.game.nodeMgr.Wrap( comp ) for comp in self.comps]
     
     def SelectParent( self ):
@@ -143,32 +147,32 @@ class Selection( p3d.Object ):
         tag. Also append any node which was under the mouse at the end of the
         operation.
         """
-        nps = []
-        
-        # Stop the marquee
         self.marquee.Stop()
         
         # Find all node paths below the root node which are inside the marquee
-        # AND have the correct tag
+        # AND have the TAG_PICKABLE tag.
+        nps = []
         for np in self.rootNp.findAllMatches( '**' ):
-            if self.marquee.IsNodePathInside( np ):
-                nps.append( self.GetPickedNodePath( np ) )
+            pickNp = self.GetPickableNodePath( np )
+            if self.marquee.IsNodePathInside( pickNp ) and pickNp not in nps:
+                nps.append( pickNp )
                     
-        # Add any node path which was under the mouse to the selection
+        # Add any node path which was under the mouse to the selection.
         np = self.GetNodePathUnderMouse()
-        if np is not None:
+        if np is not None and np not in nps:
             nps.append( np )
         
-        # In append mode we want to add / remove items from the current
-        # selection
+        # In append mode add any NodePath which wasn't already in the 
+        # selection and remove any NodePath which was already selected.
         if self.append:
-            for selfNp in self.comps:
-                if selfNp in nps:
-                    nps.remove( selfNp )
+            oldComps = self.comps
+            for np in nps:
+                if np in self.comps:
+                    oldComps.remove( np )
                 else:
-                    nps.append( selfNp )
-        
-        # Clear current selection and select new node paths
+                    oldComps.append( np )
+            nps = oldComps
+            
         return nps
         
     def GetNodePathUnderMouse( self ):
@@ -178,7 +182,7 @@ class Selection( p3d.Object ):
         self.picker.OnUpdate( None )
         pickedNp = self.picker.GetFirstNodePath()
         if pickedNp is not None:
-            return self.GetPickedNodePath( pickedNp )
+            return self.GetPickableNodePath( pickedNp )
         else:
             return None
         
@@ -186,11 +190,11 @@ class Selection( p3d.Object ):
         self.picker.OnUpdate( None, x, y )
         pickedNp = self.picker.GetFirstNodePath()
         if pickedNp is not None:
-            return self.GetPickedNodePath( pickedNp )
+            return self.GetPickableNodePath( pickedNp )
         else:
             return None
         
-    def GetPickedNodePath( self, np ):
+    def GetPickableNodePath( self, np ):
         if np.getPythonTag( editor.nodes.TAG_IGNORE ):
             return np.findNetPythonTag( editor.nodes.TAG_PICKABLE )
         elif p3d.MOUSE_CTRL in base.edCamera.mouse.modifiers:

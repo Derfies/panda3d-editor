@@ -29,20 +29,20 @@ class Document( object ):
         self.dirty = False
         self.OnRefresh()
         
-    def OnRefresh( self ):
+    def OnRefresh( self, comps=None ):
         """
         Broadcast the update message without setting the dirty flag. Methods
         subscribed to this message will rebuild ui widgets completely.
         """
-        pub.sendMessage( 'Update', base.selection.wrprs )
+        pub.sendMessage( 'Update', comps )
 
-    def OnModified( self, arg=None ):
+    def OnModified( self, comps=None ):
         """
         Broadcast the update message and set the dirty flag. Methods
         subscribed to this message will rebuild ui widgets completely.
         """
         self.dirty = True
-        pub.sendMessage( 'Update', base.selection.wrprs )
+        pub.sendMessage( 'Update', comps )
         
     def OnSelectionModified( self, task ):
         """

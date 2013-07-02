@@ -17,7 +17,7 @@ def Add( comps ):
     actn = actions.Composite( actns )
     wx.GetApp().actnMgr.Push( actn )
     actn()
-    wx.GetApp().doc.OnModified()
+    wx.GetApp().doc.OnModified( comps )
     
 
 def Remove( comps ):
@@ -32,7 +32,7 @@ def Remove( comps ):
     actn = actions.Composite( actns )
     wx.GetApp().actnMgr.Push( actn )
     actn()
-    wx.GetApp().doc.OnModified()
+    wx.GetApp().doc.OnModified( comps )
     
 
 def Duplicate( comps ):
@@ -56,7 +56,7 @@ def Duplicate( comps ):
     actn = actions.Composite( actns )
     wx.GetApp().actnMgr.Push( actn )
     actn()
-    wx.GetApp().doc.OnModified()
+    wx.GetApp().doc.OnModified( dupeComps )
     
 
 def Replace( fromComp, toComp ):
@@ -73,7 +73,7 @@ def Replace( fromComp, toComp ):
     actn = actions.Composite( actns )
     wx.GetApp().actnMgr.Push( actn )
     actn()
-    wx.GetApp().doc.OnModified()
+    wx.GetApp().doc.OnModified( [fromComp, toComp] )
     
 
 def Select( comps ):
@@ -89,7 +89,7 @@ def Select( comps ):
     actn = actions.Composite( actns )
     wx.GetApp().actnMgr.Push( actn )
     actn()
-    wx.GetApp().doc.OnRefresh()
+    wx.GetApp().doc.OnRefresh( comps )
     
 
 def SetAttribute( comps, attrs, val ):
@@ -102,7 +102,7 @@ def SetAttribute( comps, attrs, val ):
     actn = actions.Composite( actns )
     wx.GetApp().actnMgr.Push( actn )
     actn()
-    wx.GetApp().doc.OnModified()
+    wx.GetApp().doc.OnModified( comps )
     
 
 def Parent( comps, pComp ):
@@ -114,7 +114,7 @@ def Parent( comps, pComp ):
     actn = actions.Composite( actns )
     wx.GetApp().actnMgr.Push( actn )
     actn()
-    wx.GetApp().doc.OnModified()
+    wx.GetApp().doc.OnModified( comps )
     
 
 def Unparent(): pass
@@ -142,7 +142,7 @@ def Group( nps ):
     actn = actions.Composite( actns )
     wx.GetApp().actnMgr.Push( actn )
     actn()
-    wx.GetApp().doc.OnModified()
+    wx.GetApp().doc.OnModified( nps.append( grpNp ) )
     
 
 def Ungroup( nps ):
@@ -169,7 +169,7 @@ def Ungroup( nps ):
     actn = actions.Composite( actns )
     wx.GetApp().actnMgr.Push( actn )
     actn()
-    wx.GetApp().doc.OnModified()
+    wx.GetApp().doc.OnModified( nps.append( rmvNps ) )
     
 
 def Connect( tgtComps, cnnctn, fn ):
