@@ -47,6 +47,6 @@ class NodePathObjectAttribute( PyTagAttribute ):
     def __init__( self, label, pType, name, pyTagName=None ):
         if pyTagName is None:
             pyTagName = p3d.NodePathObject.pyTagName
-        super( PyTagAttribute, self ).__init__( label, pType, getattr, 
-                                                setattr, None, [name], [name], 
-                                                None, pyTagName=pyTagName )
+        args = (label, pType, getattr, setattr, None, [name], [name], None)
+        kwargs = {'pyTagName':pyTagName}
+        super( NodePathObjectAttribute, self ).__init__( *args, **kwargs )

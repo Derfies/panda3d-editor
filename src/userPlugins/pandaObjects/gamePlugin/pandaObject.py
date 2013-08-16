@@ -6,7 +6,7 @@ import p3d
 import game
 from constants import *
 from game.nodes.base import Base
-from game.nodes import Attribute as Attr
+from game.nodes.attributes import Attribute as Attr
 
 
 class PandaObjectNPO( p3d.NodePathObject ):
@@ -113,10 +113,13 @@ class PandaObject( Base ):
     
     def ReloadScript( self, scriptPath ):
         
-        # Get the class name
+        # Get the class name - bail if it is not a script loaded onto this
+        # PandaObject.
         head, tail = os.path.split( scriptPath )
         name = os.path.splitext( tail )[0]
         clsName = name[0].upper() + name[1:]
+        if clsName not in self.data.instances:
+            return
         
         # Get the current script instance, detach it from the PandaObject and
         # delete it.

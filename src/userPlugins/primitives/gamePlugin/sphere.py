@@ -4,7 +4,7 @@ import p3d
 import game
 from constants import *
 from primitive import Primitive, PrimitiveNPO
-from game.nodes import NodePathObjectAttribute as NPOAttr
+from game.nodes.attributes import NodePathObjectAttribute as NPOAttr
 
 
 class SphereNPO( PrimitiveNPO ):

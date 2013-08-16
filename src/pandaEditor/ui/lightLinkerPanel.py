@@ -5,7 +5,7 @@ import pandac.PandaModules as pm
 from pandac.PandaModules import NodePath as NP
 
 from .. import commands as cmds
-from game.nodes import Attribute as Attr
+from game.nodes.attributes import Attribute as Attr
 from sceneGraphBasePanel import SceneGraphBasePanel
 
 

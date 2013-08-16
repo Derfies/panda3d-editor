@@ -1,3 +1,3 @@
 from constants import *
-from attributes import *
+import attributes
 from manager import Manager
