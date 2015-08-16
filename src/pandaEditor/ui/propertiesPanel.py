@@ -1,6 +1,6 @@
 import wx
 from wxExtra import wxpg
-from wx.lib.pubsub import Publisher as pub
+from wx.lib.pubsub import pub
 import pandac.PandaModules as pm
 from panda3d.core import Filename
 
@@ -303,7 +303,7 @@ class PropertiesPanel( wx.Panel ):
         else:
             cmds.SetConnections( prop.GetValue(), attrs )
         
-    def OnUpdate( self, msg ):
+    def OnUpdate( self, comps=None ):
         self.pg.Freeze()
         
         # Get the scroll position.
@@ -343,7 +343,7 @@ class PropertiesPanel( wx.Panel ):
         
         self.refocus = False
         
-    def OnSelectionModified( self, msg ):
+    def OnSelectionModified( self, comps ):
         """
         Update the position, rotation and scale properties during the 
         transform operation.

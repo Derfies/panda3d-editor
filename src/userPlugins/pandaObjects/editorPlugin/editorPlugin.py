@@ -53,7 +53,7 @@ class EditorPlugin( gp.GamePlugin ):
             ActionItem( 'Play', os.path.join( dirPath, 'play.png' ), self.OnPlay, ID_PLAY, 'Play' ),
             ActionItem( 'Pause', os.path.join( dirPath, 'pause.png' ), self.OnPause, ID_PAUSE, 'Pause' )
         ]
-        self.tbPlay = CustomAuiToolBar( self.ui, -1, style=wx.aui.AUI_TB_DEFAULT_STYLE )
+        self.tbPlay = CustomAuiToolBar( self.ui, -1 )
         self.tbPlay.SetToolBitmapSize( TBAR_ICON_SIZE )
         self.tbPlay.AppendActionItems( playbackActns )
         

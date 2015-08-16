@@ -13,9 +13,9 @@ void vshader(
 }
 
 
-//void fshader(
-//   in float4 l_color : COLOR,
-//    out float4 o_color : COLOR)
-//{
-//    o_color = l_color;
-//}
+void fshader(
+    in float4 l_color : COLOR,
+    out float4 o_color : COLOR)
+{
+    o_color = l_color;
+}

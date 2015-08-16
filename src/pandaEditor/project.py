@@ -5,7 +5,7 @@ import subprocess
 import xml.etree.cElementTree as et
 
 import pandac.PandaModules as pm
-from wx.lib.pubsub import Publisher as pub
+from wx.lib.pubsub import pub
 
 import p3d
 import game

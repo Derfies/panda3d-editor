@@ -3,7 +3,7 @@ import traceback
 
 import wx
 from direct.directtools.DirectGrid import DirectGrid
-from wx.lib.pubsub import Publisher as pub
+from wx.lib.pubsub import pub
 import pandac.PandaModules as pm
 import panda3d.core as pc
 
@@ -35,7 +35,7 @@ class App( p3d.wx.App ):
         # Build main frame, start Panda and replace the wx event loop with
         # Panda's.
         self.frame = ui.MainFrame( None, size=(800, 600) )
-        ShowBase( self.frame.pnlViewport )
+        self.sb = ShowBase( self.frame.pnlViewport )
         self.ReplaceEventLoop()
         self.frame.Show()
         wx.CallAfter( self.FinishInit )
@@ -251,7 +251,7 @@ class App( p3d.wx.App ):
         else:
             base.edCamera.Frame( [base.scene.rootNp] )
             
-    def OnUpdate( self, msg ):
+    def OnUpdate( self, comps=None ):
         """
         Subscribed to the update selection message. Make sure that the
         selected nodes are attached to the managed gizmos, then refresh the

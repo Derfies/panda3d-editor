@@ -3,7 +3,7 @@ import sys
 
 import wx
 import wx.aui
-from wx.lib.pubsub import Publisher as pub
+from wx.lib.pubsub import pub
 import pandac.PandaModules as pm
 from direct.actor.Actor import Actor
 
@@ -435,7 +435,7 @@ class MainFrame( wx.Frame ):
         # Call after or IsShown() won't return a useful value 
         wx.CallAfter( UpdateWindowMenu )
         
-    def OnUpdate( self, msg ):
+    def OnUpdate( self, comps=None ):
         """
         Change the appearance and states of buttons on the form based on the
         state of the loaded document.
@@ -443,12 +443,12 @@ class MainFrame( wx.Frame ):
         NOTE: Don't use freeze / thaw as this will cause the 3D viewport to
         flicker.
         """
-        self.OnUpdateFile( msg )
-        self.OnUpdateEdit( msg )
-        self.OnUpdateModify( msg )
-        self.OnUpdateView( msg )
-        self.OnUpdateProject( msg )
-        self.OnUpdateXform( msg )
+        self.OnUpdateFile( comps )
+        self.OnUpdateEdit( comps )
+        self.OnUpdateModify( comps )
+        self.OnUpdateView( comps )
+        self.OnUpdateProject( comps )
+        self.OnUpdateXform( comps )
         
         # Set the frame's title to include the document's file path, include
         # dirty 'star'
@@ -457,7 +457,7 @@ class MainFrame( wx.Frame ):
             title += ' *'
         self.SetTitle( title )
         
-        self.app.game.pluginMgr.OnUpdate( msg )
+        self.app.game.pluginMgr.OnUpdate( comps )
         
     def OnUpdateFile( self, msg ):
         """
@@ -602,7 +602,7 @@ class MainFrame( wx.Frame ):
         self.mFile.AppendMenu( ID_FILE_PROJ, '&Project', self.mProj )
         
         # Create file toolbar
-        self.tbFile = CustomAuiToolBar( self, -1, style=wx.aui.AUI_TB_DEFAULT_STYLE )
+        self.tbFile = CustomAuiToolBar( self, -1 )
         self.tbFile.SetToolBitmapSize( TBAR_ICON_SIZE )
         self.tbFile.AppendActionItems( commonActns )
         self.tbFile.Realize()
@@ -633,7 +633,7 @@ class MainFrame( wx.Frame ):
         #self.mEdit.AppendActionItems( pntActns, self )
         
         # Create edit toolbar
-        self.tbEdit = CustomAuiToolBar( self, -1, style=wx.aui.AUI_TB_DEFAULT_STYLE )
+        self.tbEdit = CustomAuiToolBar( self, -1 )
         self.tbEdit.SetToolBitmapSize( TBAR_ICON_SIZE )
         self.tbEdit.AppendActionItems( commonActns )
         self.tbEdit.Realize()
@@ -649,7 +649,7 @@ class MainFrame( wx.Frame ):
         self.mModify.AppendActionItems( actns, self )
         
         # Create edit toolbar
-        self.tbModify = CustomAuiToolBar( self, -1, style=wx.aui.AUI_TB_DEFAULT_STYLE )
+        self.tbModify = CustomAuiToolBar( self, -1 )
         self.tbModify.SetToolBitmapSize( TBAR_ICON_SIZE )
         self.tbModify.AppendActionItems( actns )
         self.tbModify.Realize()
@@ -666,7 +666,7 @@ class MainFrame( wx.Frame ):
         ]
         
         # Create xform toolbar
-        self.tbXform = CustomAuiToolBar( self, -1, style=wx.aui.AUI_TB_DEFAULT_STYLE )
+        self.tbXform = CustomAuiToolBar( self, -1 )
         self.tbXform.SetToolBitmapSize( TBAR_ICON_SIZE )
         self.tbXform.AddSpacer( 0 )   # Need to insert a null object here or the radio buttons don't seem to work (win7 at least).
         self.tbXform.AppendActionItems( actns )
@@ -681,7 +681,7 @@ class MainFrame( wx.Frame ):
         ]
         
         # Create layout toolbar
-        self.tbLayout = CustomAuiToolBar( self, -1, style=wx.aui.AUI_TB_DEFAULT_STYLE )
+        self.tbLayout = CustomAuiToolBar( self, -1 )
         self.tbLayout.SetToolBitmapSize( TBAR_ICON_SIZE )
         self.tbLayout.AddSpacer( 0 )   # Need to insert a null object here or the radio buttons don't seem to work (win7 at least).
         self.tbLayout.AppendActionItems( actns )

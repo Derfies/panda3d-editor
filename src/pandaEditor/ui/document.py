@@ -1,6 +1,6 @@
 import os
 
-from wx.lib.pubsub import Publisher as pub
+from wx.lib.pubsub import pub
 
 
 class Document( object ):
@@ -34,7 +34,7 @@ class Document( object ):
         Broadcast the update message without setting the dirty flag. Methods
         subscribed to this message will rebuild ui widgets completely.
         """
-        pub.sendMessage( 'Update', comps )
+        pub.sendMessage( 'Update', comps=comps )
 
     def OnModified( self, comps=None ):
         """
@@ -42,7 +42,7 @@ class Document( object ):
         subscribed to this message will rebuild ui widgets completely.
         """
         self.dirty = True
-        pub.sendMessage( 'Update', comps )
+        pub.sendMessage( 'Update', comps=comps )
         
     def OnSelectionModified( self, task ):
         """
@@ -50,5 +50,5 @@ class Document( object ):
         message should be quick and not force full rebuilds of ui widgets
         considering how quickly the selection is likely to change.
         """
-        pub.sendMessage( 'SelectionModified', base.selection.wrprs )
+        pub.sendMessage( 'SelectionModified', comps=base.selection.wrprs )
         return task.cont

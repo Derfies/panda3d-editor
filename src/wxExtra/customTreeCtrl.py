@@ -10,8 +10,8 @@ class CustomTreeCtrl( ct.CustomTreeCtrl ):
         self.SetBorderPen( wx.Pen( (0, 0, 0), 0, wx.TRANSPARENT ) )
         self.EnableSelectionGradient( True )
         self.SetGradientStyle( True )
-        self.SetFirstGradientColour( wx.Color(46, 46, 46) )
-        self.SetSecondGradientColour( wx.Color(123, 123, 123) )
+        self.SetFirstGradientColour( wx.Colour(46, 46, 46) )
+        self.SetSecondGradientColour( wx.Colour(123, 123, 123) )
     
     def GetItemChildren( self, pItem, recursively=False ):
         """

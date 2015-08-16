@@ -35,14 +35,14 @@ class SceneGraphPanel( SceneGraphBasePanel ):
             comps.sort( key=lambda x: IndexInSelection( x, comps ) )
             cmds.Select( comps )
             
-    def OnUpdate( self, msg ):
+    def OnUpdate( self, comps=None ):
         """
         Update the TreeCtrl then hilight those items whose components are 
         selected.
         """
         self.tc.Freeze()
         
-        SceneGraphBasePanel.OnUpdate( self, msg )
+        SceneGraphBasePanel.OnUpdate( self, comps )
         items = [
             self._comps[comp] 
             for comp in base.selection.comps 

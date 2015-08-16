@@ -1,7 +1,7 @@
 import os
 
 import wx
-from wx.lib.pubsub import Publisher as pub
+from wx.lib.pubsub import pub
 
 import p3d
 from wxExtra import DirTreeCtrl, utils as wxUtils

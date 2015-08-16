@@ -3,7 +3,7 @@ import pandac.PandaModules as pm
 import wx.lib.agw.flatmenu as fm
 import wx.lib.agw.fmresources as fmr
 import wx.lib.agw.customtreectrl as ct
-from wx.lib.pubsub import Publisher as pub
+from wx.lib.pubsub import pub
 
 import p3d
 from .. import commands as cmds
@@ -180,10 +180,10 @@ class SceneGraphBasePanel( wx.Panel ):
         for cItem in self.tc.GetItemChildren( item ):
             self.UpdateItemData( cItem )
         
-    def OnUpdate( self, msg ):
+    def OnUpdate( self, comps=None ):
         """
         Update the contents of the TreeCtrl to reflect the contents of the 
-        scene. If msg.data is not None, it will contain only the components
+        scene. If comps is not None, it will contain only the components
         which have changed. This means we don't have to do a full rebuild of
         the tree which can be time consuming.
         """
@@ -191,12 +191,12 @@ class SceneGraphBasePanel( wx.Panel ):
         if not self.IsShownOnScreen():
             return
         
-        if msg.data is None:
+        if comps is None:
             
             # No components were specified - do a full rebuild.
             self.Rebuild()
         else:
-            for comp in msg.data:
+            for comp in comps:
                 wrpr = base.game.nodeMgr.Wrap( comp )
                 pWrpr = wrpr.GetParent()
                 if wrpr.data in self._comps:

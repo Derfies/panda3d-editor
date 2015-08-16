@@ -5,4 +5,4 @@ import pandaEditor
 
 
 app = pandaEditor.App( redirect=False )
-run()
+app.sb.run()
