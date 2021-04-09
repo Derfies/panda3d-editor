@@ -1,7 +1,7 @@
 import wx
 
-from .. import commands as cmds
-from sceneGraphBasePanel import SceneGraphBasePanel
+from pandaEditor import commands as cmds
+from .sceneGraphBasePanel import SceneGraphBasePanel
 
 
 class SceneGraphPanel( SceneGraphBasePanel ):

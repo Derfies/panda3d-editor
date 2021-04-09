@@ -1,5 +1,5 @@
 import p3d
-from base import Base
+from .base import Base
 from p3d import commonUtils as cUtils
 
 

@@ -6,8 +6,8 @@ import wx.lib.agw.customtreectrl as ct
 from wx.lib.pubsub import pub
 
 import p3d
-from .. import commands as cmds
-from customDropTarget import CustomDropTarget
+from pandaEditor import commands as cmds
+from .customDropTarget import CustomDropTarget
 from wxExtra import utils as wxUtils
 from wxExtra import CustomTreeCtrl, CompositeDropTarget
 
@@ -54,9 +54,9 @@ class SceneGraphBasePanel( wx.Panel ):
         self.tc.Bind( wx.EVT_TREE_BEGIN_LABEL_EDIT, self.OnTreeBeginLabelEdit )
         self.tc.Bind( wx.EVT_TREE_END_LABEL_EDIT, self.OnTreeEndLabelEdit )
         self.tc.Bind( wx.EVT_LEFT_DCLICK, self.OnLeftDClick )
-        self.tc.Bind( wx.EVT_KEY_UP, p3d.wx.OnKeyUp )
-        self.tc.Bind( wx.EVT_KEY_DOWN, p3d.wx.OnKeyDown )
-        self.tc.Bind( wx.EVT_LEFT_UP, p3d.wx.OnLeftUp )
+        self.tc.Bind( wx.EVT_KEY_UP, p3d.wxPanda.OnKeyUp )
+        self.tc.Bind( wx.EVT_KEY_DOWN, p3d.wxPanda.OnKeyDown )
+        self.tc.Bind( wx.EVT_LEFT_UP, p3d.wxPanda.OnLeftUp )
         self.tc.Bind( wx.EVT_MIDDLE_DOWN, self.OnMiddleDown )
         
         # Build tree control drop target

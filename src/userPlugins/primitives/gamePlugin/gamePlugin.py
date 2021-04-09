@@ -2,7 +2,7 @@ from box import Box
 from cone import Cone
 from cylinder import Cylinder
 from sphere import Sphere
-from constants import *
+from .constants import *
 from game.plugins.base import Base
 
 

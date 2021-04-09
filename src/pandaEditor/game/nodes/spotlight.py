@@ -1,9 +1,9 @@
 import pandac.PandaModules as pm
 from pandac.PandaModules import Spotlight as SL
 
-from light import Light
-from lensNode import LensNode
-from attributes import NodeAttribute as Attr
+from .light import Light
+from .lensNode import LensNode
+from .attributes import NodeAttribute as Attr
 
 
 class Spotlight( Light, LensNode ):

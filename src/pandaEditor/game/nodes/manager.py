@@ -1,6 +1,6 @@
 import inspect
 
-from constants import *
+from .constants import *
 
 
 WRAPPER_MODULE_NAMES = [
@@ -38,6 +38,8 @@ WRAPPER_MODULE_NAMES = [
 ]
 
 
+from importlib import import_module
+
 class Manager( object ):
     
     def __init__( self ):
@@ -48,7 +50,9 @@ class Manager( object ):
         # this class is instantiated - not when the module is imported - so
         # the editor classes are loaded beforehand.
         for modName in WRAPPER_MODULE_NAMES:
-            mod = __import__( modName, globals() )
+            print('modName:', modName)
+            #mod = __import__( modName, globals() )
+            mod = import_module('pandaEditor.game.nodes.' + modName)
             for mem in inspect.getmembers( mod, inspect.isclass ):
                 cls = mem[1]
                 if cls.__module__ == mod.__name__:

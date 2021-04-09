@@ -4,7 +4,7 @@ import panda3d.core as pc
 import pandac.PandaModules as pm
 from direct.directtools.DirectUtil import ROUND_TO
 
-from functions import *
+from .functions import *
 
 
 def Relpath( target, base=os.curdir ):
@@ -23,13 +23,13 @@ def Relpath( target, base=os.curdir ):
         
     # On the windows platform the target may be on a completely different
     # drive from the base
-    if os.name in ['nt','dos','os2'] and base_list[0].lower() <> target_list[0].lower():
-        raise OSError, ''.join( ['Target is on a different drive to base. Target: ', target_list[0], ', base: ', base_list[0]] )
+    if os.name in ['nt','dos','os2'] and base_list[0].lower() != target_list[0].lower():
+        raise OSError(''.join( ['Target is on a different drive to base. Target: ', target_list[0], ', base: ', base_list[0]] ))
 
     # Starting from the filepath root, work out how much of the filepath is
     # shared by base and target
     for i in range( min( len( base_list ), len( target_list ) ) ):
-        if base_list[i].lower() <> target_list[i].lower(): 
+        if base_list[i].lower() != target_list[i].lower():
             break
     else:
         

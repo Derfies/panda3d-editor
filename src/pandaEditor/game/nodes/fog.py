@@ -1,7 +1,7 @@
 import pandac.PandaModules as pm
 
-from nodePath import NodePath
-from attributes import NodeAttribute as Attr
+from .nodePath import NodePath
+from .attributes import NodeAttribute as Attr
 
 
 class Fog( NodePath ):

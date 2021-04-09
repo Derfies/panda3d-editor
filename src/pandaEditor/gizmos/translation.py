@@ -3,9 +3,9 @@ from direct.directtools.DirectUtil import ROUND_TO
 
 from p3d import commonUtils as utils
 from p3d.geometry import Cone, Square, Line
-from axis import Axis
-from base import Base
-from constants import *
+from .axis import Axis
+from .base import Base
+from .constants import *
 
 
 TOL = 0.1

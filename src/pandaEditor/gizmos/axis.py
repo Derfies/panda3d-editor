@@ -1,7 +1,7 @@
 from pandac.PandaModules import Point3, NodePath, GeomEnums 
 from pandac.PandaModules import CollisionNode, CollisionTube
 
-from constants import *
+from .constants import *
 
 
 class Axis( NodePath ):

@@ -67,11 +67,11 @@ class Viewport( wx.Panel ):
         
         self._win = None
         
-    def GetWindow( self ):
-        return self._win
-        
-    def SetWindow( self, win ):
-        self._win = win
+    # def GetWindow( self ):
+    #     return self._win
+    #
+    # def SetWindow( self, win ):
+    #     self._win = win
         
     def Initialize( self, useMainWin=True ):
         """
@@ -130,5 +130,5 @@ class App( wx.App, DirectObject ):
         while self.evtLoop.Pending():
             self.evtLoop.Dispatch()
         self.ProcessIdle()
-        if task != None: 
+        if task != None:
             return task.cont

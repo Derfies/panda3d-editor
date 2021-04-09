@@ -1,9 +1,9 @@
 import pandac.PandaModules as pm
 from pandac.PandaModules import ModelRoot as MR
 
-from constants import *
-from nodePath import NodePath
-from attributes import NodeAttribute as Attr
+from .constants import *
+from .nodePath import NodePath
+from .attributes import NodeAttribute as Attr
 
 
 class ModelRoot( NodePath ):
@@ -31,7 +31,7 @@ class ModelRoot( NodePath ):
                 try:
                     np = loader.loadModel( filePath + '.bam' )
                 except IOError:
-                    print 'Failed to load: ', filePath
+                    print('Failed to load: ', filePath)
                     np = pm.NodePath( pm.ModelRoot( '' ) )
             np.setName( filePath.getBasenameWoExtension() )
         

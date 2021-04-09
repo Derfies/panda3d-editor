@@ -5,8 +5,8 @@ import pandac.PandaModules as pm
 from panda3d.core import Filename
 
 import p3d
-from .. import commands as cmds
-import customProperties as custProps
+from pandaEditor import commands as cmds
+from . import customProperties as custProps
 
 
 ATTRIBUTE_TAG = 'attr'
@@ -35,7 +35,7 @@ class PropertyGrid( wxpg.PropertyGrid ):
         if '|' in prop.GetLabel():
             msg = ( 'Cannot use property labels containing the pipe (\'|\')' +
                     'character' )
-            raise AttributeError, msg
+            raise AttributeError(msg)
         
         # Add the property
         wxpg.PropertyGrid.Append( self, prop, *args, **kwargs )
@@ -262,7 +262,7 @@ class PropertiesPanel( wx.Panel ):
                 try:
                     objIter = iter( val )
                     prop = custProps.ConnectionListProperty( attr.label, '', attr.Get() )
-                except TypeError, te:
+                except TypeError:
                     prop = custProps.ConnectionProperty( attr.label, '', attr.Get() )
             else:
                 continue
@@ -334,7 +334,7 @@ class PropertiesPanel( wx.Panel ):
             if focusProp is not None:
                 focusProp.SetFocus( focusIndex )
             else:
-                print 'Missed focus'
+                print('Missed focus')
         
         # Set the scroll position back.
         self.pg.Scroll( x, y )

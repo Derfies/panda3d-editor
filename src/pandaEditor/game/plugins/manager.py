@@ -15,7 +15,7 @@ class Manager( object ):
             mod = __import__( fileName )
             cls = getattr( mod.gamePlugin, 'GamePlugin' )
             return cls( self.game )
-        except Exception, e:
+        except Exception:
             traceback.print_exc()
             return None
             
@@ -26,7 +26,7 @@ class Manager( object ):
         try:
             import userPlugins
         except ImportError:
-            print 'Failed to load plugins.'
+            print('Failed to load plugins.')
             return None
 
         return os.path.split( userPlugins.__file__ )[0]
@@ -41,7 +41,7 @@ class Manager( object ):
         if pluginsPath not in sys.path:
             sys.path.insert( 0, pluginsPath )
         
-        print 'Using plugins path: ', pluginsPath
+        print('Using plugins path: ', pluginsPath)
         
         # Load all plugins
         for fileName in os.listdir( pluginsPath ):

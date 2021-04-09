@@ -266,7 +266,7 @@ class """ + fileName + """( p3d ):
         # project
         tempDirPath = os.path.splitext( buildPath )[0]
         if os.path.exists( tempDirPath ):
-            print 'Already a directory named ', tempDirPath
+            print('Already a directory named ', tempDirPath)
             return False
                               
         # Copy the entire project to the temp location.

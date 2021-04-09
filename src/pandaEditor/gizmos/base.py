@@ -3,7 +3,7 @@ from pandac.PandaModules import Point3, Vec3, Plane, NodePath
 
 import p3d
 from p3d import commonUtils as utils
-from constants import *
+from .constants import *
 
 
 class Base( NodePath, p3d.SingleTask ):

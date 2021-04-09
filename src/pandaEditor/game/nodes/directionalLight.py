@@ -1,8 +1,8 @@
 import pandac.PandaModules as pm
 from pandac.PandaModules import DirectionalLight as DL
 
-from light import Light
-from attributes import NodeAttribute as Attr
+from .light import Light
+from .attributes import NodeAttribute as Attr
 
 
 class DirectionalLight( Light ):

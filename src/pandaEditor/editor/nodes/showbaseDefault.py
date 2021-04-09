@@ -1,4 +1,4 @@
-from constants import *
+from .constants import *
 from game.nodes.pandaNode import PandaNode
 from game.nodes.modelNode import ModelNode
 from game.nodes.camera import Camera

@@ -5,8 +5,8 @@ from pandac.PandaModules import CollisionSphere as CS
 from pandac.PandaModules import CollisionInvSphere  as CIS
 from pandac.PandaModules import CollisionTube as CT
 
-from base import Base
-from attributes import Attribute as Attr
+from .base import Base
+from .attributes import Attribute as Attr
 
 
 class CollisionBox( Base ):

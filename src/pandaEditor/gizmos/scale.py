@@ -4,9 +4,9 @@ from pandac.PandaModules import Mat4, Vec3, Point3, CollisionSphere, NodePath
 
 from p3d import commonUtils
 from p3d.geometry import Line, Box
-from axis import Axis
-from base import Base
-from constants import *
+from .axis import Axis
+from .base import Base
+from .constants import *
 
 
 class Scale( Base ):

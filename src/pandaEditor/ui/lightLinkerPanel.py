@@ -4,9 +4,9 @@ import wx.lib.agw.customtreectrl as ct
 import pandac.PandaModules as pm
 from pandac.PandaModules import NodePath as NP
 
-from .. import commands as cmds
+from pandaEditor import commands as cmds
 from game.nodes.attributes import Attribute as Attr
-from sceneGraphBasePanel import SceneGraphBasePanel
+from .sceneGraphBasePanel import SceneGraphBasePanel
 
 
 class LightLinkerPanel( wx.Panel ):

@@ -1,2 +1,2 @@
-from constants import *
+from .constants import *
 from gamePlugin import GamePlugin

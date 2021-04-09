@@ -1,6 +1,6 @@
 import pandac.PandaModules as pm
 
-from lensNode import LensNode
+from .lensNode import LensNode
 
 
 class Camera( LensNode ):

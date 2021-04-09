@@ -6,10 +6,10 @@ from pandac.PandaModules import NodePath as NP
 
 import p3d
 import utils
-from base import Base
-from constants import *
+from .base import Base
+from .constants import *
 from p3d import commonUtils as cUtils
-from attributes import NodePathAttribute as Attr
+from .attributes import NodePathAttribute as Attr
 from game.nodes.attributes import Connection as Cnnctn
 from game.nodes.attributes import NodePathTargetConnection as NPTCnnctn
 from game.nodes.attributes import ConnectionList as CnnctnList

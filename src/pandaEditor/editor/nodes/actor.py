@@ -2,7 +2,7 @@ import os
 
 import pandac.PandaModules as pm
 
-from constants import *
+from .constants import *
 from game.nodes.constants import *
 from game.nodes.actor import Actor as GameActor
 

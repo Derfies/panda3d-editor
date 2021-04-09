@@ -1,8 +1,8 @@
 import pandac.PandaModules as pm
 from panda3d.bullet import BulletPlaneShape as BPS
 
-from base import Base
-from attributes import Attribute as Attr
+from .base import Base
+from .attributes import Attribute as Attr
 
 
 class BulletPlaneShape( Base ):

@@ -1,6 +1,7 @@
 import wx
 
-import utils
+import wxExtra
+from wxExtra import utils
 
 
 class CustomAuiToolBar( wx.aui.AuiToolBar ):
@@ -11,7 +12,7 @@ class CustomAuiToolBar( wx.aui.AuiToolBar ):
     
     def AppendActionItem( self, actn ):
         wx.Log.SetLogLevel( 0 ) # Icon gives an sRGB error but still displays. This suppresses the error.
-        actnIcon = utils.ImgToBmp( actn.GetIconPath(), self.GetToolBitmapSize() )
+        actnIcon = wxExtra.utils.ImgToBmp( actn.GetIconPath(), self.GetToolBitmapSize() )
         self.AddTool( actn.GetId(), actn.GetText(), actnIcon, 
                       actn.GetHelpString(), actn.GetKind() )
         self.Bind( wx.EVT_TOOL, actn.GetCommand(), id=actn.GetId() )

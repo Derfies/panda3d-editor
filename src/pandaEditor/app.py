@@ -8,24 +8,27 @@ import pandac.PandaModules as pm
 import panda3d.core as pc
 
 import p3d
+from p3d.wxPanda import App as WxApp
 import wxExtra
-import ui
+#import ui
 import editor
 import gizmos
 import actions
 import commands as cmds
 from project import Project
-from showBase import ShowBase
+#from showBase import ShowBase
 from selection import Selection
 from assetManager import AssetManager
 from dragDropManager import DragDropManager
+from pandaEditor.ui.document import Document
     
 
-class App( p3d.wx.App ):
+class App:
     
     """Base editor class."""
     
-    def OnInit( self ):
+    def __init__(self, frame):
+        self.frame = frame
         self.gizmo = False
         self._xformTask = None
         
@@ -34,16 +37,18 @@ class App( p3d.wx.App ):
         
         # Build main frame, start Panda and replace the wx event loop with
         # Panda's.
-        self.frame = ui.MainFrame( None, size=(800, 600) )
-        self.sb = ShowBase( self.frame.pnlViewport )
-        self.ReplaceEventLoop()
-        self.frame.Show()
-        wx.CallAfter( self.FinishInit )
-        
-        return True
-    
+        #self.frame = ui.MainFrame( None, size=(800, 600) )
+        #self.sb = ShowBase( self.frame.pnlViewport )
+       # self.ReplaceEventLoop()
+        #self.frame.Show()
+        #wx.CallAfter( self.FinishInit )
+    #     self.FinishInit()
+    #
+    #     return True
+    #
     def FinishInit( self ):
-        base.FinishInit()
+        print('FINISH INIT')
+        #base.FinishInit()
         
         # Create project manager
         self.project = Project( self )
@@ -66,12 +71,12 @@ class App( p3d.wx.App ):
         self.SetupGizmoManager()
         
         # Bind mouse events
-        self.accept( 'mouse1', self.OnMouse1Down )
-        self.accept( 'shift-mouse1', self.OnMouse1Down, [True] )
-        self.accept( 'control-mouse1', self.OnMouse1Down )
-        self.accept( 'mouse2', self.OnMouse2Down )
-        self.accept( 'mouse1-up', self.OnMouse1Up )
-        self.accept( 'mouse2-up', self.OnMouse2Up )
+        base.accept( 'mouse1', self.OnMouse1Down )
+        base.accept( 'shift-mouse1', self.OnMouse1Down, [True] )
+        base.accept( 'control-mouse1', self.OnMouse1Down )
+        base.accept( 'mouse2', self.OnMouse2Down )
+        base.accept( 'mouse1-up', self.OnMouse1Up )
+        base.accept( 'mouse2-up', self.OnMouse2Up )
         
         # Create selection manager
         self.selection = Selection(
@@ -88,19 +93,19 @@ class App( p3d.wx.App ):
         self.actnMgr = actions.Manager()
         
         # Bind events
-        self.accept( 'z', self.Undo )
-        self.accept( 'shift-z', self.Redo )
-        self.accept( 'f', self.FrameSelection )
-        self.accept( 'del', lambda fn: cmds.Remove( fn() ), [self.selection.Get] )
-        self.accept( 'backspace', lambda fn: cmds.Remove( fn() ), [self.selection.Get] )
-        self.accept( 'control-d', lambda fn: cmds.Duplicate( fn() ), [self.selection.Get] )
-        self.accept( 'control-g', lambda fn: cmds.Group( fn() ), [self.selection.Get] )
-        self.accept( 'control-s', self.frame.OnFileSave, [None] )
-        self.accept( 'arrow_up', lambda fn: cmds.Select( fn() ), [self.selection.SelectParent] )
-        self.accept( 'arrow_down', lambda fn: cmds.Select( fn() ), [self.selection.SelectChild] )
-        self.accept( 'arrow_left', lambda fn: cmds.Select( fn() ), [self.selection.SelectPrev] )
-        self.accept( 'arrow_right', lambda fn: cmds.Select( fn() ), [self.selection.SelectNext] )
-        self.accept( 'projectFilesModified', self.OnProjectFilesModified )
+        base.accept( 'z', self.Undo )
+        base.accept( 'shift-z', self.Redo )
+        base.accept( 'f', self.FrameSelection )
+        base.accept( 'del', lambda fn: cmds.Remove( fn() ), [self.selection.Get] )
+        base.accept( 'backspace', lambda fn: cmds.Remove( fn() ), [self.selection.Get] )
+        base.accept( 'control-d', lambda fn: cmds.Duplicate( fn() ), [self.selection.Get] )
+        base.accept( 'control-g', lambda fn: cmds.Group( fn() ), [self.selection.Get] )
+        base.accept( 'control-s', self.frame.OnFileSave, [None] )
+        base.accept( 'arrow_up', lambda fn: cmds.Select( fn() ), [self.selection.SelectParent] )
+        base.accept( 'arrow_down', lambda fn: cmds.Select( fn() ), [self.selection.SelectChild] )
+        base.accept( 'arrow_left', lambda fn: cmds.Select( fn() ), [self.selection.SelectPrev] )
+        base.accept( 'arrow_right', lambda fn: cmds.Select( fn() ), [self.selection.SelectNext] )
+        base.accept( 'projectFilesModified', self.OnProjectFilesModified )
         
         # Create a "game"
         self.game = editor.Base()
@@ -143,13 +148,13 @@ class App( p3d.wx.App ):
         self.gizmoMgr.AddGizmo( gizmos.Scale( 'scl', **kwargs ) )
         
         # Bind gizmo manager events
-        self.accept( 'q', self.SetActiveGizmo, [None] )
-        self.accept( 'w', self.SetActiveGizmo, ['pos'] )
-        self.accept( 'e', self.SetActiveGizmo, ['rot'] )
-        self.accept( 'r', self.SetActiveGizmo, ['scl'] )
-        self.accept( 'space', self.ToggleGizmoLocal )
-        self.accept( '+', self.gizmoMgr.SetSize, [2] )
-        self.accept( '-', self.gizmoMgr.SetSize, [0.5] )
+        base.accept( 'q', self.SetActiveGizmo, [None] )
+        base.accept( 'w', self.SetActiveGizmo, ['pos'] )
+        base.accept( 'e', self.SetActiveGizmo, ['rot'] )
+        base.accept( 'r', self.SetActiveGizmo, ['scl'] )
+        base.accept( 'space', self.ToggleGizmoLocal )
+        base.accept( '+', self.gizmoMgr.SetSize, [2] )
+        base.accept( '-', self.gizmoMgr.SetSize, [0.5] )
         
     def SetActiveGizmo( self, name ):
         self.gizmoMgr.SetActiveGizmo( name )
@@ -286,7 +291,7 @@ class App( p3d.wx.App ):
         
         # Create the document wrapper if creating a new document
         if newDoc:
-            self.doc = ui.Document( filePath, self.scene )
+            self.doc = Document( filePath, self.scene )
         
     def AddComponent( self, typeStr, *args, **kwargs ):
         wrprCls = base.game.nodeMgr.GetWrapperByName( typeStr )

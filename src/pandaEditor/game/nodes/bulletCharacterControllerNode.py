@@ -2,8 +2,8 @@ from panda3d.bullet import ZUp
 from panda3d.bullet import BulletCapsuleShape as BCS
 from panda3d.bullet import BulletCharacterControllerNode as BCCN
 
-from nodePath import NodePath
-from attributes import NodeAttribute as Attr
+from .nodePath import NodePath
+from .attributes import NodeAttribute as Attr
 
 
 class BulletCharacterControllerNode( NodePath ):

@@ -20,7 +20,8 @@ class Camera( NodePath, p3d.SingleTask ):
         """Class representing the camera's point of interest."""
             
         def __init__( self, pos=Vec3( 0, 0, 0 ) ):
-            NodePath.__init__( self, 'target' )
+            #NodePath.__init__( self, 'target' )
+            super().__init__('target')
             
             self.defaultPos = pos
     
@@ -28,7 +29,6 @@ class Camera( NodePath, p3d.SingleTask ):
         pos = kwargs.pop( 'pos', (0, 0, 0) )
         targetPos = kwargs.pop( 'targetPos', (0, 0, 0) )
         style = kwargs.pop( 'style', CAM_DEFAULT_STYLE )
-        p3d.SingleTask.__init__( self, name, *args, **kwargs )
                       
         self.zoomLevel = 2
         self.defaultPos = pos
@@ -52,6 +52,7 @@ class Camera( NodePath, p3d.SingleTask ):
             
         # Wrap the camera in this node path class
         NodePath.__init__( self, self.cam )
+        p3d.SingleTask.__init__(self, name, *args, **kwargs)
         
         # Create camera styles
         if self.style & CAM_VIEWPORT_AXES:

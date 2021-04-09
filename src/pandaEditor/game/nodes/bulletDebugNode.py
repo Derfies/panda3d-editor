@@ -1,8 +1,8 @@
 import pandac.PandaModules as pm
 from panda3d.bullet import BulletDebugNode as BDN
 
-from nodePath import NodePath
-from attributes import NodePathAttribute as Attr
+from .nodePath import NodePath
+from .attributes import NodePathAttribute as Attr
 
 
 TAG_BULLET_DEBUG_WIREFRAME = 'P3D_BulletDebugWireframe'

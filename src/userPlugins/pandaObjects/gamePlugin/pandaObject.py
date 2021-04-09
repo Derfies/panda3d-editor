@@ -4,7 +4,7 @@ import inspect
 
 import p3d
 import game
-from constants import *
+from .constants import *
 from game.nodes.base import Base
 from game.nodes.attributes import Attribute as Attr
 

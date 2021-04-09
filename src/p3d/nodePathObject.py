@@ -16,7 +16,7 @@ class NodePathObject( object ):
             self.Attach( np )
         
     def __del__( self ):
-        print self.pyTagName, ' : ', self.np.getName(), ' DELETED'
+        print(self.pyTagName, ' : ', self.np.getName(), ' DELETED')
         
     def Attach( self, np ):
         self.np = np

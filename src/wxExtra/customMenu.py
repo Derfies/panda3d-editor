@@ -1,6 +1,6 @@
 import wx
 
-import utils
+from wxExtra import utils
 
 
 class CustomMenu( wx.Menu ):

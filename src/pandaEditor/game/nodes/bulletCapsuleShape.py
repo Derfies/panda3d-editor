@@ -1,8 +1,8 @@
 import pandac.PandaModules as pm
 from panda3d.bullet import BulletCapsuleShape as BCS, ZUp
 
-from base import Base
-from attributes import Attribute as Attr
+from .base import Base
+from .attributes import Attribute as Attr
 
 
 class BulletCapsuleShape( Base ):

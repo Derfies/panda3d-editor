@@ -69,7 +69,7 @@ def PopenAndCall( OnExit, printStdout, *popenArgs, **popenKWArgs ):
         proc = subprocess.Popen( *popenArgs, **popenKWArgs )
         proc.wait()
         if printStdout:
-            print proc.stdout.read()
+            print(proc.stdout.read())
         OnExit()
         return
 

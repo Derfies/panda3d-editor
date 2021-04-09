@@ -1,6 +1,6 @@
 from panda3d.bullet import BulletWorld as BW
 
-from base import Base
+from .base import Base
 from game.nodes.attributes import NodePathTargetConnection as Cnnctn
 
 

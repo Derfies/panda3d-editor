@@ -1,2 +1,2 @@
-from properties import *
-from connections import *
+from .properties import *
+from .connections import *

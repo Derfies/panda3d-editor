@@ -1,5 +1,5 @@
 import p3d
-from constants import *
+from .constants import *
 from game.plugins.base import Base
 
 

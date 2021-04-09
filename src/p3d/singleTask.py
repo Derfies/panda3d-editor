@@ -1,11 +1,11 @@
-from object import Object
+from .object import Object
 from direct.task import Task
 
 
-class SingleTask( Object ):
+class SingleTask(Object):
     
-    def __init__( self, name, *args, **kwargs ):
-        Object.__init__( self, *args, **kwargs )
+    def __init__(self, name, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         
         self.name = name
         self._task = None

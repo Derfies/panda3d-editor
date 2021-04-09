@@ -22,7 +22,7 @@ class PandaObject( object ):
         self.instances = {}
         
     def __del__( self ):
-        print TAG_PANDA_OBJECT, ' : ', self.np.getName(), ' DELETED'
+        print(TAG_PANDA_OBJECT, ' : ', self.np.getName(), ' DELETED')
         
     def AttachToNodePath( self, np ):
         self.np = np

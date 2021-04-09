@@ -1,5 +1,5 @@
-from singleTask import SingleTask
-from pandaManager import PandaManager as pMgr
+from .singleTask import SingleTask
+from .pandaManager import PandaManager as pMgr
 
 
 class PandaBehaviour( SingleTask ):
@@ -15,7 +15,7 @@ class PandaBehaviour( SingleTask ):
         self.accept( pMgr.PANDA_BEHAVIOUR_DEL, self.Del )
         
     def __del__( self ):
-        print '  PandaBehaviour: ', self.name, ' DELETED'
+        print('  PandaBehaviour: ', self.name, ' DELETED')
         
     def OnInit( self ):
         pass

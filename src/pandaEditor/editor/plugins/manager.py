@@ -15,7 +15,7 @@ class Manager( game.plugins.Manager ):
         try:
             cls = getattr( temp.editorPlugin, 'EditorPlugin' )
             return cls( self.game )
-        except Exception, e:
+        except Exception:
             return game.plugins.Manager.LoadPlugin( self, fileName )
             #traceback.print_exc()
         #return cls( self.game )

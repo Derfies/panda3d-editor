@@ -6,7 +6,7 @@ import pandac.PandaModules as pm
 
 import p3d
 import game
-from constants import *
+from .constants import *
 from game.nodes.constants import *
 #from editor.nodes.constants import *
 from game.nodes.nodePath import NodePath

@@ -12,7 +12,7 @@ class EditorCamera( p3d.Camera ):
         kwargs['pos'] = kwargs.pop( 'pos', (-250, -250, 200) )
         kwargs['style'] = kwargs.pop( 'style', p3d.CAM_USE_DEFAULT |
                                                p3d.CAM_VIEWPORT_AXES )
-        p3d.Camera.__init__( self, *args, **kwargs )
+        super().__init__(*args, **kwargs )
         
         # Create mouse
         base.disableMouse()

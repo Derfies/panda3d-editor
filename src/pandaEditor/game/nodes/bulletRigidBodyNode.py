@@ -1,8 +1,8 @@
 import pandac.PandaModules as pm
 from panda3d.bullet import BulletRigidBodyNode as BRBN, BulletShape as BS
 
-from nodePath import NodePath
-from attributes import NodeAttribute as Attr
+from .nodePath import NodePath
+from .attributes import NodeAttribute as Attr
 from game.nodes.attributes import NodePathSourceConnectionList as Cnnctn
 
 

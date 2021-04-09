@@ -6,9 +6,9 @@ from pandac.PandaModules import BillboardEffect
 
 from p3d import commonUtils
 from p3d.geometry import Arc, Line
-from axis import Axis
-from base import Base
-from constants import *
+from .axis import Axis
+from .base import Base
+from .constants import *
 
 
 class Rotation( Base ):

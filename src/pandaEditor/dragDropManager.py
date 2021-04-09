@@ -54,7 +54,7 @@ class DragDropManager( object ):
                 ext = os.path.splitext( filePath )[1]
                 #print 'in: ',  ext in self.fileTypes
                 return ext in self.fileTypes
-            except Exception, e:
+            except Exception:
                 pass
                 #print e
                 #return False
@@ -112,7 +112,7 @@ class DragDropManager( object ):
         
         theTex = None
         if pm.TexturePool.hasTexture( pandaPath ):
-            print 'found in pool'
+            print('found in pool')
             for tex in pm.TexturePool.findAllTextures():
                 if tex.getFilename() == pandaPath:
                     theTex = tex
@@ -120,16 +120,16 @@ class DragDropManager( object ):
         # Try to find it in the scene.
         #for foo in base.scene.comps.keys():
         #    print type( foo ) , ' : ', foo
-        print theTex
+        print(theTex)
         if theTex is not None and theTex in base.scene.comps.keys():
-            print 'found in scene'
+            print('found in scene')
             if np is not None:
                 npWrpr = base.game.nodeMgr.Wrap( np )
                 npWrpr.FindProperty( 'texture' ).Set( theTex )
                 
         else:
             
-            print 'creating new'
+            print('creating new')
             wrpr = self.AddComponent( 'Texture' )
             #wrpr = base.game.nodeMgr.Wrap( loader.loadTexture( pandaPath ) )
             #wrpr.SetDefaultValues()

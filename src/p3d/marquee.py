@@ -12,14 +12,15 @@ class Marquee( NodePath, p3d.SingleTask ):
     
     def __init__( self, *args, **kwargs ):
         colour = kwargs.pop( 'colour', (1, 1, 1, .2) )
-        p3d.SingleTask.__init__( self, *args, **kwargs )
+
 
         # Create a card maker
-        cm = CardMaker( self.name )
+        cm = CardMaker( 'foo' )
         cm.setFrame( 0, 1, 0, 1 )
         
         # Init the node path, wrapping the card maker to make a rectangle
         NodePath.__init__( self, cm.generate() )
+        p3d.SingleTask.__init__(self, *args, **kwargs)
         self.setColor( colour )
         self.setTransparency( 1 )
         self.reparentTo( self.root2d )

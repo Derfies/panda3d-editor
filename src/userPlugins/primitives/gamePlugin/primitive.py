@@ -2,7 +2,7 @@ import copy
 
 import p3d
 
-from constants import *
+from .constants import *
 from game.nodes.nodePath import NodePath
 
 

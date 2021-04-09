@@ -1,8 +1,8 @@
 import pandac.PandaModules as pm
 from pandac.PandaModules import TextureStage as TS
 
-from base import Base
-from attributes import Attribute as Attr
+from .base import Base
+from .attributes import Attribute as Attr
 
 
 class TextureStage( Base ):

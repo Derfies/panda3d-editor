@@ -1,8 +1,8 @@
 import panda3d.core as pc
 from pandac.PandaModules import Texture as T
 
-from base import Base
-from attributes import Attribute as Attr
+from .base import Base
+from .attributes import Attribute as Attr
 
 
 class Texture( Base ):

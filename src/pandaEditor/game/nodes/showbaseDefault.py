@@ -1,6 +1,6 @@
-from nodePath import NodePath
-from camera import Camera
-from modelNode import ModelNode
+from .nodePath import NodePath
+from .camera import Camera
+from .modelNode import ModelNode
 
 
 class Render( NodePath ):

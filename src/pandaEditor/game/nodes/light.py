@@ -1,8 +1,8 @@
 import pandac.PandaModules as pm
 from pandac.PandaModules import Light as L
 
-from nodePath import NodePath
-from attributes import NodeAttribute as Attr
+from .nodePath import NodePath
+from .attributes import NodeAttribute as Attr
 
 
 class Light( NodePath ):

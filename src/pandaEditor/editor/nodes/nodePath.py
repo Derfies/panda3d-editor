@@ -4,7 +4,7 @@ import pandac.PandaModules as pm
 from pandac.PandaModules import NodePath as NP
 from direct.directtools.DirectSelection import DirectBoundingBox
 
-from constants import *
+from .constants import *
 from game.nodes.constants import *
 from pandaEditor import commands as cmds
 from game.nodes.nodePath import NodePath as GameNodePath

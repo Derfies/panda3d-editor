@@ -1,8 +1,8 @@
 import pandac.PandaModules as pm
 from pandac.PandaModules import Lens
 
-from nodePath import NodePath
-from attributes import Attribute as Attr
+from .nodePath import NodePath
+from .attributes import Attribute as Attr
 
 
 class LensNode( NodePath ):

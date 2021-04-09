@@ -1,13 +1,13 @@
 import wx
 
-import p3d
-from customDropTarget import CustomDropTarget
+from p3d.wxPanda import Viewport as WxViewport
+from .customDropTarget import CustomDropTarget
 
 
-class Viewport( p3d.wx.Viewport ):
+class Viewport( WxViewport ):
     
     def __init__( self, *args, **kwargs ):
-        p3d.wx.Viewport.__init__( self, *args, **kwargs )
+        WxViewport.__init__( self, *args, **kwargs )
         
         self.app = wx.GetApp()
         

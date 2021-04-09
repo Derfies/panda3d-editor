@@ -91,8 +91,8 @@ class DirTreeCtrl( wx.TreeCtrl ):
             if os.path.exists( filepath ):
                 key = self.imagelist.Add( wx.Bitmap( filepath, wxBitmapType ) )
                 self.iconentries[name] = key
-        except Exception, e:
-            print e
+        except Exception:
+            print(e)
         
     def SetDeleteOnCollapse( self, selection ):
         """
@@ -237,8 +237,7 @@ class DirTreeCtrl( wx.TreeCtrl ):
                 if icon.IsOk():
                     return self.imagelist.AddIcon(icon)
 
-            except Exception, e:
-                print e
+            except Exception:
                 return self.iconentries['default']
 
         # if no key returned already, return default

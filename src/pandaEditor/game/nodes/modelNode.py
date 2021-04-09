@@ -1,6 +1,6 @@
 import pandac.PandaModules as pm
 
-from nodePath import NodePath
+from .nodePath import NodePath
 
 
 class ModelNode( NodePath ):

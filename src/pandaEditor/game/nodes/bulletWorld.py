@@ -4,8 +4,8 @@ from panda3d.bullet import BulletDebugNode as BDN
 from panda3d.bullet import BulletRigidBodyNode as BRBN
 from panda3d.bullet import BulletCharacterControllerNode as BCCN
 
-from base import Base
-from attributes import Attribute as Attr
+from .base import Base
+from .attributes import Attribute as Attr
 from game.nodes.attributes import NodePathTargetConnection as Cnnctn
 from game.nodes.attributes import NodePathTargetConnectionList as CnnctnList
 

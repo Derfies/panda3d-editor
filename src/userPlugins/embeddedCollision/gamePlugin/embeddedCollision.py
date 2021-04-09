@@ -2,7 +2,7 @@ import pandac.PandaModules as pm
 
 from p3d import commonUtils as utils
 import game
-from constants import *
+from .constants import *
 from game.nodes.nodePath import NodePath
 from game.nodes.collisionNode import CollisionNode
 

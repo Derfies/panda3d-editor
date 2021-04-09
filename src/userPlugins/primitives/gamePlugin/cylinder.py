@@ -2,7 +2,7 @@ import pandac.PandaModules as pm
 
 import p3d
 import game
-from constants import *
+from .constants import *
 from primitive import Primitive, PrimitiveNPO
 from game.nodes.attributes import NodePathObjectAttribute as NPOAttr
 

@@ -28,10 +28,10 @@ class AssetManager( object ):
             # Test if the file path represents an asset in one of Panda's
             # asset pools.
             if pm.TexturePool.hasTexture( pandaPath ):
-                print 'Reloading texture: ', pandaPath
+                print('Reloading texture: ', pandaPath)
                 self.ReloadTexture( pandaPath )
             elif pm.ModelPool.hasModel( pandaPath ):
-                print 'Reloading model: ', pandaPath
+                print('Reloading model: ', pandaPath)
                 self.ReloadModel( pandaPath )
             #elif pm.ShaderPool.hasShader( pandaPath ):
             #    print 'Reloading shader: ', pandaPath

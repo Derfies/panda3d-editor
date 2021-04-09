@@ -1,6 +1,6 @@
 import game
-import plugins
-from sceneParser import SceneParser
+from . import plugins
+from .sceneParser import SceneParser
 
 
 class Base( game.Base ):

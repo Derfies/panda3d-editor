@@ -1,33 +1,37 @@
 import pandac.PandaModules as pm
-from direct.showbase import ShowBase as P3dShowBase
+from direct.showbase.ShowBase import ShowBase
 
 import p3d
+from pandaEditor.ui.mainFrame import MainFrame
 
 
-class ShowBase( P3dShowBase.ShowBase ):
+class App(ShowBase):
     
-    def __init__( self, wxWin, *args, **kwargs ):
-        P3dShowBase.ShowBase.__init__( self, *args, **kwargs )
-        
-        self.wxWin = wxWin
-        
-    def FinishInit( self ):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.startWx()
+        self.frame = MainFrame(None, size=(800, 600))
+        self.frame.Show()
+        self.frame.pnlViewport.Initialize()
+
         self.SetupEdRender()
         self.SetupEdRender2d()
-        self.SetupEdWindow()
         self.SetupEdMouseWatcher()
         self.SetupEdCamera()
-        
+
         # Make additional camera for 2d nodes
         cam2d = self.makeCamera2d( self.win )
         cam2d.reparentTo( self.edRender2d )
-        
+
         # Add the editor window, camera and pixel 2d to the list of forced
         # aspect windows so aspect is fixed when the window is resized.
         self.forcedAspectWins = []
         self.forcedAspectWins.append( (self.win, self.edCamera, self.edPixel2d) )
-        
+
         self.Reset()
+
+        self.frame.app.FinishInit()
         
     def SetupEdRender( self ):
         """
@@ -60,9 +64,6 @@ class ShowBase( P3dShowBase.ShowBase ):
         self.edPixel2d.setPos( -1, 0, 1 )
         if xsize > 0 and ysize > 0:
             self.edPixel2d.setScale( 2.0 / xsize, 1.0, 2.0 / ysize )
-            
-    def SetupEdWindow( self ):
-        self.wxWin.Initialize()
         
     def SetupEdMouseWatcher( self ):
         
@@ -105,23 +106,23 @@ class ShowBase( P3dShowBase.ShowBase ):
         self.edDr.setClearColorActive( True )
         self.edDr.setClearColor( (0.63, 0.63, 0.63, 0) )
         
-    def windowEvent( self, *args, **kwargs ):
-        """
-        Overridden so as to fix the aspect ratio of the editor camera and
-        editor pixel2d.
-        """
-        P3dShowBase.ShowBase.windowEvent( self, *args, **kwargs )
-        
-        for win, cam, pixel2d in self.forcedAspectWins:
-            aspectRatio = self.getAspectRatio( win )
-            cam.node().getLens().setAspectRatio( aspectRatio )
-            
-            # Fix pixel2d scale for new window size
-            # Temporary hasattr for old Pandas
-            if not hasattr( win, 'getSbsLeftXSize' ):
-                pixel2d.setScale( 2.0 / win.getXSize(), 1.0, 2.0 / win.getYSize() )
-            else:
-                pixel2d.setScale( 2.0 / win.getSbsLeftXSize(), 1.0, 2.0 / win.getSbsLeftYSize() )
+    # def windowEvent(self, *args, **kwargs):
+    #     """
+    #     Overridden so as to fix the aspect ratio of the editor camera and
+    #     editor pixel2d.
+    #     """
+    #     super().windowEvent(*args, **kwargs)
+    #
+    #     for win, cam, pixel2d in self.forcedAspectWins:
+    #         aspectRatio = self.getAspectRatio( win )
+    #         cam.node().getLens().setAspectRatio( aspectRatio )
+    #
+    #         # Fix pixel2d scale for new window size
+    #         # Temporary hasattr for old Pandas
+    #         if not hasattr( win, 'getSbsLeftXSize' ):
+    #             pixel2d.setScale( 2.0 / win.getXSize(), 1.0, 2.0 / win.getYSize() )
+    #         else:
+    #             pixel2d.setScale( 2.0 / win.getSbsLeftXSize(), 1.0, 2.0 / win.getSbsLeftYSize() )
             
     def GetEditorRenderMasks( self ):
         """

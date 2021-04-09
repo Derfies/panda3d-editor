@@ -1,6 +1,6 @@
 import pandac.PandaModules as pm
 
-from constants import *
+from .constants import *
 from game.nodes.lensNode import LensNode as GameLensNode
 from game.nodes.attributes import NodePathAttribute as Attr
 

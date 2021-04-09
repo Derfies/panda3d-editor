@@ -1,4 +1,4 @@
-from functions import *
+from .functions import *
 
-from directoryWatcher import DirectoryWatcher
-from singleton import Singleton
+from .directoryWatcher import DirectoryWatcher
+from .singleton import Singleton

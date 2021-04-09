@@ -8,19 +8,20 @@ import pandac.PandaModules as pm
 from direct.actor.Actor import Actor
 
 import p3d
-from .. import commands as cmds
+from pandaEditor import commands as cmds
 from wxExtra import utils as wxUtils, ActionItem, LogPanel, CustomMenu
 from wxExtra import AuiManagerConfig, CustomAuiToolBar, CustomMenu
-from viewport import Viewport
+from .viewport import Viewport
+from pandaEditor.app import App as OldApp
 from pandaEditor import game
-from document import Document
-from baseDialog import BaseDialog
-from resourcesPanel import ResourcesPanel
-from propertiesPanel import PropertiesPanel
-from sceneGraphPanel import SceneGraphPanel
-from preferencesFrame import PreferencesFrame
-from lightLinkerPanel import LightLinkerPanel
-from projectSettingsPanel import ProjectSettingsPanel
+from .document import Document
+from .baseDialog import BaseDialog
+from .resourcesPanel import ResourcesPanel
+from .propertiesPanel import PropertiesPanel
+from .sceneGraphPanel import SceneGraphPanel
+from .preferencesFrame import PreferencesFrame
+from .lightLinkerPanel import LightLinkerPanel
+from .projectSettingsPanel import ProjectSettingsPanel
 
 
 FRAME_TITLE = 'Panda Editor 0.1'
@@ -91,23 +92,23 @@ class MainFrame( wx.Frame ):
 
     def __init__( self, *args, **kwargs ):
         wx.Frame.__init__( self, *args, **kwargs )
-        
-        self.app = wx.GetApp()
+
+        self.app = OldApp(self)
         self.preMaxPos = None
         self.preMaxSize = None
         self.actns = {
-            ID_EDIT_UNDO:self.app.Undo,
-            ID_EDIT_REDO:self.app.Redo,
-            ID_EDIT_GROUP:self.app.Group,
-            ID_EDIT_UNGROUP:self.app.Ungroup,
-            ID_EDIT_PARENT:self.app.Parent,
-            ID_EDIT_UNPARENT:self.app.Unparent
+            ID_EDIT_UNDO: self.app.Undo,
+            ID_EDIT_REDO: self.app.Redo,
+            ID_EDIT_GROUP: self.app.Group,
+            ID_EDIT_UNGROUP: self.app.Ungroup,
+            ID_EDIT_PARENT: self.app.Parent,
+            ID_EDIT_UNPARENT: self.app.Unparent
         }
         
         # Bind frame events
         self.Bind( wx.EVT_CLOSE, self.OnClose )
-        self.Bind( wx.EVT_KEY_UP, p3d.wx.OnKeyUp )
-        self.Bind( wx.EVT_KEY_DOWN, p3d.wx.OnKeyDown )
+        self.Bind( wx.EVT_KEY_UP, p3d.wxPanda.OnKeyUp )
+        self.Bind( wx.EVT_KEY_DOWN, p3d.wxPanda.OnKeyDown )
         self.Bind( wx.EVT_SIZE, self.OnSize )
         self.Bind( wx.EVT_MOVE, self.OnMove )
         
@@ -151,6 +152,8 @@ class MainFrame( wx.Frame ):
         
         # Update the view menu based on the perspective saved in preferences
         self.OnUpdateWindowMenu( None )
+
+
         
     def _GetSavePath( self ):
                 
@@ -323,7 +326,7 @@ class MainFrame( wx.Frame ):
         """
         Show or hide the grid based on the checked value of the menu item.
         """
-        checked = evt.Checked()
+        checked = evt.IsChecked()
         if checked:
             self.app.grid.show()
         else:

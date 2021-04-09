@@ -2,7 +2,7 @@ import pandac.PandaModules as pm
 
 import p3d
 import game
-import nodes
+from . import nodes
 
 
 class Scene( game.Scene ):

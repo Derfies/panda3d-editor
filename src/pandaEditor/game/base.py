@@ -1,7 +1,7 @@
-import nodes
-import plugins
-from scene import Scene
-from sceneParser import SceneParser
+from . import nodes
+from . import plugins
+from .scene import Scene
+from .sceneParser import SceneParser
 
 
 class Base( object ):
@@ -13,7 +13,8 @@ class Base( object ):
         self.scnParser = SceneParser()
         
     def OnInit( self ):
-        self.pluginMgr.Load()
+        pass
+        #self.pluginMgr.Load()
         
     def Load( self, filePath ):
         self.scene = Scene( self, filePath=filePath, camera=None )
