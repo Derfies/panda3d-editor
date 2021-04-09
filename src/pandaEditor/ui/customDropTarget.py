@@ -1,13 +1,15 @@
 import wx
 
 
-class CustomDropTarget( wx.PyDropTarget ):
+class CustomDropTarget(wx.TextDropTarget):
     
-    def __init__( self, formatNames, parent=None ):
-        wx.PyDropTarget.__init__( self )
+    def __init__(self, formatNames, parent=None):
+        super().__init__()
         
-        self.app = wx.GetApp()
+        self.app = parent.app
         self.parent = parent
+
+        print('jere')
 
         # Specify the type of data we will accept
         self.doc = wx.DataObjectComposite()
@@ -17,11 +19,16 @@ class CustomDropTarget( wx.PyDropTarget ):
             self.formats[formatName] = do
             self.doc.Add( do )
         self.SetDataObject( self.doc )
+
+    def OnDropText(self, x, y, data):
+        print('ver')
         
-    def OnDragOver( self, x, y, d ):
+    def OnDragOver(self, x, y, d):
+
+        print(x, y, d)
         
         # Return x.DragNone if the validation fails
-        if not self.app.dDropMgr.ValidateDropItem( x, y, self.parent ):
+        if not self.app.dDropMgr.ValidateDropItem(x, y, self.parent):
             return wx.DragNone
         else:
             return d

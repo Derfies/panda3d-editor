@@ -4,15 +4,16 @@ import wx
 from wx.lib.pubsub import pub
 
 import p3d
+from p3d import wxPanda
 from wxExtra import DirTreeCtrl, utils as wxUtils
 
 
-class ResourcesPanel( wx.Panel ):
+class ResourcesPanel(wx.Panel):
     
-    def __init__( self, *args, **kwargs ):
-        wx.Panel.__init__( self, *args, **kwargs )
-        
-        self.app = wx.GetApp()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.app = self.GetParent().app
         
         # Bind project file events
         pub.subscribe( self.OnUpdate, 'projectFilesAdded' )
@@ -38,9 +39,9 @@ class ResourcesPanel( wx.Panel ):
             self.bs1.Add( self.dtc, 1, wx.EXPAND )
             
             # Bind tree control events
-            self.dtc.Bind( wx.EVT_KEY_UP, p3d.wx.OnKeyUp )
-            self.dtc.Bind( wx.EVT_KEY_DOWN, p3d.wx.OnKeyDown )
-            self.dtc.Bind( wx.EVT_LEFT_UP, p3d.wx.OnLeftUp )
+            self.dtc.Bind( wx.EVT_KEY_UP, wxPanda.OnKeyUp )
+            self.dtc.Bind( wx.EVT_KEY_DOWN, wxPanda.OnKeyDown )
+            self.dtc.Bind( wx.EVT_LEFT_UP, wxPanda.OnLeftUp )
             self.dtc.Bind( wx.EVT_RIGHT_DOWN, self.OnRightDown )
             self.dtc.Bind( wx.EVT_RIGHT_UP, self.OnRightUp )
             self.dtc.Bind( wx.EVT_MIDDLE_DOWN, self.OnMiddleDown )

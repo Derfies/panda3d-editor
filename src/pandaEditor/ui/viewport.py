@@ -4,15 +4,15 @@ from p3d.wxPanda import Viewport as WxViewport
 from .customDropTarget import CustomDropTarget
 
 
-class Viewport( WxViewport ):
+class Viewport(WxViewport):
     
-    def __init__( self, *args, **kwargs ):
-        WxViewport.__init__( self, *args, **kwargs )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         
-        self.app = wx.GetApp()
+        self.app = self.GetParent().app
         
-        self.dt = CustomDropTarget( ['filePath', 'nodePath'], self )
-        self.SetDropTarget( self.dt )
+        self.dt = CustomDropTarget(['filePath', 'nodePath'], self)
+        self.SetDropTarget(self.dt)
         
     def ScreenToViewport( self, x, y ):
         x = ( x / float( self.GetSize()[0] )- 0.5 ) * 2

@@ -6,16 +6,16 @@ from pandac.PandaModules import WindowProperties
 
 
 keyCodes = {
-    wx.WXK_SPACE:'space',
-    wx.WXK_DELETE:'del',
-    wx.WXK_ESCAPE:'escape',
-    wx.WXK_BACK:'backspace',
-    wx.WXK_CONTROL:'control',
-    wx.WXK_ALT:'alt',
-    wx.WXK_UP:'arrow_up',
-    wx.WXK_DOWN:'arrow_down',
-    wx.WXK_LEFT:'arrow_left',
-    wx.WXK_RIGHT:'arrow_right'
+    wx.WXK_SPACE: 'space',
+    wx.WXK_DELETE: 'del',
+    wx.WXK_ESCAPE: 'escape',
+    wx.WXK_BACK: 'backspace',
+    wx.WXK_CONTROL: 'control',
+    wx.WXK_ALT: 'alt',
+    wx.WXK_UP: 'arrow_up',
+    wx.WXK_DOWN: 'arrow_down',
+    wx.WXK_LEFT: 'arrow_left',
+    wx.WXK_RIGHT: 'arrow_right'
 }
 
 

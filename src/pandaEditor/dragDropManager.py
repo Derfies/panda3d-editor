@@ -13,39 +13,46 @@ class DragDropManager( object ):
         
         # Define file types and their actions.
         self.fileTypes = {
-            '.egg':self.AddModel,
-            '.bam':self.AddModel,
-            '.pz':self.AddModel,
-            '.sha':self.AddShader#,
+            '.egg': self.AddModel,
+            '.bam': self.AddModel,
+            '.pz': self.AddModel,
+            '.sha': self.AddShader#,
             #'.png':self.app.AddTexture,
             #'.tga':self.app.AddTexture,
             #'.jpg':self.app.AddTexture
         }
         
-    def DoFileDrop( self, filePath, np ):
-        ext = os.path.splitext( filePath )[1]
+    def DoFileDrop(self, filePath, np):
+        print('DoFileDrop')
+        ext = os.path.splitext(filePath)[1]
         if ext in self.fileTypes:
             fn = self.fileTypes[ext]
-            fn( filePath, np )
+            fn(filePath, np)
         
-    def Start( self, src, dragComps, data ):
+    def Start(self, src, dragComps, data):
+        print('Start')
         self.dragComps = dragComps
         #self.src = src
         
         # Create a custom data object that we can drop onto the toolbar
         # which contains the tool's id as a string
-        do = wx.CustomDataObject( 'NodePath' )
-        do.SetData( str( data ) )
+        #do = wx.CustomDataObject('NodePath')
+        do = wx.TextDataObject('NodePath')
+        # print('data:', data)
+        # print('str data:', str( data ))
+        #do.SetData( str( data ) )
+        do.SetText(data)
         
         # Create the drop source and begin the drag and drop operation
         ds = wx.DropSource( src )
         ds.SetData( do )
-        ds.DoDragDrop( wx.Drag_AllowMove )
+        ds.DoDragDrop(True)# wx.Drag_AllowMove )
         
         # Clear drag node paths
         self.dragComps = []
         
     def ValidateDropItem( self, x, y, parent ):
+        print('ValidateDropItem:')
         dropComp = parent.GetDroppedObject( x, y )
         #if dropComp is None:
         if len( self.dragComps ) == 1:
@@ -67,6 +74,7 @@ class DragDropManager( object ):
             return wrpr.GetPossibleConnections( self.dragComps )
             
     def OnDropItem( self, str, parent, x, y ):
+        print('drop')
         
         # Get the item at the drop point
         dropComp = parent.GetDroppedObject( x, y )
@@ -99,8 +107,9 @@ class DragDropManager( object ):
         cnnctn = self.data[evt.GetId()]
         cmds.Connect( dragComps, cnnctn, cnnctn.Connect )
             
-    def AddModel( self, filePath, np=None ):
-        self.app.AddComponent( 'ModelRoot', modelPath=filePath )
+    def AddModel(self, filePath, np=None):
+        print('add model')
+        self.app.AddComponent('ModelRoot', modelPath=filePath)
         
     def AddShader( self, filePath, np=None ):
         wrpr = base.game.nodeMgr.Wrap( np )

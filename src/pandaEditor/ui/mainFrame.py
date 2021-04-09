@@ -152,8 +152,6 @@ class MainFrame( wx.Frame ):
         
         # Update the view menu based on the perspective saved in preferences
         self.OnUpdateWindowMenu( None )
-
-
         
     def _GetSavePath( self ):
                 
@@ -212,7 +210,14 @@ class MainFrame( wx.Frame ):
         if self.app.project.path is not None:
             self.cfg.Write( 'projDirPath', self.app.project.path )
         self.Show( False )
-        self.app.Quit()
+        #self.app.Quit()
+
+        #self.onDestroy(event)
+        try:
+            base
+        except NameError:
+            sys.exit()
+        base.userExit()
         
     def OnFileNew( self, evt ):
         """Show project settings panel and create new scene."""
@@ -272,8 +277,11 @@ class MainFrame( wx.Frame ):
         
     def OnFileImport( self, evt ):
         """Import assets to project."""
-        filePaths = wxUtils.FileOpenDialog( 'Import Models', WILDCARD_MODEL, 
-                                            wx.MULTIPLE )
+        filePaths = wxUtils.FileOpenDialog(
+            'Import Models',
+            WILDCARD_MODEL,
+            wx.FD_MULTIPLE
+        )
         if filePaths:
             for filePath in filePaths:
                 self.app.project.ImportAsset( filePath )

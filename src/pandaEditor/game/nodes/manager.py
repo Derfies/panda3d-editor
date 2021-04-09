@@ -50,8 +50,6 @@ class Manager( object ):
         # this class is instantiated - not when the module is imported - so
         # the editor classes are loaded beforehand.
         for modName in WRAPPER_MODULE_NAMES:
-            print('modName:', modName)
-            #mod = __import__( modName, globals() )
             mod = import_module('pandaEditor.game.nodes.' + modName)
             for mem in inspect.getmembers( mod, inspect.isclass ):
                 cls = mem[1]

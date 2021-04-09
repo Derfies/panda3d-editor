@@ -10,7 +10,7 @@ def FileDialog( message, wildcard, style, defaultDir=os.getcwd(), defaultFile=''
     """
     dlg = wx.FileDialog( wx.GetApp().GetTopWindow(), message, defaultDir, defaultFile, wildcard, style )
     if dlg.ShowModal() == wx.ID_OK:
-        if style & wx.MULTIPLE:
+        if style & wx.FD_MULTIPLE:
             result = dlg.GetPaths()
         else:
             result = dlg.GetPath()
@@ -21,15 +21,15 @@ def FileDialog( message, wildcard, style, defaultDir=os.getcwd(), defaultFile=''
     return result
     
 
-def FileOpenDialog( message, wildcard, style=0, defaultDir=os.getcwd(), defaultFile='' ):
+def FileOpenDialog(message, wildcard, style=0, defaultDir=os.getcwd(), defaultFile=''):
     """Generic file open dialog."""
-    style = style | wx.OPEN | wx.CHANGE_DIR
-    return FileDialog( message, wildcard, style, defaultDir, defaultFile )
+    style = style | wx.FD_OPEN | wx.FD_CHANGE_DIR
+    return FileDialog(message, wildcard, style, defaultDir, defaultFile)
     
 
 def FileSaveDialog( message, wildcard, style=0, defaultDir=os.getcwd(), defaultFile='' ):
     """Generic file save dialog."""
-    style = style | wx.SAVE | wx.CHANGE_DIR
+    style = style | wx.FD_SAVE | wx.FD_CHANGE_DIR
     return FileDialog( message, wildcard, style, defaultDir, defaultFile )
     
 

@@ -25,7 +25,12 @@ from pandaEditor.ui.document import Document
 
 class App:
     
-    """Base editor class."""
+    """
+    Base editor class.
+
+    TODO: Deprecate this class. Probably just add it to showbase.
+
+    """
     
     def __init__(self, frame):
         self.frame = frame
@@ -34,21 +39,8 @@ class App:
         
         # Bind publisher events
         pub.subscribe( self.OnUpdate, 'Update' )
-        
-        # Build main frame, start Panda and replace the wx event loop with
-        # Panda's.
-        #self.frame = ui.MainFrame( None, size=(800, 600) )
-        #self.sb = ShowBase( self.frame.pnlViewport )
-       # self.ReplaceEventLoop()
-        #self.frame.Show()
-        #wx.CallAfter( self.FinishInit )
-    #     self.FinishInit()
-    #
-    #     return True
-    #
+
     def FinishInit( self ):
-        print('FINISH INIT')
-        #base.FinishInit()
         
         # Create project manager
         self.project = Project( self )
@@ -114,6 +106,8 @@ class App:
         # Start with a new scene
         self.CreateScene()
         self.doc.OnRefresh()
+
+        print('FINISIED')
         
         return True
     
@@ -296,6 +290,8 @@ class App:
     def AddComponent( self, typeStr, *args, **kwargs ):
         wrprCls = base.game.nodeMgr.GetWrapperByName( typeStr )
         wrpr = wrprCls.Create( *args, **kwargs )
+        print('wrprCls:', wrprCls)
+        print('wrpr:', wrpr)
         wrpr.SetDefaultValues()
         wrpr.SetParent( wrpr.GetDefaultParent() )
         
