@@ -1,7 +1,10 @@
 import panda3d.core as pm
 from panda3d.core import Lens
 
-from .nodePath import NodePath
+try:
+    from pandaEditor.editor.nodes.nodePath import NodePath
+except ImportError:
+    from pandaEditor.game.nodes.nodePath import NodePath
 from .attributes import Attribute as Attr
 
 

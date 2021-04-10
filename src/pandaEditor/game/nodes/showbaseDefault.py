@@ -1,87 +1,90 @@
-from .nodePath import NodePath
+try:
+    from pandaEditor.editor.nodes.nodePath import NodePath
+except ImportError:
+    from pandaEditor.game.nodes.nodePath import NodePath
 from .camera import Camera
 from .modelNode import ModelNode
 
 
-class Render( NodePath ):
+class Render(NodePath):
     
     @classmethod
-    def Create( cls, *args, **kwargs ):
-        wrpr = cls( base.render )
+    def Create(cls, *args, **kwargs):
+        wrpr = cls(base.render)
         wrpr.SetupNodePath()
         return wrpr
     
-    def SetParent( self, pComp ):
+    def SetParent(self, pComp):
         
         # Render is a default Panda NodePath which shouldn't be parented to
         # anything.
         pass
     
 
-class BaseCamera( ModelNode ):
+class BaseCamera(ModelNode):
     
     @classmethod
-    def Create( cls, *args, **kwargs ):
-        wrpr = cls( base.camera )
+    def Create(cls, *args, **kwargs):
+        wrpr = cls(base.camera)
         wrpr.SetupNodePath()
         return wrpr
     
 
-class BaseCam( Camera ):
+class BaseCam(Camera):
     
     @classmethod
-    def Create( cls, *args, **kwargs ):
-        wrpr = cls( base.cam )
+    def Create(cls, *args, **kwargs):
+        wrpr = cls(base.cam)
         wrpr.SetupNodePath()
         return wrpr
     
 
-class Render2d( NodePath ):
+class Render2d(NodePath):
     
     @classmethod
-    def Create( cls, *args, **kwargs ):
-        wrpr = cls( base.render2d )
+    def Create(cls, *args, **kwargs):
+        wrpr = cls(base.render2d)
         wrpr.SetupNodePath()
         return wrpr
     
-    def SetParent( self, pComp ):
+    def SetParent(self, pComp):
         
         # Render2d is a default Panda NodePath which shouldn't be parented to
         # anything.
         pass
     
 
-class Aspect2d( NodePath ):
+class Aspect2d(NodePath):
     
     @classmethod
-    def Create( cls, *args, **kwargs ):
-        wrpr = cls( base.aspect2d )
+    def Create(cls, *args, **kwargs):
+        wrpr = cls(base.aspect2d)
         wrpr.SetupNodePath()
         return wrpr
     
 
-class Pixel2d( NodePath ):
+class Pixel2d(NodePath):
     
     @classmethod
-    def Create( cls, *args, **kwargs ):
-        wrpr = cls( base.pixel2d )
+    def Create(cls, *args, **kwargs):
+        wrpr = cls(base.pixel2d)
         wrpr.SetupNodePath()
         return wrpr
     
 
-class Camera2d( NodePath ):
+class Camera2d(NodePath):
     
     @classmethod
-    def Create( cls, *args, **kwargs ):
-        wrpr = cls( base.camera2d )
+    def Create(cls, *args, **kwargs):
+        wrpr = cls(base.camera2d)
         wrpr.SetupNodePath()
         return wrpr
     
 
-class Cam2d( NodePath ):
+class Cam2d(NodePath):
     
     @classmethod
-    def Create( cls, *args, **kwargs ):
-        wrpr = cls( base.cam2d )
+    def Create(cls, *args, **kwargs):
+        wrpr = cls(base.cam2d)
         wrpr.SetupNodePath()
         return wrpr

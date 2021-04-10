@@ -1,6 +1,9 @@
 import panda3d.core as pm
 
-from .nodePath import NodePath
+try:
+    from pandaEditor.editor.nodes.nodePath import NodePath
+except ImportError:
+    from pandaEditor.game.nodes.nodePath import NodePath
 
 
 class PandaNode(NodePath):

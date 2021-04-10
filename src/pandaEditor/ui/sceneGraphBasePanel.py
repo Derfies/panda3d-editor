@@ -180,7 +180,7 @@ class SceneGraphBasePanel( wx.Panel ):
         for cItem in self.tc.GetItemChildren( item ):
             self.UpdateItemData( cItem )
         
-    def OnUpdate( self, comps=None ):
+    def OnUpdate(self, comps=None):
         """
         Update the contents of the TreeCtrl to reflect the contents of the 
         scene. If comps is not None, it will contain only the components
@@ -197,7 +197,7 @@ class SceneGraphBasePanel( wx.Panel ):
             self.Rebuild()
         else:
             for comp in comps:
-                wrpr = base.game.nodeMgr.Wrap( comp )
+                wrpr = base.game.nodeMgr.Wrap(comp)
                 pWrpr = wrpr.GetParent()
                 if wrpr.data in self._comps:
                     if pWrpr is None and wrpr.data != base.scene:

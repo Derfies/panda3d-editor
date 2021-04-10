@@ -168,7 +168,6 @@ class BaseProperty( object ):
         return False
     
     def IsExpanded( self ):
-        return False
         return self._window.IsExpanded()
     
     def SetExpanded( self, val ):
@@ -285,11 +284,16 @@ class IntProperty( BaseProperty ):
 
 class FloatProperty( BaseProperty ):
         
-    def BuildControl( self, parent ):
-        rndValue = round( self._value, 3 )
-        ctrl = wx.TextCtrl( parent, -1, value=str( rndValue ), 
-                                validator=FloatValidator() )
-        self.AppendControl( ctrl )
+    def BuildControl(self, parent):
+        rndValue = round(self._value, 3)
+        ctrl = wx.TextCtrl(
+            parent,
+            -1,
+            style=wx.TE_PROCESS_ENTER,
+            value=str(rndValue),
+            validator=FloatValidator()
+        )
+        self.AppendControl(ctrl)
         return ctrl
     
     def SetValueFromEvent( self, evt ):
@@ -301,11 +305,16 @@ class FloatProperty( BaseProperty ):
         self.SetValue( val )
     
 
-class StringProperty( BaseProperty ):
+class StringProperty(BaseProperty):
         
-    def BuildControl( self, parent ):
-        ctrl = wx.TextCtrl( parent, -1, value=str( self.GetValue() ) )
-        self.AppendControl( ctrl )
+    def BuildControl(self, parent):
+        ctrl = wx.TextCtrl(
+            parent,
+            -1,
+            style=wx.TE_PROCESS_ENTER,
+            value=str(self.GetValue()),
+        )
+        self.AppendControl(ctrl)
         return ctrl
             
 
@@ -499,7 +508,6 @@ class PropertyGrid( scrolled.ScrolledPanel ):
             parent = self._currParent
         
         pnl = CollapsiblePanel( self, prop, parent )
-        print('pnl:', pnl)
         parent.AddWindow( pnl )
         prop.SetWindow( pnl )
         prop.SetGrid( self )

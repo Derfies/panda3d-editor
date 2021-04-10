@@ -1,10 +1,9 @@
 import panda3d.core as pm
 from direct.actor.Actor import Actor as P3dActor
 
-import p3d
 from .constants import *
 from .modelRoot import ModelRoot
-from .attributes import Attribute as Attr, PyTagAttribute as PTAttr
+from .attributes import PyTagAttribute as PTAttr
 
 
 class Actor( ModelRoot ):

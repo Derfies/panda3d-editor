@@ -8,14 +8,15 @@ import panda3d.core as pm
 
 import p3d
 from pandaEditor import commands as cmds
-from wxExtra import utils as wxUtils, ActionItem, LogPanel, CustomMenu
+from wxExtra import utils as wxUtils, ActionItem, LogPanel
 from wxExtra import AuiManagerConfig, CustomAuiToolBar, CustomMenu
-from .viewport import Viewport
 from pandaEditor.app import App as OldApp
-from .resourcesPanel import ResourcesPanel
-from .sceneGraphPanel import SceneGraphPanel
-from .preferencesFrame import PreferencesFrame
-from .lightLinkerPanel import LightLinkerPanel
+from pandaEditor.ui.viewport import Viewport
+from pandaEditor.ui.resourcesPanel import ResourcesPanel
+from pandaEditor.ui.sceneGraphPanel import SceneGraphPanel
+from pandaEditor.ui.preferencesFrame import PreferencesFrame
+from pandaEditor.ui.propertiesPanel import PropertiesPanel
+from pandaEditor.ui.lightLinkerPanel import LightLinkerPanel
 
 
 FRAME_TITLE = 'Panda Editor 0.1'
@@ -126,7 +127,7 @@ class MainFrame( wx.Frame ):
         # Build editor panels
         self.pnlSceneGraph = SceneGraphPanel( self, style=wx.SUNKEN_BORDER )
         self.pnlLightLinker = LightLinkerPanel( self, style=wx.SUNKEN_BORDER )
-        #self.pnlProps = PropertiesPanel( self, style=wx.SUNKEN_BORDER )
+        self.pnlProps = PropertiesPanel( self, style=wx.SUNKEN_BORDER )
         self.pnlRsrcs = ResourcesPanel( self, style=wx.SUNKEN_BORDER )
         self.pnlLog = LogPanel( self, style=wx.SUNKEN_BORDER )
 
@@ -390,7 +391,7 @@ class MainFrame( wx.Frame ):
         Show or hide the pane based on the menu item that was (un)checked.
         """
         pane = self.paneDefs[evt.GetId()][0]
-        self._mgr.GetPane( pane ).Show( evt.Checked() )
+        self._mgr.GetPane( pane ).Show( evt.IsChecked() )
 
         # Make sure to call or else we won't see any changes.
         self._mgr.Update()
@@ -398,7 +399,7 @@ class MainFrame( wx.Frame ):
 
     def OnXformSetActiveGizmo( self, evt ):
         if evt.GetId() == ID_XFORM_WORLD:
-            self.app.SetGizmoLocal( not evt.Checked() )
+            self.app.SetGizmoLocal( not evt.IsChecked() )
             return
 
         arg = None
@@ -890,14 +891,14 @@ class MainFrame( wx.Frame ):
                 .Right()
                 .Position( 2 )),
                 
-            # ID_WIND_PROPERTIES:(self.pnlProps, True,
-            #     wx.aui.AuiPaneInfo()
-            #     .Name( 'pnlProps' )
-            #     .Caption( 'Properties' )
-            #     .CloseButton( True )
-            #     .MaximizeButton( True )
-            #     .MinSize( (100, 100) )
-            #     .Right()),
+            ID_WIND_PROPERTIES:(self.pnlProps, True,
+                wx.aui.AuiPaneInfo()
+                .Name( 'pnlProps' )
+                .Caption( 'Properties' )
+                .CloseButton( True )
+                .MaximizeButton( True )
+                .MinSize( (100, 100) )
+                .Right()),
                 
             ID_WIND_LOG:(self.pnlLog, True,
                 wx.aui.AuiPaneInfo()

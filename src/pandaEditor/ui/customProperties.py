@@ -20,7 +20,12 @@ class Float3Property( wxpg.BaseProperty ):
     def BuildControl( self, parent ):
         bs = wx.BoxSizer( wx.HORIZONTAL )
         for i in range( self._count ):
-            ctrl = wx.TextCtrl( parent, i, validator=wxpg.FloatValidator() )
+            ctrl = wx.TextCtrl(
+                parent,
+                i,
+                style=wx.TE_PROCESS_ENTER,
+                validator=wxpg.FloatValidator()
+            )
             self.AppendControl( ctrl )
             bs.Add( ctrl, 1, wx.EXPAND )
         self.SetValue( self._value )
