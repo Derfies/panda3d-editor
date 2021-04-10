@@ -2,7 +2,7 @@ import os
 
 import wx
 import wx.lib.mixins.listctrl as listmix
-import pandac.PandaModules as pm
+import panda3d.core as pm
 from panda3d.core import Filename
 
 from wxExtra import wxpg, CompositeDropTarget, utils as wxUtils

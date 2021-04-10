@@ -1,4 +1,4 @@
-import pandac.PandaModules as pm
+import panda3d.core as pm
 
 from .constants import *
 from game.nodes.lensNode import LensNode as GameLensNode

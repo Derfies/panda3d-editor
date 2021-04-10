@@ -71,7 +71,7 @@ class CustomTreeCtrl( ct.CustomTreeCtrl ):
             self.SetItemParent( cItem, newItem, delete=False )
         
         # Set new items properties to match the old items properties.
-        #self.SetPyData( newItem, self.GetPyData( item ) )
+        #self.SetItemData( newItem, self.GetItemData( item ) )
         newItem.SetData( item.GetData() )
         if item.IsExpanded():
             newItem.Expand()

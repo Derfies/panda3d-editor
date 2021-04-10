@@ -1,6 +1,6 @@
 import math
 
-from pandac.PandaModules import Mat4, Vec3, Point3, CollisionSphere, NodePath
+from panda3d.core import Mat4, Vec3, Point3, CollisionSphere, NodePath
 
 from p3d import commonUtils
 from p3d.geometry import Line, Box

@@ -1,14 +1,10 @@
 import copy
 
-import panda3d.core as pc
-import pandac.PandaModules as pm
-
-import p3d
-import utils
 from p3d import commonUtils as cUtils
+from utils.functions import GetLowerCamelCase
 
 
-class Base( object ):
+class Base:
     
     def __init__( self, data ):
         self.data = data
@@ -33,7 +29,7 @@ class Base( object ):
         
         # Default create args to a string of the class name.
         if 'name' in createKwargs and not createKwargs['name']:
-            createKwargs['name'] = utils.GetLowerCamelCase( cls.type_.__name__ )
+            createKwargs['name'] = GetLowerCamelCase( cls.type_.__name__ )
         
         wrpr.SetData( cls.type_( **createKwargs ) )
         

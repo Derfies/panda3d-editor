@@ -1,12 +1,15 @@
-import pandac.PandaModules as pm
-from pandac.PandaModules import ModelRoot as MR
+import panda3d.core as pm
+from panda3d.core import ModelRoot as MR
 
 from .constants import *
-from .nodePath import NodePath
+try:
+    from pandaEditor.editor.nodes.nodePath import NodePath
+except ImportError:
+    from pandaEditor.game.nodes.nodePath import NodePath
 from .attributes import NodeAttribute as Attr
 
 
-class ModelRoot( NodePath ):
+class ModelRoot(NodePath):
     
     type_ = pm.ModelRoot
     

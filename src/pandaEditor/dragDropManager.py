@@ -5,10 +5,10 @@ import wx
 import commands as cmds
 
 
-class DragDropManager( object ):
+class DragDropManager:
     
-    def __init__( self ):
-        self.app = wx.GetApp()
+    def __init__(self, app):
+        self.app = app
         self.dragComps = []
         
         # Define file types and their actions.
@@ -23,25 +23,24 @@ class DragDropManager( object ):
         }
         
     def DoFileDrop(self, filePath, np):
-        print('DoFileDrop')
         ext = os.path.splitext(filePath)[1]
         if ext in self.fileTypes:
             fn = self.fileTypes[ext]
             fn(filePath, np)
         
     def Start(self, src, dragComps, data):
-        print('Start')
         self.dragComps = dragComps
-        #self.src = src
         
         # Create a custom data object that we can drop onto the toolbar
         # which contains the tool's id as a string
-        #do = wx.CustomDataObject('NodePath')
-        do = wx.TextDataObject('NodePath')
+        do = wx.CustomDataObject('NodePath')
+        #do = wx.TextDataObject('NodePath')
         # print('data:', data)
         # print('str data:', str( data ))
-        #do.SetData( str( data ) )
-        do.SetText(data)
+        import pickle
+        data = pickle.dumps(data)
+        do.SetData( data )
+        #do.SetText(data)
         
         # Create the drop source and begin the drag and drop operation
         ds = wx.DropSource( src )
@@ -52,7 +51,6 @@ class DragDropManager( object ):
         self.dragComps = []
         
     def ValidateDropItem( self, x, y, parent ):
-        print('ValidateDropItem:')
         dropComp = parent.GetDroppedObject( x, y )
         #if dropComp is None:
         if len( self.dragComps ) == 1:
@@ -84,7 +82,9 @@ class DragDropManager( object ):
                 self.DoFileDrop( filePath, dropComp )
             except:
                 pass
-        
+        if dropComp is None:
+            return
+        print(dropComp)
         wrpr = base.game.nodeMgr.Wrap( dropComp )
         self.data = {}
         dragComps = self.app.dDropMgr.dragComps
@@ -92,6 +92,7 @@ class DragDropManager( object ):
             wrpr.OnDragDrop( dragComps, wrpr.data )
         else:
             menu = wx.Menu()
+            print('wrpr 1:', wrpr)
             for cnnctn in wrpr.GetPossibleConnections( dragComps ):
                 mItem = wx.MenuItem( menu, wx.NewId(), cnnctn.label )
                 menu.AppendItem( mItem )
@@ -108,7 +109,6 @@ class DragDropManager( object ):
         cmds.Connect( dragComps, cnnctn, cnnctn.Connect )
             
     def AddModel(self, filePath, np=None):
-        print('add model')
         self.app.AddComponent('ModelRoot', modelPath=filePath)
         
     def AddShader( self, filePath, np=None ):

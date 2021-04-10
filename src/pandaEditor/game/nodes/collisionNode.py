@@ -1,5 +1,5 @@
-import pandac.PandaModules as pm
-from pandac.PandaModules import CollisionNode as CN, CollisionSolid as CS
+import panda3d.core as pm
+from panda3d.core import CollisionNode as CN, CollisionSolid as CS
 
 from .nodePath import NodePath
 from .attributes import NodeAttribute as Attr

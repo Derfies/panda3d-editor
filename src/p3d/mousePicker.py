@@ -1,5 +1,5 @@
-from pandac.PandaModules import CollisionTraverser, CollisionHandlerQueue, BitMask32
-from pandac.PandaModules import CollisionNode, CollisionRay
+from panda3d.core import CollisionTraverser, CollisionHandlerQueue, BitMask32
+from panda3d.core import CollisionNode, CollisionRay
 
 import p3d
 

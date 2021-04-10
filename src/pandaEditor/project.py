@@ -4,12 +4,12 @@ import shutil
 import subprocess
 import xml.etree.cElementTree as et
 
-import pandac.PandaModules as pm
+import panda3d.core as pm
 from wx.lib.pubsub import pub
 
 import p3d
 import game
-import utils
+from utils.directorywatcher import DirectoryWatcher
 
 
 PROJECT_DEF_NAME = 'project.xml'
@@ -22,7 +22,7 @@ PREFABS = 'prefabs'
 SHADERS = 'shaders'
 
 
-class DirectoryWatcher( utils.DirectoryWatcher ):
+class DirectoryWatcher(DirectoryWatcher):
     
     def onAdded( self, filePaths ):
         messenger.send( 'projectFilesAdded', [filePaths] )

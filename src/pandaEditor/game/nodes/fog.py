@@ -1,4 +1,4 @@
-import pandac.PandaModules as pm
+import panda3d.core as pm
 
 from .nodePath import NodePath
 from .attributes import NodeAttribute as Attr

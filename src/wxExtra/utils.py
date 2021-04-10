@@ -83,7 +83,7 @@ def ImgToBmp( filePath, size ):
     """Return a wx bitmap from a filepath, scaled to the toolbar size."""
     img = wx.Image( filePath )
     img.Rescale( size[0], size[1] )
-    bmp = wx.BitmapFromImage( img )
+    bmp = wx.Bitmap( img )
     return bmp
     
 

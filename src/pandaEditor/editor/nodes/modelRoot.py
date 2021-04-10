@@ -1,6 +1,6 @@
 import os
 
-import pandac.PandaModules as pm
+import panda3d.core as pm
 
 from .constants import *
 from game.nodes.constants import *

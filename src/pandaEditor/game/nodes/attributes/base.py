@@ -1,4 +1,4 @@
-import utils
+from utils.functions import GetLowerCamelCase
 
 
 class Base( object ):
@@ -23,7 +23,7 @@ class Base( object ):
         self.initName = initName
         
         name = self.label.replace( ' ', '' )
-        self.name = utils.GetLowerCamelCase( name )
+        self.name = GetLowerCamelCase( name )
         
         if initName is None:
             initName = self.name

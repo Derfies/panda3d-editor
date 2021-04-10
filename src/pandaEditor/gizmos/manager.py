@@ -1,4 +1,4 @@
-from pandac.PandaModules import DirectionalLight
+from panda3d.core import DirectionalLight
 
 import p3d
 

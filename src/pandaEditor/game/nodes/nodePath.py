@@ -1,21 +1,23 @@
 import uuid
 
 import panda3d.core as pc
-import pandac.PandaModules as pm
-from pandac.PandaModules import NodePath as NP
+import panda3d.core as pm
+from panda3d.core import NodePath as NP
 
-import p3d
 import utils
-from .base import Base
+#from .base import Base
 from .constants import *
-from p3d import commonUtils as cUtils
 from .attributes import NodePathAttribute as Attr
 from game.nodes.attributes import Connection as Cnnctn
 from game.nodes.attributes import NodePathTargetConnection as NPTCnnctn
 from game.nodes.attributes import ConnectionList as CnnctnList
+try:
+    from pandaEditor.editor.nodes.base import Base
+except ImportError:
+    from pandaEditor.game.nodes.base import Base
 
 
-class NodePath( Base ):
+class NodePath(Base):
     
     type_ = NP
     

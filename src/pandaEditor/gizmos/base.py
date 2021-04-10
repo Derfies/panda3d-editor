@@ -1,5 +1,5 @@
-import pandac.PandaModules as pm
-from pandac.PandaModules import Point3, Vec3, Plane, NodePath
+import panda3d.core as pm
+from panda3d.core import Point3, Vec3, Plane, NodePath
 
 import p3d
 from p3d import commonUtils as utils

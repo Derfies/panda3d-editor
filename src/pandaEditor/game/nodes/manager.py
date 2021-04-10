@@ -1,60 +1,60 @@
 import inspect
+from importlib import import_module
 
-from .constants import *
+from pandaEditor.game.nodes.constants import *
 
 
-WRAPPER_MODULE_NAMES = [
-    'base',
-    'sceneRoot',
+GAME_NODE_MODULES = [
+    'pandaEditor.game.nodes.base',
+    'pandaEditor.game.nodes.sceneRoot',
     
-    'pandaNode',
-    'nodePath',
-    'modelNode',
-    'camera',
-    'showbaseDefault',
-    'modelRoot',
-    'actor',
-    'fog',
+    'pandaEditor.game.nodes.pandaNode',
+    'pandaEditor.game.nodes.nodePath',
+    'pandaEditor.game.nodes.modelNode',
+    'pandaEditor.game.nodes.camera',
+    'pandaEditor.game.nodes.showbaseDefault',
+    'pandaEditor.game.nodes.modelRoot',
+    'pandaEditor.game.nodes.actor',
+    'pandaEditor.game.nodes.fog',
     
-    'collisionNode',
-    'collisionSolids',
+    'pandaEditor.game.nodes.collisionNode',
+    'pandaEditor.game.nodes.collisionSolids',
 
-    'light',
-    'ambientLight',
-    'pointLight',
-    'directionalLight',
-    'spotlight',
+    'pandaEditor.game.nodes.light',
+    'pandaEditor.game.nodes.ambientLight',
+    'pandaEditor.game.nodes.pointLight',
+    'pandaEditor.game.nodes.directionalLight',
+    'pandaEditor.game.nodes.spotlight',
     
-    'texture',
-    'textureStage',
+    'pandaEditor.game.nodes.texture',
+    'pandaEditor.game.nodes.textureStage',
     
-    'bulletWorld',
-    'bulletDebugNode',
-    'bulletRigidBodyNode',
-    'bulletCharacterControllerNode',
-    'bulletBoxShape',
-    'bulletPlaneShape',
-    'bulletCapsuleShape'
+    'pandaEditor.game.nodes.bulletWorld',
+    'pandaEditor.game.nodes.bulletDebugNode',
+    'pandaEditor.game.nodes.bulletRigidBodyNode',
+    'pandaEditor.game.nodes.bulletCharacterControllerNode',
+    'pandaEditor.game.nodes.bulletBoxShape',
+    'pandaEditor.game.nodes.bulletPlaneShape',
+    'pandaEditor.game.nodes.bulletCapsuleShape'
 ]
 
 
-from importlib import import_module
-
-class Manager( object ):
+class Manager:
     
-    def __init__( self ):
+    def __init__(self):
         self.nodeWrappers = {}
-        
-        # Load component wrapper classes from the list of module names and 
-        # store them in the nodeWrapper dictionary. This needs to be done when
-        # this class is instantiated - not when the module is imported - so
-        # the editor classes are loaded beforehand.
-        for modName in WRAPPER_MODULE_NAMES:
-            mod = import_module('pandaEditor.game.nodes.' + modName)
-            for mem in inspect.getmembers( mod, inspect.isclass ):
-                cls = mem[1]
-                if cls.__module__ == mod.__name__:
+
+        self.create_node_wrappers(GAME_NODE_MODULES)
+
+    def create_node_wrappers(self, module_paths):
+        for module_path in module_paths:
+            module = import_module(module_path)
+            for member in inspect.getmembers(module, inspect.isclass):
+                cls = member[1]
+                if cls.__module__ == module.__name__:
                     self.nodeWrappers[cls.__name__] = cls
+
+                    print(cls, cls.mro())
         
     def Create( self, nTypeStr, *args ):
         wrprCls = self.nodeWrappers[nTypeStr]
@@ -101,18 +101,12 @@ class Manager( object ):
             if cls in cmnClasses:
                 return cls
         
-    def GetWrapper( self, comp ):
-        typeStr = self.GetTypeString( comp )
-        if typeStr in self.nodeWrappers:
-            return self.nodeWrappers[typeStr]
-        
-        return None
+    def GetWrapper(self, comp):
+        type_ = self.GetTypeString(comp)
+        return self.nodeWrappers.get(type_)
     
-    def GetWrapperByName( self, cType ):
-        if cType in self.nodeWrappers:
-            return self.nodeWrappers[cType]
-        
-        return None
+    def GetWrapperByName(self, c_type):
+        return self.nodeWrappers.get(c_type)
         
     def GetTypeString( self, comp ):
         """

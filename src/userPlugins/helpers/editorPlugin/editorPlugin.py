@@ -1,6 +1,6 @@
 import os
 
-import pandac.PandaModules as pm
+import panda3d.core as pm
 from panda3d.core import Shader
 
 import p3d

@@ -1,7 +1,7 @@
-import pandac.PandaModules as pm
+import panda3d.core as pm
 
 import p3d
-import editor
+from pandaEditor.editor.nodes.constants import TAG_IGNORE, TAG_PICKABLE
 
 
 class Selection( p3d.Object ):
@@ -194,13 +194,13 @@ class Selection( p3d.Object ):
         else:
             return None
         
-    def GetPickableNodePath( self, np ):
-        if np.getPythonTag( editor.nodes.TAG_IGNORE ):
-            return np.findNetPythonTag( editor.nodes.TAG_PICKABLE )
+    def GetPickableNodePath(self, np):
+        if np.getPythonTag(TAG_IGNORE):
+            return np.findNetPythonTag(TAG_PICKABLE)
         elif p3d.MOUSE_CTRL in base.edCamera.mouse.modifiers:
             return np
         else:
-            return np.findNetPythonTag( editor.nodes.TAG_PICKABLE )
+            return np.findNetPythonTag(TAG_PICKABLE)
         
     def Update( self ):
         """Update the selection by running deselect and select handlers."""

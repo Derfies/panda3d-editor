@@ -1,4 +1,4 @@
-import pandac.PandaModules as pm
+import panda3d.core as pm
 from panda3d.bullet import BulletCapsuleShape as BCS, ZUp
 
 from .base import Base

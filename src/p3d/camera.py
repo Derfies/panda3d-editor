@@ -1,7 +1,7 @@
 import math
 
-import pandac.PandaModules as pm
-from pandac.PandaModules import Camera as PCamera, Vec3, Quat, NodePath, LineSegs, PerspectiveLens
+import panda3d.core as pm
+from panda3d.core import Camera as PCamera, Vec3, Quat, NodePath, LineSegs, PerspectiveLens
 
 import p3d
 

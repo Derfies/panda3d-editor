@@ -28,7 +28,7 @@ class CustomMenu( wx.Menu ):
         if actn.GetKind() == wx.ITEM_CHECK:
             self.AppendCheckItem( actn.GetId(), actnText )
         else:
-            self.AppendItem( mItem )
+            self.Append( mItem )
         
         # Bind the menu event - use args if provided.
         args = actn.GetArguments()
@@ -50,7 +50,7 @@ class CustomMenu( wx.Menu ):
         # Create and append the new menu item
         mItem = wx.MenuItem( self, id, text, help )
         mItem.SetBitmap( img.ConvertToBitmap() )
-        self.AppendItem( mItem )
+        self.Append( mItem )
         
     def EnableAllTools( self, state ):
         """Enable or disable all tools in the toolbar."""

@@ -1,5 +1,5 @@
 import wx
-import pandac.PandaModules as pm
+import panda3d.core as pm
 import wx.lib.agw.flatmenu as fm
 import wx.lib.agw.fmresources as fmr
 import wx.lib.agw.customtreectrl as ct
@@ -174,7 +174,7 @@ class SceneGraphBasePanel( wx.Panel ):
             self.UpdateItemData( newItem )
             
     def UpdateItemData( self, item ):
-        data = self.tc.GetPyData( item )
+        data = self.tc.GetItemData( item )
         self._comps[data] = item
             
         for cItem in self.tc.GetItemChildren( item ):

@@ -1,5 +1,5 @@
-import pandac.PandaModules as pm
-from pandac.PandaModules import PointLight as PL
+import panda3d.core as pm
+from panda3d.core import PointLight as PL
 
 from .light import Light
 from .attributes import NodeAttribute as Attr

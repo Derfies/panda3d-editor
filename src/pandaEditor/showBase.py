@@ -1,4 +1,4 @@
-import pandac.PandaModules as pm
+import panda3d.core as pm
 from direct.showbase.ShowBase import ShowBase
 
 import p3d

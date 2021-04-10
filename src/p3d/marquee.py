@@ -1,4 +1,4 @@
-from pandac.PandaModules import NodePath, CardMaker, LineSegs, Point2
+from panda3d.core import NodePath, CardMaker, LineSegs, Point2
 
 import p3d
 
@@ -12,7 +12,6 @@ class Marquee( NodePath, p3d.SingleTask ):
     
     def __init__( self, *args, **kwargs ):
         colour = kwargs.pop( 'colour', (1, 1, 1, .2) )
-
 
         # Create a card maker
         cm = CardMaker( 'foo' )
@@ -63,6 +62,8 @@ class Marquee( NodePath, p3d.SingleTask ):
     
     def IsNodePathInside( self, np ):
         """Test if the specified node path lies within the marquee area."""
+        print('np:', np)
+        print('rootNp:', self.rootNp)
         npWorldPos = np.getPos( self.rootNp )
         p3 = self.camera.getRelativePoint( self.rootNp, npWorldPos )
 

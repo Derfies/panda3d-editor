@@ -1,4 +1,4 @@
-import pandac.PandaModules as pm
+import panda3d.core as pm
 
 from p3d import commonUtils as utils
 import game

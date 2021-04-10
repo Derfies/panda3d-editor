@@ -1,8 +1,8 @@
 import wx
 import wx.lib.agw.customtreectrl as ct
 
-import pandac.PandaModules as pm
-from pandac.PandaModules import NodePath as NP
+import panda3d.core as pm
+from panda3d.core import NodePath as NP
 
 from pandaEditor import commands as cmds
 from game.nodes.attributes import Attribute as Attr

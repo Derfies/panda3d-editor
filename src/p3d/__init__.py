@@ -1,4 +1,4 @@
-from pandac.PandaModules import Vec3
+from panda3d.core import Vec3
 
 
 P3D_VERSION = '0.1'
@@ -26,7 +26,3 @@ from .displayShading import DisplayShading
 from .mouse import *
 from .mousePicker import MousePicker
 from . import geometry
-try:
-    import wxPanda as wx
-except:
-    print('Failed to find wx module')

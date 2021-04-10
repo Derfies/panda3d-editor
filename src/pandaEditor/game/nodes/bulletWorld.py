@@ -1,4 +1,4 @@
-import pandac.PandaModules as pm
+import panda3d.core as pm
 from panda3d.bullet import BulletWorld as BW
 from panda3d.bullet import BulletDebugNode as BDN
 from panda3d.bullet import BulletRigidBodyNode as BRBN

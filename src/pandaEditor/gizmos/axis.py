@@ -1,5 +1,5 @@
-from pandac.PandaModules import Point3, NodePath, GeomEnums 
-from pandac.PandaModules import CollisionNode, CollisionTube
+from panda3d.core import Point3, NodePath, GeomEnums
+from panda3d.core import CollisionNode, CollisionTube
 
 from .constants import *
 

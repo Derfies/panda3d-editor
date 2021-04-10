@@ -137,7 +137,7 @@ class ResourcesPanel(wx.Panel):
             # Return a dictionary mapping each node path to its tree item.
             expDict = {}
             for item in self.dtc.GetAllItems():
-                dir = self.dtc.GetPyData( item )
+                dir = self.dtc.GetItemData( item )
                 if dir is not None:
                     expDict[dir.directory] = (item, self.dtc.IsExpanded( item ))
             return expDict
@@ -148,7 +148,7 @@ class ResourcesPanel(wx.Panel):
         
         # Rebuild the tree control
         rootItem = self.dtc.GetRootItem()
-        rootDirPath = self.dtc.GetPyData( rootItem ).directory
+        rootDirPath = self.dtc.GetItemData( rootItem ).directory
         self.dtc._loadDir( rootItem, rootDirPath )
         
         # Get map of directory paths to items and expanded states after 

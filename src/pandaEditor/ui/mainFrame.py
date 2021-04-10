@@ -4,7 +4,7 @@ import sys
 import wx
 import wx.aui
 from wx.lib.pubsub import pub
-import pandac.PandaModules as pm
+import panda3d.core as pm
 from direct.actor.Actor import Actor
 
 import p3d
@@ -610,7 +610,7 @@ class MainFrame( wx.Frame ):
             ActionItem( 'Build...', '', self.OnFileBuildProject, ID_PROJ_BUILD )
         ]
         self.mProj.AppendActionItems( actns, self )
-        self.mFile.AppendMenu( ID_FILE_PROJ, '&Project', self.mProj )
+        self.mFile.Append( ID_FILE_PROJ, '&Project', self.mProj )
         
         # Create file toolbar
         self.tbFile = CustomAuiToolBar( self, -1 )
@@ -789,7 +789,7 @@ class MainFrame( wx.Frame ):
         self.mPnl = CustomMenu()
         
         self.mWind = CustomMenu()
-        self.mWind.AppendMenu( ID_WIND_PANEL, '&Panel', self.mPnl )
+        self.mWind.Append( ID_WIND_PANEL, '&Panel', self.mPnl )
         self.mWind.AppendActionItem( ActionItem( 'Preferences', '', self.OnShowPreferences, ID_WIND_PREFERENCES ), self )
                 
     def RebuildPanelMenu( self ):

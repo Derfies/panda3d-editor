@@ -1,4 +1,4 @@
-import pandac.PandaModules as pm
+import panda3d.core as pm
 from direct.actor.Actor import Actor as P3dActor
 
 import p3d

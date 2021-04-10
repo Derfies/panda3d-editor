@@ -1,4 +1,4 @@
-import pandac.PandaModules as pm
+import panda3d.core as pm
 from direct.directtools.DirectUtil import ROUND_TO
 
 from p3d import commonUtils as utils

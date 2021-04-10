@@ -1,7 +1,7 @@
 import os
 
 import panda3d.core as pc
-import pandac.PandaModules as pm
+import panda3d.core as pm
 
 
 class AssetManager( object ):

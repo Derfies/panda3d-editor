@@ -1,4 +1,4 @@
-import pandac.PandaModules as pm
+import panda3d.core as pm
 from panda3d.bullet import BulletBoxShape as BBS
 
 from .base import Base

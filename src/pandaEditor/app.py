@@ -4,7 +4,7 @@ import traceback
 import wx
 from direct.directtools.DirectGrid import DirectGrid
 from wx.lib.pubsub import pub
-import pandac.PandaModules as pm
+import panda3d.core as pm
 import panda3d.core as pc
 
 import p3d
@@ -21,7 +21,7 @@ from selection import Selection
 from assetManager import AssetManager
 from dragDropManager import DragDropManager
 from pandaEditor.ui.document import Document
-    
+
 
 class App:
     
@@ -81,7 +81,7 @@ class App:
         
         # Create our managers.
         self.assetMgr = AssetManager()
-        self.dDropMgr = DragDropManager()
+        self.dDropMgr = DragDropManager(self)
         self.actnMgr = actions.Manager()
         
         # Bind events
@@ -107,8 +107,6 @@ class App:
         self.CreateScene()
         self.doc.OnRefresh()
 
-        print('FINISIED')
-        
         return True
     
     def SetupGrid( self ):
@@ -291,7 +289,7 @@ class App:
         wrprCls = base.game.nodeMgr.GetWrapperByName( typeStr )
         wrpr = wrprCls.Create( *args, **kwargs )
         print('wrprCls:', wrprCls)
-        print('wrpr:', wrpr)
+        print('wrpr 2:', wrpr)
         wrpr.SetDefaultValues()
         wrpr.SetParent( wrpr.GetDefaultParent() )
         

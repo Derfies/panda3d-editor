@@ -1,4 +1,4 @@
-from pandac.PandaModules import Vec2
+from panda3d.core import Vec2
 
 import p3d
 

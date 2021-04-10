@@ -1,8 +1,8 @@
 import math
 
-from pandac.PandaModules import Mat4, Vec3, Point3, Plane, NodePath
-from pandac.PandaModules import CollisionSphere, CollisionPolygon
-from pandac.PandaModules import BillboardEffect
+from panda3d.core import Mat4, Vec3, Point3, Plane, NodePath
+from panda3d.core import CollisionSphere, CollisionPolygon
+from panda3d.core import BillboardEffect
 
 from p3d import commonUtils
 from p3d.geometry import Arc, Line

@@ -2,7 +2,7 @@ import sys
 
 import wx
 from direct.showbase.DirectObject import DirectObject
-from pandac.PandaModules import WindowProperties
+from panda3d.core import WindowProperties
 
 
 keyCodes = {

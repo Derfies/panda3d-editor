@@ -1,18 +1,17 @@
 import os
-import sys
 import time
 import threading
 
 
-class DirectoryWatcher( threading.Thread ):
+class DirectoryWatcher(threading.Thread):
     
     """
     Class for watching a directory and all subdirectories below it for 
     changes.
     """
     
-    def __init__( self, root=False ):
-        threading.Thread.__init__( self )
+    def __init__(self, root=False):
+        super().__init__()
         
         self.root = root
         

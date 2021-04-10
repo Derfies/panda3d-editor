@@ -2,7 +2,7 @@ import os
 import sys
 import inspect
 
-import pandac.PandaModules as pm
+import panda3d.core as pm
 
 import p3d
 from p3d import commonUtils as cUtils

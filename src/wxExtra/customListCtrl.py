@@ -49,7 +49,7 @@ class CustomListCtrl( wx.ListCtrl, listmix.ListCtrlAutoWidthMixin ):
         data.
         """
         for i in range( self.GetItemCount() ):
-            if self.GetItem( i ).GetPyData() == data:
+            if self.GetItem( i ).GetItemData() == data:
                 return i
             
         # No match found, return -1

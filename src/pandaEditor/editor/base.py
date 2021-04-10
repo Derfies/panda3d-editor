@@ -1,13 +1,11 @@
-import game
-from . import plugins
-from .sceneParser import SceneParser
+from pandaEditor.editor.nodes.manager import Manager as NodeManager
+from pandaEditor.editor.plugins.manager import Manager as PluginManager
+from pandaEditor.editor.sceneParser import SceneParser
+from pandaEditor.game.base import Base as GameBase
 
 
-class Base( game.Base ):
-    
-    def __init__( self, *args, **kwargs ):
-        game.Base.__init__( self, *args, **kwargs )
-        
-        # Use editor versions for some systems.
-        self.pluginMgr = plugins.Manager( self )
-        self.scnParser = SceneParser()
+class Base(GameBase):
+
+    node_manager_cls = NodeManager
+    plugin_manager_cls = PluginManager
+    scene_parser_cls = SceneParser

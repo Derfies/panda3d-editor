@@ -1,9 +1,9 @@
-import pandac.PandaModules as pm
-from pandac.PandaModules import CollisionBox as CB
-from pandac.PandaModules import CollisionRay as CR
-from pandac.PandaModules import CollisionSphere as CS
-from pandac.PandaModules import CollisionInvSphere  as CIS
-from pandac.PandaModules import CollisionTube as CT
+import panda3d.core as pm
+from panda3d.core import CollisionBox as CB
+from panda3d.core import CollisionRay as CR
+from panda3d.core import CollisionSphere as CS
+from panda3d.core import CollisionInvSphere  as CIS
+from panda3d.core import CollisionTube as CT
 
 from .base import Base
 from .attributes import Attribute as Attr

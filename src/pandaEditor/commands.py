@@ -1,5 +1,5 @@
 import wx
-import pandac.PandaModules as pm
+import panda3d.core as pm
 
 import actions
 

@@ -9,8 +9,6 @@ class CustomDropTarget(wx.TextDropTarget):
         self.app = parent.app
         self.parent = parent
 
-        print('jere')
-
         # Specify the type of data we will accept
         self.doc = wx.DataObjectComposite()
         self.formats = {}

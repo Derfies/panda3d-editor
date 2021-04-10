@@ -120,7 +120,7 @@ class DirTreeCtrl( wx.TreeCtrl ):
         
         # Add directory as root
         root = self.AddRoot( directory )
-        self.SetPyData( root, Directory( directory ) )
+        self.SetItemData( root, Directory( directory ) )
         self.SetItemImage( root, self.iconentries['directory'] )
         self.Expand( root )
         
@@ -163,7 +163,7 @@ class DirTreeCtrl( wx.TreeCtrl ):
                 self.SetItemHasChildren(child, True)
 
                 # Save item path for expanding later
-                self.SetPyData( child, Directory( os.path.join( directory, f ) ) )
+                self.SetItemData( child, Directory( os.path.join( directory, f ) ) )
 
             else:
                 self.AppendItem( item, f, image=imagekey )
@@ -251,8 +251,8 @@ class DirTreeCtrl( wx.TreeCtrl ):
         item = event.GetItem()
 
         # check if item has directory data
-        if type(self.GetPyData(item)) == type(Directory()):
-            d = self.GetPyData(item)
+        if type(self.GetItemData(item)) == type(Directory()):
+            d = self.GetItemData(item)
             self._loadDir(item, d.directory)
         else:
            # print 'no data found!'
@@ -276,14 +276,14 @@ class DirTreeCtrl( wx.TreeCtrl ):
     def GetItemPath( self, itemId ):
         """Return a full path for the indicated item id."""
         # If PyData is set then the item is a directory so send that path back
-        dir = self.GetPyData( itemId )
+        dir = self.GetItemData( itemId )
         if dir is not None:
             return dir.directory
             
         # Otherwise we have to create the path from the item's name and the
         # parent item's directory path
         pItemId = self.GetItemParent( itemId )
-        dirPath = self.GetPyData( pItemId ).directory
+        dirPath = self.GetItemData( pItemId ).directory
         return os.path.join( dirPath, self.GetItemText( itemId ) )
     
     def GetAllItems( self ):

@@ -1,5 +1,5 @@
-import pandac.PandaModules as pm
-from pandac.PandaModules import TextureStage as TS
+import panda3d.core as pm
+from panda3d.core import TextureStage as TS
 
 from .base import Base
 from .attributes import Attribute as Attr

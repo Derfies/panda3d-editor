@@ -1,5 +1,5 @@
-import pandac.PandaModules as pm
-from pandac.PandaModules import Spotlight as SL
+import panda3d.core as pm
+from panda3d.core import Spotlight as SL
 
 from .light import Light
 from .lensNode import LensNode
