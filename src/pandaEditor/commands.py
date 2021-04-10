@@ -1,7 +1,7 @@
 import wx
 import panda3d.core as pm
 
-import actions
+from pandaEditor import actions
 
 
 def Add( comps ):
@@ -15,9 +15,9 @@ def Add( comps ):
     actns.append( actions.Select( comps ) )
     
     actn = actions.Composite( actns )
-    wx.GetApp().actnMgr.Push( actn )
+    base.frame.app.actnMgr.Push( actn )
     actn()
-    wx.GetApp().doc.OnModified( comps )
+    base.frame.app.doc.OnModified( comps )
     
 
 def Remove( comps ):
@@ -30,9 +30,9 @@ def Remove( comps ):
     actns.extend( [actions.Remove( comp ) for comp in comps] )
     
     actn = actions.Composite( actns )
-    wx.GetApp().actnMgr.Push( actn )
+    base.frame.app.actnMgr.Push( actn )
     actn()
-    wx.GetApp().doc.OnModified( comps )
+    base.frame.app.doc.OnModified( comps )
     
 
 def Duplicate( comps ):
@@ -54,9 +54,9 @@ def Duplicate( comps ):
     actns.append( actions.Select( dupeComps ) )
     
     actn = actions.Composite( actns )
-    wx.GetApp().actnMgr.Push( actn )
+    base.frame.app.actnMgr.Push( actn )
     actn()
-    wx.GetApp().doc.OnModified( dupeComps )
+    base.frame.app.doc.OnModified( dupeComps )
     
 
 def Replace( fromComp, toComp ):
@@ -71,9 +71,9 @@ def Replace( fromComp, toComp ):
     ]
     
     actn = actions.Composite( actns )
-    wx.GetApp().actnMgr.Push( actn )
+    base.frame.app.actnMgr.Push( actn )
     actn()
-    wx.GetApp().doc.OnModified( [fromComp, toComp] )
+    base.frame.app.doc.OnModified( [fromComp, toComp] )
     
 
 def Select( comps ):
@@ -87,9 +87,9 @@ def Select( comps ):
     ]
     
     actn = actions.Composite( actns )
-    wx.GetApp().actnMgr.Push( actn )
+    base.frame.app.actnMgr.Push( actn )
     actn()
-    wx.GetApp().doc.OnRefresh( comps )
+    base.frame.app.doc.OnRefresh( comps )
     
 
 def SetAttribute( comps, attrs, val ):
@@ -100,9 +100,9 @@ def SetAttribute( comps, attrs, val ):
     actns = [actions.SetAttribute( comps[i], attrs[i], val ) for i in range( len( comps ) )]
     
     actn = actions.Composite( actns )
-    wx.GetApp().actnMgr.Push( actn )
+    base.frame.app.actnMgr.Push( actn )
     actn()
-    wx.GetApp().doc.OnModified( comps )
+    base.frame.app.doc.OnModified( comps )
     
 
 def Parent( comps, pComp ):
@@ -112,12 +112,13 @@ def Parent( comps, pComp ):
     actns = [actions.Parent( comp, pComp ) for comp in comps]
     
     actn = actions.Composite( actns )
-    wx.GetApp().actnMgr.Push( actn )
+    base.frame.app.actnMgr.Push( actn )
     actn()
-    wx.GetApp().doc.OnModified( comps )
+    base.frame.app.doc.OnModified( comps )
     
 
-def Unparent(): pass
+def Unparent():
+    pass
     
 
 def Group( nps ):
@@ -140,9 +141,9 @@ def Group( nps ):
     actns.append( actions.Select( [grpNp] ) )
     
     actn = actions.Composite( actns )
-    wx.GetApp().actnMgr.Push( actn )
+    base.frame.app.actnMgr.Push( actn )
     actn()
-    wx.GetApp().doc.OnModified( nps.append( grpNp ) )
+    base.frame.app.doc.OnModified( nps.append( grpNp ) )
     
 
 def Ungroup( nps ):
@@ -167,9 +168,9 @@ def Ungroup( nps ):
     actns.append( actions.Select( [cNp for cNps in cNpSets for cNp in cNps] ) )
     
     actn = actions.Composite( actns )
-    wx.GetApp().actnMgr.Push( actn )
+    base.frame.app.actnMgr.Push( actn )
     actn()
-    wx.GetApp().doc.OnModified( nps.append( rmvNps ) )
+    base.frame.app.doc.OnModified( nps.append( rmvNps ) )
     
 
 def Connect( tgtComps, cnnctn, fn ):
@@ -177,9 +178,9 @@ def Connect( tgtComps, cnnctn, fn ):
     Create the connect action, execute it and push it onto the undo queue.
     """
     actn = actions.Connect( tgtComps, cnnctn, fn )
-    wx.GetApp().actnMgr.Push( actn )
+    base.frame.app.actnMgr.Push( actn )
     actn()
-    wx.GetApp().doc.OnModified()
+    base.frame.app.doc.OnModified()
     
 
 def SetConnections( tgtComps, cnnctns ):
@@ -189,6 +190,6 @@ def SetConnections( tgtComps, cnnctns ):
     actns = [actions.SetConnections( tgtComps, cnnctn ) for cnnctn in cnnctns]
     
     actn = actions.Composite( actns )
-    wx.GetApp().actnMgr.Push( actn )
+    base.frame.app.actnMgr.Push( actn )
     actn()
-    wx.GetApp().doc.OnModified()
+    base.frame.app.doc.OnModified()

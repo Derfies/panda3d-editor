@@ -17,13 +17,8 @@ class CustomDropTarget(wx.TextDropTarget):
             self.formats[formatName] = do
             self.doc.Add( do )
         self.SetDataObject( self.doc )
-
-    def OnDropText(self, x, y, data):
-        print('ver')
         
     def OnDragOver(self, x, y, d):
-
-        print(x, y, d)
         
         # Return x.DragNone if the validation fails
         if not self.app.dDropMgr.ValidateDropItem(x, y, self.parent):

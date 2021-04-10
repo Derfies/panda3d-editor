@@ -4,8 +4,7 @@ import panda3d.core as pc
 import panda3d.core as pm
 from panda3d.core import NodePath as NP
 
-import utils
-#from .base import Base
+from utils.functions import GetUniqueName
 from .constants import *
 from .attributes import NodePathAttribute as Attr
 from game.nodes.attributes import Connection as Cnnctn
@@ -61,8 +60,8 @@ class NodePath(Base):
             
         self.data.removeNode()
         
-    def Duplicate( self, uniqueName=True ):
-        dupeNp = self.data.copyTo( self.data.getParent() )
+    def Duplicate(self, uniqueName=True):
+        dupeNp = self.data.copyTo(self.data.getParent())
         
         # Make sure the duplicated NodePath has a unique name to all its 
         # siblings.
@@ -71,10 +70,9 @@ class NodePath(Base):
                 np.getName() 
                 for np in self.data.getParent().getChildren()
             ]
-            dupeNp.setName( utils.GetUniqueName( self.data.getName(), 
-                                                 siblingNames ) )
+            dupeNp.setName(GetUniqueName(self.data.getName(), siblingNames))
         
-        self.FixUpDuplicateChildren( self.data, dupeNp )
+        self.FixUpDuplicateChildren(self.data, dupeNp)
         return dupeNp
     
     def GetId( self ):

@@ -1,9 +1,5 @@
-import inspect
-from importlib import import_module
+from pandaEditor.game.nodes.manager import Manager as NodeManager
 
-from pandaEditor.game.nodes.manager import (
-    Manager as NodeManager, GAME_NODE_MODULES
-)
 
 EDITOR_NODE_MODULES = [
     'pandaEditor.editor.nodes.modelRoot',

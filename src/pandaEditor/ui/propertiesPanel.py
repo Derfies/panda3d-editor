@@ -61,7 +61,7 @@ class PropertyGrid( wxpg.PropertyGrid ):
         allChildren = {}
         for cProp in cProps:
             allChildren[self.GetPropertyLongLabel( cProp )] = cProp
-        self._propsByLongLabel = dict( allProps.items() + allChildren.items() )
+        self._propsByLongLabel = {**allProps, **allChildren}
         
     def Clear( self ):
         
@@ -138,7 +138,7 @@ class PropertyGrid( wxpg.PropertyGrid ):
         
         # Recurse down hierarchy
         for i in range( prop.GetCount() ):
-            result = dict( result.items() + self.GetAllChildren( prop.Item( i ), longLbl ).items() )
+            result = {**result, **self.GetAllChildren(prop.Item(i), longLbl)}
         
         return result
 
@@ -156,7 +156,7 @@ class PropertyGrid( wxpg.PropertyGrid ):
         
         for propLabel, prop in self._propsByLabel.items():
             childs = self.GetAllChildren( prop )
-            props = dict( props.items() + childs.items() )
+            props = {**props, **childs}
         
         return props
     
@@ -243,7 +243,7 @@ class PropertiesPanel( wx.Panel ):
         self.propAttrMap = {}
                         
         # Build all properties from attributes.
-        comps = self.app.selection.comps
+        comps = base.frame.app.selection.comps
         wrprCls = base.game.nodeMgr.GetCommonWrapper( comps )
         wrprs = [wrprCls( comp ) for comp in comps]
         for i, attr in enumerate( wrprs[0].GetAttributes( addons=True ) ):

@@ -146,24 +146,29 @@ class Selection( p3d.Object ):
         Stop the marquee and get all the node paths under it with the correct
         tag. Also append any node which was under the mouse at the end of the
         operation.
+
         """
         self.marquee.Stop()
         
         # Find all node paths below the root node which are inside the marquee
         # AND have the TAG_PICKABLE tag.
         nps = []
-        for np in self.rootNp.findAllMatches( '**' ):
-            pickNp = self.GetPickableNodePath( np )
-            if self.marquee.IsNodePathInside( pickNp ) and pickNp not in nps:
-                nps.append( pickNp )
+        for np in self.rootNp.findAllMatches('**'):
+            pick_np = self.GetPickableNodePath(np)
+            if (
+                pick_np is not None and
+                self.marquee.IsNodePathInside(pick_np) and
+                pick_np not in nps
+            ):
+                nps.append(pick_np)
                     
         # Add any node path which was under the mouse to the selection.
         np = self.GetNodePathUnderMouse()
-        if np is not None and np not in nps:
-            nps.append( np )
+        if np is not None and pick_np not in nps:
+            nps.append(np)
         
-        # In append mode add any NodePath which wasn't already in the 
-        # selection and remove any NodePath which was already selected.
+        # In append mode add any NodePath which wasn't already in the selection
+        # and remove any NodePath which was already selected.
         if self.append:
             oldComps = self.comps
             for np in nps:
@@ -195,12 +200,15 @@ class Selection( p3d.Object ):
             return None
         
     def GetPickableNodePath(self, np):
-        if np.getPythonTag(TAG_IGNORE):
-            return np.findNetPythonTag(TAG_PICKABLE)
-        elif p3d.MOUSE_CTRL in base.edCamera.mouse.modifiers:
-            return np
-        else:
-            return np.findNetPythonTag(TAG_PICKABLE)
+        if p3d.MOUSE_CTRL not in base.edCamera.mouse.modifiers:
+            np = np.findNetPythonTag(TAG_PICKABLE)
+        return None if np.isEmpty() else np
+        # if np.getPythonTag(TAG_IGNORE):
+        #     np = np.findNetPythonTag(TAG_PICKABLE)
+        # #elif p3d.MOUSE_CTRL in base.edCamera.mouse.modifiers:
+        # #    return np
+        # else:
+        #     return np.findNetPythonTag(TAG_PICKABLE)
         
     def Update( self ):
         """Update the selection by running deselect and select handlers."""

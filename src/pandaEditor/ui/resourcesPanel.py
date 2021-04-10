@@ -14,30 +14,30 @@ class ResourcesPanel(wx.Panel):
         super().__init__(*args, **kwargs)
 
         self.app = self.GetParent().app
-        
+
         # Bind project file events
         pub.subscribe( self.OnUpdate, 'projectFilesAdded' )
         pub.subscribe( self.OnUpdate, 'projectFilesRemoved' )
-        
+
         # Build sizers
         self.bs1 = wx.BoxSizer( wx.VERTICAL )
         self.SetSizer( self.bs1 )
-        
+
     def Build( self, projDirPath ):
-        
+
         # Clear all widgets from the sizer
-        self.bs1.Clear( True ) 
+        self.bs1.Clear( True )
         if projDirPath is not None and os.path.isdir( projDirPath ):
-            
+
             # Build tree control and add it to the sizer
             self.dtc = DirTreeCtrl( self, -1, style=
-                                    wx.NO_BORDER | 
+                                    wx.NO_BORDER |
                                     wx.TR_DEFAULT_STYLE |
                                     wx.TR_EDIT_LABELS )
             self.dtc.SetRootDir( projDirPath )
             self.dtc.Expand( self.dtc.GetRootItem() )
             self.bs1.Add( self.dtc, 1, wx.EXPAND )
-            
+
             # Bind tree control events
             self.dtc.Bind( wx.EVT_KEY_UP, wxPanda.OnKeyUp )
             self.dtc.Bind( wx.EVT_KEY_DOWN, wxPanda.OnKeyDown )
@@ -48,7 +48,7 @@ class ResourcesPanel(wx.Panel):
             self.dtc.Bind( wx.EVT_LEFT_DCLICK, self.OnLeftDClick )
             self.dtc.Bind( wx.EVT_TREE_END_LABEL_EDIT, self.OnTreeEndLabelEdit )
         else:
-            
+
             # Build and display "project not set" warning
             tc = wx.StaticText( self, -1, 'Project directory not set', style=wx.ALIGN_CENTER )
             font = tc.GetFont()
@@ -56,56 +56,56 @@ class ResourcesPanel(wx.Panel):
             tc.SetFont( font )
             self.bs1.AddSpacer( 10 )
             self.bs1.Add( tc, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 2 )
-            
+
         self.bs1.Layout()
-        
+
     def OnRightDown( self, evt ):
         """
         This method does nothing. Oddly enough, *not* binding RightDown seems
-        to affect RightUp's behaviour, and we only trap half the mouse up 
+        to affect RightUp's behaviour, and we only trap half the mouse up
         events.
         """
         pass
-        
+
     def OnRightUp( self, evt ):
-        
+
         # Get the item under the mouse - bail if the item is not ok
         itemId = wxUtils.GetClickedItem( self.dtc, evt )
         if itemId is None or not itemId.IsOk():
             return
-        
+
         menu = wx.Menu()
         mItem = wx.MenuItem( menu, wx.NewId(), 'Open in Explorer' )
         menu.AppendItem( mItem )
         wxUtils.IdBind( menu, wx.EVT_MENU, mItem.GetId(), self.OnOpenFile, itemId )
         self.PopupMenu( menu )
         menu.Destroy()
-        
+
     def OnOpenFile( self, evt, itemId ):
         systems = {
             'nt': os.startfile,
             'posix': lambda foldername: os.system( 'xdg-open "%s"' % foldername ),
             'os2': lambda foldername: os.system( 'open "%s"' % foldername )
         }
-        
+
         filePath = self.dtc.GetItemPath( itemId )
         dirPath = os.path.split( filePath )[0]
         systems.get( os.name, os.startfile )( dirPath )
-        
+
     def OnMiddleDown( self, evt ):
-        
+
         # Get the item under the mouse - bail if the item is not ok
         itemId = wxUtils.GetClickedItem( self.dtc, evt )
         if itemId is None or not itemId.IsOk():
             return
-        
+
         # Select it and start drag and drop operations.
         self.dtc.SelectItem( itemId )
-        self.app.dDropMgr.Start( self, [self.dtc.GetItemPath( itemId )], 
+        self.app.dDropMgr.Start( self, [self.dtc.GetItemPath( itemId )],
                                  self.dtc.GetItemPath( itemId ) )
-        
+
     def OnLeftDClick( self, evt ):
-        
+
         # Load items
         itemId = wxUtils.GetClickedItem( self.dtc, evt )
         filePath = self.dtc.GetItemPath( itemId )

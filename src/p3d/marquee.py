@@ -62,10 +62,8 @@ class Marquee( NodePath, p3d.SingleTask ):
     
     def IsNodePathInside( self, np ):
         """Test if the specified node path lies within the marquee area."""
-        print('np:', np)
-        print('rootNp:', self.rootNp)
-        npWorldPos = np.getPos( self.rootNp )
-        p3 = self.camera.getRelativePoint( self.rootNp, npWorldPos )
+        npWorldPos = np.getPos(self.rootNp)
+        p3 = self.camera.getRelativePoint(self.rootNp, npWorldPos)
 
         # Convert it through the lens to render2d coordinates
         p2 = Point2()

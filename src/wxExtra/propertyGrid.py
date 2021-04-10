@@ -168,6 +168,7 @@ class BaseProperty( object ):
         return False
     
     def IsExpanded( self ):
+        return False
         return self._window.IsExpanded()
     
     def SetExpanded( self, val ):
@@ -400,13 +401,13 @@ class CollapsiblePanel( BasePanel ):
         # Add the label
         self.label = wx.StaticText( self, -1, self.prop.GetLabel() )
         if self.prop.IsCategory():
-            labelfont = wx.SystemSettings_GetFont( wx.SYS_DEFAULT_GUI_FONT )
+            labelfont = wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT)
             labelfont.SetWeight( wx.BOLD )
             self.label.SetFont( labelfont )
         
         # Button and label go in seperate sizer
         self.sizer2 = wx.BoxSizer( wx.HORIZONTAL )
-        self.sizer2.PrependSpacer( 16, -1 )
+        self.sizer2.PrependSpacer(16)
         self.sizer2.Add( self.label, 1, wx.EXPAND )
         self.sizer.Add( self.sizer2, 1, wx.EXPAND )
         
@@ -498,6 +499,7 @@ class PropertyGrid( scrolled.ScrolledPanel ):
             parent = self._currParent
         
         pnl = CollapsiblePanel( self, prop, parent )
+        print('pnl:', pnl)
         parent.AddWindow( pnl )
         prop.SetWindow( pnl )
         prop.SetGrid( self )

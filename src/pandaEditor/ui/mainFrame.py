@@ -5,7 +5,6 @@ import wx
 import wx.aui
 from wx.lib.pubsub import pub
 import panda3d.core as pm
-from direct.actor.Actor import Actor
 
 import p3d
 from pandaEditor import commands as cmds
@@ -13,20 +12,15 @@ from wxExtra import utils as wxUtils, ActionItem, LogPanel, CustomMenu
 from wxExtra import AuiManagerConfig, CustomAuiToolBar, CustomMenu
 from .viewport import Viewport
 from pandaEditor.app import App as OldApp
-from pandaEditor import game
-from .document import Document
-from .baseDialog import BaseDialog
 from .resourcesPanel import ResourcesPanel
-from .propertiesPanel import PropertiesPanel
 from .sceneGraphPanel import SceneGraphPanel
 from .preferencesFrame import PreferencesFrame
 from .lightLinkerPanel import LightLinkerPanel
-from .projectSettingsPanel import ProjectSettingsPanel
 
 
 FRAME_TITLE = 'Panda Editor 0.1'
 TBAR_ICON_SIZE = (24, 24)
-WILDCARD_MODEL = 'Model (*.egg; *.bam; *.egg.pz)|*.egg;*.bam;*.egg.pz'
+WILDCARD_MODEL = 'Model (*.egg; *.bam; *.egg.pz; *.obj)|*.egg;*.bam;*.egg.pz;*.obj'
 WILDCARD_SCENE = '.xml|*.xml'
 WILDCARD_P3D = '.p3d|*.p3d'
 
@@ -104,57 +98,57 @@ class MainFrame( wx.Frame ):
             ID_EDIT_PARENT: self.app.Parent,
             ID_EDIT_UNPARENT: self.app.Unparent
         }
-        
+
         # Bind frame events
         self.Bind( wx.EVT_CLOSE, self.OnClose )
         self.Bind( wx.EVT_KEY_UP, p3d.wxPanda.OnKeyUp )
         self.Bind( wx.EVT_KEY_DOWN, p3d.wxPanda.OnKeyDown )
         self.Bind( wx.EVT_SIZE, self.OnSize )
         self.Bind( wx.EVT_MOVE, self.OnMove )
-        
+
         # Bind publisher events
         pub.subscribe( self.OnUpdate, 'Update' )
-        
+
         # Build application preferences
         self.cfg = wx.Config( 'pandaEditor' )
-        
+
         # Build toolbars
         self.BuildFileActions()
         self.BuildEditActions()
         self.BuildModifyActions()
         self.BuildXformActions()
         self.BuildLayoutActions()
-        
-        # Build viewport. Don't initialise just yet as ShowBase has not yet 
+
+        # Build viewport. Don't initialise just yet as ShowBase has not yet
         # been created.
         self.pnlViewport = Viewport( self )
-        
+
         # Build editor panels
         self.pnlSceneGraph = SceneGraphPanel( self, style=wx.SUNKEN_BORDER )
         self.pnlLightLinker = LightLinkerPanel( self, style=wx.SUNKEN_BORDER )
-        self.pnlProps = PropertiesPanel( self, style=wx.SUNKEN_BORDER )
+        #self.pnlProps = PropertiesPanel( self, style=wx.SUNKEN_BORDER )
         self.pnlRsrcs = ResourcesPanel( self, style=wx.SUNKEN_BORDER )
         self.pnlLog = LogPanel( self, style=wx.SUNKEN_BORDER )
-        
+
         # Build aui manager to hold all the widgets
         self.BuildAuiManager()
-        
+
         # Build menus and menu bar
         self.mb = wx.MenuBar()
         self.BuildViewMenu()
         self.BuildCreateMenu()
         self.BuildWindowMenu()
         self.BuildMenuBar()
-        
+
         # Populate the panels menu bar with items representing each floating
         # panel.
         self.RebuildPanelMenu()
-        
+
         # Update the view menu based on the perspective saved in preferences
         self.OnUpdateWindowMenu( None )
-        
+
     def _GetSavePath( self ):
-                
+
         # Get default paths from current project directory, or the scene's
         # current location on disk
         defaultDir = ''
@@ -174,7 +168,7 @@ class MainFrame( wx.Frame ):
                 return False
 
         return filePath
-    
+
     def _CheckForSave( self ):
         """
         If there is already a file loaded and it is dirty, query the user to
@@ -192,7 +186,7 @@ class MainFrame( wx.Frame ):
 
         # Document not dirty, return True
         return True
-        
+
     def OnClose( self, evt ):
         """Save frame and aui preferences, hide the window and quit."""
         # Check if ok to continue, stop the closing process if the user
@@ -200,7 +194,7 @@ class MainFrame( wx.Frame ):
         if not self._CheckForSave():
             evt.Veto()
             return
-        
+
         # Save prefs, hide window and quit
         self.auiCfg.Save()
         if self.preMaxPos is not None:
@@ -218,17 +212,17 @@ class MainFrame( wx.Frame ):
         except NameError:
             sys.exit()
         base.userExit()
-        
+
     def OnFileNew( self, evt ):
         """Show project settings panel and create new scene."""
         # Check if ok to continue, return if the user cancelled
         if not self._CheckForSave():
             return
-        
+
         # Create new document
         self.app.CreateScene()
         self.app.doc.OnRefresh()
-        
+
     def OnFileOpen( self, evt, filePath=None ):
         """Create a new document and load the scene."""
         # Check if ok to continue, return if the user cancelled
@@ -237,21 +231,21 @@ class MainFrame( wx.Frame ):
 
         # Create new document from file path and load it
         if filePath is None:
-            
-            # Get the start directory. This will be the current working 
+
+            # Get the start directory. This will be the current working
             # directory if the project is not set.
             scnsDirPath = self.app.project.GetScenesDirectory()
             if scnsDirPath is None:
                 scnsDirPath = os.getcwd()
-                
+
             filePath = wxUtils.FileOpenDialog( 'Open Scene', WILDCARD_SCENE,
                                                defaultDir=scnsDirPath )
-            
+
         # Create new document
         if filePath:
             self.app.CreateScene( filePath )
             self.app.doc.Load()
-        
+
     def OnFileSave( self, evt, saveAs=False ):
         """Save the document."""
         # Set a file path for the document if one does not exist, or for save
@@ -264,17 +258,17 @@ class MainFrame( wx.Frame ):
                 self.app.doc.filePath = filePath
             else:
                 return
-        
+
         # Save the file
         self.app.doc.Save()
-        
+
     def OnFileSaveAs( self, evt ):
         """
         Call save using the saveAs flag in order to bring up a new dialog box
         so the user may set an alternate save path.
         """
         self.OnFileSave( evt, True )
-        
+
     def OnFileImport( self, evt ):
         """Import assets to project."""
         filePaths = wxUtils.FileOpenDialog(
@@ -284,8 +278,8 @@ class MainFrame( wx.Frame ):
         )
         if filePaths:
             for filePath in filePaths:
-                self.app.project.ImportAsset( filePath )
-            
+                self.app.project.ImportAsset(filePath)
+
     def OnFileNewProject( self, evt ):
         """Build project directory and set project."""
         dirPath = wxUtils.DirDialog( 'Set New Project Directory' )
@@ -293,7 +287,7 @@ class MainFrame( wx.Frame ):
             self.app.project.New( dirPath )
             self.SetProjectPath( dirPath )
             self.app.doc.OnRefresh()
-        
+
     def OnFileSetProject( self, evt ):
         """
         Set the active project directory path and rebuild the resources panel.
@@ -302,34 +296,34 @@ class MainFrame( wx.Frame ):
         if dirPath:
             self.SetProjectPath( dirPath )
             self.app.doc.OnRefresh()
-            
+
     def OnFileBuildProject( self, evt ):
         """Build the current project to a p3d file."""
         filePath = wxUtils.FileSaveDialog( 'Build Project', WILDCARD_P3D )
         if not filePath:
             return
-        
+
         if filePath and os.path.exists( filePath ):
 
             # Warn user if the chosen file path already exists
             msg = ''.join( ['The file "', filePath, '" already exists.\nDo you want to replace it?'] )
             if wxUtils.YesNoDialog( msg, 'Replace File?', wx.ICON_WARNING ) == wx.ID_NO:
                 return
-            
+
         self.app.project.Build( filePath )
-            
+
     def OnSingleCommand( self, evt ):
         id = evt.GetId()
         fn = self.actns[id]
         fn()
-        
+
     def OnEngagePhysics( self, evt ):
         wrpr = base.game.nodeMgr.Wrap( base.scene.physicsWorld )
         if base.scene.physicsTask not in taskMgr.getAllTasks():
             wrpr.EnablePhysics()
         else:
             wrpr.DisablePhysics()
-            
+
     def OnViewGrid( self, evt ):
         """
         Show or hide the grid based on the checked value of the menu item.
@@ -339,18 +333,18 @@ class MainFrame( wx.Frame ):
             self.app.grid.show()
         else:
             self.app.grid.hide()
-            
+
     def OnViewCamera( self, evt, yaw_pitch ):
-        """ 
-        Orbit camera top or bottom by manipulating delta values 
-        See p3d.camera.Orbit for more 
-        """ 
-        delta = pm.Vec2( -base.edCamera.getH() + yaw_pitch[0], -base.edCamera.getP() + yaw_pitch[1] ) 
-        base.edCamera.Orbit( delta ) 
-        
+        """
+        Orbit camera top or bottom by manipulating delta values
+        See p3d.camera.Orbit for more
+        """
+        delta = pm.Vec2( -base.edCamera.getH() + yaw_pitch[0], -base.edCamera.getP() + yaw_pitch[1] )
+        base.edCamera.Orbit( delta )
+
     def OnCreate( self, evt, typeStr ):
         self.app.AddComponent( typeStr )
-        
+
     def OnCreateActor( self, evt ):
         """
         Turn the selection into actors. This is still a massive hack - we need
@@ -361,14 +355,14 @@ class MainFrame( wx.Frame ):
             attr = wrpr.FindProperty( 'modelPath' )
             if attr is None:
                 continue
-            
+
             wrprCls = base.game.nodeMgr.nodeWrappers['Actor']
             aWrpr = wrprCls.Create( modelPath=attr.Get() )
             aWrpr.data.setTransform( wrpr.data.getTransform() )
             aWrpr.SetDefaultValues()
             aWrpr.SetParent( wrpr.GetDefaultParent() )
             cmds.Replace( wrpr.data, aWrpr.data )
-        
+
     def OnCreatePrefab( self, evt ):
         """
         Create a new prefab for the selected object in the prefab directory.
@@ -378,16 +372,16 @@ class MainFrame( wx.Frame ):
         assetName = self.app.project.GetUniqueAssetName( 'prefab.xml', dirPath )
         assetPath = os.path.join( dirPath, assetName )
         base.game.scnParser.Save( np, assetPath )
-        
+
     def OnCreateCgShader( self, evt ):
         """
-        
+
         """
         self.app.project.CreateCgShader()
-        
+
     def OnCreateGlslShader( self, evt ):
         """
-        
+
         """
         self.app.project.CreateGlslShader()
 
@@ -397,16 +391,16 @@ class MainFrame( wx.Frame ):
         """
         pane = self.paneDefs[evt.GetId()][0]
         self._mgr.GetPane( pane ).Show( evt.Checked() )
-        
+
         # Make sure to call or else we won't see any changes.
         self._mgr.Update()
         self.app.doc.OnRefresh()
-        
+
     def OnXformSetActiveGizmo( self, evt ):
         if evt.GetId() == ID_XFORM_WORLD:
             self.app.SetGizmoLocal( not evt.Checked() )
             return
-            
+
         arg = None
         if evt.GetId() == ID_XFORM_POS:
             arg = 'pos'
@@ -415,7 +409,7 @@ class MainFrame( wx.Frame ):
         elif evt.GetId() == ID_XFORM_SCL:
             arg = 'scl'
         self.app.SetActiveGizmo( arg )
-        
+
     def OnLayout( self, evt ):
         if evt.GetId() == ID_LAYOUT_GAME:
             base.LayoutGameView()
@@ -423,34 +417,34 @@ class MainFrame( wx.Frame ):
             base.LayoutEditorView()
         elif evt.GetId() == ID_LAYOUT_BOTH:
             base.LayoutBothView()
-        
+
     def OnUpdateWindowMenu( self, evt ):
         """
-        Set the checks in the window menu to match the visibility of the 
+        Set the checks in the window menu to match the visibility of the
         panes.
         """
         def UpdateWindowMenu():
-            
+
             # Check those menus representing panels which are still shown
             # after the event
             for id in self.paneDefs:
                 pane = self.paneDefs[id][0]
                 if self.mPnl.FindItemById( id ) and self._mgr.GetPane( pane ).IsShown():
                     self.mPnl.Check( id, True )
-                    
+
         # Uncheck all menus
         for id in self.paneDefs:
             if self.mPnl.FindItemById( id ):
                 self.mPnl.Check( id, False )
-        
-        # Call after or IsShown() won't return a useful value 
+
+        # Call after or IsShown() won't return a useful value
         wx.CallAfter( UpdateWindowMenu )
-        
+
     def OnUpdate( self, comps=None ):
         """
         Change the appearance and states of buttons on the form based on the
         state of the loaded document.
-        
+
         NOTE: Don't use freeze / thaw as this will cause the 3D viewport to
         flicker.
         """
@@ -460,24 +454,24 @@ class MainFrame( wx.Frame ):
         self.OnUpdateView( comps )
         self.OnUpdateProject( comps )
         self.OnUpdateXform( comps )
-        
+
         # Set the frame's title to include the document's file path, include
         # dirty 'star'
         title = ''.join( [FRAME_TITLE, ' - ', self.app.doc.title] )
         if self.app.doc.dirty:
             title += ' *'
         self.SetTitle( title )
-        
+
         self.app.game.pluginMgr.OnUpdate( comps )
-        
+
     def OnUpdateFile( self, msg ):
         """
-        Update the file menu. Disable all menu and toolbar items then turn 
+        Update the file menu. Disable all menu and toolbar items then turn
         those back on depending on the document's state.
         """
         self.mFile.EnableAllTools( False )
         self.tbFile.EnableAllTools( False )
-        
+
         self.mFile.Enable( ID_FILE_NEW, True )
         self.mFile.Enable( ID_FILE_OPEN, True )
         self.mFile.Enable( ID_FILE_SAVE_AS, True )
@@ -485,15 +479,15 @@ class MainFrame( wx.Frame ):
         self.tbFile.EnableTool( ID_FILE_NEW, True )
         self.tbFile.EnableTool( ID_FILE_OPEN, True )
         self.tbFile.EnableTool( ID_FILE_SAVE_AS, True )
-        
+
         if self.app.doc.dirty:
             self.mFile.Enable( ID_FILE_SAVE, True )
             self.tbFile.EnableTool( ID_FILE_SAVE, True )
         if self.app.project.path is not None:
             self.mFile.Enable( ID_FILE_IMPORT, True )
-        
+
         self.tbFile.Refresh()
-        
+
     def OnUpdateEdit( self, msg ):
         """
         Update the edit menu. Disable undo or redo queus if they are empty
@@ -502,43 +496,43 @@ class MainFrame( wx.Frame ):
         val = len( self.app.actnMgr.undoList ) > 0
         self.mEdit.Enable( ID_EDIT_UNDO, val )
         self.tbEdit.EnableTool( ID_EDIT_UNDO, val )
-        
+
         val = len( self.app.actnMgr.redoList ) > 0
         self.mEdit.Enable( ID_EDIT_REDO, val )
         self.tbEdit.EnableTool( ID_EDIT_REDO, val )
-        
+
         self.tbEdit.Refresh()
-        
+
     def OnUpdateModify( self, msg ):
         self.tbModify.EnableTool( ID_MODIFY_PHYSICS, False )
         if base.scene.physicsWorld is not None:
             self.tbModify.EnableTool( ID_MODIFY_PHYSICS, True )
-            
+
             if base.scene.physicsTask not in taskMgr.getAllTasks():
                 self.tbModify.ToggleTool( ID_MODIFY_PHYSICS, False )
             else:
                 self.tbModify.ToggleTool( ID_MODIFY_PHYSICS, True )
-                
+
         self.tbModify.Refresh()
-        
+
     def OnUpdateView( self, msg ):
         """
-        Update the view menu. Ensure the grid menu item's checked state 
+        Update the view menu. Ensure the grid menu item's checked state
         matches the visibility of the grid.
         """
         self.mView.Check( ID_VIEW_GRID, False )
         if not self.app.grid.isHidden():
             self.mView.Check( ID_VIEW_GRID, True )
-        
+
     def OnUpdateProject( self, msg ):
         self.mProj.EnableAllTools( False )
-        
+
         self.mProj.Enable( ID_PROJ_NEW, True )
         self.mProj.Enable( ID_PROJ_SET, True )
-        
+
         if self.app.project.path is not None:
             self.mProj.EnableAllTools( True )
-            
+
     def OnUpdateXform( self, msg ):
         gizmo = self.app.gizmoMgr.GetActiveGizmo()
         if gizmo is None:
@@ -549,12 +543,12 @@ class MainFrame( wx.Frame ):
             self.tbXform.ToggleTool( ID_XFORM_ROT, True )
         elif gizmo.getName() == 'scl':
             self.tbXform.ToggleTool( ID_XFORM_SCL, True )
-        
+
         val = not self.app.gizmoMgr.GetGizmoLocal( 'pos' )
         self.tbXform.ToggleTool( ID_XFORM_WORLD, val )
-            
+
         self.tbXform.Refresh()
-        
+
     def OnShowPreferences( self, evt ):
         try:
             self.frmPrefs.Close()
@@ -563,7 +557,7 @@ class MainFrame( wx.Frame ):
         self.frmPrefs = PreferencesFrame( self )
         self.frmPrefs.Center()
         self.frmPrefs.Show()
-        
+
     def OnMove( self, evt ):
         """
         Keep the window's position on hand before it gets maximized as this is
@@ -571,7 +565,7 @@ class MainFrame( wx.Frame ):
         """
         if not self.IsMaximized():
             self.preMaxPos = self.GetPosition()
-        
+
     def OnSize( self, evt ):
         """
         Keep the window's size on hand before it gets maximized as this is the
@@ -579,7 +573,7 @@ class MainFrame( wx.Frame ):
         """
         if not self.IsMaximized():
             self.preMaxSize = self.GetSize()
-        
+
     def SetProjectPath( self, dirPath ):
         """
         Set the project path and rebuild the resources panel.
@@ -896,14 +890,14 @@ class MainFrame( wx.Frame ):
                 .Right()
                 .Position( 2 )),
                 
-            ID_WIND_PROPERTIES:(self.pnlProps, True,
-                wx.aui.AuiPaneInfo()
-                .Name( 'pnlProps' )
-                .Caption( 'Properties' )
-                .CloseButton( True )
-                .MaximizeButton( True )
-                .MinSize( (100, 100) )
-                .Right()),
+            # ID_WIND_PROPERTIES:(self.pnlProps, True,
+            #     wx.aui.AuiPaneInfo()
+            #     .Name( 'pnlProps' )
+            #     .Caption( 'Properties' )
+            #     .CloseButton( True )
+            #     .MaximizeButton( True )
+            #     .MinSize( (100, 100) )
+            #     .Right()),
                 
             ID_WIND_LOG:(self.pnlLog, True,
                 wx.aui.AuiPaneInfo()

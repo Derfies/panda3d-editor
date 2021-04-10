@@ -53,8 +53,6 @@ class Manager:
                 cls = member[1]
                 if cls.__module__ == module.__name__:
                     self.nodeWrappers[cls.__name__] = cls
-
-                    print(cls, cls.mro())
         
     def Create( self, nTypeStr, *args ):
         wrprCls = self.nodeWrappers[nTypeStr]

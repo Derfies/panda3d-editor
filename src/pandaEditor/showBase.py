@@ -10,6 +10,8 @@ class App(ShowBase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.forcedAspectWins = []
+
         self.startWx()
         self.frame = MainFrame(None, size=(800, 600))
         self.frame.Show()
@@ -26,8 +28,8 @@ class App(ShowBase):
 
         # Add the editor window, camera and pixel 2d to the list of forced
         # aspect windows so aspect is fixed when the window is resized.
-        self.forcedAspectWins = []
-        self.forcedAspectWins.append( (self.win, self.edCamera, self.edPixel2d) )
+
+        self.forcedAspectWins.append((self.win, self.edCamera, self.edPixel2d))
 
         self.Reset()
 
@@ -106,23 +108,23 @@ class App(ShowBase):
         self.edDr.setClearColorActive( True )
         self.edDr.setClearColor( (0.63, 0.63, 0.63, 0) )
         
-    # def windowEvent(self, *args, **kwargs):
-    #     """
-    #     Overridden so as to fix the aspect ratio of the editor camera and
-    #     editor pixel2d.
-    #     """
-    #     super().windowEvent(*args, **kwargs)
-    #
-    #     for win, cam, pixel2d in self.forcedAspectWins:
-    #         aspectRatio = self.getAspectRatio( win )
-    #         cam.node().getLens().setAspectRatio( aspectRatio )
-    #
-    #         # Fix pixel2d scale for new window size
-    #         # Temporary hasattr for old Pandas
-    #         if not hasattr( win, 'getSbsLeftXSize' ):
-    #             pixel2d.setScale( 2.0 / win.getXSize(), 1.0, 2.0 / win.getYSize() )
-    #         else:
-    #             pixel2d.setScale( 2.0 / win.getSbsLeftXSize(), 1.0, 2.0 / win.getSbsLeftYSize() )
+    def windowEvent(self, *args, **kwargs):
+        """
+        Overridden so as to fix the aspect ratio of the editor camera and
+        editor pixel2d.
+        """
+        super().windowEvent(*args, **kwargs)
+
+        for win, cam, pixel2d in self.forcedAspectWins:
+            aspectRatio = self.getAspectRatio( win )
+            cam.node().getLens().setAspectRatio( aspectRatio )
+
+            # Fix pixel2d scale for new window size
+            # Temporary hasattr for old Pandas
+            if not hasattr( win, 'getSbsLeftXSize' ):
+                pixel2d.setScale( 2.0 / win.getXSize(), 1.0, 2.0 / win.getYSize() )
+            else:
+                pixel2d.setScale( 2.0 / win.getSbsLeftXSize(), 1.0, 2.0 / win.getSbsLeftYSize() )
             
     def GetEditorRenderMasks( self ):
         """

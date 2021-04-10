@@ -72,7 +72,6 @@ class DragDropManager:
             return wrpr.GetPossibleConnections( self.dragComps )
             
     def OnDropItem( self, str, parent, x, y ):
-        print('drop')
         
         # Get the item at the drop point
         dropComp = parent.GetDroppedObject( x, y )
@@ -84,7 +83,6 @@ class DragDropManager:
                 pass
         if dropComp is None:
             return
-        print(dropComp)
         wrpr = base.game.nodeMgr.Wrap( dropComp )
         self.data = {}
         dragComps = self.app.dDropMgr.dragComps
@@ -92,7 +90,6 @@ class DragDropManager:
             wrpr.OnDragDrop( dragComps, wrpr.data )
         else:
             menu = wx.Menu()
-            print('wrpr 1:', wrpr)
             for cnnctn in wrpr.GetPossibleConnections( dragComps ):
                 mItem = wx.MenuItem( menu, wx.NewId(), cnnctn.label )
                 menu.AppendItem( mItem )
