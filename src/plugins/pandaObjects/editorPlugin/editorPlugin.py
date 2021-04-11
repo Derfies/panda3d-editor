@@ -60,7 +60,7 @@ class EditorPlugin(gp.GamePlugin):
         # Try to load the script. Warn the user if the script fails in any 
         # way.
         try:
-            scriptWrprCls = base.game.nodeMgr.nodeWrappers['Script']
+            scriptWrprCls = base.game.node_manager.nodeWrappers['Script']
             scriptWrpr = scriptWrprCls.Create(filePath=filePath)
         except:
             wxUtils.ErrorDialog(traceback.format_exc(), 'Script Error')
@@ -70,7 +70,7 @@ class EditorPlugin(gp.GamePlugin):
         # script to it. Create one if it doesn't already exist and add it to
         # the list of undoable actions.
         actns = []
-        pObjWrprCls = base.game.nodeMgr.nodeWrappers[TAG_PANDA_OBJECT]
+        pObjWrprCls = base.game.node_manager.nodeWrappers[TAG_PANDA_OBJECT]
         pObj = PandaObjectNPO.Get(np)
         if pObj is None:
             pObjWrpr = pObjWrprCls.Create()
@@ -171,6 +171,6 @@ class EditorPlugin(gp.GamePlugin):
                 if np.getPythonTag(TAG_PANDA_OBJECT) is not None
             ]
             for np in nps:
-                pObjWrpr = base.game.nodeMgr.Wrap(PandaObjectNPO.Get(np))
+                pObjWrpr = base.game.node_manager.Wrap(PandaObjectNPO.Get(np))
                 for pyFilePath in pyFilePaths:
                     pObjWrpr.ReloadScript(pyFilePath)

@@ -57,7 +57,7 @@ class AssetManager:
             if np.node().getFullpath() == pandaPath
         ]
         
-        wrprCls = self.base.game.nodeMgr.GetWrapperByName('ModelRoot')
+        wrprCls = self.base.game.node_manager.GetWrapperByName('ModelRoot')
         filePath = pm.Filename.toOsSpecific(pandaPath)
         wrpr = wrprCls.Create(modelPath=filePath)
         
@@ -71,7 +71,7 @@ class AssetManager:
             inCnnctns = {}
             outCnnctns = {}
             for childNp in np.findAllMatches('**/*'):
-                cWrpr = self.base.game.nodeMgr.Wrap(childNp)
+                cWrpr = self.base.game.node_manager.Wrap(childNp)
                 path = cWrpr.GetPath()
                 oldIds[path] = cWrpr.GetId()
                 for cnnctn in self.base.scene.GetIncomingConnections(cWrpr):
@@ -91,13 +91,13 @@ class AssetManager:
             # Copy the new updated children under the old ModelRoot NodePath
             # so we retain its properties.
             for childNp in wrpr.data.getChildren():
-                cWrpr = self.base.game.nodeMgr.Wrap(childNp)
+                cWrpr = self.base.game.node_manager.Wrap(childNp)
                 dupeNp = cWrpr.Duplicate(uniqueName=False)
                 dupeNp.reparentTo(np)
                 
             # Replace connections.
             for childNp in np.findAllMatches('**/*'):
-                cWrpr = self.base.game.nodeMgr.Wrap(childNp)
+                cWrpr = self.base.game.node_manager.Wrap(childNp)
                 path = cWrpr.GetPath()
                 
                 if path in outCnnctns:

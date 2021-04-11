@@ -44,7 +44,7 @@ def Duplicate(comps):
     base.selection.Clear()
     dupeComps = []
     for comp in comps:
-        wrpr = base.game.nodeMgr.Wrap(comp)
+        wrpr = base.game.node_manager.Wrap(comp)
         dupeComps.append(wrpr.Duplicate())
     actns = []
     actns.append(actions.Deselect(selComps))
@@ -153,7 +153,7 @@ def Ungroup(nps):
     pNps = []
     cNpSets = []
     for np in nps:
-        wrpr = base.game.nodeMgr.Wrap(np)
+        wrpr = base.game.node_manager.Wrap(np)
         pNps.append(wrpr.GetParent().data)
         cNpSets.append([cWrpr.data for cWrpr in wrpr.GetChildren()])
         

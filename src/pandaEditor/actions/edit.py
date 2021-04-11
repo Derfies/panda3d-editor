@@ -5,15 +5,15 @@ class Edit(Base):
     
     def __init__(self, comp):
         self.comp = comp
-        wrpr = base.game.nodeMgr.Wrap(self.comp)
+        wrpr = base.game.node_manager.Wrap(self.comp)
         self.mod = wrpr.GetModified()
     
     def Undo(self):
-        wrpr = base.game.nodeMgr.Wrap(self.comp)
+        wrpr = base.game.node_manager.Wrap(self.comp)
         wrpr.SetModified(self.mod)
     
     def Redo(self):
-        wrpr = base.game.nodeMgr.Wrap(self.comp)
+        wrpr = base.game.node_manager.Wrap(self.comp)
         wrpr.SetModified(True)
         
 
@@ -27,12 +27,12 @@ class Transform(Edit):
     
     def Undo(self):
         self.comp.setTransform(self.oldXform)
-        wrpr = base.game.nodeMgr.Wrap(self.comp)
+        wrpr = base.game.node_manager.Wrap(self.comp)
         wrpr.SetModified(self.mod)
     
     def Redo(self):
         self.comp.setTransform(self.xform)
-        wrpr = base.game.nodeMgr.Wrap(self.comp)
+        wrpr = base.game.node_manager.Wrap(self.comp)
         wrpr.SetModified(True)
         
 

@@ -16,7 +16,7 @@ class PandaWalk(p3d.PandaBehaviour):
     def OnStart(self):
         
         # Find the panda actor placed in the scene.
-        pandaWrpr = base.game.nodeMgr.Wrap(render.find('panda_walk_character'))
+        pandaWrpr = base.game.node_manager.Wrap(render.find('panda_walk_character'))
         self.pandaActor = pandaWrpr.GetActor()
         self.pandaActor.loop(self.animName)
         

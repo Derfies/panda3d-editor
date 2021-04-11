@@ -82,7 +82,7 @@ class Script(Base):
         
     def GetParent(self):
         np = p3d.PandaObject.Get(self.data.np)
-        return base.game.nodeMgr.Wrap(np)
+        return base.game.node_manager.Wrap(np)
         
     def SetParent(self, pObj):
         if pObj is not None:

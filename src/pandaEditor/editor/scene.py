@@ -24,7 +24,7 @@ class Scene(game.Scene):
             'Cam2d'          
         ]
         for cType in defaultCompTypes:
-            wrpr = base.game.nodeMgr.Create(cType)
+            wrpr = base.game.node_manager.Create(cType)
             wrpr.data.setTag(game.nodes.TAG_NODE_TYPE, cType)
         
     def Load(self, filePath):
@@ -42,7 +42,7 @@ class Scene(game.Scene):
                 Destroy(cWrpr)
             wrpr.Destroy()
             
-        Destroy(base.game.nodeMgr.Wrap(self))
+        Destroy(base.game.node_manager.Wrap(self))
         base.game.pluginMgr.OnSceneClose()
         
         # Now remove the root node. If the root node was render, reset base
@@ -82,14 +82,14 @@ class Scene(game.Scene):
         Register a connection to its target component. This allows us to find
         a connection and break it when a component is deleted.
         """
-        compId = base.game.nodeMgr.Wrap(comp).GetId()
+        compId = base.game.node_manager.Wrap(comp).GetId()
         self.cnnctns.setdefault(compId, [])
         cnnctnLabels = [cnnctn.label for cnnctn in self.cnnctns[compId]]
         if cnnctn.label not in cnnctnLabels:
             self.cnnctns[compId].append(cnnctn)
     
     def DeregisterConnection(self, comp, cnnctn):
-        compId = base.game.nodeMgr.Wrap(comp).GetId()
+        compId = base.game.node_manager.Wrap(comp).GetId()
         if compId in self.cnnctns:
             del self.cnnctns[compId]
         

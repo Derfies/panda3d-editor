@@ -116,7 +116,8 @@ class ShowBase(DirectShowBase):
         self.accept('projectFilesModified', self.OnProjectFilesModified)
 
         # Create a "game"
-        self.game = editor.Base()
+        self.game = editor.Base(self)
+        self.game.load_plugins()
 
         # Start with a new scene
         self.CreateScene()
@@ -471,7 +472,7 @@ class ShowBase(DirectShowBase):
 
         # Make sure to mark the NodePath as dirty in case it is a child of a
         # model root.
-        wrpr = self.game.nodeMgr.Wrap(np)
+        wrpr = self.game.node_manager.Wrap(np)
         wrpr.SetModified(True)
 
         # Call OnModified next frame. Not sure why but if we call it straight
@@ -528,7 +529,7 @@ class ShowBase(DirectShowBase):
             self.doc = Document(filePath, self.scene)
 
     def AddComponent(self, typeStr, *args, **kwargs):
-        wrprCls = self.game.nodeMgr.GetWrapperByName(typeStr)
+        wrprCls = self.game.node_manager.GetWrapperByName(typeStr)
         wrpr = wrprCls.Create(*args, **kwargs)
         wrpr.SetDefaultValues()
         wrpr.SetParent(wrpr.GetDefaultParent())
@@ -538,7 +539,7 @@ class ShowBase(DirectShowBase):
         # components that were created.
         if hasattr(wrpr, 'extraNps'):
             for np in wrpr.extraNps:
-                eWrpr = self.game.nodeMgr.Wrap(np)
+                eWrpr = self.game.node_manager.Wrap(np)
                 eWrpr.SetDefaultValues()
         commands.Add([wrpr.data])
 

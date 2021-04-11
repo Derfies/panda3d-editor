@@ -57,7 +57,7 @@ class NodePath(GameNodePath):
         cls.pickable = value
         
     @classmethod
-    def SetEditorGeometry(cls, geo):
+    def set_editor_geometry(cls, geo):
         """
         Set the indicated geometry to be used as a proxy for the NodePath. 
         Tag all descendant NodePaths with the ignore tag so they don't show up
@@ -191,7 +191,7 @@ class NodePath(GameNodePath):
     def OnDuplicate(self, origNp, dupeNp):
         GameNodePath.OnDuplicate(self, origNp, dupeNp)
         
-        wrpr = base.game.nodeMgr.Wrap(origNp)
+        wrpr = base.game.node_manager.Wrap(origNp)
         cnnctns = base.scene.GetOutgoingConnections(wrpr)
         for cnnctn in cnnctns:
             newCnnctn = copy.copy(cnnctn)

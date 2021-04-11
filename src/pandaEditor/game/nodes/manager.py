@@ -66,8 +66,7 @@ def import_wrapper(full_module_path):
 class Manager:
     
     def __init__(self):
-        self.nodeWrappers = {}
-
+        self.wrappers = {}
         self.create_node_wrappers(GAME_NODE_MODULES)
 
     def create_node_wrappers(self, module_paths):
@@ -76,10 +75,10 @@ class Manager:
             for member in inspect.getmembers(module, inspect.isclass):
                 cls = member[1]
                 if cls.__module__ == module.__name__:
-                    self.nodeWrappers[cls.__name__] = cls
+                    self.wrappers[cls.__name__] = cls
         
     def Create(self, nTypeStr, *args):
-        wrprCls = self.nodeWrappers[nTypeStr]
+        wrprCls = self.wrappers[nTypeStr]
         return wrprCls.Create(*args)
     
     def Wrap(self, comp):
@@ -97,9 +96,9 @@ class Manager:
         
     def GetDefaultWrapper(self, comp):
         if hasattr(comp, 'getPythonTag'):
-            return self.nodeWrappers['NodePath']
+            return self.wrappers['NodePath']
         else:
-            return self.nodeWrappers['Base']
+            return self.wrappers['Base']
         
     def GetCommonWrapper(self, comps):
         
@@ -125,10 +124,10 @@ class Manager:
         
     def GetWrapper(self, comp):
         type_ = self.GetTypeString(comp)
-        return self.nodeWrappers.get(type_)
+        return self.wrappers.get(type_)
     
     def GetWrapperByName(self, c_type):
-        return self.nodeWrappers.get(c_type)
+        return self.wrappers.get(c_type)
         
     def GetTypeString(self, comp):
         """

@@ -55,10 +55,10 @@ class Base(GameBase):
             ids = []
             try:
                 for comp in comps:
-                    wrpr = base.game.nodeMgr.Wrap(comp)
+                    wrpr = base.game.node_manager.Wrap(comp)
                     ids.append(wrpr.GetId())
             except TypeError:
-                wrpr = base.game.nodeMgr.Wrap(comps)
+                wrpr = base.game.node_manager.Wrap(comps)
                 ids.append(wrpr.GetId())
             cnnctnDict[cnnctn.name] = ids
             
@@ -95,7 +95,7 @@ class Base(GameBase):
         cnnctns = []
         
         for comp in comps:
-            wrpr = base.game.nodeMgr.Wrap(comp)
+            wrpr = base.game.node_manager.Wrap(comp)
             posCnnctns = [attr for attr in self.GetAttributes() if hasattr(attr, 'cnnctn')]
             posCnnctns.extend(self.cnnctns)
             for cnnctn in posCnnctns:

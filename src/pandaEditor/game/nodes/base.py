@@ -60,11 +60,11 @@ class Base:
         return type(self).__name__
         
     def GetParent(self):
-        return base.game.nodeMgr.Wrap(base.scene)
+        return base.game.node_manager.Wrap(base.scene)
     
     def SetParent(self, pComp):
         if pComp is not None:
-            wrpr = base.game.nodeMgr.Wrap(pComp)
+            wrpr = base.game.node_manager.Wrap(pComp)
             wrpr.AddChild(self.data)
     
     def GetChildren(self):
@@ -135,11 +135,11 @@ class Base:
             self.attributes.insert(index + i, attrs[i])
             
     def FixUpDuplicateChildren(self, origComp, dupeComp):
-        dupeWrpr = base.game.nodeMgr.Wrap(dupeComp)
+        dupeWrpr = base.game.node_manager.Wrap(dupeComp)
         dupeWrpr.OnDuplicate(origComp, dupeComp)
         
         cDupeWrprs = dupeWrpr.GetChildren()
-        origWrpr = base.game.nodeMgr.Wrap(origComp)
+        origWrpr = base.game.node_manager.Wrap(origComp)
         cOrigWrprs = origWrpr.GetChildren()
         for i in range(len(cDupeWrprs)):
             self.FixUpDuplicateChildren(cOrigWrprs[i].data, cDupeWrprs[i].data)

@@ -61,7 +61,7 @@ class PandaObject(Base):
         return TAG_PANDA_OBJECT
         
     def GetParent(self):
-        return base.game.nodeMgr.Wrap(self.data.np)
+        return base.game.node_manager.Wrap(self.data.np)
     
     def SetParent(self, pNp):
         if pNp is None:
@@ -81,7 +81,7 @@ class PandaObject(Base):
         children = []
         
         # Create wrappers for each script attached to the object.
-        wrprCls = base.game.nodeMgr.nodeWrappers['Script']
+        wrprCls = base.game.node_manager.nodeWrappers['Script']
         for name, instance in self.data.instances.items():
             children.append(wrprCls(instance))
             
@@ -124,12 +124,12 @@ class PandaObject(Base):
         # Get the current script instance, detach it from the PandaObject and
         # delete it.
         script = self.data.instances[clsName]
-        scriptWrpr = base.game.nodeMgr.Wrap(script)
+        scriptWrpr = base.game.node_manager.Wrap(script)
         scriptWrpr.Detach()
         del scriptWrpr.data
         
         try:
-            scriptWrprCls = base.game.nodeMgr.nodeWrappers['Script']
+            scriptWrprCls = base.game.node_manager.nodeWrappers['Script']
             scriptWrpr = scriptWrprCls.Create(filePath=scriptPath)
         except:
             return False

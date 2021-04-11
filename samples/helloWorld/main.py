@@ -2,7 +2,6 @@ from math import pi, sin, cos
  
 from direct.showbase.ShowBase import ShowBase
 from direct.task import Task
-from direct.actor.Actor import Actor
 from direct.interval.IntervalGlobal import Sequence
 from panda3d.core import Point3
 
@@ -12,11 +11,10 @@ import game
 class MyApp(ShowBase):
     
     def __init__(self):
-        ShowBase.__init__(self)
+        super().__init__()
         
         # Create the game base and load the level.
         self.game = game.Base()
-        self.game.OnInit()
         self.game.Load('scenes/helloWorld.xml')
  
         # Disable the camera trackball controls.
@@ -26,7 +24,7 @@ class MyApp(ShowBase):
         self.taskMgr.add(self.spinCameraTask, 'SpinCameraTask')
         
         # Find the panda actor placed in the scene.
-        pandaWrpr = base.game.nodeMgr.Wrap(render.find('panda_walk_character'))
+        pandaWrpr = base.game.node_manager.Wrap(render.find('panda_walk_character'))
         self.pandaActor = pandaWrpr.GetActor()
         self.pandaActor.loop('walk')
  

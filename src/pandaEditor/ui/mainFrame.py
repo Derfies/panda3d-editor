@@ -319,7 +319,7 @@ class MainFrame(wx.Frame):
         fn()
 
     def OnEngagePhysics(self, evt):
-        wrpr = base.game.nodeMgr.Wrap(base.scene.physicsWorld)
+        wrpr = base.game.node_manager.Wrap(base.scene.physicsWorld)
         if base.scene.physicsTask not in taskMgr.getAllTasks():
             wrpr.EnablePhysics()
         else:
@@ -356,7 +356,7 @@ class MainFrame(wx.Frame):
             if attr is None:
                 continue
 
-            wrprCls = base.game.nodeMgr.nodeWrappers['Actor']
+            wrprCls = base.game.node_manager.nodeWrappers['Actor']
             aWrpr = wrprCls.Create(modelPath=attr.Get())
             aWrpr.data.setTransform(wrpr.data.getTransform())
             aWrpr.SetDefaultValues()
@@ -462,7 +462,7 @@ class MainFrame(wx.Frame):
             title += ' *'
         self.SetTitle(title)
 
-        self.base.game.pluginMgr.OnUpdate(comps)
+        #self.base.game.pluginMgr.OnUpdate(comps)
 
     def OnUpdateFile(self, msg):
         """

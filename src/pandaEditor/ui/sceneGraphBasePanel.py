@@ -98,7 +98,7 @@ class SceneGraphBasePanel(wx.Panel):
     def OnTreeEndLabelEdit(self, evt):
         """Change the component's name to that of the new item's name."""
         def SetComponentName(comp, name):
-            wrpr = self.base.game.nodeMgr.Wrap(comp)
+            wrpr = self.base.game.node_manager.Wrap(comp)
             attr = wrpr.FindProperty('name')
             if attr is not None:
                 wx.CallAfter(cmds.SetAttribute, [comp], [attr], name)
@@ -197,7 +197,7 @@ class SceneGraphBasePanel(wx.Panel):
             self.Rebuild()
         else:
             for comp in comps:
-                wrpr = self.base.game.nodeMgr.Wrap(comp)
+                wrpr = self.base.game.node_manager.Wrap(comp)
                 pWrpr = wrpr.GetParent()
                 if wrpr.data in self._comps:
                     if pWrpr is None and wrpr.data != self.base.scene:
@@ -222,7 +222,7 @@ class SceneGraphBasePanel(wx.Panel):
         self.tc.DeleteAllItems()
         self._comps = {}
         rItem = self.tc.AddRoot('root')
-        wrpr = self.base.game.nodeMgr.Wrap(self.base.scene)
+        wrpr = self.base.game.node_manager.Wrap(self.base.scene)
         if self.filter is None:
             self.AddItem(wrpr, rItem)
         else:

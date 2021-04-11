@@ -5,7 +5,7 @@ import game
 
 # Create game base and load level
 game = game.Base()
-game.OnInit()
+game.load_plugins()
 game.Load('scenes/helloWorld.xml')
 
 # Initialise the PandaObject manager and start all scripts.

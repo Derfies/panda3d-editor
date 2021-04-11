@@ -24,12 +24,12 @@ class Manager(object):
         Attempt to import plugins directory. Return None if it wasn't found.
         """
         try:
-            import userPlugins
+            import plugins
         except ImportError:
             print('Failed to load plugins.')
             return None
 
-        return os.path.split(userPlugins.__file__)[0]
+        return os.path.split(plugins.__file__)[0]
         
     def Load(self):
         """Attempt to load plugins from their directory."""
