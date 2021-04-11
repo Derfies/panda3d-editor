@@ -5,7 +5,7 @@ from game.nodes.manager import import_wrapper
 
 NodePath = import_wrapper('nodes.nodePath.NodePath')
 Attr = import_wrapper('nodes.attributes.Attribute')
-Cnnctn = import_wrapper('nodes.attributes.Cnnctn')
+Cnnctn = import_wrapper('nodes.attributes.Connection')
 
 
 class CollisionNode(NodePath):

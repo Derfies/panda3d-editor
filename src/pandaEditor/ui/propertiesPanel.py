@@ -188,10 +188,10 @@ class PropertyGrid(wxpg.PropertyGrid):
 
 class PropertiesPanel(wx.Panel):
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, base, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        self.app = self.GetParent().app
+
+        self.base = base
         self.propExps = {}
         self.refocus = False
         
@@ -242,7 +242,7 @@ class PropertiesPanel(wx.Panel):
         self.propAttrMap = {}
                         
         # Build all properties from attributes.
-        comps = base.frame.app.selection.comps
+        comps = self.base.selection.comps
         wrprCls = base.game.nodeMgr.GetCommonWrapper(comps)
         wrprs = [wrprCls(comp) for comp in comps]
         for i, attr in enumerate(wrprs[0].GetAttributes(addons=True)):
@@ -288,7 +288,7 @@ class PropertiesPanel(wx.Panel):
         into the grid.
         """
         # Should probably never get here...
-        comps = self.app.selection.comps
+        comps = self.base.selection.comps
         if not comps:
             return
         

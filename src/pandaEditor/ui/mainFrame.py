@@ -10,7 +10,6 @@ import p3d
 from pandaEditor import commands as cmds
 from wxExtra import utils as wxUtils, ActionItem, LogPanel
 from wxExtra import AuiManagerConfig, CustomAuiToolBar, CustomMenu
-from pandaEditor.app import App as OldApp
 from pandaEditor.constants import MODEL_EXTENSIONS
 from pandaEditor.ui.viewport import Viewport
 from pandaEditor.ui.resourcesPanel import ResourcesPanel
@@ -85,19 +84,19 @@ class MainFrame(wx.Frame):
     
     """Panda Editor user interface."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, base, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.app = OldApp(self)
+        self.base = base
         self.preMaxPos = None
         self.preMaxSize = None
         self.actns = {
-            ID_EDIT_UNDO: self.app.Undo,
-            ID_EDIT_REDO: self.app.Redo,
-            ID_EDIT_GROUP: self.app.Group,
-            ID_EDIT_UNGROUP: self.app.Ungroup,
-            ID_EDIT_PARENT: self.app.Parent,
-            ID_EDIT_UNPARENT: self.app.Unparent
+            ID_EDIT_UNDO: self.base.Undo,
+            ID_EDIT_REDO: self.base.Redo,
+            ID_EDIT_GROUP: self.base.Group,
+            ID_EDIT_UNGROUP: self.base.Ungroup,
+            ID_EDIT_PARENT: self.base.Parent,
+            ID_EDIT_UNPARENT: self.base.Unparent
         }
 
         # Bind frame events
@@ -122,14 +121,14 @@ class MainFrame(wx.Frame):
 
         # Build viewport. Don't initialise just yet as ShowBase has not yet
         # been created.
-        self.pnlViewport = Viewport(self)
+        self.pnlViewport = Viewport(self.base, self)
 
         # Build editor panels
-        self.pnlSceneGraph = SceneGraphPanel(self, style=wx.SUNKEN_BORDER)
-        self.pnlLightLinker = LightLinkerPanel(self, style=wx.SUNKEN_BORDER)
-        self.pnlProps = PropertiesPanel(self, style=wx.SUNKEN_BORDER)
-        self.pnlRsrcs = ResourcesPanel(self, style=wx.SUNKEN_BORDER)
-        self.pnlLog = LogPanel(self, style=wx.SUNKEN_BORDER)
+        self.pnlSceneGraph = SceneGraphPanel(base, self, style=wx.SUNKEN_BORDER)
+        self.pnlLightLinker = LightLinkerPanel(base, self, style=wx.SUNKEN_BORDER)
+        self.pnlProps = PropertiesPanel(base, self, style=wx.SUNKEN_BORDER)
+        self.pnlRsrcs = ResourcesPanel(base, self, style=wx.SUNKEN_BORDER)
+        self.pnlLog = LogPanel(base, self, style=wx.SUNKEN_BORDER)
 
         # Build aui manager to hold all the widgets
         self.BuildAuiManager()
@@ -154,13 +153,13 @@ class MainFrame(wx.Frame):
         # current location on disk
         defaultDir = ''
         defaultFile = ''
-        if self.app.doc.filePath is not None:
-            defaultDir, defaultFile = os.path.split(self.app.doc.filePath)
-        elif self.app.project.path is not None:
-            defaultDir = self.app.project.GetScenesDirectory()
+        if self.base.doc.filePath is not None:
+            defaultDir, defaultFile = os.path.split(self.base.doc.filePath)
+        elif self.base.project.path is not None:
+            defaultDir = self.base.project.GetScenesDirectory()
 
         # Open file browser
-        filePath = wxUtils.FileSaveDialog('Save Scene As', WILDCARD_SCENE, defaultDir=defaultDir, defaultFile=defaultFile)
+        filePath = wxUtils.file_save_dialog('Save Scene As', WILDCARD_SCENE, defaultDir=defaultDir, defaultFile=defaultFile)
         if filePath and os.path.exists(filePath):
 
             # Warn user if the chosen file path already exists
@@ -175,10 +174,10 @@ class MainFrame(wx.Frame):
         If there is already a file loaded and it is dirty, query the user to
         save the file. Return False for cancel, True otherwise.
         """
-        if self.app.doc.dirty:
+        if self.base.doc.dirty:
 
             # Show dialog, record result
-            msg = ''.join(['The document "', self.app.doc.title, '" was modified after last save.\nSave changes before continuing?'])
+            msg = ''.join(['The document "', self.base.doc.title, '" was modified after last save.\nSave changes before continuing?'])
             result = wxUtils.YesNoCancelDialog(msg, 'Save Changes?', wx.ICON_WARNING)
             if result == wx.ID_YES:
                 self.OnFileSave(None)
@@ -202,10 +201,10 @@ class MainFrame(wx.Frame):
             self.auiCfg.SavePosition(*self.preMaxPos)
         if self.preMaxSize is not None:
             self.auiCfg.SaveSize(*self.preMaxSize)
-        if self.app.project.path is not None:
-            self.cfg.Write('projDirPath', self.app.project.path)
+        if self.base.project.path is not None:
+            self.cfg.Write('projDirPath', self.base.project.path)
         self.Show(False)
-        #self.app.Quit()
+        #self.base.Quit()
 
         #self.onDestroy(event)
         try:
@@ -221,8 +220,8 @@ class MainFrame(wx.Frame):
             return
 
         # Create new document
-        self.app.CreateScene()
-        self.app.doc.OnRefresh()
+        self.base.CreateScene()
+        self.base.doc.OnRefresh()
 
     def OnFileOpen(self, evt, filePath=None):
         """Create a new document and load the scene."""
@@ -235,33 +234,33 @@ class MainFrame(wx.Frame):
 
             # Get the start directory. This will be the current working
             # directory if the project is not set.
-            scnsDirPath = self.app.project.GetScenesDirectory()
+            scnsDirPath = self.base.project.GetScenesDirectory()
             if scnsDirPath is None:
                 scnsDirPath = os.getcwd()
 
-            filePath = wxUtils.FileOpenDialog('Open Scene', WILDCARD_SCENE,
-                                               defaultDir=scnsDirPath)
+            filePath = wxUtils.file_open_dialog('Open Scene', WILDCARD_SCENE,
+                                                defaultDir=scnsDirPath)
 
         # Create new document
         if filePath:
-            self.app.CreateScene(filePath)
-            self.app.doc.Load()
+            self.base.CreateScene(filePath)
+            self.base.doc.Load()
 
     def OnFileSave(self, evt, saveAs=False):
         """Save the document."""
         # Set a file path for the document if one does not exist, or for save
         # as
-        if self.app.doc.filePath is None or saveAs:
+        if self.base.doc.filePath is None or saveAs:
 
             # Query a new save path
             filePath = self._GetSavePath()
             if filePath:
-                self.app.doc.filePath = filePath
+                self.base.doc.filePath = filePath
             else:
                 return
 
         # Save the file
-        self.app.doc.Save()
+        self.base.doc.Save()
 
     def OnFileSaveAs(self, evt):
         """
@@ -274,34 +273,34 @@ class MainFrame(wx.Frame):
         """Import assets to project."""
         formats = '; '.join([f'*{extn}' for extn in MODEL_EXTENSIONS])
         wild_card = f'Model ({formats})|{formats}'
-        file_paths = wxUtils.FileOpenDialog(
+        file_paths = wxUtils.file_open_dialog(
             'Import Models',
             wild_card,
             wx.FD_MULTIPLE
        )
         for file_path in file_paths:
-            self.app.project.ImportAsset(file_path)
+            self.base.project.ImportAsset(file_path)
 
     def OnFileNewProject(self, evt):
         """Build project directory and set project."""
-        dirPath = wxUtils.DirDialog('Set New Project Directory')
+        dirPath = wxUtils.director_dialog('Set New Project Directory')
         if dirPath:
-            self.app.project.New(dirPath)
+            self.base.project.New(dirPath)
             self.SetProjectPath(dirPath)
-            self.app.doc.OnRefresh()
+            self.base.doc.OnRefresh()
 
     def OnFileSetProject(self, evt):
         """
         Set the active project directory path and rebuild the resources panel.
         """
-        dirPath = wxUtils.DirDialog('Set Project Directory')
+        dirPath = wxUtils.director_dialog('Set Project Directory')
         if dirPath:
             self.SetProjectPath(dirPath)
-            self.app.doc.OnRefresh()
+            self.base.doc.OnRefresh()
 
     def OnFileBuildProject(self, evt):
         """Build the current project to a p3d file."""
-        filePath = wxUtils.FileSaveDialog('Build Project', WILDCARD_P3D)
+        filePath = wxUtils.file_save_dialog('Build Project', WILDCARD_P3D)
         if not filePath:
             return
 
@@ -312,7 +311,7 @@ class MainFrame(wx.Frame):
             if wxUtils.YesNoDialog(msg, 'Replace File?', wx.ICON_WARNING) == wx.ID_NO:
                 return
 
-        self.app.project.Build(filePath)
+        self.base.project.Build(filePath)
 
     def OnSingleCommand(self, evt):
         id = evt.GetId()
@@ -331,9 +330,9 @@ class MainFrame(wx.Frame):
         Show or hide the grid based on the checked value of the menu item.
         """
         if evt.IsChecked():
-            self.app.grid.show()
+            self.base.grid.show()
         else:
-            self.app.grid.hide()
+            self.base.grid.hide()
 
     def OnViewCamera(self, evt, yaw_pitch):
         """
@@ -344,7 +343,7 @@ class MainFrame(wx.Frame):
         base.edCamera.Orbit(delta)
 
     def OnCreate(self, evt, typeStr):
-        self.app.AddComponent(typeStr)
+        self.base.AddComponent(typeStr)
 
     def OnCreateActor(self, evt):
         """
@@ -352,7 +351,7 @@ class MainFrame(wx.Frame):
         a more concise way of storing this information.
         """
         comps = []
-        for wrpr in self.app.selection.wrprs:
+        for wrpr in self.base.selection.wrprs:
             attr = wrpr.FindProperty('modelPath')
             if attr is None:
                 continue
@@ -368,9 +367,9 @@ class MainFrame(wx.Frame):
         """
         Create a new prefab for the selected object in the prefab directory.
         """
-        np = self.app.selection.GetNodePaths()[0]
-        dirPath = self.app.project.GetPrefabsDirectory()
-        assetName = self.app.project.GetUniqueAssetName('prefab.xml', dirPath)
+        np = self.base.selection.GetNodePaths()[0]
+        dirPath = self.base.project.GetPrefabsDirectory()
+        assetName = self.base.project.GetUniqueAssetName('prefab.xml', dirPath)
         assetPath = os.path.join(dirPath, assetName)
         base.game.scnParser.Save(np, assetPath)
 
@@ -378,13 +377,13 @@ class MainFrame(wx.Frame):
         """
 
         """
-        self.app.project.CreateCgShader()
+        self.base.project.CreateCgShader()
 
     def OnCreateGlslShader(self, evt):
         """
 
         """
-        self.app.project.CreateGlslShader()
+        self.base.project.CreateGlslShader()
 
     def OnShowHidePane(self, evt):
         """
@@ -395,11 +394,11 @@ class MainFrame(wx.Frame):
 
         # Make sure to call or else we won't see any changes.
         self._mgr.Update()
-        self.app.doc.OnRefresh()
+        self.base.doc.OnRefresh()
 
     def OnXformSetActiveGizmo(self, evt):
         if evt.GetId() == ID_XFORM_WORLD:
-            self.app.SetGizmoLocal(not evt.IsChecked())
+            self.base.SetGizmoLocal(not evt.IsChecked())
             return
 
         arg = None
@@ -409,7 +408,7 @@ class MainFrame(wx.Frame):
             arg = 'rot'
         elif evt.GetId() == ID_XFORM_SCL:
             arg = 'scl'
-        self.app.SetActiveGizmo(arg)
+        self.base.SetActiveGizmo(arg)
 
     def OnLayout(self, evt):
         if evt.GetId() == ID_LAYOUT_GAME:
@@ -458,12 +457,12 @@ class MainFrame(wx.Frame):
 
         # Set the frame's title to include the document's file path, include
         # dirty 'star'
-        title = ''.join([FRAME_TITLE, ' - ', self.app.doc.title])
-        if self.app.doc.dirty:
+        title = ''.join([FRAME_TITLE, ' - ', self.base.doc.title])
+        if self.base.doc.dirty:
             title += ' *'
         self.SetTitle(title)
 
-        self.app.game.pluginMgr.OnUpdate(comps)
+        self.base.game.pluginMgr.OnUpdate(comps)
 
     def OnUpdateFile(self, msg):
         """
@@ -481,10 +480,10 @@ class MainFrame(wx.Frame):
         self.tbFile.EnableTool(ID_FILE_OPEN, True)
         self.tbFile.EnableTool(ID_FILE_SAVE_AS, True)
 
-        if self.app.doc.dirty:
+        if self.base.doc.dirty:
             self.mFile.Enable(ID_FILE_SAVE, True)
             self.tbFile.EnableTool(ID_FILE_SAVE, True)
-        if self.app.project.path is not None:
+        if self.base.project.path is not None:
             self.mFile.Enable(ID_FILE_IMPORT, True)
 
         self.tbFile.Refresh()
@@ -494,11 +493,11 @@ class MainFrame(wx.Frame):
         Update the edit menu. Disable undo or redo queus if they are empty
         and make sure to refresh the toolbar.
         """
-        val = len(self.app.actnMgr.undoList) > 0
+        val = len(self.base.actnMgr.undoList) > 0
         self.mEdit.Enable(ID_EDIT_UNDO, val)
         self.tbEdit.EnableTool(ID_EDIT_UNDO, val)
 
-        val = len(self.app.actnMgr.redoList) > 0
+        val = len(self.base.actnMgr.redoList) > 0
         self.mEdit.Enable(ID_EDIT_REDO, val)
         self.tbEdit.EnableTool(ID_EDIT_REDO, val)
 
@@ -522,7 +521,7 @@ class MainFrame(wx.Frame):
         matches the visibility of the grid.
         """
         self.mView.Check(ID_VIEW_GRID, False)
-        if not self.app.grid.isHidden():
+        if not self.base.grid.isHidden():
             self.mView.Check(ID_VIEW_GRID, True)
 
     def OnUpdateProject(self, msg):
@@ -531,11 +530,11 @@ class MainFrame(wx.Frame):
         self.mProj.Enable(ID_PROJ_NEW, True)
         self.mProj.Enable(ID_PROJ_SET, True)
 
-        if self.app.project.path is not None:
+        if self.base.project.path is not None:
             self.mProj.EnableAllTools(True)
 
     def OnUpdateXform(self, msg):
-        gizmo = self.app.gizmoMgr.GetActiveGizmo()
+        gizmo = self.base.gizmoMgr.GetActiveGizmo()
         if gizmo is None:
             self.tbXform.ToggleTool(ID_XFORM_SEL, True)
         elif gizmo.getName() == 'pos':
@@ -545,7 +544,7 @@ class MainFrame(wx.Frame):
         elif gizmo.getName() == 'scl':
             self.tbXform.ToggleTool(ID_XFORM_SCL, True)
 
-        val = not self.app.gizmoMgr.GetGizmoLocal('pos')
+        val = not self.base.gizmoMgr.GetGizmoLocal('pos')
         self.tbXform.ToggleTool(ID_XFORM_WORLD, val)
 
         self.tbXform.Refresh()
@@ -579,8 +578,8 @@ class MainFrame(wx.Frame):
         """
         Set the project path and rebuild the resources panel.
         """
-        self.app.project.Set(dirPath)
-        self.pnlRsrcs.Build(self.app.project.path)
+        self.base.project.Set(dirPath)
+        self.pnlRsrcs.Build(self.base.project.path)
         
     def BuildFileActions(self):
         """Add tools, set long help strings and bind toolbar events."""

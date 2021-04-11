@@ -8,8 +8,7 @@ class SceneGraphPanel(SceneGraphBasePanel):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        # Bind tree control events.
+
         self.tc.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnTreeSelChanged)
         
     def OnTreeSelChanged(self, evt):
@@ -25,10 +24,10 @@ class SceneGraphPanel(SceneGraphBasePanel):
             original.
 
             """
-            if x in base.selection.comps:
-                i = base.selection.comps.index(x)
+            if x in self.base.selection.comps:
+                i = self.base.selection.comps.index(x)
             else:
-                i = len(base.selection.comps)
+                i = len(self.base.selection.comps)
             return i
             
         items = self.GetValidSelections()
@@ -48,7 +47,7 @@ class SceneGraphPanel(SceneGraphBasePanel):
         super().OnUpdate(comps)
         items = [
             self._comps[comp] 
-            for comp in base.selection.comps 
+            for comp in self.base.selection.comps
             if comp in self._comps
         ]
         self.SelectItems(items)

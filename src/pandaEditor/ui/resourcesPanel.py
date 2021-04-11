@@ -9,10 +9,10 @@ from wxExtra import DirTreeCtrl, utils as wxUtils
 
 class ResourcesPanel(wx.Panel):
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, base, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.app = self.GetParent().app
+        self.base = base
 
         # Bind project file events
         pub.subscribe(self.OnUpdate, 'projectFilesAdded')
@@ -100,7 +100,7 @@ class ResourcesPanel(wx.Panel):
 
         # Select it and start drag and drop operations.
         self.dtc.SelectItem(item_id)
-        self.app.dDropMgr.Start(
+        self.base.dDropMgr.Start(
             self,
             [self.dtc.GetItemPath(item_id)],
             self.dtc.GetItemPath(item_id)
@@ -113,7 +113,7 @@ class ResourcesPanel(wx.Panel):
         filePath = self.dtc.GetItemPath(itemId)
         ext = os.path.splitext(os.path.basename(self.dtc.GetItemText(itemId)))[1]
         if ext == '.xml':
-            self.app.frame.OnFileOpen(None, filePath)
+            self.base.frame.OnFileOpen(None, filePath)
         elif ext == '.py':
             os.startfile(filePath)
             

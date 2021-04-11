@@ -9,8 +9,8 @@ from pandaEditor import constants
 
 class DragDropManager:
 
-    def __init__(self, app):
-        self.app = app
+    def __init__(self, base):
+        self.base = base
         self.dragComps = []
 
         # Define file types and their actions.
@@ -22,9 +22,9 @@ class DragDropManager:
         #     '.bam': self.AddModel,
         #     '.pz': self.AddModel,
         #     '.sha': self.AddShader,
-        #     #'.png':self.app.AddTexture,
-        #     #'.tga':self.app.AddTexture,
-        #     #'.jpg':self.app.AddTexture
+        #     #'.png':self.AddTexture,
+        #     #'.tga':self.AddTexture,
+        #     #'.jpg':self.AddTexture
         # }
 
     def DoFileDrop(self, filePath, np):
@@ -82,9 +82,9 @@ class DragDropManager:
                 raise
         if dropComp is None:
             return
-        wrpr = base.game.nodeMgr.Wrap(dropComp)
+        wrpr = self.base.game.nodeMgr.Wrap(dropComp)
         self.data = {}
-        dragComps = self.app.dDropMgr.dragComps
+        dragComps = self.base.dDropMgr.dragComps
         if wx.GetMouseState().CmdDown():
             wrpr.OnDragDrop(dragComps, wrpr.data)
         else:
@@ -98,17 +98,15 @@ class DragDropManager:
             menu.Destroy()
 
     def OnConnect(self, evt):
-        dragComps = self.app.dDropMgr.dragComps
-        menu = evt.GetEventObject()
-        mItem = menu.FindItemById(evt.GetId())
+        dragComps = self.base.dDropMgr.dragComps
         cnnctn = self.data[evt.GetId()]
         cmds.Connect(dragComps, cnnctn, cnnctn.Connect)
 
     def add_model(self, file_path, np=None):
-        self.app.AddComponent('ModelRoot', modelPath=file_path)
+        self.base.AddComponent('ModelRoot', modelPath=file_path)
 
     def AddShader(self, filePath, np=None):
-        wrpr = base.game.nodeMgr.Wrap(np)
+        wrpr = self.base.game.nodeMgr.Wrap(np)
         prop = wrpr.FindProperty('shader')
         cmds.SetAttribute([np], [prop], filePath)
 

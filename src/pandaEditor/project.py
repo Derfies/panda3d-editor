@@ -42,8 +42,8 @@ class DirectoryWatcher(DirectoryWatcher):
 
 class Project:
     
-    def __init__(self, app):
-        self.app = app
+    def __init__(self, base):
+        self.base = base
         
         self.path = None
         self.dirs = {}
@@ -303,11 +303,11 @@ class """ + fileName + """(p3d):
             shutil.copytree(src_path, tgt_path)
         
         # Now copy the plugin module.
-        pluginsPath = self.app.game.pluginMgr.GetPluginsPath()
+        pluginsPath = self.base.game.pluginMgr.GetPluginsPath()
         if pluginsPath is not None:
             pluginDestPath = os.path.join(tempDirPath, 'userPlugins')
-            shutil.copytree(self.app.game.pluginMgr.GetPluginsPath(), 
-                             pluginDestPath)
+            shutil.copytree(self.base.game.pluginMgr.GetPluginsPath(),
+                            pluginDestPath)
                              
             # Remove all editor plugins for the userPlugins directory
             for dirName in os.listdir(pluginDestPath):

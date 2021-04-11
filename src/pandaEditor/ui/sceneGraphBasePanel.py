@@ -17,39 +17,39 @@ DISPLAY_NODEPATHS = wx.NewId()
 
 class SceneGraphBasePanel(wx.Panel):
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, base, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
+        self.base = base
         self._comps = {}
-        self.app = wx.GetApp()
         self.filter = pm.PandaNode
-        
+
         # Build display filter menu.
         fileMenu = fm.FlatMenu()
         item = fm.FlatMenuItem(fileMenu, DISPLAY_NODEPATHS, '&NodePaths Only', '', wx.ITEM_CHECK)
         item.Check()
         fileMenu.AppendItem(item)
-        
+
         self.fm = fm.FlatMenuBar(self, -1, 16, 1, options=fmr.FM_OPT_IS_LCD)
         self.fm.Append(fileMenu, '&Display')
         self.fm.GetRendererManager().SetTheme(fm.StyleVista)
-        
+
         ln = wx.StaticLine(self, -1, style=wx.LI_HORIZONTAL)
-        
+
         # Bind menu controls
         self.Bind(fm.EVT_FLAT_MENU_SELECTED, self.OnFlatMenuSelected, id=DISPLAY_NODEPATHS)
-        
+
         # Build tree control
         self.tc = CustomTreeCtrl(self, -1, agwStyle=
                                   ct.TR_EDIT_LABELS |
-                                  ct.TR_HIDE_ROOT | 
+                                  ct.TR_HIDE_ROOT |
                                   ct.TR_FULL_ROW_HIGHLIGHT |
                                   ct.TR_NO_LINES |
                                   ct.TR_HAS_BUTTONS |
                                   ct.TR_TWIST_BUTTONS |
                                   ct.TR_MULTIPLE)
         self.tc.AddRoot('root')
-        
+
         # Bind tree control events
         self.tc.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.OnTreeBeginLabelEdit)
         self.tc.Bind(wx.EVT_TREE_END_LABEL_EDIT, self.OnTreeEndLabelEdit)
@@ -58,31 +58,31 @@ class SceneGraphBasePanel(wx.Panel):
         self.tc.Bind(wx.EVT_KEY_DOWN, p3d.wxPanda.OnKeyDown)
         self.tc.Bind(wx.EVT_LEFT_UP, p3d.wxPanda.OnLeftUp)
         self.tc.Bind(wx.EVT_MIDDLE_DOWN, self.OnMiddleDown)
-        
+
         # Build tree control drop target
-        self.dt = CustomDropTarget(['filePath', 'nodePath'], self)
+        self.dt = CustomDropTarget(self.base, self, ['filePath', 'nodePath'])
         self.tc.SetDropTarget(self.dt)
-                
+
         # Bind publisher events
         pub.subscribe(self.OnUpdate, 'Update')
-        
+
         # Build sizers
         self.bs1 = wx.BoxSizer(wx.VERTICAL)
         self.bs1.Add(self.fm, 0, wx.EXPAND)
         self.bs1.Add(ln, 0, wx.EXPAND)
         self.bs1.Add(self.tc, 1, wx.EXPAND)
         self.SetSizer(self.bs1)
-        
+
     def OnFlatMenuSelected(self, evt):
-        
+
         # Set the filter based on the flat menu selection.
         self.filter = None
         val = self.fm.FindMenuItem(DISPLAY_NODEPATHS).IsChecked()
         if val:
             self.filter = pm.PandaNode
-            
-        self.app.doc.OnRefresh()
-        
+
+        self.base.doc.OnRefresh()
+
     def OnTreeBeginLabelEdit(self, evt):
         """
         Highlight the text of the tree item label as soon as the edit process
@@ -92,42 +92,42 @@ class SceneGraphBasePanel(wx.Panel):
         def HighlightText(tc):
             ctrl = tc.GetEditControl()
             ctrl.SetSelection(-1, -1)
-            
+
         wx.CallAfter(HighlightText, self.tc)
-            
+
     def OnTreeEndLabelEdit(self, evt):
         """Change the component's name to that of the new item's name."""
         def SetComponentName(comp, name):
-            wrpr = base.game.nodeMgr.Wrap(comp)
+            wrpr = self.base.game.nodeMgr.Wrap(comp)
             attr = wrpr.FindProperty('name')
             if attr is not None:
                 wx.CallAfter(cmds.SetAttribute, [comp], [attr], name)
-        
+
         comp = evt.GetItem().GetData()
         name = evt.GetLabel()
         if not name:
             return
         wx.CallAfter(SetComponentName, comp, name)
-        
+
     def OnLeftDClick(self, evt):
         item = wxUtils.GetClickedItem(self.tc, evt)
         if item is not None:
             self.tc.EditLabel(item)
-            
+
     def OnMiddleDown(self, evt):
-        
+
         # Get the item under the mouse - bail if the item is bad
         item = wxUtils.GetClickedItem(self.tc, evt)
         if item is None or not item.IsOk():
             return
-        
+
         # If the item under the middle mouse click is part of the selection
         # then use the whole selection, otherwise just use the item.
-        if item.GetData() in self.app.selection.comps:
-            dragComps = self.app.selection.comps
+        if item.GetData() in self.base.selection.comps:
+            dragComps = self.base.selection.comps
         else:
             dragComps = [item.GetData()]
-        self.app.dDropMgr.Start(self, dragComps, item.GetData())
+        self.base.dDropMgr.Start(self, dragComps, item.GetData())
         
     def GetDroppedObject(self, x, y):
         dropItem = self.tc.HitTest(wx.Point(x, y))[0]
@@ -197,10 +197,10 @@ class SceneGraphBasePanel(wx.Panel):
             self.Rebuild()
         else:
             for comp in comps:
-                wrpr = base.game.nodeMgr.Wrap(comp)
+                wrpr = self.base.game.nodeMgr.Wrap(comp)
                 pWrpr = wrpr.GetParent()
                 if wrpr.data in self._comps:
-                    if pWrpr is None and wrpr.data != base.scene:
+                    if pWrpr is None and wrpr.data != self.base.scene:
                         
                         # Component has no parent - remove it.
                         self.RemoveItem(wrpr)
@@ -222,7 +222,7 @@ class SceneGraphBasePanel(wx.Panel):
         self.tc.DeleteAllItems()
         self._comps = {}
         rItem = self.tc.AddRoot('root')
-        wrpr = base.game.nodeMgr.Wrap(base.scene)
+        wrpr = self.base.game.nodeMgr.Wrap(self.base.scene)
         if self.filter is None:
             self.AddItem(wrpr, rItem)
         else:

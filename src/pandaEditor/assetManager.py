@@ -3,9 +3,10 @@ import os
 import panda3d.core as pm
 
 
-class AssetManager(object):
+class AssetManager:
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, base, *args, **kwargs):
+        self.base = base
         self.assets = {}
         
     def RegisterAsset(self, assetPath, asset):
@@ -52,11 +53,11 @@ class AssetManager(object):
         # Find all instances of this model in the scene graph.
         nps = [
             np 
-            for np in base.scene.rootNp.findAllMatches('**/+ModelRoot')
+            for np in self.base.scene.rootNp.findAllMatches('**/+ModelRoot')
             if np.node().getFullpath() == pandaPath
         ]
         
-        wrprCls = base.game.nodeMgr.GetWrapperByName('ModelRoot')
+        wrprCls = self.base.game.nodeMgr.GetWrapperByName('ModelRoot')
         filePath = pm.Filename.toOsSpecific(pandaPath)
         wrpr = wrprCls.Create(modelPath=filePath)
         
@@ -70,15 +71,15 @@ class AssetManager(object):
             inCnnctns = {}
             outCnnctns = {}
             for childNp in np.findAllMatches('**/*'):
-                cWrpr = base.game.nodeMgr.Wrap(childNp)
+                cWrpr = self.base.game.nodeMgr.Wrap(childNp)
                 path = cWrpr.GetPath()
                 oldIds[path] = cWrpr.GetId()
-                for cnnctn in base.scene.GetIncomingConnections(cWrpr):
+                for cnnctn in self.base.scene.GetIncomingConnections(cWrpr):
                     # Need to break connection here?
                     inCnnctns.setdefault(path, [])
                     inCnnctns[path].append(cnnctn)
                     
-                for cnnctn in base.scene.GetOutgoingConnections(cWrpr):
+                for cnnctn in self.base.scene.GetOutgoingConnections(cWrpr):
                     cnnctn.Break(cWrpr.data)
                     outCnnctns.setdefault(path, [])
                     outCnnctns[path].append(cnnctn)
@@ -90,13 +91,13 @@ class AssetManager(object):
             # Copy the new updated children under the old ModelRoot NodePath
             # so we retain its properties.
             for childNp in wrpr.data.getChildren():
-                cWrpr = base.game.nodeMgr.Wrap(childNp)
+                cWrpr = self.base.game.nodeMgr.Wrap(childNp)
                 dupeNp = cWrpr.Duplicate(uniqueName=False)
                 dupeNp.reparentTo(np)
                 
             # Replace connections.
             for childNp in np.findAllMatches('**/*'):
-                cWrpr = base.game.nodeMgr.Wrap(childNp)
+                cWrpr = self.base.game.nodeMgr.Wrap(childNp)
                 path = cWrpr.GetPath()
                 
                 if path in outCnnctns:

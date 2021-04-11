@@ -44,12 +44,12 @@ GAME_NODE_MODULES = [
 cache = {}
 
 
-def import_wrapper(module_path):
-    if module_path in cache:
-        return cache[module_path]
+def import_wrapper(full_module_path):
+    if full_module_path in cache:
+        return cache[full_module_path]
     editor_mode = ConfigVariableBool('editor_mode', False)
     prefix = 'editor' if editor_mode else 'game'
-    module_path, class_name = module_path.rsplit('.', 1)
+    module_path, class_name = full_module_path.rsplit('.', 1)
     module = import_module(f'{prefix}.{module_path}')
     members = iter([
         value
@@ -60,6 +60,7 @@ def import_wrapper(module_path):
     if cls is not None:
         cache[module_path] = cls
         return cls
+    raise ModuleNotFoundError(f'No module found at: {full_module_path}')
 
 
 class Manager:

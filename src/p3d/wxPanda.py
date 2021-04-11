@@ -57,21 +57,16 @@ def OnLeftUp(evt):
 
 class Viewport(wx.Panel):
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, base, *args, **kwargs):
         """
         Initialise the wx panel. You must complete the other part of the
         init process by calling Initialize() once the wx-window has been
         built.
         """
-        wx.Panel.__init__(self, *args, **kwargs)
-        
+        super().__init__(*args, **kwargs)
+
+        self.base = base
         self._win = None
-        
-    # def GetWindow(self):
-    #     return self._win
-    #
-    # def SetWindow(self, win):
-    #     self._win = win
         
     def Initialize(self, useMainWin=True):
         """
@@ -85,10 +80,10 @@ class Viewport(wx.Panel):
         wp.setParentWindow(self.GetHandle())
         if self._win is None:
             if useMainWin:
-                base.openDefaultWindow(props=wp, gsg=None)
-                self._win = base.win
+                self.base.openDefaultWindow(props=wp, gsg=None)
+                self._win = self.base.win
             else:
-                self._win = base.openWindow(props=wp, makeCamera=0)
+                self._win = self.base.openWindow(props=wp, makeCamera=0)
         self.Bind(wx.EVT_SIZE, self.OnResize)
         
     def OnResize(self, event):
@@ -98,37 +93,3 @@ class Viewport(wx.Panel):
         wp.setOrigin(0, 0)
         wp.setSize(frame_size.GetWidth(), frame_size.GetHeight())
         self._win.requestProperties(wp)
-        
-
-# class App(wx.App, DirectObject):
-#
-#     """
-#     Don't forget to bind your frame's wx.EVT_CLOSE event to the app's
-#     self.Quit method, or the application will not close properly.
-#     """
-#
-#     def ReplaceEventLoop(self):
-#         self.evtLoop = wx.EventLoop()
-#         self.oldLoop = wx.EventLoop.GetActive()
-#         wx.EventLoop.SetActive(self.evtLoop)
-#         taskMgr.add(self.WxStep, 'evtLoopTask')
-#         self.WxStep()
-#
-#     def OnDestroy(self, event=None):
-#         self.WxStep()
-#         wx.EventLoop.SetActive(self.oldLoop)
-#
-#     def Quit(self, event=None):
-#         self.OnDestroy(event)
-#         try:
-#             base
-#         except NameError:
-#             sys.exit()
-#         base.userExit()
-#
-#     def WxStep(self, task=None):
-#         while self.evtLoop.Pending():
-#             self.evtLoop.Dispatch()
-#         self.ProcessIdle()
-#         if task != None:
-#             return task.cont

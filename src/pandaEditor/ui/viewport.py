@@ -7,9 +7,7 @@ class Viewport(WxViewport):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        self.app = self.GetParent().app
-        
-        self.dt = CustomDropTarget(['filePath', 'nodePath'], self)
+        self.dt = CustomDropTarget(self.base, self, ['filePath', 'nodePath'])
         self.SetDropTarget(self.dt)
         
     def ScreenToViewport(self, x, y):
@@ -19,4 +17,4 @@ class Viewport(WxViewport):
         
     def GetDroppedObject(self, x, y):
         x, y = self.ScreenToViewport(x, y)
-        return self.app.selection.GetNodePathAtPosition(x, y)
+        return self.base.selection.GetNodePathAtPosition(x, y)

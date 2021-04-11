@@ -3,10 +3,10 @@ import wx
 
 class CustomDropTarget(wx.TextDropTarget):
     
-    def __init__(self, formatNames, parent=None):
+    def __init__(self, base, parent, formatNames):
         super().__init__()
-        
-        self.app = parent.app
+
+        self.base = base
         self.parent = parent
 
         # Specify the type of data we will accept
@@ -21,7 +21,7 @@ class CustomDropTarget(wx.TextDropTarget):
     def OnDragOver(self, x, y, d):
         
         # Return x.DragNone if the validation fails
-        if not self.app.dDropMgr.ValidateDropItem(x, y, self.parent):
+        if not self.base.dDropMgr.ValidateDropItem(x, y, self.parent):
             return wx.DragNone
         else:
             return d
@@ -34,6 +34,6 @@ class CustomDropTarget(wx.TextDropTarget):
             # Call the method on the string taken from the data object
             format = self.doc.GetReceivedFormat().GetId()
             do = self.formats[format]
-            self.app.dDropMgr.OnDropItem(do.GetData(), self.parent, x, y)
+            self.base.dDropMgr.OnDropItem(do.GetData(), self.parent, x, y)
         
         return d

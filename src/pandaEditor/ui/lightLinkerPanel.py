@@ -11,29 +11,27 @@ from .sceneGraphBasePanel import SceneGraphBasePanel
 
 class LightLinkerPanel(wx.Panel):
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, base, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        # Build combo box
-        #self.cmboMode = wx.ComboBox(self)
+
+        self.base = base
        
         # Build splitter and panels
         self.splt = wx.SplitterWindow(self, style=wx.SP_3DSASH)
         self.splt.SetSashGravity(0.5)
         
-        self.pnlLeft = SceneGraphBasePanel(self.splt)
+        self.pnlLeft = SceneGraphBasePanel(self.base, self.splt)
         flags = self.pnlLeft.tc.GetAGWWindowStyleFlag()
         self.pnlLeft.tc.SetAGWWindowStyleFlag(flags & ~ct.TR_MULTIPLE)
         self.pnlLeft.filter = pm.Light
         
-        self.pnlRight = SceneGraphBasePanel(self.splt)
+        self.pnlRight = SceneGraphBasePanel(self.base, self.splt)
 
         # Split the window
         self.splt.SplitVertically(self.pnlLeft, self.pnlRight)
         self.splt.SetMinimumPaneSize(20)
 
         sizer = wx.BoxSizer(wx.VERTICAL)
-        #sizer.Add(self.cmboMode, 0, wx.EXPAND)
         sizer.Add(self.splt, 1, wx.EXPAND)
         self.SetSizer(sizer)
         

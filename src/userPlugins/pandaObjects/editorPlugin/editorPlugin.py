@@ -1,11 +1,9 @@
 import os
-import sys
 import tempfile
 import traceback
 
 import wx
 
-import p3d
 from .. import gamePlugin as gp
 from ..gamePlugin.pandaObject import PandaObjectNPO
 from ..gamePlugin.constants import *

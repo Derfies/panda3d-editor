@@ -1,5 +1,4 @@
 from .document import Document
-from .baseDialog import BaseDialog
 from .mainFrame import MainFrame
 from .viewport import Viewport
 from .projectSettingsPanel import ProjectSettingsPanel

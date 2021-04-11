@@ -10,7 +10,7 @@ class LogPanel(wx.Panel):
     stderr streams.
     """
     
-    class RedirectText(object):
+    class RedirectText:
         
         def __init__(self, terminal, textCtrl):
             self.terminal = terminal
@@ -41,15 +41,15 @@ class LogPanel(wx.Panel):
             if topWin.IsFrozen():
                 topWin.Thaw()
     
-    def __init__(self, *args, **kwargs):
-        wx.Panel.__init__(self, *args, **kwargs)
+    def __init__(self, base, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.base = base
         
         # Build log text control
-        self.tc = wx.TextCtrl(self, style=
-                               wx.TE_MULTILINE | 
-                               wx.TE_RICH2 |
-                               wx.NO_BORDER)
-        
+        style = wx.TE_MULTILINE | wx.TE_RICH2 | wx.NO_BORDER
+        self.tc = wx.TextCtrl(self, style=style)
+
         # Redirect text here
         sys.stdout = self.RedirectText(sys.stdout, self.tc)
         sys.stderr = self.RedirectText(sys.stderr, self.tc)

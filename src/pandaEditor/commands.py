@@ -14,9 +14,9 @@ def Add(comps):
     actns.extend([actions.Add(comp) for comp in comps])
     actns.append(actions.Select(comps))
     actn = actions.Composite(actns)
-    base.frame.app.actnMgr.Push(actn)
+    base.actnMgr.Push(actn)
     actn()
-    base.frame.app.doc.OnModified(comps)
+    base.doc.OnModified(comps)
     
 
 def Remove(comps):
@@ -29,9 +29,9 @@ def Remove(comps):
     actns.append(actions.Deselect(comps))
     actns.extend([actions.Remove(comp) for comp in comps])
     actn = actions.Composite(actns)
-    base.frame.app.actnMgr.Push(actn)
+    base.actnMgr.Push(actn)
     actn()
-    base.frame.app.doc.OnModified(comps)
+    base.doc.OnModified(comps)
     
 
 def Duplicate(comps):
@@ -51,9 +51,9 @@ def Duplicate(comps):
     actns.extend([actions.Add(dupeComp) for dupeComp in dupeComps])
     actns.append(actions.Select(dupeComps))
     actn = actions.Composite(actns)
-    base.frame.app.actnMgr.Push(actn)
+    base.actnMgr.Push(actn)
     actn()
-    base.frame.app.doc.OnModified(dupeComps)
+    base.doc.OnModified(dupeComps)
     
 
 def Replace(fromComp, toComp):
@@ -67,9 +67,9 @@ def Replace(fromComp, toComp):
         actions.Select([toComp])
     ]
     actn = actions.Composite(actns)
-    base.frame.app.actnMgr.Push(actn)
+    base.actnMgr.Push(actn)
     actn()
-    base.frame.app.doc.OnModified([fromComp, toComp])
+    base.doc.OnModified([fromComp, toComp])
     
 
 def Select(comps):
@@ -83,9 +83,9 @@ def Select(comps):
         actions.Select(comps)
     ]
     actn = actions.Composite(actns)
-    base.frame.app.actnMgr.Push(actn)
+    base.actnMgr.Push(actn)
     actn()
-    base.frame.app.doc.OnRefresh(comps)
+    base.doc.OnRefresh(comps)
     
 
 def SetAttribute(comps, attrs, val):
@@ -99,9 +99,9 @@ def SetAttribute(comps, attrs, val):
         for i in range(len(comps))
     ]
     actn = actions.Composite(actns)
-    base.frame.app.actnMgr.Push(actn)
+    base.actnMgr.Push(actn)
     actn()
-    base.frame.app.doc.OnModified(comps)
+    base.doc.OnModified(comps)
     
 
 def Parent(comps, pComp):
@@ -111,9 +111,9 @@ def Parent(comps, pComp):
     """
     actns = [actions.Parent(comp, pComp) for comp in comps]
     actn = actions.Composite(actns)
-    base.frame.app.actnMgr.Push(actn)
+    base.actnMgr.Push(actn)
     actn()
-    base.frame.app.doc.OnModified(comps)
+    base.doc.OnModified(comps)
     
 
 def Unparent():
@@ -140,9 +140,9 @@ def Group(nps):
     actns.append(actions.Deselect(nps))
     actns.append(actions.Select([grpNp]))
     actn = actions.Composite(actns)
-    base.frame.app.actnMgr.Push(actn)
+    base.actnMgr.Push(actn)
     actn()
-    base.frame.app.doc.OnModified(nps.append(grpNp))
+    base.doc.OnModified(nps.append(grpNp))
     
 
 def Ungroup(nps):
@@ -168,9 +168,9 @@ def Ungroup(nps):
     actns.append(actions.Select([cNp for cNps in cNpSets for cNp in cNps]))
     
     actn = actions.Composite(actns)
-    base.frame.app.actnMgr.Push(actn)
+    base.actnMgr.Push(actn)
     actn()
-    base.frame.app.doc.OnModified(nps.append(rmvNps))
+    base.doc.OnModified(nps.append(rmvNps))
     
 
 def Connect(tgtComps, cnnctn, fn):
@@ -179,9 +179,9 @@ def Connect(tgtComps, cnnctn, fn):
 
     """
     actn = actions.Connect(tgtComps, cnnctn, fn)
-    base.frame.app.actnMgr.Push(actn)
+    base.actnMgr.Push(actn)
     actn()
-    base.frame.app.doc.OnModified()
+    base.doc.OnModified()
     
 
 def SetConnections(tgtComps, cnnctns):
@@ -191,6 +191,6 @@ def SetConnections(tgtComps, cnnctns):
     """
     actns = [actions.SetConnections(tgtComps, cnnctn) for cnnctn in cnnctns]
     actn = actions.Composite(actns)
-    base.frame.app.actnMgr.Push(actn)
+    base.actnMgr.Push(actn)
     actn()
-    base.frame.app.doc.OnModified()
+    base.doc.OnModified()

@@ -3,7 +3,7 @@ import os
 import wx
 
 
-def FileDialog(message, wildcard, style, defaultDir=os.getcwd(), defaultFile=''):
+def file_dialog(message, wildcard, style, defaultDir=os.getcwd(), defaultFile=''):
     """
     Generic file dialog method. If False is returned then the user has hit
     cancel or not selected a valid path.
@@ -19,20 +19,21 @@ def FileDialog(message, wildcard, style, defaultDir=os.getcwd(), defaultFile='')
     return result
     
 
-def FileOpenDialog(message, wildcard, style=0, defaultDir=os.getcwd(), defaultFile=''):
+def file_open_dialog(message, wildcard, style=0, defaultDir=os.getcwd(), defaultFile=''):
     """Generic file open dialog."""
     style = style | wx.FD_OPEN | wx.FD_CHANGE_DIR
-    return FileDialog(message, wildcard, style, defaultDir, defaultFile)
-    
-
-def FileSaveDialog(message, wildcard, style=0, defaultDir=os.getcwd(), defaultFile=''):
-    """Generic file save dialog."""
-    style = style | wx.FD_SAVE | wx.FD_CHANGE_DIR
-    file_paths = FileDialog(message, wildcard, style, defaultDir, defaultFile)
+    file_paths = file_dialog(message, wildcard, style, defaultDir, defaultFile)
     return next(iter(file_paths), None)
     
 
-def DirDialog(message, defaultPath=os.getcwd(), style=wx.DD_DEFAULT_STYLE):
+def file_save_dialog(message, wildcard, style=0, defaultDir=os.getcwd(), defaultFile=''):
+    """Generic file save dialog."""
+    style = style | wx.FD_SAVE | wx.FD_CHANGE_DIR
+    file_paths = file_dialog(message, wildcard, style, defaultDir, defaultFile)
+    return next(iter(file_paths), None)
+    
+
+def director_dialog(message, defaultPath=os.getcwd(), style=wx.DD_DEFAULT_STYLE):
     """Generic directory dialog."""
     dlg = wx.DirDialog(wx.GetApp().GetTopWindow(), message, defaultPath, style)
     if dlg.ShowModal() == wx.ID_OK:
@@ -44,7 +45,7 @@ def DirDialog(message, defaultPath=os.getcwd(), style=wx.DD_DEFAULT_STYLE):
     return result
     
 
-def MessageDialog(message, caption, style):
+def message_dialog(message, caption, style):
     """Generic message dialog method."""
     dlg = wx.MessageDialog(wx.GetApp().GetTopWindow(), message, caption, style)
     result = dlg.ShowModal()
@@ -55,27 +56,27 @@ def MessageDialog(message, caption, style):
 
 def InformationDialog(message, caption='Information'):
     """Generic information dialog with ok button."""
-    return MessageDialog(message, caption, wx.ICON_INFORMATION | wx.OK)
+    return message_dialog(message, caption, wx.ICON_INFORMATION | wx.OK)
     
 
 def WarningDialog(message, caption='Warning'):
     """Generic warning dialog with ok button."""
-    return MessageDialog(message, caption, wx.ICON_WARNING | wx.OK)
+    return message_dialog(message, caption, wx.ICON_WARNING | wx.OK)
     
 
 def ErrorDialog(message, caption='Error'):
     """Generic error dialog with ok button."""
-    return MessageDialog(message, caption, wx.ICON_ERROR | wx.OK)
+    return message_dialog(message, caption, wx.ICON_ERROR | wx.OK)
     
 
 def YesNoDialog(message, caption, style=wx.ICON_QUESTION):
     """Generic message dialog with yes / no buttons."""
-    return MessageDialog(message, caption, style | wx.YES_NO)
+    return message_dialog(message, caption, style | wx.YES_NO)
     
 
 def YesNoCancelDialog(message, caption, style=wx.ICON_QUESTION):
     """Generic message dialog with yes / no / cancel buttons."""
-    return MessageDialog(message, caption, style | wx.YES_NO | wx.CANCEL)
+    return message_dialog(message, caption, style | wx.YES_NO | wx.CANCEL)
     
 
 def ImgToBmp(filePath, size):

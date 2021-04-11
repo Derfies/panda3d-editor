@@ -9,8 +9,8 @@ from game.nodes.manager import import_wrapper
 
 Base = import_wrapper('nodes.base.Base')
 Attr = import_wrapper('nodes.attributes.Attribute')
-Cnnctn = import_wrapper('nodes.attributes.Cnnctn')
-CnnctnList = import_wrapper('nodes.attributes.CnnctnList')
+Cnnctn = import_wrapper('nodes.attributes.Connection')
+CnnctnList = import_wrapper('nodes.attributes.ConnectionList')
 
 
 class BulletWorld(Base):
