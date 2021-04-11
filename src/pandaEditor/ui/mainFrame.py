@@ -3,7 +3,7 @@ import sys
 
 import wx
 import wx.aui
-from wx.lib.pubsub import pub
+from pubsub import pub
 import panda3d.core as pm
 
 import p3d
@@ -11,6 +11,7 @@ from pandaEditor import commands as cmds
 from wxExtra import utils as wxUtils, ActionItem, LogPanel
 from wxExtra import AuiManagerConfig, CustomAuiToolBar, CustomMenu
 from pandaEditor.app import App as OldApp
+from pandaEditor.constants import MODEL_EXTENSIONS
 from pandaEditor.ui.viewport import Viewport
 from pandaEditor.ui.resourcesPanel import ResourcesPanel
 from pandaEditor.ui.sceneGraphPanel import SceneGraphPanel
@@ -21,7 +22,6 @@ from pandaEditor.ui.lightLinkerPanel import LightLinkerPanel
 
 FRAME_TITLE = 'Panda Editor 0.1'
 TBAR_ICON_SIZE = (24, 24)
-WILDCARD_MODEL = 'Model (*.egg; *.bam; *.egg.pz; *.obj)|*.egg;*.bam;*.egg.pz;*.obj'
 WILDCARD_SCENE = '.xml|*.xml'
 WILDCARD_P3D = '.p3d|*.p3d'
 
@@ -160,7 +160,7 @@ class MainFrame( wx.Frame ):
             defaultDir = self.app.project.GetScenesDirectory()
 
         # Open file browser
-        filePath = wxUtils.FileSaveDialog( 'Save Scene As', WILDCARD_SCENE, defaultDir=defaultDir, defaultFile=defaultFile )
+        filePath = wxUtils.FileSaveDialog('Save Scene As', WILDCARD_SCENE, defaultDir=defaultDir, defaultFile=defaultFile)
         if filePath and os.path.exists( filePath ):
 
             # Warn user if the chosen file path already exists
@@ -272,14 +272,15 @@ class MainFrame( wx.Frame ):
 
     def OnFileImport( self, evt ):
         """Import assets to project."""
-        filePaths = wxUtils.FileOpenDialog(
+        formats = '; '.join([f'*{extn}' for extn in MODEL_EXTENSIONS])
+        wild_card = f'Model ({formats})|{formats}'
+        file_paths = wxUtils.FileOpenDialog(
             'Import Models',
-            WILDCARD_MODEL,
+            wild_card,
             wx.FD_MULTIPLE
         )
-        if filePaths:
-            for filePath in filePaths:
-                self.app.project.ImportAsset(filePath)
+        for file_path in file_paths:
+            self.app.project.ImportAsset(file_path)
 
     def OnFileNewProject( self, evt ):
         """Build project directory and set project."""
@@ -329,8 +330,7 @@ class MainFrame( wx.Frame ):
         """
         Show or hide the grid based on the checked value of the menu item.
         """
-        checked = evt.IsChecked()
-        if checked:
+        if evt.IsChecked():
             self.app.grid.show()
         else:
             self.app.grid.hide()

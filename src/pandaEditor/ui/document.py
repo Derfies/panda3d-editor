@@ -1,6 +1,6 @@
 import os
 
-from wx.lib.pubsub import pub
+from pubsub import pub
 
 
 class Document( object ):
@@ -36,13 +36,13 @@ class Document( object ):
         """
         pub.sendMessage( 'Update', comps=comps )
 
-    def OnModified( self, comps=None ):
+    def OnModified(self, comps=None):
         """
         Broadcast the update message and set the dirty flag. Methods
         subscribed to this message will rebuild ui widgets completely.
         """
         self.dirty = True
-        pub.sendMessage( 'Update', comps=comps )
+        pub.sendMessage('Update', comps=comps)
         
     def OnSelectionModified( self, task ):
         """

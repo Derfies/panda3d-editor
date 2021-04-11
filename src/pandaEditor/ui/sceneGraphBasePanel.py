@@ -3,7 +3,7 @@ import panda3d.core as pm
 import wx.lib.agw.flatmenu as fm
 import wx.lib.agw.fmresources as fmr
 import wx.lib.agw.customtreectrl as ct
-from wx.lib.pubsub import pub
+from pubsub import pub
 
 import p3d
 from pandaEditor import commands as cmds
@@ -208,7 +208,7 @@ class SceneGraphBasePanel( wx.Panel ):
                         
                         # Component found in the tree - refresh it.
                         self.RefreshItem( wrpr )
-                elif pWrpr.data in self._comps:
+                elif pWrpr is not None and pWrpr.data in self._comps:
                     
                     # Component not found in the tree - add it.
                     self.AddItem( wrpr, self._comps[pWrpr.data] )

@@ -1,55 +1,54 @@
 import os
+import pickle
 
 import wx
 
-import commands as cmds
+from pandaEditor import commands as cmds
+from pandaEditor import constants
 
 
 class DragDropManager:
-    
+
     def __init__(self, app):
         self.app = app
         self.dragComps = []
-        
+
         # Define file types and their actions.
-        self.fileTypes = {
-            '.egg': self.AddModel,
-            '.bam': self.AddModel,
-            '.pz': self.AddModel,
-            '.sha': self.AddShader#,
-            #'.png':self.app.AddTexture,
-            #'.tga':self.app.AddTexture,
-            #'.jpg':self.app.AddTexture
-        }
-        
+        self.fileTypes = {}
+        for model_extn in constants.MODEL_EXTENSIONS:
+            self.fileTypes[model_extn] = self.add_model
+        # self.fileTypes = {
+        #     '.egg': self.AddModel,
+        #     '.bam': self.AddModel,
+        #     '.pz': self.AddModel,
+        #     '.sha': self.AddShader,
+        #     #'.png':self.app.AddTexture,
+        #     #'.tga':self.app.AddTexture,
+        #     #'.jpg':self.app.AddTexture
+        # }
+
     def DoFileDrop(self, filePath, np):
         ext = os.path.splitext(filePath)[1]
         if ext in self.fileTypes:
             fn = self.fileTypes[ext]
             fn(filePath, np)
-        
+
     def Start(self, src, dragComps, data):
         self.dragComps = dragComps
-        
+
         # Create a custom data object that we can drop onto the toolbar
         # which contains the tool's id as a string
         do = wx.CustomDataObject('NodePath')
-        #do = wx.TextDataObject('NodePath')
-        # print('data:', data)
-        # print('str data:', str( data ))
-        import pickle
-        data = pickle.dumps(data)
-        do.SetData( data )
-        #do.SetText(data)
-        
+        do.SetData(pickle.dumps(data))
+
         # Create the drop source and begin the drag and drop operation
-        ds = wx.DropSource( src )
-        ds.SetData( do )
-        ds.DoDragDrop(True)# wx.Drag_AllowMove )
-        
+        ds = wx.DropSource(src)
+        ds.SetData(do)
+        ds.DoDragDrop(True)
+
         # Clear drag node paths
         self.dragComps = []
-        
+
     def ValidateDropItem( self, x, y, parent ):
         dropComp = parent.GetDroppedObject( x, y )
         #if dropComp is None:
@@ -64,15 +63,15 @@ class DragDropManager:
                 #print e
                 #return False
         #return False
-        
+
         wrpr = base.game.nodeMgr.Wrap( dropComp )
         if wx.GetMouseState().CmdDown():
             return wrpr.ValidateDragDrop( self.dragComps, dropComp )
         else:
             return wrpr.GetPossibleConnections( self.dragComps )
-            
+
     def OnDropItem( self, str, parent, x, y ):
-        
+
         # Get the item at the drop point
         dropComp = parent.GetDroppedObject( x, y )
         if len( self.dragComps ) == 1:
@@ -80,7 +79,7 @@ class DragDropManager:
                 filePath = self.dragComps[0]
                 self.DoFileDrop( filePath, dropComp )
             except:
-                pass
+                raise
         if dropComp is None:
             return
         wrpr = base.game.nodeMgr.Wrap( dropComp )
@@ -97,32 +96,32 @@ class DragDropManager:
                 self.data[mItem.GetId()] = cnnctn
             parent.PopupMenu( menu )
             menu.Destroy()
-        
+
     def OnConnect( self, evt ):
         dragComps = self.app.dDropMgr.dragComps
         menu = evt.GetEventObject()
         mItem = menu.FindItemById( evt.GetId() )
         cnnctn = self.data[evt.GetId()]
         cmds.Connect( dragComps, cnnctn, cnnctn.Connect )
-            
-    def AddModel(self, filePath, np=None):
-        self.app.AddComponent('ModelRoot', modelPath=filePath)
-        
+
+    def add_model(self, file_path, np=None):
+        self.app.AddComponent('ModelRoot', modelPath=file_path)
+
     def AddShader( self, filePath, np=None ):
         wrpr = base.game.nodeMgr.Wrap( np )
         prop = wrpr.FindProperty( 'shader' )
         cmds.SetAttribute( [np], [prop], filePath )
-        
+
     def AddTexture( self, filePath, np=None ):
         pandaPath = pm.Filename.fromOsSpecific( filePath )
-        
+
         theTex = None
         if pm.TexturePool.hasTexture( pandaPath ):
             print('found in pool')
             for tex in pm.TexturePool.findAllTextures():
                 if tex.getFilename() == pandaPath:
                     theTex = tex
-        
+
         # Try to find it in the scene.
         #for foo in base.scene.comps.keys():
         #    print type( foo ) , ' : ', foo
@@ -132,9 +131,9 @@ class DragDropManager:
             if np is not None:
                 npWrpr = base.game.nodeMgr.Wrap( np )
                 npWrpr.FindProperty( 'texture' ).Set( theTex )
-                
+
         else:
-            
+
             print('creating new')
             wrpr = self.AddComponent( 'Texture' )
             #wrpr = base.game.nodeMgr.Wrap( loader.loadTexture( pandaPath ) )
@@ -142,10 +141,10 @@ class DragDropManager:
             #wrpr.SetParent( wrpr.GetDefaultParent() )
             wrpr.FindProperty( 'fullPath' ).Set( pandaPath )
             #pm.TexturePool.addTexture( wrpr.data )
-            
+
             if np is not None:
                 npWrpr = base.game.nodeMgr.Wrap( np )
                 npWrpr.FindProperty( 'texture' ).Set( wrpr.data )
-            
-            
-            #cmds.Connect( 
+
+
+            #cmds.Connect(

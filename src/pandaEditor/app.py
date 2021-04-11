@@ -1,5 +1,5 @@
 from direct.directtools.DirectGrid import DirectGrid
-from wx.lib.pubsub import pub
+from pubsub import pub
 
 import p3d
 import editor

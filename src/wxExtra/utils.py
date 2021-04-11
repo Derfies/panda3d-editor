@@ -3,21 +3,19 @@ import os
 import wx
 
 
-def FileDialog( message, wildcard, style, defaultDir=os.getcwd(), defaultFile='' ):
+def FileDialog(message, wildcard, style, defaultDir=os.getcwd(), defaultFile=''):
     """
     Generic file dialog method. If False is returned then the user has hit
     cancel or not selected a valid path.
     """
-    dlg = wx.FileDialog( wx.GetApp().GetTopWindow(), message, defaultDir, defaultFile, wildcard, style )
+    result = []
+    dlg = wx.FileDialog(wx.GetApp().GetTopWindow(), message, defaultDir, defaultFile, wildcard, style)
     if dlg.ShowModal() == wx.ID_OK:
         if style & wx.FD_MULTIPLE:
             result = dlg.GetPaths()
         else:
-            result = dlg.GetPath()
-    else:
-        result = False
+            result = [dlg.GetPath()]
     dlg.Destroy()
-    
     return result
     
 
@@ -30,7 +28,8 @@ def FileOpenDialog(message, wildcard, style=0, defaultDir=os.getcwd(), defaultFi
 def FileSaveDialog( message, wildcard, style=0, defaultDir=os.getcwd(), defaultFile='' ):
     """Generic file save dialog."""
     style = style | wx.FD_SAVE | wx.FD_CHANGE_DIR
-    return FileDialog( message, wildcard, style, defaultDir, defaultFile )
+    file_paths = FileDialog(message, wildcard, style, defaultDir, defaultFile)
+    return next(iter(file_paths), None)
     
 
 def DirDialog( message, defaultPath=os.getcwd(), style=wx.DD_DEFAULT_STYLE ):

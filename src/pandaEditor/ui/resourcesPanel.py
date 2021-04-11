@@ -1,9 +1,8 @@
 import os
 
 import wx
-from wx.lib.pubsub import pub
+from pubsub import pub
 
-import p3d
 from p3d import wxPanda
 from wxExtra import DirTreeCtrl, utils as wxUtils
 
@@ -16,12 +15,12 @@ class ResourcesPanel(wx.Panel):
         self.app = self.GetParent().app
 
         # Bind project file events
-        pub.subscribe( self.OnUpdate, 'projectFilesAdded' )
-        pub.subscribe( self.OnUpdate, 'projectFilesRemoved' )
+        pub.subscribe(self.OnUpdate, 'projectFilesAdded')
+        pub.subscribe(self.OnUpdate, 'projectFilesRemoved')
 
         # Build sizers
-        self.bs1 = wx.BoxSizer( wx.VERTICAL )
-        self.SetSizer( self.bs1 )
+        self.bs1 = wx.BoxSizer(wx.VERTICAL)
+        self.SetSizer(self.bs1)
 
     def Build( self, projDirPath ):
 
@@ -92,17 +91,20 @@ class ResourcesPanel(wx.Panel):
         dirPath = os.path.split( filePath )[0]
         systems.get( os.name, os.startfile )( dirPath )
 
-    def OnMiddleDown( self, evt ):
+    def OnMiddleDown(self, evt):
 
-        # Get the item under the mouse - bail if the item is not ok
-        itemId = wxUtils.GetClickedItem( self.dtc, evt )
-        if itemId is None or not itemId.IsOk():
+        # Get the item under the mouse - bail if the item is not ok.
+        item_id = wxUtils.GetClickedItem( self.dtc, evt )
+        if item_id is None or not item_id.IsOk():
             return
 
         # Select it and start drag and drop operations.
-        self.dtc.SelectItem( itemId )
-        self.app.dDropMgr.Start( self, [self.dtc.GetItemPath( itemId )],
-                                 self.dtc.GetItemPath( itemId ) )
+        self.dtc.SelectItem(item_id)
+        self.app.dDropMgr.Start(
+            self,
+            [self.dtc.GetItemPath(item_id)],
+            self.dtc.GetItemPath(item_id)
+        )
 
     def OnLeftDClick( self, evt ):
 
@@ -128,7 +130,7 @@ class ResourcesPanel(wx.Panel):
         newPath = os.path.join( head, evt.GetLabel() )
         os.rename( oldPath, newPath )
         
-    def OnUpdate( self, arg ):
+    def OnUpdate(self, file_paths):
         """Rebuild the directory tree."""
         self.dtc.Freeze()
         

@@ -8,6 +8,7 @@ verify_ssl = true
 [packages]
 panda3d = "==1.10.9"
 wxpython = "==4.1.1"
+pypubsub = "==4.0.3"
 
 [requires]
-python_version = "3.8"
+python_version = "3.6"

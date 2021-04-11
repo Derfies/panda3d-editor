@@ -1,10 +1,9 @@
 import wx
 from wxExtra import wxpg
-from wx.lib.pubsub import pub
+from pubsub import pub
 import panda3d.core as pm
 from panda3d.core import Filename
 
-import p3d
 from pandaEditor import commands as cmds
 from . import customProperties as custProps
 
@@ -12,7 +11,7 @@ from . import customProperties as custProps
 ATTRIBUTE_TAG = 'attr'
 
 
-class PropertyGrid( wxpg.PropertyGrid ):
+class PropertyGrid(wxpg.PropertyGrid):
     """
     Unfortunately I've had to override some of the basic methods of the
     property grid in order to overcome what seems like an odd limitation /
@@ -21,24 +20,24 @@ class PropertyGrid( wxpg.PropertyGrid ):
     Append(). This seems odd to me as then none of the overridden methods used
     in custom properties will work...
     """
-    def __init__( self, *args, **kwargs ):
-        wxpg.PropertyGrid.__init__( self, *args, **kwargs )
+    def __init__(self, *args, **kwargs):
+        wxpg.PropertyGrid.__init__(self, *args, **kwargs)
         
         self._propsByName = {}
         self._propsByLabel = {}
         self._propsByLongLabel = {}
     
-    def Append( self, prop, *args, **kwargs ):
+    def Append(self, prop, *args, **kwargs):
         
         # Do not allow properties with '|' in the label as we use this as a
         # delimiter
         if '|' in prop.GetLabel():
-            msg = ( 'Cannot use property labels containing the pipe (\'|\')' +
-                    'character' )
+            msg = ('Cannot use property labels containing the pipe (\'|\')' +
+                    'character')
             raise AttributeError(msg)
         
         # Add the property
-        wxpg.PropertyGrid.Append( self, prop, *args, **kwargs )
+        wxpg.PropertyGrid.Append(self, prop, *args, **kwargs)
         
         # Store the property again in our dicts by name and label
         self._propsByName[prop.GetName()] = prop
@@ -46,33 +45,33 @@ class PropertyGrid( wxpg.PropertyGrid ):
         
         # Store the property plus all its children in the long label dict
         allProps = self._propsByLongLabel
-        allChildren = self.GetAllChildren( prop )
-        #self._propsByLongLabel = dict( allProps.items() + allChildren.items() )
+        allChildren = self.GetAllChildren(prop)
+        #self._propsByLongLabel = dict(allProps.items() + allChildren.items())
         
-        def Rec( prop, res ):
-            res.append( prop )
+        def Rec(prop, res):
+            res.append(prop)
             for cProp in prop.GetChildren():
-                Rec( cProp, res )
+                Rec(cProp, res)
         
         cProps = []
-        Rec( prop, cProps )
+        Rec(prop, cProps)
         
         allProps = self._propsByLongLabel
         allChildren = {}
         for cProp in cProps:
-            allChildren[self.GetPropertyLongLabel( cProp )] = cProp
+            allChildren[self.GetPropertyLongLabel(cProp)] = cProp
         self._propsByLongLabel = {**allProps, **allChildren}
         
-    def Clear( self ):
+    def Clear(self):
         
         # Empty property dicts before using default clear method
         self._propsByName = {}
         self._propsByLabel = {}
         self._propsByLongLabel = {}
         
-        wxpg.PropertyGrid.Clear( self )
+        wxpg.PropertyGrid.Clear(self)
         
-    def GetPropertyByName( self, name ):
+    def GetPropertyByName(self, name):
         
         # Return value from the property dict
         if name in self._propsByName:
@@ -80,7 +79,7 @@ class PropertyGrid( wxpg.PropertyGrid ):
         
         return None
         
-    def GetPropertyByLabel( self, label ):
+    def GetPropertyByLabel(self, label):
         
         # Return value from the property dict
         if label in self._propsByLabel:
@@ -88,7 +87,7 @@ class PropertyGrid( wxpg.PropertyGrid ):
         
         return None
     
-    def GetPropertyByLongLabel( self, longLbl ):
+    def GetPropertyByLongLabel(self, longLbl):
         """
         Return the property from the property dict matching the indicated
         long label.
@@ -98,7 +97,7 @@ class PropertyGrid( wxpg.PropertyGrid ):
         
         return None
     
-    def GetPropertyLongLabel( self, prop ):
+    def GetPropertyLongLabel(self, prop):
         """
         Return the property's long label. Do this by iterating to the top of
         the hierarchy and joining each parent's label with a pipe character 
@@ -110,13 +109,13 @@ class PropertyGrid( wxpg.PropertyGrid ):
             if prop.GetParent() is None:
                 break
             else:
-                elem.insert( 0, prop.GetLabel() )
+                elem.insert(0, prop.GetLabel())
                 prop = prop.GetParent()
             
-        return '|'.join( elem )
+        return '|'.join(elem)
             
     
-    def GetAllChildren( self, prop, parentLbl=None ):
+    def GetAllChildren(self, prop, parentLbl=None):
         """
         Return all decendant properties of the indicated property.
         """
@@ -129,25 +128,25 @@ class PropertyGrid( wxpg.PropertyGrid ):
         # Get the long label for this property
         lblElems = []
         if parentLbl:
-            lblElems.append( parentLbl )
-        lblElems.append( prop.GetLabel() )
-        longLbl = '|'.join( lblElems )
+            lblElems.append(parentLbl)
+        lblElems.append(prop.GetLabel())
+        longLbl = '|'.join(lblElems)
         
         # Add the property to the dictionary
         result[longLbl] = prop
         
         # Recurse down hierarchy
-        for i in range( prop.GetCount() ):
+        for i in range(prop.GetCount()):
             result = {**result, **self.GetAllChildren(prop.Item(i), longLbl)}
         
         return result
 
-    def GetProperties( self ):
+    def GetProperties(self):
         
         # Return values of the property dict
         return self._propsByName.values()
     
-    def GetPropertiesDictionary( self ):
+    def GetPropertiesDictionary(self):
         """
         Return a flat dictionary containing all properties including all their
         decendants.
@@ -155,31 +154,31 @@ class PropertyGrid( wxpg.PropertyGrid ):
         props = {}
         
         for propLabel, prop in self._propsByLabel.items():
-            childs = self.GetAllChildren( prop )
+            childs = self.GetAllChildren(prop)
             props = {**props, **childs}
         
         return props
     
-    def Enable( self, value ):
+    def Enable(self, value):
         """
         Overridden from wxpg.PropertyGrid. A disabled property grid doesn't
         seem to change in its appearance. Grey out all properties to give a
         nice visual indication of the state of the panel.
         """
-        wxpg.PropertyGrid.Enable( self, value )
+        wxpg.PropertyGrid.Enable(self, value)
         
         # Remove the selection if we are disabling the panel
         if not value:
-            self.SetSelection( [] )
+            self.SetSelection([])
         
         # Grey out all properties if we are disabling the panel
         for property in self.GetProperties():
             if value:
-                self.SetPropertyColourToDefault( property )
+                self.SetPropertyColourToDefault(property)
             else:
-                self.SetPropertyTextColour( property, wx.Colour(150, 150, 150) )
+                self.SetPropertyTextColour(property, wx.Colour(150, 150, 150))
                 
-    def OnChildFocus( self, evt ):
+    def OnChildFocus(self, evt):
         """
         Overriden to stop the property grid scrolling to the child which just
         received focus.
@@ -187,12 +186,12 @@ class PropertyGrid( wxpg.PropertyGrid ):
         pass
     
 
-class PropertiesPanel( wx.Panel ):
+class PropertiesPanel(wx.Panel):
     
-    def __init__( self, *args, **kwargs ):
-        wx.Panel.__init__( self, *args, **kwargs )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         
-        self.app = wx.GetApp()
+        self.app = self.GetParent().app
         self.propExps = {}
         self.refocus = False
         
@@ -215,22 +214,22 @@ class PropertiesPanel( wx.Panel ):
         }
         
         # Bind publisher events
-        pub.subscribe( self.OnUpdate, 'Update' )
-        pub.subscribe( self.OnUpdate, 'UpdateSelection' )
-        pub.subscribe( self.OnSelectionModified, 'SelectionModified' )
+        pub.subscribe(self.OnUpdate, 'Update')
+        pub.subscribe(self.OnUpdate, 'UpdateSelection')
+        pub.subscribe(self.OnSelectionModified, 'SelectionModified')
         
         # Build property grid
-        self.pg = PropertyGrid( self )
+        self.pg = PropertyGrid(self)
         
         # Bind property grid events
-        self.pg.Bind( wxpg.EVT_PG_CHANGED, self.OnPgChanged )
+        self.pg.Bind(wxpg.EVT_PG_CHANGED, self.OnPgChanged)
         
         # Build sizers
-        self.bs1 = wx.BoxSizer( wx.VERTICAL )
-        self.bs1.Add( self.pg, 1, wx.EXPAND )
-        self.SetSizer( self.bs1 )
+        self.bs1 = wx.BoxSizer(wx.VERTICAL)
+        self.bs1.Add(self.pg, 1, wx.EXPAND)
+        self.SetSizer(self.bs1)
         
-    def BuildPropertyGrid( self, wrprs ):
+    def BuildPropertyGrid(self, wrprs):
         """
         Build the properties for the grid based on the contents of nps.
         """
@@ -244,46 +243,46 @@ class PropertiesPanel( wx.Panel ):
                         
         # Build all properties from attributes.
         comps = base.frame.app.selection.comps
-        wrprCls = base.game.nodeMgr.GetCommonWrapper( comps )
-        wrprs = [wrprCls( comp ) for comp in comps]
-        for i, attr in enumerate( wrprs[0].GetAttributes( addons=True ) ):
+        wrprCls = base.game.nodeMgr.GetCommonWrapper(comps)
+        wrprs = [wrprCls(comp) for comp in comps]
+        for i, attr in enumerate(wrprs[0].GetAttributes(addons=True)):
             
             # Find the correct property to display this attribute
             if attr.type in self.propMap and attr.getFn is not None:
                 propCls = self.propMap[attr.type]
                 if attr.type is not None:
-                    prop = propCls( attr.label, '', attr.Get() )
+                    prop = propCls(attr.label, '', attr.Get())
                     if attr.setFn is None:
-                        prop.Enable( False )
+                        prop.Enable(False)
                 else:
-                    prop = propCls( attr.label )
-            elif hasattr( attr, 'cnnctn' ):
+                    prop = propCls(attr.label)
+            elif hasattr(attr, 'cnnctn'):
                 val = attr.Get()
                 try:
-                    objIter = iter( val )
-                    prop = custProps.ConnectionListProperty( attr.label, '', attr.Get() )
+                    objIter = iter(val)
+                    prop = custProps.ConnectionListProperty(attr.label, '', attr.Get())
                 except TypeError:
-                    prop = custProps.ConnectionProperty( attr.label, '', attr.Get() )
+                    prop = custProps.ConnectionProperty(attr.label, '', attr.Get())
             else:
                 continue
             
-            if hasattr( attr, 'parent' ) and attr.parent not in self.propAttrMap and attr.parent is not None:
-                pProp = wxpg.PropertyCategory( attr.parent )
+            if hasattr(attr, 'parent') and attr.parent not in self.propAttrMap and attr.parent is not None:
+                pProp = wxpg.PropertyCategory(attr.parent)
                 self.propAttrMap[attr.parent] = pProp
-                self.pg.Append( pProp )
+                self.pg.Append(pProp)
             
-            allAttrs = [wrpr.GetAttributes( addons=True )[i] for wrpr in wrprs]
-            prop.SetAttribute( ATTRIBUTE_TAG, allAttrs )
+            allAttrs = [wrpr.GetAttributes(addons=True)[i] for wrpr in wrprs]
+            prop.SetAttribute(ATTRIBUTE_TAG, allAttrs)
             self.propAttrMap[attr.label] = prop
                 
             # Append to property grid or the last property if it is a 
             # child.
-            if hasattr( attr, 'parent' ) and attr.parent in self.propAttrMap:
-                self.propAttrMap[attr.parent].AddPrivateChild( prop )
+            if hasattr(attr, 'parent') and attr.parent in self.propAttrMap:
+                self.propAttrMap[attr.parent].AddPrivateChild(prop)
             else:
-                self.pg.Append( prop )
+                self.pg.Append(prop)
                             
-    def OnPgChanged( self, evt ):
+    def OnPgChanged(self, evt):
         """
         Set the node path or node's property using the value the user entered
         into the grid.
@@ -297,13 +296,13 @@ class PropertiesPanel( wx.Panel ):
         
         # Get the node property from the property and set it.
         prop = evt.GetProperty()
-        attrs = prop.GetAttribute( ATTRIBUTE_TAG )
-        if not hasattr( attrs[0], 'cnnctn' ):
-            cmds.SetAttribute( comps, attrs, prop.GetValue() )
+        attrs = prop.GetAttribute(ATTRIBUTE_TAG)
+        if not hasattr(attrs[0], 'cnnctn'):
+            cmds.SetAttribute(comps, attrs, prop.GetValue())
         else:
-            cmds.SetConnections( prop.GetValue(), attrs )
+            cmds.SetConnections(prop.GetValue(), attrs)
         
-    def OnUpdate( self, comps=None ):
+    def OnUpdate(self, comps=None):
         self.pg.Freeze()
         
         # Get the scroll position.
@@ -316,34 +315,34 @@ class PropertiesPanel( wx.Panel ):
             
         focusProp = self.pg.GetFocusedProperty()
         if focusProp is not None:
-            focusPropLbl = self.pg.GetPropertyLongLabel( focusProp )
+            focusPropLbl = self.pg.GetPropertyLongLabel(focusProp)
             focusIndex = self.pg.GetFocusedPropertyControl()
         
         # Clear and rebuild property grid
-        self.BuildPropertyGrid( base.selection.wrprs )
+        self.BuildPropertyGrid(base.selection.wrprs)
         
         # Set all property expanded states back.
         for propLongLbl, expanded in self.propExps.items():
-            prop = self.pg.GetPropertyByLongLabel( propLongLbl )
+            prop = self.pg.GetPropertyByLongLabel(propLongLbl)
             if prop is not None:
-                prop.SetExpanded( expanded )
+                prop.SetExpanded(expanded)
         
         # Set the focused property back.
         if self.refocus and focusProp is not None:
-            focusProp = self.pg.GetPropertyByLongLabel( focusPropLbl )
+            focusProp = self.pg.GetPropertyByLongLabel(focusPropLbl)
             if focusProp is not None:
-                focusProp.SetFocus( focusIndex )
+                focusProp.SetFocus(focusIndex)
             else:
                 print('Missed focus')
         
         # Set the scroll position back.
-        self.pg.Scroll( x, y )
+        self.pg.Scroll(x, y)
         
         self.pg.Thaw()
         
         self.refocus = False
         
-    def OnSelectionModified( self, comps ):
+    def OnSelectionModified(self, comps):
         """
         Update the position, rotation and scale properties during the 
         transform operation.
@@ -358,6 +357,6 @@ class PropertiesPanel( wx.Panel ):
         # Set the value of each property to the result returned from calling
         # the function.
         for label, fn in labelFnDict.items():
-            prop = self.pg.GetPropertyByLabel( label )
+            prop = self.pg.GetPropertyByLabel(label)
             if prop is not None:
-                prop.SetValue( fn() )
+                prop.SetValue(fn())
