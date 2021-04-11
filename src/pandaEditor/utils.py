@@ -2,20 +2,20 @@ import threading
 import subprocess
 
 
-def indent(elem, level=0, indent='    '):
+def indent(elem, level=0, indent_size=4):
     """
     Function used to 'prettify' output xml from cElementTree's tree.getroot() 
     method into lines so it's easily read.
 
     """
-    i = "\n" + level * indent
+    i = '\n' + level * (indent_size * ' ')
     if len(elem):
         if not elem.text or not elem.text.strip():
-            elem.text = i + indent
+            elem.text = i + indent_size * ' '
         if not elem.tail or not elem.tail.strip():
             elem.tail = i
         for elem in elem:
-            indent(elem, level + 1, indent)
+            indent(elem, level + 1, indent_size)
         if not elem.tail or not elem.tail.strip():
             elem.tail = i
     else:
