@@ -117,7 +117,6 @@ class ShowBase(DirectShowBase):
 
         # Create a "game"
         self.game = editor.Base()
-        self.game.OnInit()
 
         # Start with a new scene
         self.CreateScene()

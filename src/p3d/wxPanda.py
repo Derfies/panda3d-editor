@@ -1,7 +1,4 @@
-import sys
-
 import wx
-from direct.showbase.DirectObject import DirectObject
 from panda3d.core import WindowProperties
 
 

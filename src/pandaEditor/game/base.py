@@ -11,14 +11,10 @@ class Base:
     scene_parser_cls = SceneParser
     
     def __init__(self):
-        base.game = self
         self.nodeMgr = self.node_manager_cls()
         self.pluginMgr = self.plugin_manager_cls(self)
-        self.scnParser = self.scene_parser_cls()
-        
-    def OnInit(self):
-        pass
         #self.pluginMgr.Load()
+        self.scnParser = self.scene_parser_cls()
         
     def Load(self, file_path):
         self.scene = Scene(self, filePath=file_path, camera=None)
