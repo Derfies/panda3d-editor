@@ -4,6 +4,7 @@ from panda3d.core import Light as L
 try:
     from pandaEditor.editor.nodes.nodePath import NodePath
 except ImportError:
+    print('import failed')
     from pandaEditor.game.nodes.nodePath import NodePath
 from .attributes import NodeAttribute as Attr
 

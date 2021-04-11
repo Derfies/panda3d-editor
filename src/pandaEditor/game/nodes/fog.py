@@ -1,10 +1,11 @@
 import panda3d.core as pm
 
 try:
+    from pandaEditor.editor.nodes.attributes import NodeAttribute as Attr
     from pandaEditor.editor.nodes.nodePath import NodePath
 except ImportError:
+    from pandaEditor.game.nodes.attributes import NodeAttribute as Attr
     from pandaEditor.game.nodes.nodePath import NodePath
-from .attributes import NodeAttribute as Attr
 
 
 class Fog(NodePath):

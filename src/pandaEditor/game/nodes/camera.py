@@ -1,6 +1,6 @@
 import panda3d.core as pm
 
-from .lensNode import LensNode
+from pandaEditor.game.nodes.lensNode import LensNode
 
 
 class Camera(LensNode):

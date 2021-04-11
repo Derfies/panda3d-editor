@@ -5,6 +5,7 @@ try:
     from pandaEditor.editor.nodes.lensNode import LensNode
     from pandaEditor.editor.nodes.light import Light
 except ImportError:
+    print('import failed')
     from pandaEditor.game.nodes.lensNode import LensNode
     from pandaEditor.game.nodes.light import Light
 from .attributes import NodeAttribute as Attr

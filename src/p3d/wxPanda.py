@@ -100,35 +100,35 @@ class Viewport( wx.Panel ):
         self._win.requestProperties( wp )
         
 
-class App( wx.App, DirectObject ):
-    
-    """
-    Don't forget to bind your frame's wx.EVT_CLOSE event to the app's
-    self.Quit method, or the application will not close properly.
-    """
-        
-    def ReplaceEventLoop( self ):
-        self.evtLoop = wx.EventLoop()
-        self.oldLoop = wx.EventLoop.GetActive()
-        wx.EventLoop.SetActive( self.evtLoop )
-        taskMgr.add( self.WxStep, 'evtLoopTask' )
-        self.WxStep()
-        
-    def OnDestroy( self, event=None ):
-        self.WxStep()
-        wx.EventLoop.SetActive( self.oldLoop )
-        
-    def Quit( self, event=None ):
-        self.OnDestroy( event )
-        try:
-            base
-        except NameError:
-            sys.exit()
-        base.userExit()
-        
-    def WxStep( self, task=None ):
-        while self.evtLoop.Pending():
-            self.evtLoop.Dispatch()
-        self.ProcessIdle()
-        if task != None:
-            return task.cont
+# class App( wx.App, DirectObject ):
+#
+#     """
+#     Don't forget to bind your frame's wx.EVT_CLOSE event to the app's
+#     self.Quit method, or the application will not close properly.
+#     """
+#
+#     def ReplaceEventLoop( self ):
+#         self.evtLoop = wx.EventLoop()
+#         self.oldLoop = wx.EventLoop.GetActive()
+#         wx.EventLoop.SetActive( self.evtLoop )
+#         taskMgr.add( self.WxStep, 'evtLoopTask' )
+#         self.WxStep()
+#
+#     def OnDestroy( self, event=None ):
+#         self.WxStep()
+#         wx.EventLoop.SetActive( self.oldLoop )
+#
+#     def Quit( self, event=None ):
+#         self.OnDestroy( event )
+#         try:
+#             base
+#         except NameError:
+#             sys.exit()
+#         base.userExit()
+#
+#     def WxStep( self, task=None ):
+#         while self.evtLoop.Pending():
+#             self.evtLoop.Dispatch()
+#         self.ProcessIdle()
+#         if task != None:
+#             return task.cont

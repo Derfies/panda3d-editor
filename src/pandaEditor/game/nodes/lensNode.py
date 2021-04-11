@@ -2,10 +2,12 @@ import panda3d.core as pm
 from panda3d.core import Lens
 
 try:
+    from pandaEditor.editor.nodes.attributes import Attribute as Attr
     from pandaEditor.editor.nodes.nodePath import NodePath
 except ImportError:
+    print('import failed')
+    from pandaEditor.game.nodes.attributes import Attribute as Attr
     from pandaEditor.game.nodes.nodePath import NodePath
-from .attributes import Attribute as Attr
 
 
 class LensNode(NodePath):

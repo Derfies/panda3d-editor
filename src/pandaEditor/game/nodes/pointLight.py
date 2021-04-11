@@ -4,6 +4,7 @@ from panda3d.core import PointLight as PL
 try:
     from pandaEditor.editor.nodes.light import Light
 except ImportError:
+    print('import failed')
     from pandaEditor.game.nodes.light import Light
 from .attributes import NodeAttribute as Attr
 

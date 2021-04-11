@@ -3,10 +3,12 @@ from panda3d.core import ModelRoot as MR
 
 from .constants import *
 try:
+    from pandaEditor.editor.nodes.attributes import NodeAttribute as Attr
     from pandaEditor.editor.nodes.nodePath import NodePath
 except ImportError:
+    print('import failed')
+    from pandaEditor.game.nodes.attributes import NodeAttribute as Attr
     from pandaEditor.game.nodes.nodePath import NodePath
-from .attributes import NodeAttribute as Attr
 
 
 class ModelRoot(NodePath):

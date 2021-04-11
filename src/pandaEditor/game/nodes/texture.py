@@ -4,6 +4,7 @@ from panda3d.core import Texture as T
 try:
     from pandaEditor.editor.nodes.base import Base
 except ImportError:
+    print('import failed')
     from pandaEditor.game.nodes.base import Base
 from .attributes import Attribute as Attr
 

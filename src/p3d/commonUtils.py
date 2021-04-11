@@ -147,24 +147,23 @@ def SerializeToString( val ):
         return type_.__name__
     
     fnMap = {
-        bool:str,
-        float:str,
-        int:str,
-        str:str,
-        unicode:str,
-        type:GetName,
-        pm.Vec2:FloatTuple2Str,
-        pm.LVecBase2f:FloatTuple2Str,
-        pm.Vec3:FloatTuple2Str,
-        pm.LVecBase3f:FloatTuple2Str,
-        pm.Vec4:FloatTuple2Str,
-        pm.LVecBase4f:FloatTuple2Str,
-        pm.Point2:FloatTuple2Str,
-        pm.Point3:FloatTuple2Str,
-        pm.Point4:FloatTuple2Str,
-        pm.Mat4:Mat42Str,
-        pm.LMatrix4f:Mat42Str,
-        pc.Filename:str
+        bool: str,
+        float: str,
+        int: str,
+        str: str,
+        type: GetName,
+        pm.Vec2: FloatTuple2Str,
+        pm.LVecBase2f: FloatTuple2Str,
+        pm.Vec3: FloatTuple2Str,
+        pm.LVecBase3f: FloatTuple2Str,
+        pm.Vec4: FloatTuple2Str,
+        pm.LVecBase4f: FloatTuple2Str,
+        pm.Point2: FloatTuple2Str,
+        pm.Point3: FloatTuple2Str,
+        pm.Point4: FloatTuple2Str,
+        pm.Mat4: Mat42Str,
+        pm.LMatrix4f: Mat42Str,
+        pc.Filename: str
     }
     
     if type( val ) in fnMap:
@@ -173,26 +172,25 @@ def SerializeToString( val ):
         return None
     
 
-def UnserializeFromString( string, type_ ):
+def UnserializeFromString(string, type_):
 
     fnMap = {
-        bool:Str2Bool,
-        float:float,
-        int:int,
-        str:str,
-        unicode:str,
-        pm.LVector2f:Str2Vec2,
-        pm.LVecBase2f:Str2Vec2,
-        pm.LVector3f:Str2Vec3,
-        pm.LVecBase3f:Str2Vec3,
-        pm.LVector4f:Str2Vec4,
-        pm.LVecBase4f:Str2Vec4,
-        pm.LPoint3f:Str2Point3,
-        pm.LMatrix4f:Str2Mat4,
-        pm.Filename:str
+        bool: Str2Bool,
+        float: float,
+        int: int,
+        str: str,
+        pm.LVector2f: Str2Vec2,
+        pm.LVecBase2f: Str2Vec2,
+        pm.LVector3f: Str2Vec3,
+        pm.LVecBase3f: Str2Vec3,
+        pm.LVector4f: Str2Vec4,
+        pm.LVecBase4f: Str2Vec4,
+        pm.LPoint3f: Str2Point3,
+        pm.LMatrix4f: Str2Mat4,
+        pm.Filename: str
     }
     
     if type_ in fnMap:
-        return fnMap[type_]( string )
+        return fnMap[type_](string)
     else:
         return None

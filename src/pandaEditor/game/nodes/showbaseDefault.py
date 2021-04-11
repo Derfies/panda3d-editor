@@ -1,9 +1,10 @@
+from pandaEditor.game.nodes.camera import Camera
+from pandaEditor.game.nodes.modelNode import ModelNode
 try:
     from pandaEditor.editor.nodes.nodePath import NodePath
 except ImportError:
+    print('import failed')
     from pandaEditor.game.nodes.nodePath import NodePath
-from .camera import Camera
-from .modelNode import ModelNode
 
 
 class Render(NodePath):

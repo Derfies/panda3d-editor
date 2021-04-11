@@ -53,7 +53,7 @@ class Scene( game.Scene ):
         # in order to remove and recreate the default node set.
         if self.rootNp is render:
             base.Reset()
-        
+
         self.rootNp.removeNode()
         
     def GetOutgoingConnections( self, wrpr ):

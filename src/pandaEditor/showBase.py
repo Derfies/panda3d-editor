@@ -2,6 +2,7 @@ import panda3d.core as pm
 from direct.showbase.ShowBase import ShowBase
 
 import p3d
+from direct.showbase import ShowBaseGlobal
 from pandaEditor.ui.mainFrame import MainFrame
 
 
@@ -28,12 +29,11 @@ class App(ShowBase):
 
         # Add the editor window, camera and pixel 2d to the list of forced
         # aspect windows so aspect is fixed when the window is resized.
-
         self.forcedAspectWins.append((self.win, self.edCamera, self.edPixel2d))
 
         self.Reset()
-
         self.frame.app.FinishInit()
+        self.windowEvent(None)
         
     def SetupEdRender( self ):
         """
@@ -164,19 +164,30 @@ class App(ShowBase):
         clearMask = pm.BitMask32()
         render.node().adjustDrawMask( showMask, hideMask, clearMask )
             
-    def Reset( self ):
+    def Reset(self):
+
+
         """Remove all default nodes and recreate them."""
         # Remove all default nodes and set them to None so they are recreated
         # properly.
-        for name in ['cam', 'camera', 'cam2d', 'camera2d']:
-            np = getattr( self, name )
+        for name in ('cam', 'camera', 'cam2d', 'camera2d'):
+            np = getattr(self, name)
             np.removeNode()
-            setattr( self, name, None )
+            setattr(self, name, None)
         
         # Set up render and render2d again, forcing their new values into
         # builtins.
         self.setupRender()
+
+        # This is kinda lame imho. These default nodes are created by importing
+        # the showbase global module, which makes it difficult to recreate these
+        # nodes for our purposes.
+        render2d = pm.NodePath('render2d')
+        aspect2d = render2d.attachNewNode(pm.PGTop('aspect2d'))
+        ShowBaseGlobal.render2d = render2d
+        ShowBaseGlobal.aspect2d = aspect2d
         self.setupRender2d()
+
         __builtins__['render'] = self.render
         __builtins__['render2d'] = self.render2d
         __builtins__['aspect2d'] = self.aspect2d

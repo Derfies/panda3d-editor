@@ -5,14 +5,25 @@ import panda3d.core as pm
 from panda3d.core import NodePath as NP
 
 from utils.functions import GetUniqueName
-from .constants import *
-from .attributes import NodePathAttribute as Attr
-from game.nodes.attributes import Connection as Cnnctn
-from game.nodes.attributes import NodePathTargetConnection as NPTCnnctn
-from game.nodes.attributes import ConnectionList as CnnctnList
+from pandaEditor.game.nodes.constants import (
+    TAG_ACTOR, TAG_NODE_UUID, TAG_PYTHON_TAGS
+)
 try:
+    from pandaEditor.editor.nodes.attributes import (
+        Connection as Cnnctn,
+        ConnectionList as CnnctnList,
+        NodePathAttribute as Attr,
+        NodePathTargetConnection as NPTCnnctn,
+    )
     from pandaEditor.editor.nodes.base import Base
 except ImportError:
+    print('import failed')
+    from pandaEditor.game.nodes.attributes import (
+        Connection as Cnnctn,
+        ConnectionList as CnnctnList,
+        NodePathAttribute as Attr,
+        NodePathTargetConnection as NPTCnnctn,
+    )
     from pandaEditor.game.nodes.base import Base
 
 
