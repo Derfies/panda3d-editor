@@ -1,8 +1,8 @@
 import panda3d.core as pm
 from panda3d.core import NodePath as NP
 
-from pandaEditor.game.nodes.attributes import ConnectionList as CnnctnL
-from pandaEditor.game.nodes.light import Light as GameLight
+from game.nodes.attributes import ConnectionList as CnnctnL
+from game.nodes.light import Light as GameLight
 
 
 class Light(GameLight):

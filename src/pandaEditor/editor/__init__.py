@@ -1,6 +1,6 @@
 import sys
 import game
-sys.modules['oldGame'] = sys.modules.pop( 'game' )
+sys.modules['oldGame'] = sys.modules.pop('game')
 
 from . import nodes
 from . import plugins

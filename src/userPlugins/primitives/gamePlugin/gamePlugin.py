@@ -6,15 +6,15 @@ from .constants import *
 from game.plugins.base import Base
 
 
-class GamePlugin( Base ):
+class GamePlugin(Base):
     
-    def __init__( self, *args ):
-        Base.__init__( self, *args, sort=-10 )
+    def __init__(self, *args):
+        Base.__init__(self, *args, sort=-10)
         
-    def OnInit( self ):
+    def OnInit(self):
         
         # Register primitive types
-        self.RegisterNodeWrapper( TAG_BOX, Box )
-        self.RegisterNodeWrapper( TAG_CONE, Cone )
-        self.RegisterNodeWrapper( TAG_CYLINDER, Cylinder )
-        self.RegisterNodeWrapper( TAG_SPHERE, Sphere )
+        self.RegisterNodeWrapper(TAG_BOX, Box)
+        self.RegisterNodeWrapper(TAG_CONE, Cone)
+        self.RegisterNodeWrapper(TAG_CYLINDER, Cylinder)
+        self.RegisterNodeWrapper(TAG_SPHERE, Sphere)

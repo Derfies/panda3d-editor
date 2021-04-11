@@ -1,4 +1,4 @@
-class NodePathObject( object ):
+class NodePathObject:
 
     """
     Basic building block class, designed to be attached to a node path in the
@@ -9,23 +9,23 @@ class NodePathObject( object ):
     
     pyTagName = 'NodePathObject'
     
-    def __init__( self, np=None ):
+    def __init__(self, np=None):
         self.np = None
         
         if np is not None:
-            self.Attach( np )
+            self.Attach(np)
         
-    def __del__( self ):
+    def __del__(self):
         print(self.pyTagName, ' : ', self.np.getName(), ' DELETED')
         
-    def Attach( self, np ):
+    def Attach(self, np):
         self.np = np
-        self.np.setPythonTag( self.pyTagName, self )
+        self.np.setPythonTag(self.pyTagName, self)
         
     @classmethod
-    def Get( cls, np ):
-        return np.getPythonTag( cls.pyTagName )
+    def Get(cls, np):
+        return np.getPythonTag(cls.pyTagName)
     
     @classmethod
-    def Break( cls, np ):
-        np.clearPythonTag( cls.pyTagName )
+    def Break(cls, np):
+        np.clearPythonTag(cls.pyTagName)

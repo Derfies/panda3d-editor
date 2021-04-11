@@ -1,31 +1,33 @@
-import panda3d.core as pm
 from panda3d.core import CollisionNode as CN, CollisionSolid as CS
 
-from .nodePath import NodePath
-from .attributes import NodeAttribute as Attr
-from game.nodes.attributes import NodePathSourceConnectionList as Cnnctn
+from game.nodes.manager import import_wrapper
 
 
-class CollisionNode( NodePath ):
+NodePath = import_wrapper('nodes.nodePath.NodePath')
+Attr = import_wrapper('nodes.attributes.Attribute')
+Cnnctn = import_wrapper('nodes.attributes.Cnnctn')
+
+
+class CollisionNode(NodePath):
     
     type_ = CN
     
-    def __init__( self, *args, **kwargs ):
-        NodePath.__init__( self, *args, **kwargs )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         
         self.AddAttributes(
-            Attr( 'Num Solids', int, CN.getNumSolids ),
-            Cnnctn( 'Solids', CS, CN.getSolids, CN.addSolid, CN.clearSolids, self.RemoveSolid, self.data ),
+            Attr('Num Solids', int, CN.getNumSolids),
+            Cnnctn('Solids', CS, CN.getSolids, CN.addSolid, CN.clearSolids, self.RemoveSolid, self.data),
             parent='CollisionNode'
-        )
+       )
     
     @classmethod
-    def Create( cls, *args, **kwargs ):
-        wrpr = super( CollisionNode, cls ).Create( *args, **kwargs )
+    def Create(cls, *args, **kwargs):
+        wrpr = super(CollisionNode, cls).Create(*args, **kwargs)
         wrpr.data.show()
         return wrpr
     
-    def RemoveSolid( self, srcComp, tgtComp ):
+    def RemoveSolid(self, srcComp, tgtComp):
         solids = srcComp.getSolids()
-        index = solids.index( tgtComp )
-        CN.removeSolid( srcComp, index )
+        index = solids.index(tgtComp)
+        CN.removeSolid(srcComp, index)

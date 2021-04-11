@@ -1,7 +1,7 @@
-from pandaEditor.game.nodes.manager import Manager as NodeManager
-from pandaEditor.game.plugins.manager import Manager as PluginManager
-from pandaEditor.game.scene import Scene
-from pandaEditor.game.sceneParser import SceneParser
+from game.nodes.manager import Manager as NodeManager
+from game.plugins.manager import Manager as PluginManager
+from game.scene import Scene
+from game.sceneParser import SceneParser
 
 
 class Base:

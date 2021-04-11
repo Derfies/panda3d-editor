@@ -49,13 +49,13 @@ class DragDropManager:
         # Clear drag node paths
         self.dragComps = []
 
-    def ValidateDropItem( self, x, y, parent ):
-        dropComp = parent.GetDroppedObject( x, y )
+    def ValidateDropItem(self, x, y, parent):
+        dropComp = parent.GetDroppedObject(x, y)
         #if dropComp is None:
-        if len( self.dragComps ) == 1:
+        if len(self.dragComps) == 1:
             try:
                 filePath = self.dragComps[0]
-                ext = os.path.splitext( filePath )[1]
+                ext = os.path.splitext(filePath)[1]
                 #print 'in: ',  ext in self.fileTypes
                 return ext in self.fileTypes
             except Exception:
@@ -64,59 +64,59 @@ class DragDropManager:
                 #return False
         #return False
 
-        wrpr = base.game.nodeMgr.Wrap( dropComp )
+        wrpr = base.game.nodeMgr.Wrap(dropComp)
         if wx.GetMouseState().CmdDown():
-            return wrpr.ValidateDragDrop( self.dragComps, dropComp )
+            return wrpr.ValidateDragDrop(self.dragComps, dropComp)
         else:
-            return wrpr.GetPossibleConnections( self.dragComps )
+            return wrpr.GetPossibleConnections(self.dragComps)
 
-    def OnDropItem( self, str, parent, x, y ):
+    def OnDropItem(self, str, parent, x, y):
 
         # Get the item at the drop point
-        dropComp = parent.GetDroppedObject( x, y )
-        if len( self.dragComps ) == 1:
+        dropComp = parent.GetDroppedObject(x, y)
+        if len(self.dragComps) == 1:
             try:
                 filePath = self.dragComps[0]
-                self.DoFileDrop( filePath, dropComp )
+                self.DoFileDrop(filePath, dropComp)
             except:
                 raise
         if dropComp is None:
             return
-        wrpr = base.game.nodeMgr.Wrap( dropComp )
+        wrpr = base.game.nodeMgr.Wrap(dropComp)
         self.data = {}
         dragComps = self.app.dDropMgr.dragComps
         if wx.GetMouseState().CmdDown():
-            wrpr.OnDragDrop( dragComps, wrpr.data )
+            wrpr.OnDragDrop(dragComps, wrpr.data)
         else:
             menu = wx.Menu()
-            for cnnctn in wrpr.GetPossibleConnections( dragComps ):
-                mItem = wx.MenuItem( menu, wx.NewId(), cnnctn.label )
-                menu.AppendItem( mItem )
-                menu.Bind( wx.EVT_MENU, self.OnConnect, id=mItem.GetId() )
+            for cnnctn in wrpr.GetPossibleConnections(dragComps):
+                mItem = wx.MenuItem(menu, wx.NewId(), cnnctn.label)
+                menu.AppendItem(mItem)
+                menu.Bind(wx.EVT_MENU, self.OnConnect, id=mItem.GetId())
                 self.data[mItem.GetId()] = cnnctn
-            parent.PopupMenu( menu )
+            parent.PopupMenu(menu)
             menu.Destroy()
 
-    def OnConnect( self, evt ):
+    def OnConnect(self, evt):
         dragComps = self.app.dDropMgr.dragComps
         menu = evt.GetEventObject()
-        mItem = menu.FindItemById( evt.GetId() )
+        mItem = menu.FindItemById(evt.GetId())
         cnnctn = self.data[evt.GetId()]
-        cmds.Connect( dragComps, cnnctn, cnnctn.Connect )
+        cmds.Connect(dragComps, cnnctn, cnnctn.Connect)
 
     def add_model(self, file_path, np=None):
         self.app.AddComponent('ModelRoot', modelPath=file_path)
 
-    def AddShader( self, filePath, np=None ):
-        wrpr = base.game.nodeMgr.Wrap( np )
-        prop = wrpr.FindProperty( 'shader' )
-        cmds.SetAttribute( [np], [prop], filePath )
+    def AddShader(self, filePath, np=None):
+        wrpr = base.game.nodeMgr.Wrap(np)
+        prop = wrpr.FindProperty('shader')
+        cmds.SetAttribute([np], [prop], filePath)
 
-    def AddTexture( self, filePath, np=None ):
-        pandaPath = pm.Filename.fromOsSpecific( filePath )
+    def AddTexture(self, filePath, np=None):
+        pandaPath = pm.Filename.fromOsSpecific(filePath)
 
         theTex = None
-        if pm.TexturePool.hasTexture( pandaPath ):
+        if pm.TexturePool.hasTexture(pandaPath):
             print('found in pool')
             for tex in pm.TexturePool.findAllTextures():
                 if tex.getFilename() == pandaPath:
@@ -124,27 +124,24 @@ class DragDropManager:
 
         # Try to find it in the scene.
         #for foo in base.scene.comps.keys():
-        #    print type( foo ) , ' : ', foo
+        #    print type(foo) , ' : ', foo
         print(theTex)
         if theTex is not None and theTex in base.scene.comps.keys():
             print('found in scene')
             if np is not None:
-                npWrpr = base.game.nodeMgr.Wrap( np )
-                npWrpr.FindProperty( 'texture' ).Set( theTex )
+                npWrpr = base.game.nodeMgr.Wrap(np)
+                npWrpr.FindProperty('texture').Set(theTex)
 
         else:
 
             print('creating new')
-            wrpr = self.AddComponent( 'Texture' )
-            #wrpr = base.game.nodeMgr.Wrap( loader.loadTexture( pandaPath ) )
+            wrpr = self.AddComponent('Texture')
+            #wrpr = base.game.nodeMgr.Wrap(loader.loadTexture(pandaPath))
             #wrpr.SetDefaultValues()
-            #wrpr.SetParent( wrpr.GetDefaultParent() )
-            wrpr.FindProperty( 'fullPath' ).Set( pandaPath )
-            #pm.TexturePool.addTexture( wrpr.data )
+            #wrpr.SetParent(wrpr.GetDefaultParent())
+            wrpr.FindProperty('fullPath').Set(pandaPath)
+            #pm.TexturePool.addTexture(wrpr.data)
 
             if np is not None:
-                npWrpr = base.game.nodeMgr.Wrap( np )
-                npWrpr.FindProperty( 'texture' ).Set( wrpr.data )
-
-
-            #cmds.Connect(
+                npWrpr = base.game.nodeMgr.Wrap(np)
+                npWrpr.FindProperty('texture').Set(wrpr.data)

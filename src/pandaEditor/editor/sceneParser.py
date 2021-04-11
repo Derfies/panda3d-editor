@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as et
 
 import game
-from utils.functions import Indent
+from utils import indent
 
 
 class SceneParser(game.SceneParser):
@@ -14,7 +14,7 @@ class SceneParser(game.SceneParser):
         
         # Wrap with an element tree and write to file.
         tree = et.ElementTree(rootElem)
-        Indent(tree.getroot())
+        indent(tree.getroot())
         tree.write(filePath)
     
     def SaveComponent(self, wrpr, pElem):

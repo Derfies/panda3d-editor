@@ -1,33 +1,33 @@
 import uuid
 
-import p3d
+from p3d.object import Object
 
 
-class Scene( p3d.Object ):
-        
+class Scene(Object):
+
     cType = 'SceneRoot'
-    
-    def __init__( self, *args, **kwargs ):
-        p3d.Object.__init__( self, *args, **kwargs )
+
+    def __init__(self, *args, **kwargs):
+        Object.__init__(self, *args, **kwargs)
         
         self.comps = {}
         base.scene = self
         self.physicsWorld = None
         self.physicsTask = None
     
-    def RegisterComponent( self, comp ):
-        id = str( uuid.uuid4() )
+    def RegisterComponent(self, comp):
+        id = str(uuid.uuid4())
         self.comps[comp] = id
         
-    def DeregisterComponent( self, comp ):
+    def DeregisterComponent(self, comp):
         if comp in self.comps:
             del self.comps[comp]
             
-    def GetPhysicsWorld( self, foo ):
+    def GetPhysicsWorld(self, foo):
         return self.physicsWorld
     
-    def SetPhysicsWorld( self, cookie, phWorld ):
+    def SetPhysicsWorld(self, cookie, phWorld):
         self.physicsWorld = phWorld
     
-    def ClearPhysicsWorld( self, cookie ):
+    def ClearPhysicsWorld(self, cookie):
         self.physicsWorld = None

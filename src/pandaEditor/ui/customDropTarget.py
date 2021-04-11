@@ -13,10 +13,10 @@ class CustomDropTarget(wx.TextDropTarget):
         self.doc = wx.DataObjectComposite()
         self.formats = {}
         for formatName in formatNames:
-            do = wx.CustomDataObject( formatName )
+            do = wx.CustomDataObject(formatName)
             self.formats[formatName] = do
-            self.doc.Add( do )
-        self.SetDataObject( self.doc )
+            self.doc.Add(do)
+        self.SetDataObject(self.doc)
         
     def OnDragOver(self, x, y, d):
         
@@ -26,7 +26,7 @@ class CustomDropTarget(wx.TextDropTarget):
         else:
             return d
         
-    def OnData( self, x, y, d ):
+    def OnData(self, x, y, d):
         
         # Copy the data from the drag source to our data object
         if self.GetData():
@@ -34,6 +34,6 @@ class CustomDropTarget(wx.TextDropTarget):
             # Call the method on the string taken from the data object
             format = self.doc.GetReceivedFormat().GetId()
             do = self.formats[format]
-            self.app.dDropMgr.OnDropItem( do.GetData(), self.parent, x, y )
+            self.app.dDropMgr.OnDropItem(do.GetData(), self.parent, x, y)
         
         return d

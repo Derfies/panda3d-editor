@@ -1,12 +1,11 @@
 import panda3d.core as pm
 from panda3d.core import DirectionalLight as DL
 
-try:
-    from pandaEditor.editor.nodes.attributes import NodeAttribute as Attr
-    from pandaEditor.editor.nodes.light import Light
-except ImportError:
-    from pandaEditor.game.nodes.attributes import NodeAttribute as Attr
-    from pandaEditor.game.nodes.light import Light
+from game.nodes.manager import import_wrapper
+
+
+Attr = import_wrapper('nodes.attributes.NodeAttribute')
+Light = import_wrapper('nodes.light.Light')
 
 
 class DirectionalLight(Light):
@@ -22,4 +21,4 @@ class DirectionalLight(Light):
             Attr('Specular Color', pm.Vec4, DL.getSpecularColor, DL.setSpecularColor),
             Attr('Shadow Caster', bool, DL.isShadowCaster, DL.setShadowCaster),
             parent='DirectionalLight'
-        )
+       )

@@ -2,7 +2,6 @@ import string
 
 import wx
 import wx.lib.intctrl
-import wx.lib.agw.floatspin as fs
 import wx.lib.scrolledpanel as scrolled
 from wx.lib.embeddedimage import PyEmbeddedImage
 from wx.lib.newevent import NewEvent
@@ -13,14 +12,14 @@ expand = PyEmbeddedImage(
     "AP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9oCBRUpC/sWEUMAAAA9"
     "SURBVDjLY2AY1uA/MYqYKDWEiVKXMFHqHSZKw4SJ0oAl1QBGSgxgpMQLjCQHIiMTBOPTjN9K"
     "JuJS4sADAOgbBxlBsfXrAAAAAElFTkSuQmCC"
-    )
+   )
 
 collapse = PyEmbeddedImage(
     "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAAZiS0dE"
     "AP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9oCBRMnAPbKmfcAAABB"
     "SURBVDjLY2AYBcMAMKJwmBj+//9HhCYmBob//yB6GbFI4jUEWTNWA6DgP9GuxqPwPyHNhAxA"
     "N4SR3ID+P8wTEgBwLg4FdgEHxgAAAABJRU5ErkJggg=="
-    )
+   )
     
 
 EvtIconClick, EVT_ICON_CLICK = NewEvent()
@@ -293,7 +292,7 @@ class FloatProperty(BaseProperty):
             style=wx.TE_PROCESS_ENTER,
             value=str(rndValue),
             validator=FloatValidator()
-        )
+       )
         self.AppendControl(ctrl)
         return ctrl
     
@@ -314,7 +313,7 @@ class StringProperty(BaseProperty):
             -1,
             style=wx.TE_PROCESS_ENTER,
             value=str(self.GetValue()),
-        )
+       )
         self.AppendControl(ctrl)
         return ctrl
             

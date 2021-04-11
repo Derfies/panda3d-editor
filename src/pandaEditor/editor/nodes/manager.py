@@ -1,4 +1,4 @@
-from pandaEditor.game.nodes.manager import Manager as NodeManager
+from game.nodes.manager import Manager as NodeManager
 
 
 EDITOR_NODE_MODULES = [

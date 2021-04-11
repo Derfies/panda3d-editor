@@ -1,6 +1,6 @@
-from pandaEditor.editor.nodes.constants import TAG_IGNORE
-from pandaEditor.game.nodes.lensNode import LensNode as GameLensNode
-from pandaEditor.game.nodes.attributes import NodePathAttribute as Attr
+from editor.nodes.constants import TAG_IGNORE
+from game.nodes.lensNode import LensNode as GameLensNode
+from game.nodes.attributes import NodePathAttribute as Attr
 
 
 TAG_FRUSTUM = 'P3D_Fustum'

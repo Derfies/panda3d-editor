@@ -1,8 +1,8 @@
 from panda3d.bullet import BulletWorld as BW
 from panda3d.bullet import BulletRigidBodyNode as BRBN
 
-from pandaEditor.game.nodes.bulletRigidBodyNode import BulletRigidBodyNode as GameBulletRigidBodyNode
-from pandaEditor.game.nodes.attributes import (
+from game.nodes.bulletRigidBodyNode import BulletRigidBodyNode as GameBulletRigidBodyNode
+from game.nodes.attributes import (
     NodeAttribute as Attr, 
     NodePathTargetConnectionList as CnnctnList
 )

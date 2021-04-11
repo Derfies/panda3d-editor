@@ -9,114 +9,114 @@ from game.nodes.base import Base
 from game.nodes.attributes import Attribute as Attr
 
 
-class PandaObjectNPO( p3d.NodePathObject ):
+class PandaObjectNPO(p3d.NodePathObject):
     
     cType = TAG_PANDA_OBJECT
     pyTagName = TAG_PANDA_OBJECT
     
-    def __init__( self ):
+    def __init__(self):
         self.instances = {}
     
 
-class PandaObject( Base ):
+class PandaObject(Base):
     
     @classmethod
-    def Create( cls, *args, **kwargs ):
-        return cls( PandaObjectNPO() )
+    def Create(cls, *args, **kwargs):
+        return cls(PandaObjectNPO())
     
-    def Detach( self ):
+    def Detach(self):
         
         # Remove the NodePath's tag referencing the PandaObject. Also remove
         # the PandaObject tag from the list of tags on this NodePath.
-        self.data.np.clearPythonTag( TAG_PANDA_OBJECT )
-        pyTag = self.data.np.getPythonTag( game.nodes.TAG_PYTHON_TAGS )
+        self.data.np.clearPythonTag(TAG_PANDA_OBJECT)
+        pyTag = self.data.np.getPythonTag(game.nodes.TAG_PYTHON_TAGS)
         if pyTag is not None:
-            pyTag.remove( TAG_PANDA_OBJECT )
+            pyTag.remove(TAG_PANDA_OBJECT)
     
-    def Destroy( self ):
+    def Destroy(self):
         for clsName, instance in self.data.instances.items():
-            filePath = inspect.getfile( instance.__class__ )
+            filePath = inspect.getfile(instance.__class__)
             try:
                 instance.ignoreAll()
             except Exception, e:
                 print 'Could not ignore: ', e
             del self.data.instances[clsName]
 
-        PandaObjectNPO.Break( self.data.np )
+        PandaObjectNPO.Break(self.data.np)
         
         self.data = None
         
-    def Duplicate( self ):
-        dupePyObj = copy.copy( self.data )
-        self.FixUpDuplicateChildren( self.data, dupePyObj )
+    def Duplicate(self):
+        dupePyObj = copy.copy(self.data)
+        self.FixUpDuplicateChildren(self.data, dupePyObj)
         return dupePyObj
         
-    def SetId( self, id ):
+    def SetId(self, id):
         
         # PandaObjects don't need ids.
         pass
     
-    def GetType( self ):
+    def GetType(self):
         #print 'using: ', TAG_PANDA_OBJECT
         return TAG_PANDA_OBJECT
         
-    def GetParent( self ):
-        return base.game.nodeMgr.Wrap( self.data.np )
+    def GetParent(self):
+        return base.game.nodeMgr.Wrap(self.data.np)
     
-    def SetParent( self, pNp ):
+    def SetParent(self, pNp):
         if pNp is None:
             return
         
-        self.data.Attach( pNp )
+        self.data.Attach(pNp)
         
-        pyTag = pNp.getPythonTag( game.nodes.TAG_PYTHON_TAGS )
+        pyTag = pNp.getPythonTag(game.nodes.TAG_PYTHON_TAGS)
         if pyTag is None:
             pyTag = []
-            pNp.setPythonTag( game.nodes.TAG_PYTHON_TAGS, pyTag )
+            pNp.setPythonTag(game.nodes.TAG_PYTHON_TAGS, pyTag)
             
         if TAG_PANDA_OBJECT not in pyTag:
-            pyTag.append( TAG_PANDA_OBJECT )
+            pyTag.append(TAG_PANDA_OBJECT)
             
-    def GetChildren( self ):
+    def GetChildren(self):
         children = []
         
         # Create wrappers for each script attached to the object.
         wrprCls = base.game.nodeMgr.nodeWrappers['Script']
         for name, instance in self.data.instances.items():
-            children.append( wrprCls( instance ) )
+            children.append(wrprCls(instance))
             
         return children
     
-    def GetAttributes( self, *args, **kwargs ):
+    def GetAttributes(self, *args, **kwargs):
         attrs = []
         
         if self.data is not None:
             for name, instance in self.data.instances.items():
-                for pName, pType in self.GetProps( instance ).items():
-                    attrs.append( Attr( pName, pType, getattr, setattr, 
+                for pName, pType in self.GetProps(instance).items():
+                    attrs.append(Attr(pName, pType, getattr, setattr, 
                                         self.GetPObjInstance, [pName], [pName], 
                                         [name], w=False, parent=name,
-                                        srcComp=self.data ) )
+                                        srcComp=self.data))
         
         return attrs
     
-    def GetPObjInstance( self, pObj, clsName ):
+    def GetPObjInstance(self, pObj, clsName):
         return pObj.instances[clsName]
     
-    def GetProps( self, instance ):
+    def GetProps(self, instance):
         props = {}
-        for pName, prop in vars( instance.__class__ ).items():
-            if type( prop ) == type:
+        for pName, prop in vars(instance.__class__).items():
+            if type(prop) == type:
                 props[pName] = prop
                 
         return props
     
-    def ReloadScript( self, scriptPath ):
+    def ReloadScript(self, scriptPath):
         
         # Get the class name - bail if it is not a script loaded onto this
         # PandaObject.
-        head, tail = os.path.split( scriptPath )
-        name = os.path.splitext( tail )[0]
+        head, tail = os.path.split(scriptPath)
+        name = os.path.splitext(tail)[0]
         clsName = name[0].upper() + name[1:]
         if clsName not in self.data.instances:
             return
@@ -124,20 +124,20 @@ class PandaObject( Base ):
         # Get the current script instance, detach it from the PandaObject and
         # delete it.
         script = self.data.instances[clsName]
-        scriptWrpr = base.game.nodeMgr.Wrap( script )
+        scriptWrpr = base.game.nodeMgr.Wrap(script)
         scriptWrpr.Detach()
         del scriptWrpr.data
         
         try:
             scriptWrprCls = base.game.nodeMgr.nodeWrappers['Script']
-            scriptWrpr = scriptWrprCls.Create( filePath=scriptPath )
+            scriptWrpr = scriptWrprCls.Create(filePath=scriptPath)
         except:
             return False
         
-        scriptWrpr.SetParent( self.data )
+        scriptWrpr.SetParent(self.data)
         return True
         
-    def OnDuplicate( self, origComp, dupeComp ):
+    def OnDuplicate(self, origComp, dupeComp):
         dupeComp.instances = {}
         for name, instance in origComp.instances.items():
-            dupeComp.instances[name] = copy.copy( instance )    
+            dupeComp.instances[name] = copy.copy(instance)    

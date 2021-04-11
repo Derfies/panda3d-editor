@@ -14,77 +14,74 @@ from game.nodes.collisionNode import CollisionNode
 from game.nodes.bulletRigidBodyNode import BulletRigidBodyNode
 
 
-class EmbeddedBulletTriangleMeshShape( BulletRigidBodyNode ):
+class EmbeddedBulletTriangleMeshShape(BulletRigidBodyNode):
     
-    def __init__( self, *args, **kwargs ):
-        BulletRigidBodyNode.__init__( self, *args, **kwargs )
+    def __init__(self, *args, **kwargs):
+        BulletRigidBodyNode.__init__(self, *args, **kwargs)
         
         # Remove the shapes connection as this is built from the input 
         # NodePath.
         #self.attributes.
-        cnnctn = self.FindProperty( 'shapes' )
-        self.attributes.remove( cnnctn )
+        cnnctn = self.FindProperty('shapes')
+        self.attributes.remove(cnnctn)
     
     @classmethod
-    def Create( cls, *args, **kwargs ):
+    def Create(cls, *args, **kwargs):
         if 'inputNp' in kwargs:
             inputNp = kwargs['inputNp']
         elif 'path' in kwargs:
-            inputNp = cls( cls.FindChild( kwargs['path'], kwargs['parent'] ) )
+            inputNp = cls(cls.FindChild(kwargs['path'], kwargs['parent']))
             return inputNp
         else:
-            return cls( pm.NodePath( blt.BulletRigidBodyNode( '' ) ) )
+            return cls(pm.NodePath(blt.BulletRigidBodyNode('')))
         
         # Get all geom nodes at this level and below.
-        #geomNps = inputNp.findAllMatches( '**/+GeomNode' )
-        #if inputNp.node().isOfType( pm.GeomNode ):
-        #    geomNps.addPath( inputNp )
+        #geomNps = inputNp.findAllMatches('**/+GeomNode')
+        #if inputNp.node().isOfType(pm.GeomNode):
+        #    geomNps.addPath(inputNp)
         
         geomNps = [inputNp]
             
         # Get a flat list of all geoms.
         geoms = []
         for geomNp in geomNps:
-            geoms.extend( geomNp.node().getGeoms() )
+            geoms.extend(geomNp.node().getGeoms())
             
         mesh = blt.BulletTriangleMesh()
         for geom in geoms:
-            mesh.addGeom( geom )
+            mesh.addGeom(geom)
             
-        shape = blt.BulletTriangleMeshShape( mesh, dynamic=False )
-        rBody = blt.BulletRigidBodyNode( inputNp.getName() )
-        rBody.addShape( shape )
+        shape = blt.BulletTriangleMeshShape(mesh, dynamic=False)
+        rBody = blt.BulletRigidBodyNode(inputNp.getName())
+        rBody.addShape(shape)
         
         # Swap the original NodePath for the one we just created.
-        np = pm.NodePath( rBody )
-        np.reparentTo( inputNp.getParent() )
-        np.setTag( game.nodes.TAG_NODE_TYPE, TAG_EMBEDDED_BULLET_TRIANGLE_MESH_SHAPE )
+        np = pm.NodePath(rBody)
+        np.reparentTo(inputNp.getParent())
+        np.setTag(game.nodes.TAG_NODE_TYPE, TAG_EMBEDDED_BULLET_TRIANGLE_MESH_SHAPE)
         
         inputNp.detachNode()
-        wrpr = cls( np )
+        wrpr = cls(np)
         wrpr.CreateNewId()
         
         return wrpr
     
-    def OnDuplicate( self, origNp, dupeNp ):
+    def OnDuplicate(self, origNp, dupeNp):
         
         # Duplicate doesn't work for rigid body nodes...
-        foo = blt.BulletRigidBodyNode( origNp.getName() )
-        bar = pm.NodePath( foo )
-        bar.reparentTo( self.data.getParent() )
+        foo = blt.BulletRigidBodyNode(origNp.getName())
+        bar = pm.NodePath(foo)
+        bar.reparentTo(self.data.getParent())
         self.data.detachNode()
         
         self.data = bar
-        self.data.setTag( game.nodes.TAG_NODE_TYPE, TAG_EMBEDDED_BULLET_TRIANGLE_MESH_SHAPE )
+        self.data.setTag(game.nodes.TAG_NODE_TYPE, TAG_EMBEDDED_BULLET_TRIANGLE_MESH_SHAPE)
         #self.SetupNodePath()
-        #print 'DUPE: ', self.data
-        #print 'new: ', dupeNp, ' : ', self.data
-        #print 'from: ', dupeNp
         for shape in origNp.node().getShapes():
-            copShape = copy.copy( shape )
-            self.data.node().addShape( copShape )
+            copShape = copy.copy(shape)
+            self.data.node().addShape(copShape)
         
-        BulletRigidBodyNode.OnDuplicate( self, origNp, dupeNp )
+        BulletRigidBodyNode.OnDuplicate(self, origNp, dupeNp)
         
         return self.data
         

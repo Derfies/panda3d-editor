@@ -1,19 +1,22 @@
 import panda3d.core as pm
 from panda3d.bullet import BulletPlaneShape as BPS
 
-from .base import Base
-from .attributes import Attribute as Attr
+from game.nodes.manager import import_wrapper
 
 
-class BulletPlaneShape( Base ):
+Base = import_wrapper('nodes.base.Base')
+Attr = import_wrapper('nodes.attributes.Attribute')
+
+
+class BulletPlaneShape(Base):
     
     type_ = BPS
     
-    def __init__( self, *args, **kwargs ):
-        Base.__init__( self, *args, **kwargs )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         
         self.AddAttributes(
-            Attr( 'Normal', pm.Vec3, initDefault=pm.Vec3( 0, 0, 1 ) ),
-            Attr( 'Constant', int, initDefault=0 ),
+            Attr('Normal', pm.Vec3, initDefault=pm.Vec3(0, 0, 1)),
+            Attr('Constant', int, initDefault=0),
             parent='BulletBoxShape'
         )

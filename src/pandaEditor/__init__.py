@@ -3,9 +3,9 @@ import sys
 
 
 # Make sure game and editor can be found on sys.path.
-pandaEditorPath = os.path.abspath( 'pandaEditor' )
+pandaEditorPath = os.path.abspath('pandaEditor')
 if pandaEditorPath not in sys.path:
-    sys.path.append( pandaEditorPath )
+    sys.path.append(pandaEditorPath)
     
 
 from showBase import ShowBase

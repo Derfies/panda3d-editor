@@ -1,5 +1,5 @@
-from pandaEditor.game.nodes.base import Base as GameBase
-from utils.functions import GetLowerCamelCase
+from game.nodes.base import Base as GameBase
+from game.utils import get_lower_camel_case
 
 
 class Base(GameBase):
@@ -8,7 +8,7 @@ class Base(GameBase):
         try:
             return self.data.getName()
         except:
-            return GetLowerCamelCase(type(self.data).__name__)
+            return get_lower_camel_case(type(self.data).__name__)
         
     def ValidateDragDrop(self, dragComp, dropComp):
         return False

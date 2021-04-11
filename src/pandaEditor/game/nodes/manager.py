@@ -1,42 +1,65 @@
 import inspect
 from importlib import import_module
 
-from pandaEditor.game.nodes.constants import *
+from panda3d.core import ConfigVariableBool
+
+from game.nodes.constants import TAG_NODE_TYPE
 
 
 GAME_NODE_MODULES = [
-    'pandaEditor.game.nodes.base',
-    'pandaEditor.game.nodes.sceneRoot',
+    'game.nodes.base',
+    'game.nodes.sceneRoot',
     
-    'pandaEditor.game.nodes.pandaNode',
-    'pandaEditor.game.nodes.nodePath',
-    'pandaEditor.game.nodes.modelNode',
-    'pandaEditor.game.nodes.camera',
-    'pandaEditor.game.nodes.showbaseDefault',
-    'pandaEditor.game.nodes.modelRoot',
-    'pandaEditor.game.nodes.actor',
-    'pandaEditor.game.nodes.fog',
+    'game.nodes.pandaNode',
+    'game.nodes.nodePath',
+    'game.nodes.modelNode',
+    'game.nodes.camera',
+    'game.nodes.showbaseDefault',
+    'game.nodes.modelRoot',
+    'game.nodes.actor',
+    'game.nodes.fog',
     
-    'pandaEditor.game.nodes.collisionNode',
-    'pandaEditor.game.nodes.collisionSolids',
+    'game.nodes.collisionNode',
+    'game.nodes.collisionSolids',
 
-    'pandaEditor.game.nodes.light',
-    'pandaEditor.game.nodes.ambientLight',
-    'pandaEditor.game.nodes.pointLight',
-    'pandaEditor.game.nodes.directionalLight',
-    'pandaEditor.game.nodes.spotlight',
+    'game.nodes.light',
+    'game.nodes.ambientLight',
+    'game.nodes.pointLight',
+    'game.nodes.directionalLight',
+    'game.nodes.spotlight',
     
-    'pandaEditor.game.nodes.texture',
-    'pandaEditor.game.nodes.textureStage',
+    'game.nodes.texture',
+    'game.nodes.textureStage',
     
-    'pandaEditor.game.nodes.bulletWorld',
-    'pandaEditor.game.nodes.bulletDebugNode',
-    'pandaEditor.game.nodes.bulletRigidBodyNode',
-    'pandaEditor.game.nodes.bulletCharacterControllerNode',
-    'pandaEditor.game.nodes.bulletBoxShape',
-    'pandaEditor.game.nodes.bulletPlaneShape',
-    'pandaEditor.game.nodes.bulletCapsuleShape'
+    'game.nodes.bulletWorld',
+    'game.nodes.bulletDebugNode',
+    'game.nodes.bulletRigidBodyNode',
+    'game.nodes.bulletCharacterControllerNode',
+    'game.nodes.bulletBoxShape',
+    'game.nodes.bulletPlaneShape',
+    'game.nodes.bulletCapsuleShape'
 ]
+
+
+cache = {}
+
+
+def import_wrapper(module_path):
+    if module_path in cache:
+        return cache[module_path]
+    editor_mode = ConfigVariableBool('editor_mode', False)
+    prefix = 'editor' if editor_mode else 'game'
+    module_path, class_name = module_path.rsplit('.', 1)
+    module = import_module(f'{prefix}.{module_path}')
+    members = iter([
+        value
+        for name, value in inspect.getmembers(module, inspect.isclass)
+        if name == class_name
+    ])
+    cls = next(members, None)
+    if cls is not None:
+        cache[module_path] = cls
+        return cls
 
 
 class Manager:
@@ -54,44 +77,44 @@ class Manager:
                 if cls.__module__ == module.__name__:
                     self.nodeWrappers[cls.__name__] = cls
         
-    def Create( self, nTypeStr, *args ):
+    def Create(self, nTypeStr, *args):
         wrprCls = self.nodeWrappers[nTypeStr]
-        return wrprCls.Create( *args )
+        return wrprCls.Create(*args)
     
-    def Wrap( self, comp ):
+    def Wrap(self, comp):
         """
         Return a wrapper suitable for the indicated component. If the correct
         wrapper cannot be found, return a NodePath wrapper for NodePaths and
         a Base wrapper for everything else.
         """
-        wrprCls = self.GetWrapper( comp )
+        wrprCls = self.GetWrapper(comp)
         if wrprCls is not None:
-            return wrprCls( comp )
+            return wrprCls(comp)
         else:
-            wrprCls = self.GetDefaultWrapper( comp )
-            return wrprCls( comp )
+            wrprCls = self.GetDefaultWrapper(comp)
+            return wrprCls(comp)
         
-    def GetDefaultWrapper( self, comp ):
-        if hasattr( comp, 'getPythonTag' ):
+    def GetDefaultWrapper(self, comp):
+        if hasattr(comp, 'getPythonTag'):
             return self.nodeWrappers['NodePath']
         else:
             return self.nodeWrappers['Base']
         
-    def GetCommonWrapper( self, comps ):
+    def GetCommonWrapper(self, comps):
         
         # Get method resolution orders for each wrapper for all the indicated
         # components.
         mros = []
         for comp in comps:
-            wrprCls = self.GetWrapper( comp )
+            wrprCls = self.GetWrapper(comp)
             if wrprCls is not None:
-                mros.append( wrprCls.mro() )
+                mros.append(wrprCls.mro())
                 
         if not mros:
-            return self.GetDefaultWrapper( comps[0] )
+            return self.GetDefaultWrapper(comps[0])
                 
         # Intersect the mros to get the common classes.
-        cmnClasses = set( mros[0] ).intersection( *mros )
+        cmnClasses = set(mros[0]).intersection(*mros)
         
         # The result was unordered, so go find the first common class from
         # one of the mros.
@@ -106,7 +129,7 @@ class Manager:
     def GetWrapperByName(self, c_type):
         return self.nodeWrappers.get(c_type)
         
-    def GetTypeString( self, comp ):
+    def GetTypeString(self, comp):
         """
         Return the type of the component as a string. Components are 
         identified in the following method (in order):
@@ -118,13 +141,13 @@ class Manager:
         for the type.
         - If this tag is missing, use the NodePath's node as the type.
         """
-        if hasattr( comp.__class__, 'cType' ):
+        if hasattr(comp.__class__, 'cType'):
             return comp.cType
         
-        typeStr = type( comp ).__name__
+        typeStr = type(comp).__name__
         if typeStr == 'NodePath':
-            typeStr = comp.node().getTag( TAG_NODE_TYPE )
+            typeStr = comp.node().getTag(TAG_NODE_TYPE)
             if not typeStr:
-                typeStr = type( comp.node() ).__name__
+                typeStr = type(comp.node()).__name__
                 
         return typeStr

@@ -1,12 +1,10 @@
 from panda3d.bullet import BulletWorld as BW
 
-try:
-    from pandaEditor.editor.nodes.attributes import NodePathTargetConnection as Cnnctn
-    from pandaEditor.editor.nodes.base import Base
-except ImportError:
-    print('import failed')
-    from pandaEditor.game.nodes.attributes import NodePathTargetConnection as Cnnctn
-    from pandaEditor.game.nodes.base import Base
+from game.nodes.manager import import_wrapper
+
+
+Base = import_wrapper('nodes.base.Base')
+Cnnctn = import_wrapper('nodes.attributes.NodePathTargetConnection')
 
 
 class SceneRoot(Base):
@@ -15,10 +13,15 @@ class SceneRoot(Base):
         super().__init__(*args, **kwargs)
         
         self.AddAttributes(
-            Cnnctn('PhysicsWorld', BW, base.scene.GetPhysicsWorld, 
-                    base.scene.SetPhysicsWorld, base.scene.ClearPhysicsWorld),
+            Cnnctn(
+                'PhysicsWorld',
+                BW,
+                base.scene.GetPhysicsWorld,
+                base.scene.SetPhysicsWorld,
+                base.scene.ClearPhysicsWorld
+            ),
             parent='Scene'
-        )
+       )
     
     @classmethod
     def Create(cls, *args, **kwargs):

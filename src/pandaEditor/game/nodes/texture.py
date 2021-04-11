@@ -1,12 +1,11 @@
 import panda3d.core as pc
 from panda3d.core import Texture as T
 
-try:
-    from pandaEditor.editor.nodes.base import Base
-except ImportError:
-    print('import failed')
-    from pandaEditor.game.nodes.base import Base
-from .attributes import Attribute as Attr
+from game.nodes.manager import import_wrapper
+
+
+Base = import_wrapper('nodes.base.Base')
+Attr = import_wrapper('nodes.attributes.Attribute')
 
 
 class Texture(Base):
@@ -14,7 +13,7 @@ class Texture(Base):
     type_ = T
     
     def __init__(self, *args, **kwargs):
-        Base.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         
         self.AddAttributes(
             Attr('Name', str, T.getName, T.setName, initDefault=''),

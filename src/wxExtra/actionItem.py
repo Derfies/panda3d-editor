@@ -1,10 +1,10 @@
 import wx
 
 
-class ActionItem( object ):
+class ActionItem(object):
     
-    def __init__( self, text, iconPath, cmd, id=None, args=[], helpStr='', 
-                  kind=wx.ITEM_NORMAL ):
+    def __init__(self, text, iconPath, cmd, id=None, args=[], helpStr='', 
+                  kind=wx.ITEM_NORMAL):
         self._text = text
         self._iconPath = iconPath
         self._cmd = cmd
@@ -17,25 +17,25 @@ class ActionItem( object ):
         if self._id is None:
             self._id = wx.NewId()
             
-    def GetText( self ):
+    def GetText(self):
         return self._text
     
-    def GetIconPath( self ):
+    def GetIconPath(self):
         return self._iconPath
     
-    def GetCommand( self ):
+    def GetCommand(self):
         return self._cmd
             
-    def GetId( self ):
+    def GetId(self):
         return self._id
     
-    def GetArguments( self ):
+    def GetArguments(self):
         return self._args
     
-    def GetHelpString( self ):
+    def GetHelpString(self):
         return self._helpStr
     
-    def GetKind( self ):
+    def GetKind(self):
         return self._kind
     
     

@@ -21,7 +21,7 @@ class PropertyGrid(wxpg.PropertyGrid):
     in custom properties will work...
     """
     def __init__(self, *args, **kwargs):
-        wxpg.PropertyGrid.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         
         self._propsByName = {}
         self._propsByLabel = {}

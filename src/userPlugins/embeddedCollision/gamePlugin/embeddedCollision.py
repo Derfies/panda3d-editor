@@ -7,11 +7,11 @@ from game.nodes.nodePath import NodePath
 from game.nodes.collisionNode import CollisionNode
 
 
-class EmbeddedCollision( CollisionNode ):
+class EmbeddedCollision(CollisionNode):
     
     @classmethod
-    def Create( cls, *args, **kwargs ):
-        #wrpr = super( Actor, cls ).Create( *args, **kwargs )
+    def Create(cls, *args, **kwargs):
+        #wrpr = super(Actor, cls).Create(*args, **kwargs)
         
         
         
@@ -31,17 +31,17 @@ class EmbeddedCollision( CollisionNode ):
         #print 'find: ', np.findAllMatches('/**+GeomNode')
         
         collNps = np.findAllMatches('**/+GeomNode')
-        collNps.addPath( np )
-        newCollNp = utils.RebuildGeomNodesToColPolys( collNps ).getChildren()[0]
+        collNps.addPath(np)
+        newCollNp = utils.RebuildGeomNodesToColPolys(collNps).getChildren()[0]
         newCollNp.show()
         
-        newCollNp.reparentTo( np.getParent() )
-        newCollNp.setName( 'NEW NODE' )
+        newCollNp.reparentTo(np.getParent())
+        newCollNp.setName('NEW NODE')
         newCollNp.show()
-        newCollNp.setTag( game.nodes.TAG_NODE_TYPE, TAG_EMBEDDED_COLLISION )
+        newCollNp.setTag(game.nodes.TAG_NODE_TYPE, TAG_EMBEDDED_COLLISION)
         np.detachNode()
         
-        wrpr = cls( newCollNp )
+        wrpr = cls(newCollNp)
         wrpr.SetupNodePath()
         #for t in wrpr.attributes:
         #    print t.label

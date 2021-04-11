@@ -1,13 +1,11 @@
 import panda3d.core as pm
 from panda3d.core import PointLight as PL
 
-try:
-    from pandaEditor.editor.nodes.attributes import NodeAttribute as Attr
-    from pandaEditor.editor.nodes.light import Light
-except ImportError:
-    print('import failed')
-    from pandaEditor.game.nodes.attributes import NodeAttribute as Attr
-    from pandaEditor.game.nodes.light import Light
+from game.nodes.manager import import_wrapper
+
+
+Attr = import_wrapper('nodes.attributes.NodeAttribute')
+Light = import_wrapper('nodes.light.Light')
 
 
 class PointLight(Light):
@@ -22,4 +20,4 @@ class PointLight(Light):
             Attr('Point', pm.Point3, PL.getPoint, PL.setPoint),
             Attr('Specular Color', pm.Vec4, PL.getSpecularColor, PL.setSpecularColor),
             parent='PointLight'
-        )
+       )

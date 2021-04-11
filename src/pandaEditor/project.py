@@ -9,8 +9,10 @@ from pubsub import pub
 
 import p3d
 import game
+import utils
 from pandaEditor.constants import MODEL_EXTENSIONS
-from utils.directorywatcher import DirectoryWatcher
+from directorywatcher import DirectoryWatcher
+from utils import popen_and_call
 
 
 PROJECT_DEF_NAME = 'project.xml'
@@ -38,7 +40,7 @@ class DirectoryWatcher(DirectoryWatcher):
         pub.sendMessage('projectFilesModified', file_paths=file_paths)
         
 
-class Project(object):
+class Project:
     
     def __init__(self, app):
         self.app = app
@@ -53,7 +55,10 @@ class Project(object):
         return os.path.join(self.path, PROJECT_DEF_NAME)
     
     def GetMainScript(self):
-        return """from direct.directbase import DirectStart
+        return """import sys
+sys.path.append(r'C:\\Users\\Jamie Davies\\.virtualenvs\\panda3d-editor-yMC_6O54\\Lib\\site-packages')
+        
+from direct.directbase import DirectStart
 
 import game
 
@@ -67,11 +72,11 @@ run()"""
     def New(self, dirPath, **kwargs):
                  
         dirs = {
-            SCENES:kwargs.pop('scenes', 'scenes'),
-            MODELS:kwargs.pop('models', 'models'),
-            SCRIPTS:kwargs.pop('scripts', 'scripts'),
-            PREFABS:kwargs.pop('prefabs', 'prefabs'),
-            SHADERS:kwargs.pop('shaders', 'shaders')
+            SCENES: kwargs.pop('scenes', 'scenes'),
+            MODELS: kwargs.pop('models', 'models'),
+            SCRIPTS: kwargs.pop('scripts', 'scripts'),
+            PREFABS: kwargs.pop('prefabs', 'prefabs'),
+            SHADERS: kwargs.pop('shaders', 'shaders')
         }
 
         # Create xml tags for project directories
@@ -83,7 +88,7 @@ run()"""
         
         # Wrap with an element tree and write to file
         tree = et.ElementTree(rootElem)
-        utils.Indent(tree.getroot())
+        utils.indent(tree.getroot())
         filePath = os.path.join(dirPath, PROJECT_DEF_NAME)
         tree.write(filePath)
         
@@ -210,6 +215,7 @@ run()"""
         assetNames = os.listdir(dirPath)
         
         # Iterate until we find a incremented suffix not in use
+        # TODO: Isn't there a common function for this?
         i = 1
         while True:
             if newAssetName not in assetNames:
@@ -290,9 +296,11 @@ class """ + fileName + """(p3d):
         shutil.copytree(self.path, tempDirPath)
         
         # Copy the game module over to the temp project.
-        gamePath = os.path.split(game.__file__)[0]
-        gameDestPath = os.path.join(tempDirPath, 'game')
-        shutil.copytree(gamePath, gameDestPath)
+        # Include various modules / packages.
+        for module in (game, p3d):
+            src_path = os.path.split(module.__file__)[0]
+            tgt_path = os.path.join(tempDirPath, module.__name__)
+            shutil.copytree(src_path, tgt_path)
         
         # Now copy the plugin module.
         pluginsPath = self.app.game.pluginMgr.GetPluginsPath()
@@ -322,13 +330,19 @@ class """ + fileName + """(p3d):
         
         # Run the script with ppackage, then remove the copied project once
         # it's built.
-        def Cleanup():
-            if os.path.exists(tempDirPath):
-                shutil.rmtree(tempDirPath)
-            
-        cmd = ('ppackage', '-i', buildDirPath, 'build.pdef')
-        utils.PopenAndCall(Cleanup, True, cmd, stdout=subprocess.PIPE, 
-                            stderr=subprocess.STDOUT, cwd=tempDirPath)
+        def clean_up():
+            # if os.path.exists(tempDirPath):
+            #     shutil.rmtree(tempDirPath)
+            pass
+
+        popen_and_call(
+            clean_up,
+            True,
+            ('ppackage', '-i', buildDirPath, 'build.pdef'),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            cwd=tempDirPath
+       )
         
     def GetRelModelPath(self, pandaPath):
         """

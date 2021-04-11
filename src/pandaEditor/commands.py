@@ -1,4 +1,3 @@
-import wx
 import panda3d.core as pm
 
 from pandaEditor import actions
@@ -8,12 +7,12 @@ def Add(comps):
     """
     Create the add composite action, execute it and push it onto the undo 
     queue.
+
     """
     actns = []
     actns.append(actions.Deselect(base.selection.comps))
     actns.extend([actions.Add(comp) for comp in comps])
     actns.append(actions.Select(comps))
-    
     actn = actions.Composite(actns)
     base.frame.app.actnMgr.Push(actn)
     actn()
@@ -24,6 +23,7 @@ def Remove(comps):
     """
     Create the remove composite action, execute it and push it onto the undo 
     queue.
+
     """
     actns = []
     actns.append(actions.Deselect(comps))
@@ -38,20 +38,18 @@ def Duplicate(comps):
     """
     Create the duplicate composite action, execute it and push it onto the 
     undo queue.
+
     """
     selComps = base.selection.comps
     base.selection.Clear()
-    
     dupeComps = []
     for comp in comps:
         wrpr = base.game.nodeMgr.Wrap(comp)
         dupeComps.append(wrpr.Duplicate())
-        
     actns = []
     actns.append(actions.Deselect(selComps))
     actns.extend([actions.Add(dupeComp) for dupeComp in dupeComps])
     actns.append(actions.Select(dupeComps))
-    
     actn = actions.Composite(actns)
     base.frame.app.actnMgr.Push(actn)
     actn()
@@ -68,7 +66,6 @@ def Replace(fromComp, toComp):
         actions.Add(toComp),
         actions.Select([toComp])
     ]
-    
     actn = actions.Composite(actns)
     base.frame.app.actnMgr.Push(actn)
     actn()
@@ -79,12 +76,12 @@ def Select(comps):
     """
     Create the select composite action, execute it and push it onto the
     undo queue.
+
     """
     actns = [
         actions.Deselect(base.selection.comps), 
         actions.Select(comps)
     ]
-    
     actn = actions.Composite(actns)
     base.frame.app.actnMgr.Push(actn)
     actn()
@@ -95,9 +92,12 @@ def SetAttribute(comps, attrs, val):
     """
     Create the set attribute action, execute it and push it onto the undo
     queue.
+
     """
-    actns = [actions.SetAttribute(comps[i], attrs[i], val) for i in range(len(comps))]
-    
+    actns = [
+        actions.SetAttribute(comps[i], attrs[i], val)
+        for i in range(len(comps))
+    ]
     actn = actions.Composite(actns)
     base.frame.app.actnMgr.Push(actn)
     actn()
@@ -107,9 +107,9 @@ def SetAttribute(comps, attrs, val):
 def Parent(comps, pComp):
     """
     Create the parent action, execute it and push it onto the undo queue.
+
     """
     actns = [actions.Parent(comp, pComp) for comp in comps]
-    
     actn = actions.Composite(actns)
     base.frame.app.actnMgr.Push(actn)
     actn()
@@ -123,6 +123,7 @@ def Unparent():
 def Group(nps):
     """
     Create the group action, execute it and push it onto the undo queue.
+
     """
     # Find the lowest common ancestor for all NodePaths - this will be the
     # parent for the group NodePath.
@@ -138,7 +139,6 @@ def Group(nps):
     actns.extend([actions.Parent(np, grpNp) for np in nps])
     actns.append(actions.Deselect(nps))
     actns.append(actions.Select([grpNp]))
-    
     actn = actions.Composite(actns)
     base.frame.app.actnMgr.Push(actn)
     actn()
@@ -148,6 +148,7 @@ def Group(nps):
 def Ungroup(nps):
     """
     Create the ungroup action, execute it and push it onto the undo queue.
+
     """
     pNps = []
     cNpSets = []
@@ -175,6 +176,7 @@ def Ungroup(nps):
 def Connect(tgtComps, cnnctn, fn):
     """
     Create the connect action, execute it and push it onto the undo queue.
+
     """
     actn = actions.Connect(tgtComps, cnnctn, fn)
     base.frame.app.actnMgr.Push(actn)
@@ -185,9 +187,9 @@ def Connect(tgtComps, cnnctn, fn):
 def SetConnections(tgtComps, cnnctns):
     """
     Create the connect action, execute it and push it onto the undo queue.
+
     """
     actns = [actions.SetConnections(tgtComps, cnnctn) for cnnctn in cnnctns]
-    
     actn = actions.Composite(actns)
     base.frame.app.actnMgr.Push(actn)
     actn()

@@ -1,6 +1,6 @@
-from pandaEditor.editor.nodes.constants import TAG_PICKABLE
-from pandaEditor.game.nodes.actor import Actor as GameActor
-from pandaEditor.game.nodes.constants import TAG_MODEL_PATH
+from editor.nodes.constants import TAG_PICKABLE
+from game.nodes.actor import Actor as GameActor
+from game.nodes.constants import TAG_MODEL_PATH
 
 
 class Actor(GameActor):

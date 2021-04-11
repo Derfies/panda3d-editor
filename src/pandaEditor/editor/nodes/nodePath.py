@@ -4,13 +4,13 @@ import panda3d.core as pm
 from panda3d.core import NodePath as NP
 from direct.directtools.DirectSelection import DirectBoundingBox
 
-from pandaEditor import commands as cmds
-from pandaEditor.editor.nodes.constants import (
+import commands as cmds
+from editor.nodes.constants import (
     TAG_BBOX, TAG_IGNORE, TAG_MODIFIED, TAG_PICKABLE
 )
-from pandaEditor.game.nodes.constants import TAG_MODEL_ROOT_CHILD
-from pandaEditor.game.nodes.attributes import NodePathAttribute as Attr
-from pandaEditor.game.nodes.nodePath import NodePath as GameNodePath
+from game.nodes.constants import TAG_MODEL_ROOT_CHILD
+from game.nodes.attributes import NodePathAttribute as Attr
+from game.nodes.nodePath import NodePath as GameNodePath
 
 
 class NodePath(GameNodePath):
@@ -34,7 +34,7 @@ class NodePath(GameNodePath):
             Attr('Y', float, NP.getY, NP.setY, w=False),
             Attr('Z', float, NP.getZ, NP.setZ, w=False),
             parent='Position'
-       )
+      )
         
         self.AddAttributes(Attr('Rotation', pm.Vec3, NP.getHpr, NP.setHpr, w=False), index=i + 2)
         self.AddAttributes(
@@ -42,7 +42,7 @@ class NodePath(GameNodePath):
             Attr('P', float, NP.getP, NP.setP, w=False),
             Attr('R', float, NP.getR, NP.setR, w=False),
             parent='Rotation'
-       )
+      )
         
         self.AddAttributes(Attr('Scale', pm.Vec3, NP.getScale, NP.setScale, w=False), index=i + 3)
         self.AddAttributes(
@@ -50,7 +50,7 @@ class NodePath(GameNodePath):
             Attr('Sy', float, NP.getSy, NP.setSy, w=False),
             Attr('Sz', float, NP.getSz, NP.setSz, w=False),
             parent='Scale'
-       )
+      )
         
     @classmethod
     def SetPickable(cls, value=True):

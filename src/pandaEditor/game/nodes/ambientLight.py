@@ -1,6 +1,9 @@
 import panda3d.core as pm
 
-from .light import Light
+from game.nodes.manager import import_wrapper
+
+
+Light = import_wrapper('nodes.light.Light')
 
 
 class AmbientLight(Light):

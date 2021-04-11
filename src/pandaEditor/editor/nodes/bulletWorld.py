@@ -1,8 +1,8 @@
 from panda3d.bullet import BulletWorld as BW
 
-from pandaEditor.game.nodes.attributes import Attribute as Attr
-from pandaEditor.game.nodes.attributes import Connection as Cnnctn
-from pandaEditor.game.nodes.bulletWorld import BulletWorld as GameBulletWorld
+from game.nodes.attributes import Attribute as Attr
+from game.nodes.attributes import Connection as Cnnctn
+from game.nodes.bulletWorld import BulletWorld as GameBulletWorld
 
 
 class BulletWorld(GameBulletWorld):

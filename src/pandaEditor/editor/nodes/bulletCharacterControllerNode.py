@@ -1,7 +1,7 @@
 from panda3d.bullet import BulletWorld as BW
 
-from pandaEditor.game.nodes.attributes import NodePathTargetConnectionList as CnnctnList
-from pandaEditor.game.nodes.bulletCharacterControllerNode import BulletCharacterControllerNode as GameBulletCharacterControllerNode
+from game.nodes.attributes import NodePathTargetConnectionList as CnnctnList
+from game.nodes.bulletCharacterControllerNode import BulletCharacterControllerNode as GameBulletCharacterControllerNode
 
 
 class BulletCharacterControllerNode(GameBulletCharacterControllerNode):

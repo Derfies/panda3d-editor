@@ -1,8 +1,8 @@
-from pandaEditor.editor.nodes.constants import TAG_IGNORE
-from pandaEditor.game.nodes.pandaNode import PandaNode
-from pandaEditor.game.nodes.modelNode import ModelNode
-from pandaEditor.game.nodes.camera import Camera
-from pandaEditor.game.nodes.showbaseDefault import (
+from editor.nodes.constants import TAG_IGNORE
+from game.nodes.pandaNode import PandaNode
+from game.nodes.modelNode import ModelNode
+from game.nodes.camera import Camera
+from game.nodes.showbaseDefault import (
     Aspect2d as GameAspect2d,
     BaseCam as GameBaseCam,
     BaseCamera as GameBaseCamera,

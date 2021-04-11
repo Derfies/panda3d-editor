@@ -1,6 +1,9 @@
 import panda3d.core as pm
 
-from pandaEditor.game.nodes.lensNode import LensNode
+from game.nodes.manager import import_wrapper
+
+
+LensNode = import_wrapper('nodes.lensNode.LensNode')
 
 
 class Camera(LensNode):

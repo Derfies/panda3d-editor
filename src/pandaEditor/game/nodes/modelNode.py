@@ -1,10 +1,9 @@
 import panda3d.core as pm
 
-try:
-    from pandaEditor.editor.nodes.nodePath import NodePath
-except ImportError:
-    print('import failed')
-    from pandaEditor.game.nodes.nodePath import NodePath
+from game.nodes.manager import import_wrapper
+
+
+NodePath = import_wrapper('nodes.nodePath.NodePath')
 
 
 class ModelNode(NodePath):

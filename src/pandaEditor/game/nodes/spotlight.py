@@ -1,15 +1,13 @@
 import panda3d.core as pm
 from panda3d.core import Spotlight as SL
 
-try:
-    from pandaEditor.editor.nodes.attributes import NodeAttribute as Attr
-    from pandaEditor.editor.nodes.lensNode import LensNode
-    from pandaEditor.editor.nodes.light import Light
-except ImportError:
-    print('import failed')
-    from pandaEditor.game.nodes.attributes import NodeAttribute as Attr
-    from pandaEditor.game.nodes.lensNode import LensNode
-    from pandaEditor.game.nodes.light import Light
+from game.nodes.manager import import_wrapper
+
+
+Attr = import_wrapper('nodes.attributes.NodeAttribute')
+LensNode = import_wrapper('nodes.lensNode.LensNode')
+Light = import_wrapper('nodes.light.Light')
+
 
 
 class Spotlight(Light, LensNode):
@@ -25,4 +23,4 @@ class Spotlight(Light, LensNode):
             Attr('Specular Color', pm.Vec4, SL.getSpecularColor, SL.setSpecularColor),
             Attr('Shadow Caster', bool, SL.isShadowCaster, SL.setShadowCaster),
             parent='Spotlight'
-        )
+       )

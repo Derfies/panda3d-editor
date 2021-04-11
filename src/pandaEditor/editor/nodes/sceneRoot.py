@@ -1,4 +1,4 @@
-from pandaEditor.game.nodes.sceneRoot import SceneRoot as GameSceneRoot
+from game.nodes.sceneRoot import SceneRoot as GameSceneRoot
 
 
 class SceneRoot(GameSceneRoot):

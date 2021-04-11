@@ -1,10 +1,9 @@
-from pandaEditor.game.nodes.camera import Camera
-from pandaEditor.game.nodes.modelNode import ModelNode
-try:
-    from pandaEditor.editor.nodes.nodePath import NodePath
-except ImportError:
-    print('import failed')
-    from pandaEditor.game.nodes.nodePath import NodePath
+from game.nodes.camera import Camera
+from game.nodes.manager import import_wrapper
+from game.nodes.modelNode import ModelNode
+
+
+NodePath = import_wrapper('nodes.nodePath.NodePath')
 
 
 class Render(NodePath):

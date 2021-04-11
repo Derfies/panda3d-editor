@@ -1,7 +1,9 @@
 from direct.directtools.DirectGrid import DirectGrid
 from pubsub import pub
 
-import p3d
+from p3d.displayShading import DisplayShading
+from p3d.frameRate import FrameRate
+from p3d.mouse import MOUSE_ALT
 import editor
 import gizmos
 import actions
@@ -28,37 +30,37 @@ class App:
         self._xformTask = None
         
         # Bind publisher events
-        pub.subscribe( self.OnUpdate, 'Update' )
+        pub.subscribe(self.OnUpdate, 'Update')
 
-    def FinishInit( self ):
+    def FinishInit(self):
 
         # Create project manager
-        self.project = Project( self )
+        self.project = Project(self)
         base.project = self.project
-        self.frame.SetProjectPath( self.frame.cfg.Read( 'projDirPath' ) )
+        self.frame.SetProjectPath(self.frame.cfg.Read('projDirPath'))
 
         # Create grid
         self.SetupGrid()
 
         # Create frame rate meter
-        self.frameRate = p3d.FrameRate()
+        self.frameRate = FrameRate()
 
         # Create shading mode keys
-        dsp = p3d.DisplayShading()
-        dsp.accept( '4', dsp.Wireframe )
-        dsp.accept( '5', dsp.Shade )
-        dsp.accept( '6', dsp.Texture )
+        dsp = DisplayShading()
+        dsp.accept('4', dsp.Wireframe)
+        dsp.accept('5', dsp.Shade)
+        dsp.accept('6', dsp.Texture)
 
         # Set up gizmos
         self.SetupGizmoManager()
 
         # Bind mouse events
-        base.accept( 'mouse1', self.OnMouse1Down )
-        base.accept( 'shift-mouse1', self.OnMouse1Down, [True] )
-        base.accept( 'control-mouse1', self.OnMouse1Down )
-        base.accept( 'mouse2', self.OnMouse2Down )
-        base.accept( 'mouse1-up', self.OnMouse1Up )
-        base.accept( 'mouse2-up', self.OnMouse2Up )
+        base.accept('mouse1', self.OnMouse1Down)
+        base.accept('shift-mouse1', self.OnMouse1Down, [True])
+        base.accept('control-mouse1', self.OnMouse1Down)
+        base.accept('mouse2', self.OnMouse2Down)
+        base.accept('mouse1-up', self.OnMouse1Up)
+        base.accept('mouse2-up', self.OnMouse2Up)
 
         # Create selection manager
         self.selection = Selection(
@@ -66,7 +68,7 @@ class App:
             root2d=base.edRender2d,
             win=base.win,
             mouseWatcherNode=base.edMouseWatcherNode
-        )
+       )
         base.selection = self.selection
 
         # Create our managers.
@@ -75,19 +77,19 @@ class App:
         self.actnMgr = actions.Manager()
 
         # Bind events
-        base.accept( 'z', self.Undo )
-        base.accept( 'shift-z', self.Redo )
-        base.accept( 'f', self.FrameSelection )
-        base.accept( 'del', lambda fn: cmds.Remove( fn() ), [self.selection.Get] )
-        base.accept( 'backspace', lambda fn: cmds.Remove( fn() ), [self.selection.Get] )
-        base.accept( 'control-d', lambda fn: cmds.Duplicate( fn() ), [self.selection.Get] )
-        base.accept( 'control-g', lambda fn: cmds.Group( fn() ), [self.selection.Get] )
-        base.accept( 'control-s', self.frame.OnFileSave, [None] )
-        base.accept( 'arrow_up', lambda fn: cmds.Select( fn() ), [self.selection.SelectParent] )
-        base.accept( 'arrow_down', lambda fn: cmds.Select( fn() ), [self.selection.SelectChild] )
-        base.accept( 'arrow_left', lambda fn: cmds.Select( fn() ), [self.selection.SelectPrev] )
-        base.accept( 'arrow_right', lambda fn: cmds.Select( fn() ), [self.selection.SelectNext] )
-        base.accept( 'projectFilesModified', self.OnProjectFilesModified )
+        base.accept('z', self.Undo)
+        base.accept('shift-z', self.Redo)
+        base.accept('f', self.FrameSelection)
+        base.accept('del', lambda fn: cmds.Remove(fn()), [self.selection.Get])
+        base.accept('backspace', lambda fn: cmds.Remove(fn()), [self.selection.Get])
+        base.accept('control-d', lambda fn: cmds.Duplicate(fn()), [self.selection.Get])
+        base.accept('control-g', lambda fn: cmds.Group(fn()), [self.selection.Get])
+        base.accept('control-s', self.frame.OnFileSave, [None])
+        base.accept('arrow_up', lambda fn: cmds.Select(fn()), [self.selection.SelectParent])
+        base.accept('arrow_down', lambda fn: cmds.Select(fn()), [self.selection.SelectChild])
+        base.accept('arrow_left', lambda fn: cmds.Select(fn()), [self.selection.SelectPrev])
+        base.accept('arrow_right', lambda fn: cmds.Select(fn()), [self.selection.SelectNext])
+        base.accept('projectFilesModified', self.OnProjectFilesModified)
 
         # Create a "game"
         self.game = editor.Base()
@@ -99,70 +101,72 @@ class App:
 
         return True
 
-    def SetupGrid( self ):
+    def SetupGrid(self):
         """Create the grid and set up its appearance."""
         self.grid = DirectGrid(
             gridSize=20.0,
             gridSpacing=1.0,
             planeColor=(0.5, 0.5, 0.5, 0.0),
             parent=base.edRender
-        )
+       )
         self.grid.snapMarker.hide()
-        self.grid.centerLines.setColor( (0, 0, 0, 0) )
-        self.grid.centerLines.setThickness( 2 )
-        self.grid.majorLines.setColor( (0.25, 0.25, 0.25, 0) )
-        self.grid.majorLines.setThickness( 1 )
-        self.grid.minorLines.setColor( (0.5, 0.5, 0.5, 0) )
+        self.grid.centerLines.setColor((0, 0, 0, 0))
+        self.grid.centerLines.setThickness(2)
+        self.grid.majorLines.setColor((0.25, 0.25, 0.25, 0))
+        self.grid.majorLines.setThickness(1)
+        self.grid.minorLines.setColor((0.5, 0.5, 0.5, 0))
         self.grid.updateGrid()
 
-    def SetupGizmoManager( self ):
+    def SetupGizmoManager(self):
         """Create gizmo manager."""
-        gizmoMgrRootNp = base.edRender.attachNewNode( 'gizmoManager' )
+        gizmoMgrRootNp = base.edRender.attachNewNode('gizmoManager')
         kwargs = {
             'camera':base.edCamera,
             'rootNp':gizmoMgrRootNp,
             'win':base.win,
             'mouseWatcherNode':base.edMouseWatcherNode
         }
-        self.gizmoMgr = gizmos.Manager( **kwargs )
-        self.gizmoMgr.AddGizmo( gizmos.Translation( 'pos', **kwargs ) )
-        self.gizmoMgr.AddGizmo( gizmos.Rotation( 'rot', **kwargs ) )
-        self.gizmoMgr.AddGizmo( gizmos.Scale( 'scl', **kwargs ) )
+        self.gizmoMgr = gizmos.Manager(**kwargs)
+        self.gizmoMgr.AddGizmo(gizmos.Translation('pos', **kwargs))
+        self.gizmoMgr.AddGizmo(gizmos.Rotation('rot', **kwargs))
+        self.gizmoMgr.AddGizmo(gizmos.Scale('scl', **kwargs))
 
         # Bind gizmo manager events
-        base.accept( 'q', self.SetActiveGizmo, [None] )
-        base.accept( 'w', self.SetActiveGizmo, ['pos'] )
-        base.accept( 'e', self.SetActiveGizmo, ['rot'] )
-        base.accept( 'r', self.SetActiveGizmo, ['scl'] )
-        base.accept( 'space', self.ToggleGizmoLocal )
-        base.accept( '+', self.gizmoMgr.SetSize, [2] )
-        base.accept( '-', self.gizmoMgr.SetSize, [0.5] )
+        base.accept('q', self.SetActiveGizmo, [None])
+        base.accept('w', self.SetActiveGizmo, ['pos'])
+        base.accept('e', self.SetActiveGizmo, ['rot'])
+        base.accept('r', self.SetActiveGizmo, ['scl'])
+        base.accept('space', self.ToggleGizmoLocal)
+        base.accept('+', self.gizmoMgr.SetSize, [2])
+        base.accept('-', self.gizmoMgr.SetSize, [0.5])
 
-    def SetActiveGizmo( self, name ):
-        self.gizmoMgr.SetActiveGizmo( name )
-        self.frame.OnUpdateXform( None )
+    def SetActiveGizmo(self, name):
+        self.gizmoMgr.SetActiveGizmo(name)
+        self.frame.OnUpdateXform(None)
 
-    def SetGizmoLocal( self, val ):
-        self.gizmoMgr.SetLocal( val )
-        self.frame.OnUpdateXform( None )
+    def SetGizmoLocal(self, val):
+        self.gizmoMgr.SetLocal(val)
+        self.frame.OnUpdateXform(None)
 
-    def ToggleGizmoLocal( self ):
+    def ToggleGizmoLocal(self):
         self.gizmoMgr.ToggleLocal()
-        self.frame.OnUpdateXform( None )
+        self.frame.OnUpdateXform(None)
 
-    def OnMouse1Down( self, shift=False ):
+    def OnMouse1Down(self, shift=False):
         """
         Handle mouse button 1 down event. Start the drag select operation if
         a gizmo is not being used and the alt key is not down, otherwise start
         the transform operation.
         """
-        if ( not self.gizmoMgr.IsDragging() and
-             p3d.MOUSE_ALT not in base.edCamera.mouse.modifiers ):
-            self.selection.StartDragSelect( shift )
+        if (
+            not self.gizmoMgr.IsDragging() and
+            MOUSE_ALT not in base.edCamera.mouse.modifiers
+        ):
+            self.selection.StartDragSelect(shift)
         elif self.gizmoMgr.IsDragging():
             self.StartTransform()
 
-    def OnMouse2Down( self ):
+    def OnMouse2Down(self):
         """
         Handle mouse button 2 down event. Start the transform operation if a
         gizmo is being used.
@@ -170,18 +174,18 @@ class App:
         if self.gizmoMgr.IsDragging():
             self.StartTransform()
 
-    def OnMouse1Up( self ):
+    def OnMouse1Up(self):
         """
         Handle mouse button 1 up event. Stop the drag select operation if the
         marquee is running, otherwise stop the transform operation if a gizmo
         is being used.
         """
         if self.selection.marquee.IsRunning():
-            cmds.Select( self.selection.StopDragSelect() )
+            cmds.Select(self.selection.StopDragSelect())
         elif self.gizmoMgr.IsDragging() or self.gizmo:
             self.StopTransform()
 
-    def OnMouse2Up( self ):
+    def OnMouse2Up(self):
         """
         Handle mouse button 2 up event. Stop the transform operation if a
         gizmo is being used.
@@ -189,16 +193,16 @@ class App:
         if self.gizmoMgr.IsDragging() or self.gizmo:
             self.StopTransform()
 
-    def StartTransform( self ):
+    def StartTransform(self):
         """
         Start the transfrom operation by adding a task to constantly send a
         selection modified message while transfoming.
         """
         self.gizmo = True
-        self._xformTask = taskMgr.add( self.doc.OnSelectionModified,
-                                       'SelectionModified' )
+        self._xformTask = taskMgr.add(self.doc.OnSelectionModified,
+                                       'SelectionModified')
 
-    def StopTransform( self ):
+    def StopTransform(self):
         """
         Stop the transfrom operation by removing the selection modified
         message task. Also create a transform action and push it onto the undo
@@ -206,50 +210,50 @@ class App:
         """
         # Remove the transform task
         if self._xformTask in taskMgr.getAllTasks():
-            taskMgr.remove( self._xformTask )
+            taskMgr.remove(self._xformTask)
             self._xformTask = None
 
         actGizmo = self.gizmoMgr.GetActiveGizmo()
         actns = []
-        for i, np in enumerate( actGizmo.attachedNps ):
-            actns.append( actions.Transform( np, np.getTransform(), actGizmo.initNpXforms[i] ) )
-        actn = actions.Composite( actns )
-        self.actnMgr.Push( actn )
+        for i, np in enumerate(actGizmo.attachedNps):
+            actns.append(actions.Transform(np, np.getTransform(), actGizmo.initNpXforms[i]))
+        actn = actions.Composite(actns)
+        self.actnMgr.Push(actn)
         self.gizmo = False
 
         # Make sure to mark the NodePath as dirty in case it is a child of a
         # model root.
-        wrpr = base.game.nodeMgr.Wrap( np )
-        wrpr.SetModified( True )
+        wrpr = base.game.nodeMgr.Wrap(np)
+        wrpr.SetModified(True)
 
         # Call OnModified next frame. Not sure why but if we call it straight
         # away it causes a small jitter when xforming...
-        taskMgr.doMethodLater( 0, self.doc.OnModified, 'dragDrop',
-                               [actGizmo.attachedNps] )
+        taskMgr.doMethodLater(0, self.doc.OnModified, 'dragDrop',
+                               [actGizmo.attachedNps])
 
-    def FrameSelection( self ):
+    def FrameSelection(self):
         """
         Call frame selection on the camera if there are some node paths in the
         selection.
         """
         nps = self.selection.GetNodePaths()
         if nps:
-            base.edCamera.Frame( nps )
+            base.edCamera.Frame(nps)
         else:
-            base.edCamera.Frame( [base.scene.rootNp] )
+            base.edCamera.Frame([base.scene.rootNp])
 
-    def OnUpdate( self, comps=None ):
+    def OnUpdate(self, comps=None):
         """
         Subscribed to the update selection message. Make sure that the
         selected nodes are attached to the managed gizmos, then refresh the
         active one.
         """
         nps = self.selection.GetNodePaths()
-        self.gizmoMgr.AttachNodePaths( nps )
+        self.gizmoMgr.AttachNodePaths(nps)
         self.gizmoMgr.RefreshActiveGizmo()
         self.selection.Update()
 
-    def CreateScene( self, filePath=None, newDoc=True ):
+    def CreateScene(self, filePath=None, newDoc=True):
         """
         Create an empty scene and set its root node to the picker's root node.
         """
@@ -259,12 +263,12 @@ class App:
 
         # Close the current scene if there is one
         self.selection.Clear()
-        if hasattr( self, 'scene' ):
+        if hasattr(self, 'scene'):
             self.scene.Close()
 
         # Create a new scene
         self.scene = editor.Scene()
-        self.scene.rootNp.reparentTo( base.edRender )
+        self.scene.rootNp.reparentTo(base.edRender)
 
         # Set the selection and picker root node to the scene's root node
         self.selection.rootNp = self.scene.rootNp
@@ -273,49 +277,49 @@ class App:
 
         # Create the document wrapper if creating a new document
         if newDoc:
-            self.doc = Document( filePath, self.scene )
+            self.doc = Document(filePath, self.scene)
 
-    def AddComponent( self, typeStr, *args, **kwargs ):
-        wrprCls = base.game.nodeMgr.GetWrapperByName( typeStr )
-        wrpr = wrprCls.Create( *args, **kwargs )
+    def AddComponent(self, typeStr, *args, **kwargs):
+        wrprCls = base.game.nodeMgr.GetWrapperByName(typeStr)
+        wrpr = wrprCls.Create(*args, **kwargs)
         wrpr.SetDefaultValues()
-        wrpr.SetParent( wrpr.GetDefaultParent() )
+        wrpr.SetParent(wrpr.GetDefaultParent())
 
         # Bit of a hack. Sometimes a wrapper can create multiple components
         # when Create is called. Make sure to set default values on all the
         # components that were created.
-        if hasattr( wrpr, 'extraNps' ):
+        if hasattr(wrpr, 'extraNps'):
             for np in wrpr.extraNps:
-                eWrpr = base.game.nodeMgr.Wrap( np )
+                eWrpr = base.game.nodeMgr.Wrap(np)
                 eWrpr.SetDefaultValues()
-        cmds.Add( [wrpr.data] )
+        cmds.Add([wrpr.data])
 
         return wrpr
 
-    def OnProjectFilesModified( self, filePaths ):
-        self.assetMgr.OnAssetModified( filePaths )
-        self.game.pluginMgr.OnProjectFilesModified( filePaths )
+    def OnProjectFilesModified(self, filePaths):
+        self.assetMgr.OnAssetModified(filePaths)
+        self.game.pluginMgr.OnProjectFilesModified(filePaths)
 
-    def Undo( self ):
+    def Undo(self):
         self.actnMgr.Undo()
         self.doc.OnModified()
 
-    def Redo( self ):
+    def Redo(self):
         self.actnMgr.Redo()
         self.doc.OnModified()
 
-    def Group( self ):
+    def Group(self):
         nps = self.selection.GetNodePaths()
         if nps:
-            cmds.Group( nps )
+            cmds.Group(nps)
 
-    def Ungroup( self ):
+    def Ungroup(self):
         nps = self.selection.GetNodePaths()
         if nps:
-            cmds.Ungroup( nps )
+            cmds.Ungroup(nps)
 
-    def Parent( self ):
+    def Parent(self):
         pass
 
-    def Unparent( self ):
+    def Unparent(self):
         pass

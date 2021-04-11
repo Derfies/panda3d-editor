@@ -1,5 +1,5 @@
-from pandaEditor.game.nodes.constants import TAG_MODEL_ROOT_CHILD
-from pandaEditor.game.nodes.modelRoot import ModelRoot as GameModelRoot
+from game.nodes.constants import TAG_MODEL_ROOT_CHILD
+from game.nodes.modelRoot import ModelRoot as GameModelRoot
 
 
 class ModelRoot(GameModelRoot):

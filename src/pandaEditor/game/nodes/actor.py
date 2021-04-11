@@ -1,68 +1,73 @@
 import panda3d.core as pm
 from direct.actor.Actor import Actor as P3dActor
 
-from .constants import *
-from .modelRoot import ModelRoot
-from .attributes import PyTagAttribute as PTAttr
+from game.nodes.constants import (
+    TAG_ACTOR, TAG_MODEL_PATH, TAG_NODE_TYPE, TAG_NODE_UUID
+)
+from game.nodes.manager import import_wrapper
 
 
-class Actor( ModelRoot ):
+PTAttr = import_wrapper('nodes.attributes.PyTagAttribute')
+ModelRoot = import_wrapper('nodes.modelRoot.ModelRoot')
+
+
+class Actor(ModelRoot):
     
-    def __init__( self, *args, **kwargs ):
-        ModelRoot.__init__( self, *args, **kwargs )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         
         self.AddAttributes(
-            PTAttr( 'Anims', dict, self.GetAnimDict, self.SetAnimDict, pyTagName=TAG_ACTOR ),
+            PTAttr('Anims', dict, self.GetAnimDict, self.SetAnimDict, pyTagName=TAG_ACTOR),
             parent='Actor'
-        )
+       )
     
     @classmethod
-    def Create( cls, *args, **kwargs ):
-        wrpr = super( Actor, cls ).Create( *args, **kwargs )
+    def Create(cls, *args, **kwargs):
+        wrpr = super(Actor, cls).Create(*args, **kwargs)
         
-        actor = P3dActor( wrpr.data )
-        actor.setTag( TAG_NODE_TYPE, 'Actor' )
-        actor.setTag( TAG_NODE_UUID, wrpr.data.getTag( TAG_NODE_UUID ) )
-        actor.setPythonTag( TAG_MODEL_PATH, str( wrpr.data.node().getFullpath() ) )
-        actor.setPythonTag( TAG_ACTOR, actor )
+        actor = P3dActor(wrpr.data)
+        actor.setTag(TAG_NODE_TYPE, 'Actor')
+        actor.setTag(TAG_NODE_UUID, wrpr.data.getTag(TAG_NODE_UUID))
+        actor.setPythonTag(TAG_MODEL_PATH, str(wrpr.data.node().getFullpath()))
+        actor.setPythonTag(TAG_ACTOR, actor)
         
-        return cls( actor.getGeomNode() )
+        return cls(actor.getGeomNode())
     
-    def Duplicate( self ):
-        dupeNp = ModelRoot.Duplicate( self )
+    def Duplicate(self):
+        dupeNp = ModelRoot.Duplicate(self)
         
-        actor = P3dActor( dupeNp )
-        actor.setTag( TAG_NODE_TYPE, 'Actor' )
-        actor.setPythonTag( TAG_ACTOR, actor )
-        actor.reparentTo( self.data.getParent() )
-        actor.setTransform( dupeNp.getTransform() )
-        actor.setName( dupeNp.getName() )
+        actor = P3dActor(dupeNp)
+        actor.setTag(TAG_NODE_TYPE, 'Actor')
+        actor.setPythonTag(TAG_ACTOR, actor)
+        actor.reparentTo(self.data.getParent())
+        actor.setTransform(dupeNp.getTransform())
+        actor.setName(dupeNp.getName())
                          
         dupeNp.detachNode()
         
         # Copy animations over to the new actor.
-        oldAnims = self.GetAnimDict( self.data.getPythonTag( TAG_ACTOR ) )
-        self.SetAnimDict( actor, oldAnims )
+        oldAnims = self.GetAnimDict(self.data.getPythonTag(TAG_ACTOR))
+        self.SetAnimDict(actor, oldAnims)
         
         return actor.getGeomNode()
     
-    def GetAnimDict( self, actor ):
+    def GetAnimDict(self, actor):
         animDict = {}
-        for name in P3dActor.getAnimNames( actor ):
-            filePath = actor.getAnimFilename( name )
-            animDict[name] = base.project.GetRelModelPath( filePath )
+        for name in P3dActor.getAnimNames(actor):
+            filePath = actor.getAnimFilename(name)
+            animDict[name] = base.project.GetRelModelPath(filePath)
             
         return animDict
         
-    def SetAnimDict( self, actor, animDict ):
+    def SetAnimDict(self, actor, animDict):
         actor.removeAnimControlDict()
         
         myDict = {}
         for key, value in animDict.items():
             try:
-                pandaPath = pm.Filename.fromOsSpecific( value )
+                pandaPath = pm.Filename.fromOsSpecific(value)
             except TypeError:
                 pandaPath = value
             myDict[key] = pandaPath
             
-        actor.loadAnims( myDict )
+        actor.loadAnims(myDict)

@@ -1,47 +1,54 @@
 import panda3d.core as pm
 
-import p3d
-from pandaEditor.editor.nodes.constants import TAG_IGNORE, TAG_PICKABLE
+from p3d.object import Object
+from p3d.marquee import Marquee
+from p3d.mouse import MOUSE_CTRL
+from p3d.mousePicker import MousePicker
+from editor.nodes.constants import TAG_PICKABLE
 
 
-class Selection( p3d.Object ):
+class Selection(Object):
     
     BBOX_TAG = 'bbox'
     
-    def __init__( self, *args, **kwargs ):
-        p3d.Object.__init__( self, *args, **kwargs )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         
         self.comps = []
         self.wrprs = []
         
         # Create a marquee
-        self.marquee = p3d.Marquee( 'marquee', *args, **kwargs )
+        self.marquee = Marquee('marquee', *args, **kwargs)
         
         # Create node picker - set its collision mask to hit both geom nodes
         # and collision nodes
         bitMask = pm.GeomNode.getDefaultCollideMask() | pm.CollisionNode.getDefaultCollideMask()
-        self.picker = p3d.MousePicker( 'picker', *args, fromCollideMask=bitMask, **kwargs )
+        self.picker = MousePicker(
+            'picker',
+            *args,
+            fromCollideMask=bitMask, **kwargs
+        )
                 
-    def Get( self ):
+    def Get(self):
         """Return the selected components."""
         return self.comps
     
-    def GetNodePaths( self ):
+    def GetNodePaths(self):
         nps = [
             wrpr.data 
             for wrpr in self.wrprs
-            if type( wrpr.data  ) == pm.NodePath
+            if type(wrpr.data ) == pm.NodePath
         ]
         return nps
     
-    def Clear( self ):
+    def Clear(self):
         """Clear the selection list and run deselect handlers."""
         for wrpr in self.wrprs:
             wrpr.OnDeselect()
         self.comps = []
         self.wrprs = []
     
-    def Add( self, comps ):
+    def Add(self, comps):
         """
         Add the indicated components to the selection and run select handlers.
         """
@@ -51,12 +58,12 @@ class Selection( p3d.Object ):
             if comp in self.comps:
                 continue
             
-            wrpr = base.game.nodeMgr.Wrap( comp )
+            wrpr = base.game.nodeMgr.Wrap(comp)
             wrpr.OnSelect()
-            self.comps.append( comp )
-            self.wrprs.append( wrpr )
+            self.comps.append(comp)
+            self.wrprs.append(wrpr)
     
-    def Remove( self, comps ):
+    def Remove(self, comps):
         """
         Remove those components that were in the selection and run deselect
         handlers.
@@ -65,9 +72,9 @@ class Selection( p3d.Object ):
             wrpr.OnDeselect()
             
         self.comps = [comp for comp in self.comps if comp not in comps]
-        self.wrprs = [base.game.nodeMgr.Wrap( comp ) for comp in self.comps]
+        self.wrprs = [base.game.nodeMgr.Wrap(comp) for comp in self.comps]
     
-    def SelectParent( self ):
+    def SelectParent(self):
         """
         Return a list of parent components from the selection. Include the
         original component if no suitable parent is found.
@@ -76,12 +83,12 @@ class Selection( p3d.Object ):
         for wrpr in self.wrprs:
             pWrpr = wrpr.GetParent()
             if pWrpr.data != base.scene:
-                comps.append( pWrpr.data )
+                comps.append(pWrpr.data)
             else:
-                comps.append( wrpr.data )
+                comps.append(wrpr.data)
         return comps
         
-    def SelectChild( self ):
+    def SelectChild(self):
         """
         Return a list of child components from the selection. Include the
         original component if no children are found.
@@ -90,12 +97,12 @@ class Selection( p3d.Object ):
         for wrpr in self.wrprs:
             cWrprs = wrpr.GetChildren()
             if cWrprs:
-                comps.append( cWrprs[0].data )
+                comps.append(cWrprs[0].data)
             else:
-                comps.append( wrpr.data )
+                comps.append(wrpr.data)
         return comps
             
-    def SelectPrev( self ):
+    def SelectPrev(self):
         """
         For each component in the selection, return the component that appears
         one before in the parent's list of children. 
@@ -107,14 +114,14 @@ class Selection( p3d.Object ):
                 
             # Get the index of the child before this one - wrap around if the 
             # index has gone below zero.
-            index = cComps.index( wrpr.data ) - 1
+            index = cComps.index(wrpr.data) - 1
             if index < 0:
-                index = len( cComps ) - 1
+                index = len(cComps) - 1
             
-            comps.append( cComps[index] )
+            comps.append(cComps[index])
         return comps
         
-    def SelectNext( self ):
+    def SelectNext(self):
         """
         For each component in the selection, return the component that appears
         one after in the parent's list of children. 
@@ -126,14 +133,14 @@ class Selection( p3d.Object ):
             
             # Get the index of the child after this one - wrap around if the 
             # index has gone over the number of children.
-            index = cComps.index( wrpr.data ) + 1
-            if index > len( cComps ) - 1:
+            index = cComps.index(wrpr.data) + 1
+            if index > len(cComps) - 1:
                 index = 0
             
-            comps.append( cComps[index] )
+            comps.append(cComps[index])
         return comps
     
-    def StartDragSelect( self, append=False ):
+    def StartDragSelect(self, append=False):
         """
         Start the marquee and put the tool into append mode if specified.
         """
@@ -141,7 +148,7 @@ class Selection( p3d.Object ):
             self.append = append
             self.marquee.Start()
     
-    def StopDragSelect( self ):
+    def StopDragSelect(self):
         """
         Stop the marquee and get all the node paths under it with the correct
         tag. Also append any node which was under the mouse at the end of the
@@ -159,7 +166,7 @@ class Selection( p3d.Object ):
                 pick_np is not None and
                 self.marquee.IsNodePathInside(pick_np) and
                 pick_np not in nps
-            ):
+           ):
                 nps.append(pick_np)
                     
         # Add any node path which was under the mouse to the selection.
@@ -173,34 +180,34 @@ class Selection( p3d.Object ):
             oldComps = self.comps
             for np in nps:
                 if np in self.comps:
-                    oldComps.remove( np )
+                    oldComps.remove(np)
                 else:
-                    oldComps.append( np )
+                    oldComps.append(np)
             nps = oldComps
             
         return nps
         
-    def GetNodePathUnderMouse( self ):
+    def GetNodePathUnderMouse(self):
         """
         Returns the closest node under the mouse, or None if there isn't one.
         """
-        self.picker.OnUpdate( None )
+        self.picker.OnUpdate(None)
         pickedNp = self.picker.GetFirstNodePath()
         if pickedNp is not None:
-            return self.GetPickableNodePath( pickedNp )
+            return self.GetPickableNodePath(pickedNp)
         else:
             return None
         
-    def GetNodePathAtPosition( self, x, y ):
-        self.picker.OnUpdate( None, x, y )
+    def GetNodePathAtPosition(self, x, y):
+        self.picker.OnUpdate(None, x, y)
         pickedNp = self.picker.GetFirstNodePath()
         if pickedNp is not None:
-            return self.GetPickableNodePath( pickedNp )
+            return self.GetPickableNodePath(pickedNp)
         else:
             return None
         
     def GetPickableNodePath(self, np):
-        if p3d.MOUSE_CTRL not in base.edCamera.mouse.modifiers:
+        if MOUSE_CTRL not in base.edCamera.mouse.modifiers:
             np = np.findNetPythonTag(TAG_PICKABLE)
         return None if np.isEmpty() else np
         # if np.getPythonTag(TAG_IGNORE):
@@ -210,7 +217,7 @@ class Selection( p3d.Object ):
         # else:
         #     return np.findNetPythonTag(TAG_PICKABLE)
         
-    def Update( self ):
+    def Update(self):
         """Update the selection by running deselect and select handlers."""
         for wrpr in self.wrprs:
             wrpr.OnDeselect()

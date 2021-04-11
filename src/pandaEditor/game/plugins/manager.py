@@ -3,23 +3,23 @@ import sys
 import traceback
 
 
-class Manager( object ):
+class Manager(object):
     
-    def __init__( self, game ):
+    def __init__(self, game):
         self.game = game
         
         self.plugins = []
     
-    def LoadPlugin( self, fileName ):
+    def LoadPlugin(self, fileName):
         try:
-            mod = __import__( fileName )
-            cls = getattr( mod.gamePlugin, 'GamePlugin' )
-            return cls( self.game )
+            mod = __import__(fileName)
+            cls = getattr(mod.gamePlugin, 'GamePlugin')
+            return cls(self.game)
         except Exception:
             traceback.print_exc()
             return None
             
-    def GetPluginsPath( self ):
+    def GetPluginsPath(self):
         """
         Attempt to import plugins directory. Return None if it wasn't found.
         """
@@ -29,9 +29,9 @@ class Manager( object ):
             print('Failed to load plugins.')
             return None
 
-        return os.path.split( userPlugins.__file__ )[0]
+        return os.path.split(userPlugins.__file__)[0]
         
-    def Load( self ):
+    def Load(self):
         """Attempt to load plugins from their directory."""
         # Put the plugins directory on sys.path.
         pluginsPath = self.GetPluginsPath()
@@ -39,31 +39,31 @@ class Manager( object ):
             return
         
         if pluginsPath not in sys.path:
-            sys.path.insert( 0, pluginsPath )
+            sys.path.insert(0, pluginsPath)
         
         print('Using plugins path: ', pluginsPath)
         
         # Load all plugins
-        for fileName in os.listdir( pluginsPath ):
-            filePath = os.path.join( pluginsPath, fileName )
-            if os.path.isdir( filePath ):
-                plugin = self.LoadPlugin( fileName )
+        for fileName in os.listdir(pluginsPath):
+            filePath = os.path.join(pluginsPath, fileName)
+            if os.path.isdir(filePath):
+                plugin = self.LoadPlugin(fileName)
                 if plugin is not None:
-                    self.plugins.append( plugin )
+                    self.plugins.append(plugin)
             
         # Now run their OnInit methods
         self.SortPlugins()
         for plugin in self.plugins:
             plugin.OnInit()
             
-    def SortPlugins( self ):
+    def SortPlugins(self):
         """Sort plugins by accending sort order."""
-        self.plugins = sorted( self.plugins, key=lambda plugin: plugin._sort )
+        self.plugins = sorted(self.plugins, key=lambda plugin: plugin._sort)
             
-    def OnNodeDuplicate( self, np ):
+    def OnNodeDuplicate(self, np):
         for plugin in self.plugins:
-            plugin.OnNodeDuplicate( np )
+            plugin.OnNodeDuplicate(np)
     
-    def OnNodeDestroy( self, np ):
+    def OnNodeDestroy(self, np):
         for plugin in self.plugins:
-            plugin.OnNodeDestroy( np )
+            plugin.OnNodeDestroy(np)

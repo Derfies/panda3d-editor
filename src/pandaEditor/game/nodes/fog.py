@@ -1,11 +1,10 @@
 import panda3d.core as pm
 
-try:
-    from pandaEditor.editor.nodes.attributes import NodeAttribute as Attr
-    from pandaEditor.editor.nodes.nodePath import NodePath
-except ImportError:
-    from pandaEditor.game.nodes.attributes import NodeAttribute as Attr
-    from pandaEditor.game.nodes.nodePath import NodePath
+from game.nodes.manager import import_wrapper
+
+
+Attr = import_wrapper('nodes.attributes.NodeAttribute')
+NodePath = import_wrapper('nodes.nodePath.NodePath')
 
 
 class Fog(NodePath):
@@ -13,7 +12,7 @@ class Fog(NodePath):
     type_ = pm.Fog
     
     def __init__(self, *args, **kwargs):
-        NodePath.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         self.AddAttributes(
             Attr('Color', pm.Vec4, pm.Fog.getColor, pm.Fog.setColor), 

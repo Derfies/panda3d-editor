@@ -28,7 +28,7 @@ class SceneGraphPanel(SceneGraphBasePanel):
             if x in base.selection.comps:
                 i = base.selection.comps.index(x)
             else:
-                i = len( base.selection.comps)
+                i = len(base.selection.comps)
             return i
             
         items = self.GetValidSelections()
