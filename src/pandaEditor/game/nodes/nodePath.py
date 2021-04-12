@@ -84,14 +84,14 @@ class NodePath(Base):
     
     def GetParent(self):
         if not self.data.getParent().isEmpty():
-            return base.game.node_manager.Wrap(self.data.getParent())
+            return base.node_manager.Wrap(self.data.getParent())
         else:
             return None
     
     def GetChildren(self):
         """Return a list of wrappers for the children of this NodePath."""
         children = [
-            base.game.node_manager.Wrap(cNp)
+            base.node_manager.Wrap(cNp)
             for cNp in self.data.getChildren()
         ]
         return children
@@ -99,7 +99,7 @@ class NodePath(Base):
     def GetTags(self):
         tags = self.data.getPythonTag(TAG_PYTHON_TAGS)
         if tags is not None:
-            return [tag for tag in tags if tag in base.game.node_manager.nodeWrappers]
+            return [tag for tag in tags if tag in base.node_manager.nodeWrappers]
         
         return []
     
@@ -109,7 +109,7 @@ class NodePath(Base):
         # Add wrappers for python objects.
         for tag in self.GetTags():
             pyObj = self.data.getPythonTag(tag)
-            pyObjWrpr = base.game.node_manager.Wrap(pyObj)
+            pyObjWrpr = base.node_manager.Wrap(pyObj)
             addons.append(pyObjWrpr)
             
         return addons
@@ -118,7 +118,7 @@ class NodePath(Base):
         
         # If the original NodePath had an id then generate a new one for the 
         # duplicate.
-        wrpr = base.game.node_manager.Wrap(origNp)
+        wrpr = base.node_manager.Wrap(origNp)
         if wrpr.GetId():
             self.CreateNewId()
             
@@ -126,7 +126,7 @@ class NodePath(Base):
         # tags and set them to the new NodePath.
         for tag in self.GetTags():
             pyObj = origNp.getPythonTag(tag)
-            pyObjWrpr = base.game.node_manager.Wrap(pyObj)
+            pyObjWrpr = base.node_manager.Wrap(pyObj)
             dupePyObj = pyObjWrpr.Duplicate()
             self.data.setPythonTag(tag, dupePyObj)
         

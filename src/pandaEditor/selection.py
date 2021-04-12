@@ -59,7 +59,7 @@ class Selection(Object):
             if comp in self.comps:
                 continue
             
-            wrpr = base.game.node_manager.Wrap(comp)
+            wrpr = base.node_manager.Wrap(comp)
             wrpr.OnSelect()
             self.comps.append(comp)
             self.wrprs.append(wrpr)
@@ -73,7 +73,7 @@ class Selection(Object):
             wrpr.OnDeselect()
             
         self.comps = [comp for comp in self.comps if comp not in comps]
-        self.wrprs = [base.game.node_manager.Wrap(comp) for comp in self.comps]
+        self.wrprs = [base.node_manager.Wrap(comp) for comp in self.comps]
     
     def SelectParent(self):
         """

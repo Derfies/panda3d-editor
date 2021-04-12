@@ -7,5 +7,5 @@ class SceneRoot(GameSceneRoot):
         children = []
         comps = (render2d, render) + tuple(base.scene.comps.keys())
         for comp in comps:
-            children.append(base.game.node_manager.Wrap(comp))
+            children.append(base.node_manager.Wrap(comp))
         return children

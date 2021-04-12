@@ -17,7 +17,7 @@ from game.nodes.showbaseDefault import (
 class Render(GameRender):
     
     def GetParent(self):
-        return base.game.node_manager.Wrap(base.scene)
+        return base.node_manager.Wrap(base.scene)
     
     @classmethod
     def GetDefaultPropertyData(cls):
@@ -41,7 +41,7 @@ class BaseCam(GameBaseCam):
 class Render2d(GameRender2d):
     
     def GetParent(self):
-        return base.game.node_manager.Wrap(base.scene)
+        return base.node_manager.Wrap(base.scene)
     
     @classmethod
     def GetDefaultPropertyData(cls):

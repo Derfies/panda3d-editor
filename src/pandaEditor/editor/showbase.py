@@ -1,7 +1,6 @@
 import panda3d.core as pc
 from direct.directtools.DirectGrid import DirectGrid
 from direct.showbase import ShowBaseGlobal
-from direct.showbase.ShowBase import ShowBase as DirectShowBase
 from pubsub import pub
 
 import p3d
@@ -10,17 +9,27 @@ from p3d.editorCamera import EditorCamera
 from p3d.frameRate import FrameRate
 from p3d.mouse import MOUSE_ALT
 from pandaEditor.ui.mainFrame import MainFrame
-from pandaEditor import actions, commands, editor, gizmos
+from pandaEditor import actions, commands, gizmos
 from pandaEditor.assetManager import AssetManager
 from pandaEditor.dragDropManager import DragDropManager
-from pandaEditor.editor.base import Base as EditorBase
 from pandaEditor.editor.scene import Scene
 from pandaEditor.project import Project
 from pandaEditor.selection import Selection
 from pandaEditor.ui.document import Document
+from pandaEditor.game.showbase import ShowBase as GameShowBase
+
+from editor.nodes.manager import Manager as NodeManager
+from editor.plugins.manager import Manager as PluginManager
+from editor.sceneParser import SceneParser
+from editor.plugins.base import Base as EditorPluginBase
+from game.plugins.base import Base as GamePluginBase
 
 
-class ShowBase(DirectShowBase):
+class ShowBase(GameShowBase):
+
+    node_manager_cls = NodeManager
+    plug_manager_cls = PluginManager
+    scene_parser_cls = SceneParser
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -118,14 +127,22 @@ class ShowBase(DirectShowBase):
         self.accept('projectFilesModified', self.OnProjectFilesModified)
 
         # Create a "game"
-        self.game = EditorBase(self)
-        self.game.load_plugins()
+        # self.game = EditorBase(self)
+        self.load_plugins()
 
         # Start with a new scene
         self.CreateScene()
         self.doc.OnRefresh()
 
         self.windowEvent(None)
+
+    def load_plugins(self):
+        self.plugin_manager.setCategoriesFilter({
+            'editor': EditorPluginBase,
+            'game': GamePluginBase,
+        })
+        super().load_plugins()
+
 
     def SetupEdRender(self):
         """
@@ -474,7 +491,7 @@ class ShowBase(DirectShowBase):
 
         # Make sure to mark the NodePath as dirty in case it is a child of a
         # model root.
-        wrpr = self.game.node_manager.Wrap(np)
+        wrpr = self.node_manager.Wrap(np)
         wrpr.SetModified(True)
 
         # Call OnModified next frame. Not sure why but if we call it straight
@@ -531,7 +548,7 @@ class ShowBase(DirectShowBase):
             self.doc = Document(filePath, self.scene)
 
     def AddComponent(self, typeStr, *args, **kwargs):
-        wrprCls = self.game.node_manager.GetWrapperByName(typeStr)
+        wrprCls = self.node_manager.GetWrapperByName(typeStr)
         wrpr = wrprCls.Create(*args, **kwargs)
         wrpr.SetDefaultValues()
         wrpr.SetParent(wrpr.GetDefaultParent())
@@ -541,7 +558,7 @@ class ShowBase(DirectShowBase):
         # components that were created.
         if hasattr(wrpr, 'extraNps'):
             for np in wrpr.extraNps:
-                eWrpr = self.game.node_manager.Wrap(np)
+                eWrpr = self.node_manager.Wrap(np)
                 eWrpr.SetDefaultValues()
         commands.Add([wrpr.data])
 
@@ -549,7 +566,7 @@ class ShowBase(DirectShowBase):
 
     def OnProjectFilesModified(self, filePaths):
         self.assetMgr.OnAssetModified(filePaths)
-        self.game.plugin_manager.on_project_modified(filePaths)
+        self.plugin_manager.on_project_modified(filePaths)
 
     def Undo(self):
         self.actnMgr.Undo()

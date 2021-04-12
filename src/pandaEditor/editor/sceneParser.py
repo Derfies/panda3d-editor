@@ -9,7 +9,7 @@ class SceneParser(game.SceneParser):
     def Save(self, scene, filePath):
         """Save the scene out to an xml file."""
         rootElem = et.Element('Scene')
-        wrpr = base.game.node_manager.Wrap(scene)
+        wrpr = base.node_manager.Wrap(scene)
         self.SaveComponent(wrpr, rootElem)
         
         # Wrap with an element tree and write to file.

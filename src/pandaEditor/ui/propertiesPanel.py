@@ -243,7 +243,7 @@ class PropertiesPanel(wx.Panel):
                         
         # Build all properties from attributes.
         comps = self.base.selection.comps
-        wrprCls = base.game.node_manager.GetCommonWrapper(comps)
+        wrprCls = base.node_manager.GetCommonWrapper(comps)
         wrprs = [wrprCls(comp) for comp in comps]
         for i, attr in enumerate(wrprs[0].GetAttributes(addons=True)):
             

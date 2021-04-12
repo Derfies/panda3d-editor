@@ -15,7 +15,7 @@ class MyApp(ShowBase):
         
         # Create the game base and load the level.
         self.game = game.Base()
-        self.game.Load('scenes/helloWorld.xml')
+        self.Load('scenes/helloWorld.xml')
  
         # Disable the camera trackball controls.
         self.disableMouse()
@@ -24,7 +24,7 @@ class MyApp(ShowBase):
         self.taskMgr.add(self.spinCameraTask, 'SpinCameraTask')
         
         # Find the panda actor placed in the scene.
-        pandaWrpr = base.game.node_manager.Wrap(render.find('panda_walk_character'))
+        pandaWrpr = base.node_manager.Wrap(render.find('panda_walk_character'))
         self.pandaActor = pandaWrpr.GetActor()
         self.pandaActor.loop('walk')
  

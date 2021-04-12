@@ -64,7 +64,7 @@ class DragDropManager:
                 #return False
         #return False
 
-        wrpr = base.game.node_manager.Wrap(dropComp)
+        wrpr = base.node_manager.Wrap(dropComp)
         if wx.GetMouseState().CmdDown():
             return wrpr.ValidateDragDrop(self.dragComps, dropComp)
         else:
@@ -82,7 +82,7 @@ class DragDropManager:
                 raise
         if dropComp is None:
             return
-        wrpr = self.base.game.node_manager.Wrap(dropComp)
+        wrpr = self.base.node_manager.Wrap(dropComp)
         self.data = {}
         dragComps = self.base.dDropMgr.dragComps
         if wx.GetMouseState().CmdDown():
@@ -106,7 +106,7 @@ class DragDropManager:
         self.base.AddComponent('ModelRoot', modelPath=file_path)
 
     def AddShader(self, filePath, np=None):
-        wrpr = self.base.game.node_manager.Wrap(np)
+        wrpr = self.base.node_manager.Wrap(np)
         prop = wrpr.FindProperty('shader')
         cmds.SetAttribute([np], [prop], filePath)
 
@@ -127,19 +127,19 @@ class DragDropManager:
         if theTex is not None and theTex in base.scene.comps.keys():
             print('found in scene')
             if np is not None:
-                npWrpr = base.game.node_manager.Wrap(np)
+                npWrpr = base.node_manager.Wrap(np)
                 npWrpr.FindProperty('texture').Set(theTex)
 
         else:
 
             print('creating new')
             wrpr = self.AddComponent('Texture')
-            #wrpr = base.game.node_manager.Wrap(loader.loadTexture(pandaPath))
+            #wrpr = base.node_manager.Wrap(loader.loadTexture(pandaPath))
             #wrpr.SetDefaultValues()
             #wrpr.SetParent(wrpr.GetDefaultParent())
             wrpr.FindProperty('fullPath').Set(pandaPath)
             #pm.TexturePool.addTexture(wrpr.data)
 
             if np is not None:
-                npWrpr = base.game.node_manager.Wrap(np)
+                npWrpr = base.node_manager.Wrap(np)
                 npWrpr.FindProperty('texture').Set(wrpr.data)

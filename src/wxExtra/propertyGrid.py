@@ -276,7 +276,7 @@ class BoolProperty(BaseProperty):
 class IntProperty(BaseProperty):
         
     def BuildControl(self, parent):
-        ctrl = wx.lib.intctrl.IntCtrl(parent, -1)
+        ctrl = wx.lib.intctrl.IntCtrl(parent, -1, style=wx.TE_PROCESS_ENTER)
         ctrl.SetValue(self.GetValue())
         self.AppendControl(ctrl)
         return ctrl

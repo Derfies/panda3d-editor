@@ -319,7 +319,7 @@ class MainFrame(wx.Frame):
         fn()
 
     def OnEngagePhysics(self, evt):
-        wrpr = base.game.node_manager.Wrap(base.scene.physicsWorld)
+        wrpr = base.node_manager.Wrap(base.scene.physicsWorld)
         if base.scene.physicsTask not in taskMgr.getAllTasks():
             wrpr.EnablePhysics()
         else:
@@ -356,7 +356,7 @@ class MainFrame(wx.Frame):
             if attr is None:
                 continue
 
-            wrprCls = base.game.node_manager.nodeWrappers['Actor']
+            wrprCls = base.node_manager.nodeWrappers['Actor']
             aWrpr = wrprCls.Create(modelPath=attr.Get())
             aWrpr.data.setTransform(wrpr.data.getTransform())
             aWrpr.SetDefaultValues()
@@ -371,7 +371,7 @@ class MainFrame(wx.Frame):
         dirPath = self.base.project.GetPrefabsDirectory()
         assetName = self.base.project.GetUniqueAssetName('prefab.xml', dirPath)
         assetPath = os.path.join(dirPath, assetName)
-        base.game.scnParser.Save(np, assetPath)
+        base.scnParser.Save(np, assetPath)
 
     def OnCreateCgShader(self, evt):
         """
@@ -462,7 +462,7 @@ class MainFrame(wx.Frame):
             title += ' *'
         self.SetTitle(title)
 
-        self.base.game.plugin_manager.on_update(comps)
+        self.base.plugin_manager.on_update(comps)
 
     def OnUpdateFile(self, msg):
         """

@@ -9,7 +9,6 @@ from game.plugins import base
 class HelpersPlugin(base.Base):
 
     def on_init(self, base):
-        print('here')
 
         # Load vertex colour shader.
         vtx_shader = Shader.load(self.get_model_path('vertex_colours.sha'))
@@ -25,7 +24,7 @@ class HelpersPlugin(base.Base):
         for model_name, wrpr_name in model_to_wrapper.items():
             model = base.loader.load_model(self.get_model_path(model_name))
             model.set_shader(vtx_shader)
-            base.game.node_manager.wrappers[wrpr_name].set_editor_geometry(model)
+            base.node_manager.wrappers[wrpr_name].set_editor_geometry(model)
 
     def get_model_path(self, file_name):
         """

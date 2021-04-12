@@ -28,7 +28,7 @@ class SceneParser(object):
         return kwargs
             
     def LoadComponent(self, elem, pComp):
-        wrprCls = base.game.node_manager.GetWrapperByName(elem.get('type'))
+        wrprCls = base.node_manager.GetWrapperByName(elem.get('type'))
         if wrprCls is not None:
             
             args = self.GetCreateKwargs(wrprCls, elem)
@@ -90,5 +90,5 @@ class SceneParser(object):
                         cnctnDict.setdefault(key, [])
                         cnctnDict[key].append(self.nodes[val])
             
-            wrpr = base.game.node_manager.Wrap(comp)
+            wrpr = base.node_manager.Wrap(comp)
             wrpr.SetConnectionData(cnctnDict)

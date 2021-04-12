@@ -47,7 +47,7 @@ class ModelRoot(NodePath):
         wrpr.extraNps = []
         def Recurse(node):
             nTypeStr = node.getTag(TAG_NODE_TYPE)
-            cWrprCls = base.game.node_manager.GetWrapperByName(nTypeStr)
+            cWrprCls = base.node_manager.GetWrapperByName(nTypeStr)
             if cWrprCls is not None:
                 cWrpr = cWrprCls.Create(inputNp=node)
                 wrpr.extraNps.append(cWrpr.data)

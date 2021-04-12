@@ -162,7 +162,7 @@ class ConnectionBaseProperty(wxpg.BaseProperty):
     def ValidateDropItem(self, x, y):
         for comp in wx.GetApp().frame.pnlSceneGraph.dragComps:
             cnnctn = self.GetAttribute('attr')[0]
-            wrpr = base.game.node_manager.Wrap(comp)
+            wrpr = base.node_manager.Wrap(comp)
             if wrpr.IsOfType(cnnctn.type):
                 return True
         
@@ -177,7 +177,7 @@ class ConnectionProperty(ConnectionBaseProperty):
         
         comp = self.GetValue()
         if comp is not None:
-            wrpr = base.game.node_manager.Wrap(comp)
+            wrpr = base.node_manager.Wrap(comp)
             ctrl.Append(wrpr.GetName())
             ctrl.SetClientData(0, wrpr.data)
         
@@ -204,7 +204,7 @@ class ConnectionListProperty(ConnectionBaseProperty):
         comps = self.GetValue()
         if comps is not None:
             for i in range(len(comps)):
-                wrpr = base.game.node_manager.Wrap(comps[i])
+                wrpr = base.node_manager.Wrap(comps[i])
                 ctrl.Append(wrpr.GetName(), wrpr.data)
         
         return ctrl

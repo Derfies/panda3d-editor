@@ -1,5 +1,5 @@
 from panda3d.core import ConfigVariableBool, loadPrcFileData
-from pandaEditor.showbase import ShowBase
+from editor.showbase import ShowBase
 
 
 editor_mode = ConfigVariableBool('editor_mode', False)

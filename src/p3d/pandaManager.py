@@ -56,5 +56,5 @@ class PandaManager:
         for scriptPath in scriptPaths:
             print('Reloading script: ', scriptPath)
             for pObj in self.pObjs[scriptPath]:
-                pObjWrpr = base.game.node_manager.Wrap(pObj)
+                pObjWrpr = base.node_manager.Wrap(pObj)
                 pObjWrpr.ReloadScript(scriptPath)

@@ -12,7 +12,7 @@ class AddRemove(Base):
     def _AddComponent(self):
         
         # Attach the component back to its old parent and set its id back.
-        wrpr = base.game.node_manager.Wrap(self.comp)
+        wrpr = base.node_manager.Wrap(self.comp)
         wrpr.SetParent(self.pComp)
         if self.id is not None:
             wrpr.SetId(self.id)
@@ -27,7 +27,7 @@ class AddRemove(Base):
         
         # Break all connections for the component we are removing, then store
         # those connections so we can reconnect them if this action is undone.
-        wrpr = base.game.node_manager.Wrap(self.comp)
+        wrpr = base.node_manager.Wrap(self.comp)
         for cnnctn in base.scene.GetOutgoingConnections(wrpr):
             cnnctn.Break(self.comp)
             self.cnnctns.append(cnnctn)

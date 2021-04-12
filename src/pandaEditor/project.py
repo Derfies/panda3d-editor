@@ -302,10 +302,10 @@ class """ + fileName + """(p3d):
             shutil.copytree(src_path, tgt_path)
         
         # Now copy the plugin module.
-        pluginsPath = self.base.game.pluginMgr.GetPluginsPath()
+        pluginsPath = self.base.pluginMgr.GetPluginsPath()
         if pluginsPath is not None:
             pluginDestPath = os.path.join(tempDirPath, 'userPlugins')
-            shutil.copytree(self.base.game.pluginMgr.GetPluginsPath(),
+            shutil.copytree(self.base.pluginMgr.GetPluginsPath(),
                             pluginDestPath)
                              
             # Remove all editor plugins for the userPlugins directory
