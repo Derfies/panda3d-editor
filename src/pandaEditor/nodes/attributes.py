@@ -11,6 +11,7 @@ from game.nodes.attributes import NodePathTargetConnection as GameNodePathTarget
 from game.nodes.attributes import ConnectionList as GameConnectionList
 from game.nodes.attributes import NodePathSourceConnectionList as GameNodePathSourceConnectionList
 from game.nodes.attributes import NodePathTargetConnectionList as GameNodePathTargetConnectionList
+from game.nodes.attributes import NodePathSourceConnection as GameNodePathSourceConnection
 
 
 class RegisterMixin:
@@ -54,6 +55,12 @@ class NodePathSourceConnectionList(RegisterMixin, GameNodePathSourceConnectionLi
 class NodePathTargetConnectionList(RegisterMixin, GameNodePathTargetConnectionList):
 
     pass
+
+
+class NodePathSourceConnection(RegisterMixin, GameNodePathSourceConnection):
+
+    pass
+
 
 
 class SerializeMixin:

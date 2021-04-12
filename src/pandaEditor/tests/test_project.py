@@ -30,3 +30,4 @@ class Test(unittest.TestCase):
 
         shutil.rmtree(cls.temp_dir_path, onerror=del_rw)
         logger.info('Deleted working directory: {}'.format(cls.temp_dir_path))
+

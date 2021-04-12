@@ -75,7 +75,7 @@ class FloatValidator(wx.Validator):
             event.Skip()
             return
 
-        if not wx.Validator_IsSilent():
+        if not wx.Validator.IsSilent():
             wx.Bell()
 
         # Returning without calling even.Skip eats the event before it

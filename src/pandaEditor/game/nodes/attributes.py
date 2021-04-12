@@ -109,6 +109,15 @@ class Connection(Base):
         self.clearFn(self.GetSource())
 
 
+class NodePathSourceConnection(Connection):
+
+    def GetSource(self, comp):
+        try:
+            return comp.node()
+        except AttributeError:
+            return comp
+
+
 class NodePathTargetConnection(Connection):
 
     def GetTarget(self, comp):

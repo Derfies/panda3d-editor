@@ -25,7 +25,7 @@ class Scene(game.Scene):
         ]
         for cType in defaultCompTypes:
             wrpr = base.node_manager.Create(cType)
-            wrpr.data.setTag(game.nodes.TAG_NODE_TYPE, cType)
+            wrpr.data.setTag(game.nodes.constants.TAG_NODE_TYPE, cType)
         
     def Load(self, filePath):
         """Recreate a scene graph from file."""
