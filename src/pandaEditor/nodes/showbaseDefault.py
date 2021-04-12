@@ -1,4 +1,4 @@
-from editor.nodes.constants import TAG_IGNORE
+from nodes.constants import TAG_IGNORE
 from game.nodes.pandaNode import PandaNode
 from game.nodes.modelNode import ModelNode
 from game.nodes.camera import Camera

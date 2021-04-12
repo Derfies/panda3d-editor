@@ -1,13 +1,11 @@
 import panda3d.core as pm
 from panda3d.core import Lens
 
-try:
-    from editor.nodes.attributes import Attribute as Attr
-    from editor.nodes.nodePath import NodePath
-except ImportError:
-    print('import failed')
-    from game.nodes.attributes import Attribute as Attr
-    from game.nodes.nodePath import NodePath
+from game.nodes.manager import import_wrapper
+
+
+Attr = import_wrapper('nodes.attributes.Attribute')
+NodePath = import_wrapper('nodes.nodePath')
 
 
 class LensNode(NodePath):

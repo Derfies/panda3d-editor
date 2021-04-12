@@ -1,4 +1,4 @@
-from editor.nodes.constants import TAG_IGNORE
+from nodes.constants import TAG_IGNORE
 from game.nodes.lensNode import LensNode as GameLensNode
 from game.nodes.attributes import NodePathAttribute as Attr
 

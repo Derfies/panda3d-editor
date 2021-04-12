@@ -5,7 +5,7 @@ from panda3d.core import NodePath as NP
 from direct.directtools.DirectSelection import DirectBoundingBox
 
 import commands as cmds
-from editor.nodes.constants import (
+from nodes.constants import (
     TAG_BBOX, TAG_IGNORE, TAG_MODIFIED, TAG_PICKABLE
 )
 from game.nodes.constants import TAG_MODEL_ROOT_CHILD

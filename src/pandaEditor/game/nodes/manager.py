@@ -48,9 +48,9 @@ def import_wrapper(full_module_path):
     if full_module_path in cache:
         return cache[full_module_path]
     editor_mode = ConfigVariableBool('editor_mode', False)
-    prefix = 'editor' if editor_mode else 'game'
     module_path, class_name = full_module_path.rsplit('.', 1)
-    module = import_module(f'{prefix}.{module_path}')
+    search_path = module_path if editor_mode else f'game.{module_path}'
+    module = import_module(search_path)
     members = iter([
         value
         for name, value in inspect.getmembers(module, inspect.isclass)

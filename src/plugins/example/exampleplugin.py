@@ -1,4 +1,4 @@
-from editor.plugins import base
+from plugins import base
 
 
 class ExamplePlugin(base.Base):

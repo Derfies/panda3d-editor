@@ -12,16 +12,16 @@ from pandaEditor.ui.mainFrame import MainFrame
 from pandaEditor import actions, commands, gizmos
 from pandaEditor.assetManager import AssetManager
 from pandaEditor.dragDropManager import DragDropManager
-from pandaEditor.editor.scene import Scene
+from scene import Scene
 from pandaEditor.project import Project
 from pandaEditor.selection import Selection
 from pandaEditor.ui.document import Document
 from pandaEditor.game.showbase import ShowBase as GameShowBase
 
-from editor.nodes.manager import Manager as NodeManager
-from editor.plugins.manager import Manager as PluginManager
-from editor.sceneParser import SceneParser
-from editor.plugins.base import Base as EditorPluginBase
+from nodes.manager import Manager as NodeManager
+from plugins.manager import Manager as PluginManager
+from sceneParser import SceneParser
+from plugins.base import Base as EditorPluginBase
 from game.plugins.base import Base as GamePluginBase
 
 
