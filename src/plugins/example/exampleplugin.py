@@ -11,6 +11,6 @@ class ExamplePlugin(base.Base):
         # print(self, 'on_scene_close')
         pass
 
-    def on_project_modified(self, base):
+    def on_project_modified(self, base, file_paths):
         # print(self, 'on_project_modified')
         pass

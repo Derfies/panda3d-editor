@@ -23,8 +23,10 @@ def file_open_dialog(message, wildcard, style=0, defaultDir=os.getcwd(), default
     """Generic file open dialog."""
     style = style | wx.FD_OPEN | wx.FD_CHANGE_DIR
     file_paths = file_dialog(message, wildcard, style, defaultDir, defaultFile)
+    if style & wx.FD_MULTIPLE:
+        return file_paths
     return next(iter(file_paths), None)
-    
+
 
 def file_save_dialog(message, wildcard, style=0, defaultDir=os.getcwd(), defaultFile=''):
     """Generic file save dialog."""

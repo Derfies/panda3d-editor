@@ -277,7 +277,7 @@ class MainFrame(wx.Frame):
             'Import Models',
             wild_card,
             wx.FD_MULTIPLE
-       )
+        )
         for file_path in file_paths:
             self.base.project.ImportAsset(file_path)
 

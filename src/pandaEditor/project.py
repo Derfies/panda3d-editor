@@ -55,18 +55,13 @@ class Project:
         return os.path.join(self.path, PROJECT_DEF_NAME)
     
     def GetMainScript(self):
-        return """import sys
-sys.path.append(r'C:\\Users\\Jamie Davies\\.virtualenvs\\panda3d-editor-yMC_6O54\\Lib\\site-packages')
-        
-from direct.directbase import DirectStart
-
-import game
+        return """from game.showbase import ShowBase
 
 
 # Create game base and load level
-game = game.Base()
-game.Load('scenes/test.xml')
-run()"""
+base = ShowBase()
+base.load_scene('scenes/level.xml')
+base.run()"""
     
     def New(self, dirPath, **kwargs):
                  

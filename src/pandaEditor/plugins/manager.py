@@ -17,6 +17,6 @@ class Manager(GameManager):
         for plugin in self.getPluginsOfCategory('editor'):
             plugin.plugin_object.on_scene_close(self.base)
 
-    def on_project_modified(self):
+    def on_project_modified(self, file_paths):
         for plugin in self.getPluginsOfCategory('editor'):
-            plugin.plugin_object.on_project_modified(self.base)
+            plugin.plugin_object.on_project_modified(self.base, file_paths)

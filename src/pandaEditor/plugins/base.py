@@ -9,5 +9,5 @@ class Base(GameBase):
     def on_scene_close(self, base):
         pass
 
-    def on_project_modified(self, base):
+    def on_project_modified(self, base, file_paths):
         pass
