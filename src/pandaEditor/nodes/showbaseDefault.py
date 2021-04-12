@@ -4,7 +4,6 @@ from game.nodes.modelNode import ModelNode
 from game.nodes.camera import Camera
 from game.nodes.showbaseDefault import (
     Aspect2d as GameAspect2d,
-    BaseCam as GameBaseCam,
     BaseCamera as GameBaseCamera,
     Cam2d as GameCam2d,
     Camera2d as GameCamera2d,
@@ -29,14 +28,7 @@ class BaseCamera(GameBaseCamera):
     @classmethod
     def GetDefaultPropertyData(cls):
         return ModelNode.Create(name='camera').GetPropertyData()
-    
 
-class BaseCam(GameBaseCam):
-    
-    @classmethod
-    def GetDefaultPropertyData(cls):
-        return Camera.Create(name='cam').GetPropertyData()
-    
 
 class Render2d(GameRender2d):
     

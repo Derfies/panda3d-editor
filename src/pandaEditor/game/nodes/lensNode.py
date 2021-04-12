@@ -1,14 +1,16 @@
 import panda3d.core as pm
 from panda3d.core import Lens
 
+from game.nodes.nodepath import NodePath
+from game.nodes.wrappermeta import WrapperMeta
+
 from game.nodes.manager import import_wrapper
 
 
-Attr = import_wrapper('nodes.attributes.Attribute')
-NodePath = import_wrapper('nodes.nodePath')
+Attr = import_wrapper('nodes.attributes.NodeAttribute')
 
 
-class LensNode(NodePath):
+class LensNode(NodePath, metaclass=WrapperMeta):
     
     type_ = pm.LensNode
     

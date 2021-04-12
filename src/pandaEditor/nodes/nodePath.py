@@ -10,16 +10,16 @@ from nodes.constants import (
 )
 from game.nodes.constants import TAG_MODEL_ROOT_CHILD
 from game.nodes.attributes import NodePathAttribute as Attr
-from game.nodes.nodePath import NodePath as GameNodePath
+from pandaEditor.nodes.base import Base
 
 
-class NodePath(GameNodePath):
+class NodePath(Base):
     
     geo = None
     pickable = True
     
     def __init__(self, *args, **kwargs):
-        GameNodePath.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         
         # Find the index of the 'name' property so we can add position, 
         # rotation and scale properties immediately after it.
@@ -67,10 +67,12 @@ class NodePath(GameNodePath):
             childNp.setPythonTag(TAG_IGNORE, True)
         geo.setLightOff()
         geo.node().adjustDrawMask(*base.GetEditorRenderMasks())
+        print('HERE:', cls, geo)
         cls.geo = geo
         
     def SetupNodePath(self):
-        GameNodePath.SetupNodePath(self)
+        print('SetupNodePath:', self)
+        super().SetupNodePath()
         
         if self.geo is not None:
             self.geo.copyTo(self.data)

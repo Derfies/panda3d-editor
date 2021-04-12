@@ -14,14 +14,14 @@ class Scene(game.Scene):
         # up. Tag them so their type is overriden and the component manager
         # wraps them appropriately.
         defaultCompTypes = [
-            'Render',
-            'BaseCamera',
+            # 'Render',
+            # 'BaseCamera',
             'BaseCam',
-            'Render2d',
-            'Aspect2d',
-            'Pixel2d',
-            'Camera2d',
-            'Cam2d'          
+            # 'Render2d',
+            # 'Aspect2d',
+            # 'Pixel2d',
+            # 'Camera2d',
+            # 'Cam2d'
         ]
         for cType in defaultCompTypes:
             wrpr = base.node_manager.Create(cType)

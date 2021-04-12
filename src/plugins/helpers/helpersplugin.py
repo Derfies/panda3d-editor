@@ -1,9 +1,13 @@
+import logging
 import os
 
 import panda3d.core as pc
 from panda3d.core import Shader
 
 from game.plugins import base
+
+
+logger = logging.getLogger(__name__)
 
 
 class HelpersPlugin(base.Base):
@@ -24,7 +28,13 @@ class HelpersPlugin(base.Base):
         for model_name, wrpr_name in model_to_wrapper.items():
             model = base.loader.load_model(self.get_model_path(model_name))
             model.set_shader(vtx_shader)
-            base.node_manager.wrappers[wrpr_name].set_editor_geometry(model)
+            try:
+                base.node_manager.wrappers[wrpr_name].set_editor_geometry(model)
+            except KeyError:
+                logger.error(
+                    f'Could not set geometry on wrapper: {wrpr_name}. Perhaps '
+                    f'it\'s not loaded?'
+                )
 
     def get_model_path(self, file_name):
         """

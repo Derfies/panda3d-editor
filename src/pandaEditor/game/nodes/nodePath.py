@@ -9,15 +9,18 @@ from game.nodes.constants import (
 )
 from game.nodes.manager import import_wrapper
 
+from game.nodes.wrappermeta import WrapperMeta
+
 
 NPTCnnctn = import_wrapper('nodes.attributes.NodePathTargetConnection')
 Cnnctn = import_wrapper('nodes.attributes.Connection')
 CnnctnList = import_wrapper('nodes.attributes.ConnectionList')
 Attr = import_wrapper('nodes.attributes.NodePathAttribute')
-Base = import_wrapper('nodes.base.Base')
+#Base = import_wrapper('nodes.base.Base')
+from game.nodes.base import Base
 
 
-class NodePath(Base):
+class NodePath(Base, metaclass=WrapperMeta):
     
     type_ = NP
     

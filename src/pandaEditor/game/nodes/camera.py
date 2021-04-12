@@ -1,11 +1,9 @@
 import panda3d.core as pm
 
-from game.nodes.manager import import_wrapper
+from game.nodes.lensnode import LensNode
+from game.nodes.wrappermeta import WrapperMeta
 
 
-LensNode = import_wrapper('nodes.lensNode.LensNode')
-
-
-class Camera(LensNode):
+class Camera(LensNode, metaclass=WrapperMeta):
     
     type_ = pm.Camera

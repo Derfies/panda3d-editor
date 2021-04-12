@@ -1,8 +1,7 @@
-from game.nodes.base import Base as GameBase
 from game.utils import get_lower_camel_case
 
 
-class Base(GameBase):
+class Base:
     
     def GetName(self):
         try:
