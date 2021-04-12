@@ -11,10 +11,12 @@ from p3d.frameRate import FrameRate
 from p3d.mouse import MOUSE_ALT
 from pandaEditor.ui.mainFrame import MainFrame
 from pandaEditor import actions, commands, editor, gizmos
-from pandaEditor.project import Project
-from pandaEditor.selection import Selection
 from pandaEditor.assetManager import AssetManager
 from pandaEditor.dragDropManager import DragDropManager
+from pandaEditor.editor.base import Base as EditorBase
+from pandaEditor.editor.scene import Scene
+from pandaEditor.project import Project
+from pandaEditor.selection import Selection
 from pandaEditor.ui.document import Document
 
 
@@ -116,7 +118,7 @@ class ShowBase(DirectShowBase):
         self.accept('projectFilesModified', self.OnProjectFilesModified)
 
         # Create a "game"
-        self.game = editor.Base(self)
+        self.game = EditorBase(self)
         self.game.load_plugins()
 
         # Start with a new scene
@@ -516,7 +518,7 @@ class ShowBase(DirectShowBase):
             self.scene.Close()
 
         # Create a new scene
-        self.scene = editor.Scene()
+        self.scene = Scene()
         self.scene.rootNp.reparentTo(self.edRender)
 
         # Set the selection and picker root node to the scene's root node
@@ -547,7 +549,7 @@ class ShowBase(DirectShowBase):
 
     def OnProjectFilesModified(self, filePaths):
         self.assetMgr.OnAssetModified(filePaths)
-        self.game.pluginMgr.OnProjectFilesModified(filePaths)
+        self.game.plugin_manager.on_project_modified(filePaths)
 
     def Undo(self):
         self.actnMgr.Undo()

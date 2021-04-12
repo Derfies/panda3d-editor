@@ -43,7 +43,7 @@ class Scene(game.Scene):
             wrpr.Destroy()
             
         Destroy(base.game.node_manager.Wrap(self))
-        base.game.pluginMgr.OnSceneClose()
+        base.game.plugin_manager.on_scene_close()
         
         # Now remove the root node. If the root node was render, reset base
         # in order to remove and recreate the default node set.

@@ -1,14 +1,15 @@
 import os
 
-import panda3d.core as pm
+import panda3d.core as pc
 from panda3d.core import Shader
 
-from yapsy.IPlugin import IPlugin
+from game.plugins import base
 
 
-class PluginOne(IPlugin):
+class HelpersPlugin(base.Base):
 
     def on_init(self, base):
+        print('here')
 
         # Load vertex colour shader.
         vtx_shader = Shader.load(self.get_model_path('vertex_colours.sha'))
@@ -35,5 +36,5 @@ class PluginOne(IPlugin):
 
         """
         dir_path = os.path.join(os.path.split(__file__)[0], 'data')
-        model_path = pm.Filename.from_os_specific(os.path.join(dir_path, file_name))
+        model_path = pc.Filename.from_os_specific(os.path.join(dir_path, file_name))
         return model_path

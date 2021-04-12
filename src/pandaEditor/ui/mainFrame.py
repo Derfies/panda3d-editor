@@ -462,7 +462,7 @@ class MainFrame(wx.Frame):
             title += ' *'
         self.SetTitle(title)
 
-        #self.base.game.pluginMgr.OnUpdate(comps)
+        self.base.game.plugin_manager.on_update(comps)
 
     def OnUpdateFile(self, msg):
         """

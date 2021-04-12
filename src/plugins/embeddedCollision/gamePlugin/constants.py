@@ -1,2 +1,0 @@
-TAG_EMBEDDED_COLLISION = 'EmbeddedCollision'
-TAG_EMBEDDED_BULLET_TRIANGLE_MESH_SHAPE = 'EmbeddedBulletTriangleMeshShape'

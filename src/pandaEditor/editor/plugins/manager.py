@@ -1,33 +1,22 @@
-import traceback
-
-import game
+from game.plugins.manager import Manager as GameManager
 
 
-class Manager(game.plugins.Manager):
-    
-    def __init__(self, *args, **kwargs):
-        game.plugins.Manager.__init__(self, *args, **kwargs)
-        
-    def LoadPlugin(self, fileName):
-        temp = __import__(fileName, globals(), locals(), ['editorPlugin'])
-        
-        # Create an instance of the editor plugin to wrap the game plugin.
+class Manager(GameManager):
+
+    def getPluginsOfCategory(self, category_name):
         try:
-            cls = getattr(temp.editorPlugin, 'EditorPlugin')
-            return cls(self.game)
-        except Exception:
-            return game.plugins.Manager.LoadPlugin(self, fileName)
-            #traceback.print_exc()
-        #return cls(self.game)
-        
-    def OnSceneClose(self):
-        for plugin in self.plugins:
-            plugin.OnSceneClose()
-            
-    def OnUpdate(self, msg):
-        for plugin in self.plugins:
-            plugin.OnUpdate(msg)
-            
-    def OnProjectFilesModified(self, filePaths):
-        for plugin in self.plugins:
-            plugin.OnProjectFilesModified(filePaths)
+            return super().getPluginsOfCategory(category_name)
+        except KeyError:
+            return []
+
+    def on_update(self, comps):
+        for plugin in self.getPluginsOfCategory('editor'):
+            plugin.plugin_object.on_update(self.base, comps)
+
+    def on_scene_close(self):
+        for plugin in self.getPluginsOfCategory('editor'):
+            plugin.plugin_object.on_scene_close(self.base)
+
+    def on_project_modified(self):
+        for plugin in self.getPluginsOfCategory('editor'):
+            plugin.plugin_object.on_project_modified(self.base)

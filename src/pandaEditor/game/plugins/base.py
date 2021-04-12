@@ -1,19 +1,11 @@
-class Base(object):
-    
-    def __init__(self, game, name='', sort=0, priority=10):
-        self.game = game
-        self.name = name
-        self._sort = sort
-        self._priority = priority
-        
-    def OnInit(self):
+from direct.showbase.PythonUtil import getBase as get_base
+from yapsy.IPlugin import IPlugin
+
+
+class Base(IPlugin):
+
+    def on_init(self, base):
         pass
-    
-    def RegisterNodeWrapper(self, typeStr, cls):
-        self.game.node_manager.nodeWrappers[typeStr] = cls
-    
-    def OnNodeDuplicate(self, np):
-        pass
-    
-    def OnNodeDestroy(self, np):
-        pass
+
+    def register_node_wrapper(self, typeStr, cls):
+        get_base().game.node_manager.wrappers[typeStr] = cls
