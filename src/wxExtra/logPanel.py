@@ -1,4 +1,4 @@
-import sys
+import logging
 
 import wx
 
@@ -6,55 +6,38 @@ import wx
 class LogPanel(wx.Panel):
     
     """
-    Simple wxPanel containing a text control which will display the stdout and
-    stderr streams.
+    Simple wxPanel containing a text control which will display the root
+    logger's stream.
+
     """
-    
-    class RedirectText:
-        
-        def __init__(self, terminal, textCtrl):
-            self.terminal = terminal
-            self.textCtrl = textCtrl
-            
-            # Set err to True if the stream is stderr
-            self.err = False
-            if terminal is sys.stderr:
-                self.err = True
 
-        def write(self, text):
-            self.terminal.write(text)
-            self.textCtrl.WriteText(text)
-            
-            # If the text came from stderr, thaw the top window of the 
-            # application or else we won't see the message!
-            if self.err:
-                wx.CallAfter(self.ThawTopWindow)
-                
-        def ThawTopWindow(self):
-            """
-            If the application has thrown an assertion while the top frame has
-            been frozen then we won't be able to see the text. This method once
-            called after the write() method above will make sure the top frame
-            is thawed - making the text visible.
-            """
-            topWin = wx.GetApp().GetTopWindow()
-            if topWin.IsFrozen():
-                topWin.Thaw()
+    class CustomConsoleHandler(logging.StreamHandler):
+
+        def __init__(self, text_ctrl, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+
+            self.text_ctrl = text_ctrl
+
+        def emit(self, record):
+            msg = self.format(record)
+            self.text_ctrl.WriteText(msg + '\n')
+            self.flush()
     
-    def __init__(self, base, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        self.base = base
         
-        # Build log text control
-        style = wx.TE_MULTILINE | wx.TE_RICH2 | wx.NO_BORDER
-        self.tc = wx.TextCtrl(self, style=style)
+        # Build log text control.
+        style = wx.TE_MULTILINE | wx.TE_RICH2 | wx.NO_BORDER | wx.TE_READONLY
+        text_ctrl = wx.TextCtrl(self, style=style)
 
-        # Redirect text here
-        sys.stdout = self.RedirectText(sys.stdout, self.tc)
-        sys.stderr = self.RedirectText(sys.stderr, self.tc)
+        # Set up another logging stream that prints to the text control. Use
+        # the default handler's formatter.
+        root_log = logging.getLogger()
+        handler = self.CustomConsoleHandler(text_ctrl)
+        handler.formatter = root_log.handlers[0].formatter
+        root_log.addHandler(handler)
         
-        # Build sizers
-        self.bs1 = wx.BoxSizer(wx.VERTICAL)
-        self.bs1.Add(self.tc, 1, wx.EXPAND)
-        self.SetSizer(self.bs1)
+        # Build sizers.
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        sizer.Add(text_ctrl, 1, wx.EXPAND)
+        self.SetSizer(sizer)

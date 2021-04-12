@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 import shutil
@@ -13,6 +14,9 @@ import utils
 from pandaEditor.constants import MODEL_EXTENSIONS
 from directorywatcher import DirectoryWatcher
 from utils import popen_and_call
+
+
+logger = logging.getLogger(__name__)
 
 
 PROJECT_DEF_NAME = 'project.xml'
@@ -201,7 +205,7 @@ base.run()"""
             subprocess.call(['egg2bam', '-o', tgt_path + '.bam', file_path])
 
         else:
-            print('Unsupported file extension:', original_ext)
+            logger.info('Unsupported file extension:', original_ext)
     
     def GetUniqueAssetName(self, startName, dirPath):
         """Return a unique asset name."""
@@ -283,7 +287,7 @@ class """ + fileName + """(p3d):
         # project
         tempDirPath = os.path.splitext(buildPath)[0]
         if os.path.exists(tempDirPath):
-            print('Already a directory named ', tempDirPath)
+            logger.info('Already a directory named ', tempDirPath)
             return False
                               
         # Copy the entire project to the temp location.
@@ -353,7 +357,7 @@ class """ + fileName + """(p3d):
         # # Remove all extensions.
         # # TODO: Move to common utils lib.
         modelPath = str(relPath)
-        #print('modelPath:', modelPath)
+        #logger.info('modelPath:', modelPath)
         # while True:
         #     modelPath, ext = os.path.splitext(modelPath)
         #     if not ext:

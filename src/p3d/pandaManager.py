@@ -1,5 +1,9 @@
+import logging
 import os
 import weakref
+
+
+logger = logging.getLogger(__name__)
 
 
 class PandaManager:
@@ -41,10 +45,10 @@ class PandaManager:
     def DeregisterScript(self, scriptPath):
         filePath = os.path.splitext(scriptPath)[0]
         if filePath in self.pObjs:
-            print('degister: ', filePath)
+            logger.info('degister: ', filePath)
             del self.pObjs[filePath]
         else:
-            print('couldnt find: ', filePath)
+            logger.info('couldnt find: ', filePath)
         
     def ReloadScripts(self, scriptPaths):
         """
@@ -54,7 +58,7 @@ class PandaManager:
         """
         scriptPaths = set(scriptPaths) & set(self.pObjs.keys())
         for scriptPath in scriptPaths:
-            print('Reloading script: ', scriptPath)
+            logger.info('Reloading script: ', scriptPath)
             for pObj in self.pObjs[scriptPath]:
                 pObjWrpr = base.node_manager.Wrap(pObj)
                 pObjWrpr.ReloadScript(scriptPath)

@@ -1,5 +1,9 @@
+import logging
 import threading
 import subprocess
+
+
+logger = logging.getLogger(__name__)
 
 
 def indent(elem, level=0, indent_size=4):
@@ -37,7 +41,7 @@ def popen_and_call(OnExit, printStdout, *popenArgs, **popenKWArgs):
         proc = subprocess.Popen(*popenArgs, **popenKWArgs)
         proc.wait()
         if printStdout:
-            print(proc.stdout.read())
+            logger.info(proc.stdout.read())
         OnExit()
         return
 

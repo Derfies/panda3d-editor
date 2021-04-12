@@ -8,7 +8,8 @@ import panda3d.core as pm
 
 import p3d
 from pandaEditor import commands as cmds
-from wxExtra import utils as wxUtils, ActionItem, LogPanel
+from wxExtra import utils as wxUtils, ActionItem
+from wxExtra.logpanel import LogPanel
 from wxExtra import AuiManagerConfig, CustomAuiToolBar, CustomMenu
 from pandaEditor.constants import MODEL_EXTENSIONS
 from pandaEditor.ui.viewport import Viewport
@@ -128,7 +129,7 @@ class MainFrame(wx.Frame):
         self.pnlLightLinker = LightLinkerPanel(base, self, style=wx.SUNKEN_BORDER)
         self.pnlProps = PropertiesPanel(base, self, style=wx.SUNKEN_BORDER)
         self.pnlRsrcs = ResourcesPanel(base, self, style=wx.SUNKEN_BORDER)
-        self.pnlLog = LogPanel(base, self, style=wx.SUNKEN_BORDER)
+        self.pnlLog = LogPanel(self, style=wx.SUNKEN_BORDER)
 
         # Build aui manager to hold all the widgets
         self.BuildAuiManager()

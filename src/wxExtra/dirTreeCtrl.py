@@ -26,10 +26,13 @@
     @todo:
         extract ico from exes found in directory
 """
-
+import logging
 import os
 
 import wx
+
+
+logger = logging.getLogger(__name__)
 
 
 ICON_SIZE = (16, 16)
@@ -92,7 +95,7 @@ class DirTreeCtrl(wx.TreeCtrl):
                 key = self.imagelist.Add(wx.Bitmap(filepath, wxBitmapType))
                 self.iconentries[name] = key
         except Exception:
-            print(e)
+            logger.info(e)
         
     def SetDeleteOnCollapse(self, selection):
         """

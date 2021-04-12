@@ -1,11 +1,11 @@
 import os
-import imp
-import sys
 import inspect
+import logging
 
 from direct.showbase.DirectObject import DirectObject
 
-import p3d
+
+logger = logging.getLogger(__name__)
 
 
 TAG_PANDA_OBJECT = 'PandaObject'
@@ -22,7 +22,7 @@ class PandaObject(object):
         self.instances = {}
         
     def __del__(self):
-        print(TAG_PANDA_OBJECT, ' : ', self.np.getName(), ' DELETED')
+        logger.info(TAG_PANDA_OBJECT, ' : ', self.np.getName(), ' DELETED')
         
     def AttachToNodePath(self, np):
         self.np = np

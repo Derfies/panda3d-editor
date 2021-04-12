@@ -1,11 +1,16 @@
+import logging
+
 import wx
+
 from wxExtra import wxpg
 from pubsub import pub
 import panda3d.core as pm
 from panda3d.core import Filename
-
 from pandaEditor import commands as cmds
 from . import customProperties as custProps
+
+
+logger = logging.getLogger(__name__)
 
 
 ATTRIBUTE_TAG = 'attr'
@@ -333,7 +338,7 @@ class PropertiesPanel(wx.Panel):
             if focusProp is not None:
                 focusProp.SetFocus(focusIndex)
             else:
-                print('Missed focus')
+                logger.info('Missed focus')
         
         # Set the scroll position back.
         self.pg.Scroll(x, y)

@@ -1,3 +1,9 @@
+import logging
+
+
+logger = logging.getLogger(__name__)
+
+
 class Manager:
 
     def __init__(self):
@@ -6,7 +12,7 @@ class Manager:
         
     def Undo(self):
         if len(self.undoList) < 1:
-            print('No more undo')
+            logger.info('No more undo')
         else:
             actn = self.undoList.pop()
             self.redoList.append(actn)
@@ -14,7 +20,7 @@ class Manager:
 
     def Redo(self):
         if len(self.redoList) < 1:
-            print('No more redo')
+            logger.info('No more redo')
         else:
             actn = self.redoList.pop()
             self.undoList.append(actn)

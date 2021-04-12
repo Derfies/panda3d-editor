@@ -1,3 +1,4 @@
+import logging
 import os
 import pickle
 
@@ -5,6 +6,9 @@ import wx
 
 from pandaEditor import commands as cmds
 from pandaEditor import constants
+
+
+logger = logging.getLogger(__name__)
 
 
 class DragDropManager:
@@ -115,7 +119,7 @@ class DragDropManager:
 
         theTex = None
         if pm.TexturePool.hasTexture(pandaPath):
-            print('found in pool')
+            logger.info('found in pool')
             for tex in pm.TexturePool.findAllTextures():
                 if tex.getFilename() == pandaPath:
                     theTex = tex
@@ -123,16 +127,16 @@ class DragDropManager:
         # Try to find it in the scene.
         #for foo in base.scene.comps.keys():
         #    print type(foo) , ' : ', foo
-        print(theTex)
+        logger.info(theTex)
         if theTex is not None and theTex in base.scene.comps.keys():
-            print('found in scene')
+            logger.info('found in scene')
             if np is not None:
                 npWrpr = base.node_manager.Wrap(np)
                 npWrpr.FindProperty('texture').Set(theTex)
 
         else:
 
-            print('creating new')
+            logger.info('creating new')
             wrpr = self.AddComponent('Texture')
             #wrpr = base.node_manager.Wrap(loader.loadTexture(pandaPath))
             #wrpr.SetDefaultValues()

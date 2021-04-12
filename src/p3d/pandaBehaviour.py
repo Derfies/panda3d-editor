@@ -1,5 +1,10 @@
+import logging
+
 from p3d.singleTask import SingleTask
 from p3d.pandaManager import PandaManager as pMgr
+
+
+logger = logging.getLogger(__name__)
 
 
 class PandaBehaviour(SingleTask):
@@ -15,7 +20,7 @@ class PandaBehaviour(SingleTask):
         self.accept(pMgr.PANDA_BEHAVIOUR_DEL, self.Del)
         
     def __del__(self):
-        print('  PandaBehaviour: ', self.name, ' DELETED')
+        logger.info('  PandaBehaviour: ', self.name, ' DELETED')
         
     def OnInit(self):
         pass

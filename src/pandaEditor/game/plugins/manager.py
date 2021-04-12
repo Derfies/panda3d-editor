@@ -10,5 +10,4 @@ class Manager(PluginManager):
 
     def on_init(self):
         for plugin in self.getAllPlugins():
-            print('Loaded pluging:', plugin.plugin_object)
             plugin.plugin_object.on_init(self.base)

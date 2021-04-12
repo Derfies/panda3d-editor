@@ -1,6 +1,10 @@
+import logging
 import os
 
 import panda3d.core as pm
+
+
+logger = logging.getLogger(__name__)
 
 
 class AssetManager:
@@ -28,10 +32,10 @@ class AssetManager:
             # Test if the file path represents an asset in one of Panda's
             # asset pools.
             if pm.TexturePool.hasTexture(pandaPath):
-                print('Reloading texture: ', pandaPath)
+                logger.info('Reloading texture: ', pandaPath)
                 self.ReloadTexture(pandaPath)
             elif pm.ModelPool.hasModel(pandaPath):
-                print('Reloading model: ', pandaPath)
+                logger.info('Reloading model: ', pandaPath)
                 self.ReloadModel(pandaPath)
             #elif pm.ShaderPool.hasShader(pandaPath):
             #    print 'Reloading shader: ', pandaPath

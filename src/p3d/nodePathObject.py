@@ -1,3 +1,9 @@
+import logging
+
+
+logger = logging.getLogger(__name__)
+
+
 class NodePathObject:
 
     """
@@ -16,7 +22,7 @@ class NodePathObject:
             self.Attach(np)
         
     def __del__(self):
-        print(self.pyTagName, ' : ', self.np.getName(), ' DELETED')
+        logger.info(self.pyTagName, ' : ', self.np.getName(), ' DELETED')
         
     def Attach(self, np):
         self.np = np

@@ -1,4 +1,3 @@
-from .logPanel import LogPanel
 from .dirTreeCtrl import DirTreeCtrl
 from .auiManagerConfig import AuiManagerConfig
 from .customMenu import CustomMenu
