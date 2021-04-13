@@ -1,3 +1,4 @@
+from .ambientlight import AmbientLight
 from .attributes import (
     Attribute,
     Base,
@@ -15,6 +16,7 @@ from .attributes import (
 from .base import Base
 from .camera import Camera
 from .lensnode import LensNode
+from .light import Light
 from .nodepath import NodePath
 from .sceneroot import SceneRoot
 from .showbasedefaults import (

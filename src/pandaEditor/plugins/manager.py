@@ -14,12 +14,11 @@ class Manager(GameManager):
         except KeyError:
             return []
 
-    # def on_init(self):
-    #     super().on_init()
-    #
-    #     logger.info(f'Loading plugins')
-    #     for plugin in self.getAllPlugins():
-    #         logger.info(f'Loaded plugin: {plugin.name}')
+    def on_init(self):
+        super().on_init()
+
+        for plugin in self.getAllPlugins():
+            logger.info(f'Loaded plugin: {plugin.name}')
 
     def on_update(self, comps):
         for plugin in self.getPluginsOfCategory('editor'):

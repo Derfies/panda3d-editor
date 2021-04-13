@@ -13,6 +13,7 @@ from .attributes import (
 )
 from .base import Base
 from .lensnode import LensNode
+from .light import Light
 from .nodepath import NodePath
 from .sceneroot import SceneRoot
 from .showbasedefaults import (

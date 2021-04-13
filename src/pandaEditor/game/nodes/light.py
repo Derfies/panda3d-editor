@@ -1,21 +1,23 @@
 import panda3d.core as pm
-from panda3d.core import Light as L
+from panda3d.core import Light as PandaLight
 
-from game.nodes.manager import import_wrapper
-
-
-Attr = import_wrapper('nodes.attributes.NodeAttribute')
-NodePath = import_wrapper('nodes.nodePath.NodePath')
+from game.nodes.attributes import NodeAttribute
+from game.nodes.nodepath import NodePath
 
 
 class Light(NodePath):
 
-    type_ = L
+    type_ = PandaLight
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.AddAttributes(
-            Attr('Color', pm.Vec4, L.getColor, L.setColor),
+            NodeAttribute(
+                'Color',
+                pm.Vec4,
+                PandaLight.getColor,
+                PandaLight.setColor
+            ),
             parent='Light'
         )

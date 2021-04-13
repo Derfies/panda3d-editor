@@ -10,10 +10,9 @@ from nodes.constants import (
 )
 from game.nodes.constants import TAG_MODEL_ROOT_CHILD
 from pandaEditor.nodes.attributes import NodePathAttribute
-from pandaEditor.nodes.base import Base
 
 
-class NodePath(Base):
+class NodePath:
     
     geo = None
     pickable = True

@@ -1,4 +1,5 @@
 from game.nodes.base import Base
+from game.nodes.ambientlight import AmbientLight
 from game.nodes.constants import TAG_NODE_TYPE
 from game.nodes.nodepath import NodePath
 from game.nodes.sceneroot import SceneRoot
@@ -18,6 +19,7 @@ class Manager:
     
     def __init__(self):
         self.wrappers = {
+            'AmbientLight': AmbientLight,
             'Aspect2d': Aspect2d,
             'Base': Base,
             'BaseCam': BaseCam,

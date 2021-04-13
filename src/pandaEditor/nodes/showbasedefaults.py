@@ -14,7 +14,7 @@ from nodes.constants import TAG_IGNORE
 from pandaEditor.nodes.nodepath import NodePath
 
 
-class Render(NodePath):
+class Render:
     
     def GetParent(self):
         return base.node_manager.Wrap(base.scene)
@@ -24,21 +24,21 @@ class Render(NodePath):
         return PandaNode.Create(name='render').GetPropertyData()
     
 
-class BaseCamera(NodePath):
+class BaseCamera:
     
     @classmethod
     def GetDefaultPropertyData(cls):
         return ModelNode.Create(name='camera').GetPropertyData()
 
 
-class BaseCam(NodePath):
+class BaseCam:
 
     @classmethod
     def GetDefaultPropertyData(cls):
         return Camera.Create(name='cam').GetPropertyData()
 
 
-class Render2d(NodePath):
+class Render2d:
     
     def GetParent(self):
         return base.node_manager.Wrap(base.scene)
@@ -48,7 +48,7 @@ class Render2d(NodePath):
         return PandaNode.Create(name='render2d').GetPropertyData()
     
 
-class Aspect2d(NodePath):
+class Aspect2d:
     
     @classmethod
     def Create(cls, *args, **kwargs):
@@ -68,21 +68,21 @@ class Aspect2d(NodePath):
         return PandaNode.Create(name='aspect2d').GetPropertyData()
     
 
-class Pixel2d(NodePath):
+class Pixel2d:
     
     @classmethod
     def GetDefaultPropertyData(cls):
         return PandaNode.Create(name='pixel2d').GetPropertyData()
     
 
-class Camera2d(NodePath):
+class Camera2d:
     
     @classmethod
     def GetDefaultPropertyData(cls):
         return PandaNode.Create(name='camera2d').GetPropertyData()
     
 
-class Cam2d(NodePath):
+class Cam2d:
     
     @classmethod
     def GetDefaultPropertyData(cls):
