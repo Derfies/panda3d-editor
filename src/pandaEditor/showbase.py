@@ -16,13 +16,12 @@ from scene import Scene
 from pandaEditor.project import Project
 from pandaEditor.selection import Selection
 from pandaEditor.ui.document import Document
+from pandaEditor.game.plugins.base import Base as GamePluginBase
 from pandaEditor.game.showbase import ShowBase as GameShowBase
-
-from nodes.manager import Manager as NodeManager
-from plugins.manager import Manager as PluginManager
-from sceneParser import SceneParser
-from plugins.base import Base as EditorPluginBase
-from game.plugins.base import Base as GamePluginBase
+from pandaEditor.nodes.manager import Manager as NodeManager
+from pandaEditor.plugins.manager import Manager as PluginManager
+from pandaEditor.plugins.base import Base as EditorPluginBase
+from pandaEditor.sceneParser import SceneParser
 
 
 class ShowBase(GameShowBase):
@@ -141,8 +140,8 @@ class ShowBase(GameShowBase):
             'editor': EditorPluginBase,
             'game': GamePluginBase,
         })
+        print('here')
         super().load_plugins()
-
 
     def SetupEdRender(self):
         """

@@ -1,13 +1,9 @@
 import panda3d.core as pm
 from panda3d.core import Lens
 
+from game.nodes.attributes import NodeAttribute
 from game.nodes.nodepath import NodePath
 from game.nodes.wrappermeta import WrapperMeta
-
-from game.nodes.manager import import_wrapper
-
-
-Attr = import_wrapper('nodes.attributes.NodeAttribute')
 
 
 class LensNode(NodePath, metaclass=WrapperMeta):
@@ -18,9 +14,9 @@ class LensNode(NodePath, metaclass=WrapperMeta):
         super().__init__(*args, **kwargs)
         
         self.AddAttributes(
-            Attr('Fov', pm.Vec2, Lens.getFov, Lens.setFov, self.GetLens),
-            Attr('Near', float, Lens.getNear, Lens.setNear, self.GetLens),
-            Attr('Far', float, Lens.getFar, Lens.setFar, self.GetLens),
+            NodeAttribute('Fov', pm.Vec2, Lens.getFov, Lens.setFov, self.GetLens),
+            NodeAttribute('Near', float, Lens.getNear, Lens.setNear, self.GetLens),
+            NodeAttribute('Far', float, Lens.getFar, Lens.setFar, self.GetLens),
             parent='LensNode'
         )
 

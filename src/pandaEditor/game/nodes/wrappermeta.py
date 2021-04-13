@@ -15,13 +15,13 @@ class WrapperMeta(type):
         editor_mode = ConfigVariableBool('editor_mode', False)
         if editor_mode:
             class_name = cls.__name__
-            search_path = f'nodes.{class_name.lower()}'
-            logger.info(f'Searching for: {search_path}')
-            try:
-                module = import_module(search_path)
-            except ImportError as e:
-                logger.error(f'Failed to find editor class: {search_path} {e}')
-                return mro
+            search_path = f'nodes'
+            logger.info(f'Searching for: {search_path}.{class_name}')
+            #try:
+            module = import_module(search_path)
+            # except ImportError as e:
+            #     logger.error(f'Failed to find editor class: {search_path} {e}')
+            #     return mro
             editor_cls = next(iter([
                 value
                 for name, value in inspect.getmembers(module, inspect.isclass)

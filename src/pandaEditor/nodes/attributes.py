@@ -1,17 +1,4 @@
-from game.nodes.attributes import (
-    Attribute as GameAttribute,
-    NodeAttribute as GameNodeAttribute,
-    NodePathAttribute as GameNodePathAttribute,
-    NodePathObjectAttribute as GameNodePathObjectAttribute,
-    PyTagAttribute as GamePyTagAttribute,
-)
 from p3d import commonUtils as cUtils
-from game.nodes.attributes import Connection as GameConnection
-from game.nodes.attributes import NodePathTargetConnection as GameNodePathTargetConnection
-from game.nodes.attributes import ConnectionList as GameConnectionList
-from game.nodes.attributes import NodePathSourceConnectionList as GameNodePathSourceConnectionList
-from game.nodes.attributes import NodePathTargetConnectionList as GameNodePathTargetConnectionList
-from game.nodes.attributes import NodePathSourceConnection as GameNodePathSourceConnection
 
 
 class RegisterMixin:
@@ -32,32 +19,32 @@ class RegisterMixin:
         base.scene.DeregisterConnection(tgtComp, self)
 
 
-class Connection(RegisterMixin, GameConnection):
+class Connection(RegisterMixin):
 
     pass
 
 
-class NodePathTargetConnection(RegisterMixin, GameNodePathTargetConnection):
+class NodePathTargetConnection(RegisterMixin):
 
     pass
 
 
-class ConnectionList(RegisterMixin, GameConnectionList):
+class ConnectionList(RegisterMixin):
 
     pass
 
 
-class NodePathSourceConnectionList(RegisterMixin, GameNodePathSourceConnectionList):
+class NodePathSourceConnectionList(RegisterMixin):
 
     pass
 
 
-class NodePathTargetConnectionList(RegisterMixin, GameNodePathTargetConnectionList):
+class NodePathTargetConnectionList(RegisterMixin):
 
     pass
 
 
-class NodePathSourceConnection(RegisterMixin, GameNodePathSourceConnection):
+class NodePathSourceConnection(RegisterMixin):
 
     pass
 
@@ -79,26 +66,26 @@ class SerializeMixin:
             return cUtils.SerializeToString(pVal)
 
 
-class Attribute(SerializeMixin, GameAttribute):
+class Attribute(SerializeMixin):
 
     pass
 
 
-class NodeAttribute(SerializeMixin, GameNodeAttribute):
+class NodeAttribute(SerializeMixin):
 
     pass
 
 
-class NodePathAttribute(SerializeMixin, GameNodePathAttribute):
+class NodePathAttribute(SerializeMixin):
 
     pass
 
 
-class PyTagAttribute(SerializeMixin, GamePyTagAttribute):
+class PyTagAttribute(SerializeMixin):
 
     pass
 
 
-class NodePathObjectAttribute(SerializeMixin, GameNodePathObjectAttribute):
+class NodePathObjectAttribute(SerializeMixin):
 
     pass

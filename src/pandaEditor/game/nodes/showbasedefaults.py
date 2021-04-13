@@ -1,12 +1,10 @@
 from game.nodes.camera import Camera
-from game.nodes.manager import import_wrapper
-from game.nodes.modelNode import ModelNode
+from game.nodes.modelnode import ModelNode
+from game.nodes.nodepath import NodePath
+from game.nodes.wrappermeta import WrapperMeta
 
 
-NodePath = import_wrapper('nodes.nodePath.NodePath')
-
-
-class Render(NodePath):
+class Render(NodePath, metaclass=WrapperMeta):
     
     @classmethod
     def Create(cls, *args, **kwargs):
@@ -19,21 +17,27 @@ class Render(NodePath):
         # Render is a default Panda NodePath which shouldn't be parented to
         # anything.
         pass
-    
 
-class BaseCamera(ModelNode):
+
+class BaseCamera(ModelNode, metaclass=WrapperMeta):
     
     @classmethod
     def Create(cls, *args, **kwargs):
         wrpr = cls(base.camera)
         wrpr.SetupNodePath()
         return wrpr
-    
 
 
-    
+class BaseCam(Camera, metaclass=WrapperMeta):
 
-class Render2d(NodePath):
+    @classmethod
+    def Create(cls, *args, **kwargs):
+        wrpr = cls(base.cam)
+        wrpr.SetupNodePath()
+        return wrpr
+
+
+class Render2d(NodePath, metaclass=WrapperMeta):
     
     @classmethod
     def Create(cls, *args, **kwargs):
@@ -48,7 +52,7 @@ class Render2d(NodePath):
         pass
     
 
-class Aspect2d(NodePath):
+class Aspect2d(NodePath, metaclass=WrapperMeta):
     
     @classmethod
     def Create(cls, *args, **kwargs):
@@ -57,7 +61,7 @@ class Aspect2d(NodePath):
         return wrpr
     
 
-class Pixel2d(NodePath):
+class Pixel2d(NodePath, metaclass=WrapperMeta):
     
     @classmethod
     def Create(cls, *args, **kwargs):
@@ -66,7 +70,7 @@ class Pixel2d(NodePath):
         return wrpr
     
 
-class Camera2d(NodePath):
+class Camera2d(NodePath, metaclass=WrapperMeta):
     
     @classmethod
     def Create(cls, *args, **kwargs):
@@ -75,7 +79,7 @@ class Camera2d(NodePath):
         return wrpr
     
 
-class Cam2d(NodePath):
+class Cam2d(NodePath, metaclass=WrapperMeta):
     
     @classmethod
     def Create(cls, *args, **kwargs):

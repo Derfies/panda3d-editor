@@ -1,93 +1,35 @@
-import inspect
-from importlib import import_module
-
-from panda3d.core import ConfigVariableBool
-
-from game.nodes.constants import TAG_NODE_TYPE
-
-#
-# GAME_NODE_MODULES = [
-#     'game.nodes.base',
-#     # 'game.nodes.sceneRoot',
-#     #
-#     # 'game.nodes.pandaNode',
-#     'game.nodes.nodepath',
-#
-#     'game.nodes.basecam',
-#     # 'game.nodes.modelNode',
-#     # 'game.nodes.camera',
-#     # 'game.nodes.showbaseDefault',
-#     # 'game.nodes.modelRoot',
-#     # 'game.nodes.actor',
-#     # 'game.nodes.fog',
-#     #
-#     # 'game.nodes.collisionNode',
-#     # 'game.nodes.collisionSolids',
-#     #
-#     # 'game.nodes.light',
-#     # 'game.nodes.ambientLight',
-#     # 'game.nodes.pointLight',
-#     # 'game.nodes.directionalLight',
-#     # 'game.nodes.spotlight',
-#     #
-#     # 'game.nodes.texture',
-#     # 'game.nodes.textureStage',
-#     #
-#     # 'game.nodes.bulletWorld',
-#     # 'game.nodes.bulletDebugNode',
-#     # 'game.nodes.bulletRigidBodyNode',
-#     # 'game.nodes.bulletCharacterControllerNode',
-#     # 'game.nodes.bulletBoxShape',
-#     # 'game.nodes.bulletPlaneShape',
-#     # 'game.nodes.bulletCapsuleShape'
-# ]
-
-
-cache = {}
-
-
-def import_wrapper(full_module_path):
-    if full_module_path in cache:
-        return cache[full_module_path]
-    editor_mode = ConfigVariableBool('editor_mode', False)
-    module_path, class_name = full_module_path.rsplit('.', 1)
-    search_path = module_path if editor_mode else f'game.{module_path}'
-    module = import_module(search_path)
-    members = iter([
-        value
-        for name, value in inspect.getmembers(module, inspect.isclass)
-        if name == class_name
-    ])
-    cls = next(members, None)
-    if cls is not None:
-        cache[module_path] = cls
-        return cls
-    raise ModuleNotFoundError(f'No module found at: {full_module_path}')
-
-
 from game.nodes.base import Base
+from game.nodes.constants import TAG_NODE_TYPE
 from game.nodes.nodepath import NodePath
-from game.nodes.basecam import BaseCam
+from game.nodes.sceneroot import SceneRoot
+from game.nodes.showbasedefaults import (
+    Aspect2d,
+    BaseCam,
+    BaseCamera,
+    Cam2d,
+    Camera2d,
+    Pixel2d,
+    Render,
+    Render2d,
+)
+
 
 class Manager:
     
     def __init__(self):
-        self.wrappers = {}
-
-        self.wrappers['Base'] = Base
-        self.wrappers['NodePath'] = NodePath
-        self.wrappers['BaseCam'] = BaseCam
-        #self.create_node_wrappers(GAME_NODE_MODULES)
-
-    # def create_node_wrappers(self, module_paths):
-    #     for module_path in module_paths:
-    #         module = import_module(module_path)
-    #         for member in inspect.getmembers(module, inspect.isclass):
-    #             cls = member[1]
-    #             print('here:', cls, cls.__module__, module.__name__)
-    #             if cls.__module__ == module.__name__:
-    #                 self.wrappers[cls.__name__] = cls
-    #                 print('created:', cls.__name__)
+        self.wrappers = {
+            'Aspect2d': Aspect2d,
+            'Base': Base,
+            'BaseCam': BaseCam,
+            'BaseCamera': BaseCamera,
+            'Cam2d': Cam2d,
+            'Camera2d': Camera2d,
+            'NodePath': NodePath,
+            'Pixel2d': Pixel2d,
+            'Render': Render,
+            'Render2d': Render2d,
+            'SceneRoot': SceneRoot,
+        }
         
     def Create(self, nTypeStr, *args):
         wrprCls = self.wrappers[nTypeStr]
@@ -111,28 +53,6 @@ class Manager:
             return self.wrappers['NodePath']
         else:
             return self.wrappers['Base']
-        
-    def GetCommonWrapper(self, comps):
-        
-        # Get method resolution orders for each wrapper for all the indicated
-        # components.
-        mros = []
-        for comp in comps:
-            wrprCls = self.GetWrapper(comp)
-            if wrprCls is not None:
-                mros.append(wrprCls.mro())
-                
-        if not mros:
-            return self.GetDefaultWrapper(comps[0])
-                
-        # Intersect the mros to get the common classes.
-        cmnClasses = set(mros[0]).intersection(*mros)
-        
-        # The result was unordered, so go find the first common class from
-        # one of the mros.
-        for cls in mros[0]:
-            if cls in cmnClasses:
-                return cls
         
     def GetWrapper(self, comp):
         type_ = self.GetTypeString(comp)

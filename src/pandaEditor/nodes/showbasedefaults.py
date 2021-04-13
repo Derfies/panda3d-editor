@@ -1,19 +1,20 @@
 from nodes.constants import TAG_IGNORE
-from game.nodes.pandaNode import PandaNode
-from game.nodes.modelNode import ModelNode
-from game.nodes.camera import Camera
-from game.nodes.showbaseDefault import (
-    Aspect2d as GameAspect2d,
-    BaseCamera as GameBaseCamera,
-    Cam2d as GameCam2d,
-    Camera2d as GameCamera2d,
-    Pixel2d as GamePixel2d,
-    Render as GameRender,
-    Render2d as GameRender2d,
-)
+#from game.nodes.pandaNode import PandaNode
+# from game.nodes.modelnode import ModelNode
+# from game.nodes.camera import Camera
+# from game.nodes.showbasedefaults import (
+#     Aspect2d as GameAspect2d,
+#     BaseCamera as GameBaseCamera,
+#     Cam2d as GameCam2d,
+#     Camera2d as GameCamera2d,
+#     Pixel2d as GamePixel2d,
+#     Render as GameRender,
+#     Render2d as GameRender2d,
+# )
+from pandaEditor.nodes.nodepath import NodePath
 
 
-class Render(GameRender):
+class Render(NodePath):
     
     def GetParent(self):
         return base.node_manager.Wrap(base.scene)
@@ -23,14 +24,21 @@ class Render(GameRender):
         return PandaNode.Create(name='render').GetPropertyData()
     
 
-class BaseCamera(GameBaseCamera):
+class BaseCamera(NodePath):
     
     @classmethod
     def GetDefaultPropertyData(cls):
         return ModelNode.Create(name='camera').GetPropertyData()
 
 
-class Render2d(GameRender2d):
+class BaseCam(NodePath):
+
+    @classmethod
+    def GetDefaultPropertyData(cls):
+        return Camera.Create(name='cam').GetPropertyData()
+
+
+class Render2d(NodePath):
     
     def GetParent(self):
         return base.node_manager.Wrap(base.scene)
@@ -40,7 +48,7 @@ class Render2d(GameRender2d):
         return PandaNode.Create(name='render2d').GetPropertyData()
     
 
-class Aspect2d(GameAspect2d):
+class Aspect2d(NodePath):
     
     @classmethod
     def Create(cls, *args, **kwargs):
@@ -60,21 +68,21 @@ class Aspect2d(GameAspect2d):
         return PandaNode.Create(name='aspect2d').GetPropertyData()
     
 
-class Pixel2d(GamePixel2d):
+class Pixel2d(NodePath):
     
     @classmethod
     def GetDefaultPropertyData(cls):
         return PandaNode.Create(name='pixel2d').GetPropertyData()
     
 
-class Camera2d(GameCamera2d):
+class Camera2d(NodePath):
     
     @classmethod
     def GetDefaultPropertyData(cls):
         return PandaNode.Create(name='camera2d').GetPropertyData()
     
 
-class Cam2d(GameCam2d):
+class Cam2d(NodePath):
     
     @classmethod
     def GetDefaultPropertyData(cls):

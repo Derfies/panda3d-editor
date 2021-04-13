@@ -1,7 +1,7 @@
-from game.nodes.sceneRoot import SceneRoot as GameSceneRoot
+from pandaEditor.nodes.base import Base
 
 
-class SceneRoot(GameSceneRoot):
+class SceneRoot(Base):
     
     def GetChildren(self):
         children = []

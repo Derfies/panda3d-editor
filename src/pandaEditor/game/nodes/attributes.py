@@ -1,9 +1,10 @@
 import p3d
 from p3d import commonUtils as cUtils
+from game.nodes.wrappermeta import WrapperMeta
 from game.utils import get_lower_camel_case
 
 
-class Base:
+class Base(metaclass=WrapperMeta):
     
     def __init__(
         self,
@@ -66,7 +67,7 @@ class Base:
         return self.setFn(*args)
 
 
-class Connection(Base):
+class Connection(Base, metaclass=WrapperMeta):
 
     def __init__(
         self,
@@ -109,7 +110,7 @@ class Connection(Base):
         self.clearFn(self.GetSource())
 
 
-class NodePathSourceConnection(Connection):
+class NodePathSourceConnection(Connection, metaclass=WrapperMeta):
 
     def GetSource(self, comp):
         try:
@@ -118,7 +119,7 @@ class NodePathSourceConnection(Connection):
             return comp
 
 
-class NodePathTargetConnection(Connection):
+class NodePathTargetConnection(Connection, metaclass=WrapperMeta):
 
     def GetTarget(self, comp):
         try:
@@ -154,13 +155,13 @@ class ConnectionList(Connection):
         self.removeFn(self.GetSource(), self.GetTarget(tgtComp))
 
 
-class NodePathSourceConnectionList(ConnectionList):
+class NodePathSourceConnectionList(ConnectionList, metaclass=WrapperMeta):
 
     def GetSource(self):
         return self.srcComp.node()
 
 
-class NodePathTargetConnectionList(ConnectionList):
+class NodePathTargetConnectionList(ConnectionList, metaclass=WrapperMeta):
 
     def GetTarget(self, comp):
         try:
@@ -183,12 +184,12 @@ class UnserializeMixin:
                 self.Set(val)
 
 
-class Attribute(UnserializeMixin, Base):
+class Attribute(UnserializeMixin, Base, metaclass=WrapperMeta):
 
     pass
 
 
-class NodeAttribute(UnserializeMixin, Base):
+class NodeAttribute(UnserializeMixin, Base, metaclass=WrapperMeta):
 
     def GetSource(self):
         return self.srcComp.node()
@@ -200,7 +201,7 @@ class NodePathAttribute(UnserializeMixin, Base):
         return self.srcComp
 
 
-class PyTagAttribute(UnserializeMixin, Base):
+class PyTagAttribute(UnserializeMixin, Base, metaclass=WrapperMeta):
 
     def __init__(self, *args, **kwargs):
         self.pyTagName = kwargs.pop('pyTagName')
@@ -210,7 +211,7 @@ class PyTagAttribute(UnserializeMixin, Base):
         return self.srcComp.getPythonTag(self.pyTagName)
 
 
-class NodePathObjectAttribute(PyTagAttribute):
+class NodePathObjectAttribute(PyTagAttribute, metaclass=WrapperMeta):
 
     def __init__(self, label, pType, name, pyTagName=None):
         if pyTagName is None:

@@ -9,7 +9,7 @@ from nodes.constants import (
     TAG_BBOX, TAG_IGNORE, TAG_MODIFIED, TAG_PICKABLE
 )
 from game.nodes.constants import TAG_MODEL_ROOT_CHILD
-from game.nodes.attributes import NodePathAttribute as Attr
+from pandaEditor.nodes.attributes import NodePathAttribute
 from pandaEditor.nodes.base import Base
 
 
@@ -20,6 +20,8 @@ class NodePath(Base):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        return
         
         # Find the index of the 'name' property so we can add position, 
         # rotation and scale properties immediately after it.
@@ -28,27 +30,27 @@ class NodePath(Base):
         # Add attributes for position, rotation and scale. These are 
         # implemented editor side only as we only need a matrix to xform the 
         # NodePath; they are for the user's benefit only.
-        self.AddAttributes(Attr('Position', pm.Vec3, NP.getPos, NP.setPos, w=False), index=i + 1)
+        self.AddAttributes(NodePathAttribute('Position', pm.Vec3, NP.getPos, NP.setPos, w=False), index=i + 1)
         self.AddAttributes(
-            Attr('X', float, NP.getX, NP.setX, w=False),
-            Attr('Y', float, NP.getY, NP.setY, w=False),
-            Attr('Z', float, NP.getZ, NP.setZ, w=False),
+            NodePathAttribute('X', float, NP.getX, NP.setX, w=False),
+            NodePathAttribute('Y', float, NP.getY, NP.setY, w=False),
+            NodePathAttribute('Z', float, NP.getZ, NP.setZ, w=False),
             parent='Position'
       )
         
-        self.AddAttributes(Attr('Rotation', pm.Vec3, NP.getHpr, NP.setHpr, w=False), index=i + 2)
+        self.AddAttributes(NodePathAttribute('Rotation', pm.Vec3, NP.getHpr, NP.setHpr, w=False), index=i + 2)
         self.AddAttributes(
-            Attr('H', float, NP.getH, NP.setH, w=False),
-            Attr('P', float, NP.getP, NP.setP, w=False),
-            Attr('R', float, NP.getR, NP.setR, w=False),
+            NodePathAttribute('H', float, NP.getH, NP.setH, w=False),
+            NodePathAttribute('P', float, NP.getP, NP.setP, w=False),
+            NodePathAttribute('R', float, NP.getR, NP.setR, w=False),
             parent='Rotation'
       )
         
-        self.AddAttributes(Attr('Scale', pm.Vec3, NP.getScale, NP.setScale, w=False), index=i + 3)
+        self.AddAttributes(NodePathAttribute('Scale', pm.Vec3, NP.getScale, NP.setScale, w=False), index=i + 3)
         self.AddAttributes(
-            Attr('Sx', float, NP.getSx, NP.setSx, w=False),
-            Attr('Sy', float, NP.getSy, NP.setSy, w=False),
-            Attr('Sz', float, NP.getSz, NP.setSz, w=False),
+            NodePathAttribute('Sx', float, NP.getSx, NP.setSx, w=False),
+            NodePathAttribute('Sy', float, NP.getSy, NP.setSy, w=False),
+            NodePathAttribute('Sz', float, NP.getSz, NP.setSz, w=False),
             parent='Scale'
       )
         
@@ -67,11 +69,9 @@ class NodePath(Base):
             childNp.setPythonTag(TAG_IGNORE, True)
         geo.setLightOff()
         geo.node().adjustDrawMask(*base.GetEditorRenderMasks())
-        print('HERE:', cls, geo)
         cls.geo = geo
         
     def SetupNodePath(self):
-        print('SetupNodePath:', self)
         super().SetupNodePath()
         
         if self.geo is not None:
@@ -116,7 +116,7 @@ class NodePath(Base):
         If this node is a child of a model root, make sure to add its position
         in the hierarchy to the attrib dictionary.
         """
-        attrib = GameNodePath.GetAttrib(self)
+        attrib = super().GetAttrib()
         
         if self.GetModified():
             attrib['path'] = self.GetPath()
@@ -185,13 +185,13 @@ class NodePath(Base):
         """
         children = [
             cWrpr 
-            for cWrpr in GameNodePath.GetChildren(self) 
+            for cWrpr in super().GetChildren()
             if not cWrpr.data.getPythonTag(TAG_IGNORE)
         ]
         return children
     
     def OnDuplicate(self, origNp, dupeNp):
-        GameNodePath.OnDuplicate(self, origNp, dupeNp)
+        super().OnDuplicate(origNp, dupeNp)
         
         wrpr = base.node_manager.Wrap(origNp)
         cnnctns = base.scene.GetOutgoingConnections(wrpr)

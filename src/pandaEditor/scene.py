@@ -1,10 +1,11 @@
-import game
+from pandaEditor.game.scene import Scene
+from pandaEditor.game.nodes.constants import TAG_NODE_TYPE
 
 
-class Scene(game.Scene):
+class Scene(Scene):
     
     def __init__(self, *args, **kwargs):
-        game.Scene.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         
         self.cnnctns = {}
         
@@ -14,18 +15,18 @@ class Scene(game.Scene):
         # up. Tag them so their type is overriden and the component manager
         # wraps them appropriately.
         defaultCompTypes = [
-            # 'Render',
-            # 'BaseCamera',
+            'Render',
+            'BaseCamera',
             'BaseCam',
-            # 'Render2d',
-            # 'Aspect2d',
-            # 'Pixel2d',
-            # 'Camera2d',
-            # 'Cam2d'
+            'Render2d',
+            'Aspect2d',
+            'Pixel2d',
+            'Camera2d',
+            'Cam2d'
         ]
         for cType in defaultCompTypes:
             wrpr = base.node_manager.Create(cType)
-            wrpr.data.setTag(game.nodes.constants.TAG_NODE_TYPE, cType)
+            wrpr.data.setTag(TAG_NODE_TYPE, cType)
         
     def Load(self, filePath):
         """Recreate a scene graph from file."""

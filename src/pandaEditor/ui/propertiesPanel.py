@@ -249,6 +249,8 @@ class PropertiesPanel(wx.Panel):
         # Build all properties from attributes.
         comps = self.base.selection.comps
         wrprCls = base.node_manager.GetCommonWrapper(comps)
+        print('wrprCls:', wrprCls)
+        print('wrprCls:', wrprCls.mro())
         wrprs = [wrprCls(comp) for comp in comps]
         for i, attr in enumerate(wrprs[0].GetAttributes(addons=True)):
             

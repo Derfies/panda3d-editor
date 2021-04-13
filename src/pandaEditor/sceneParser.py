@@ -1,10 +1,10 @@
 import xml.etree.ElementTree as et
 
-import game
+from game.sceneParser import SceneParser
 from utils import indent
 
 
-class SceneParser(game.SceneParser):
+class SceneParser(SceneParser):
     
     def Save(self, scene, filePath):
         """Save the scene out to an xml file."""

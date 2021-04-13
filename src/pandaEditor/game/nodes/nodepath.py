@@ -3,21 +3,20 @@ import uuid
 import panda3d.core as pc
 from panda3d.core import NodePath as NP
 
-from game.utils import get_unique_name
-from game.nodes.constants import (
-    TAG_ACTOR, TAG_NODE_UUID, TAG_PYTHON_TAGS
+from game.nodes.attributes import (
+    Connection,
+    ConnectionList,
+    NodePathAttribute,
+    NodePathTargetConnection
 )
-from game.nodes.manager import import_wrapper
-
-from game.nodes.wrappermeta import WrapperMeta
-
-
-NPTCnnctn = import_wrapper('nodes.attributes.NodePathTargetConnection')
-Cnnctn = import_wrapper('nodes.attributes.Connection')
-CnnctnList = import_wrapper('nodes.attributes.ConnectionList')
-Attr = import_wrapper('nodes.attributes.NodePathAttribute')
-#Base = import_wrapper('nodes.base.Base')
+from game.nodes.constants import (
+    TAG_ACTOR,
+    TAG_NODE_UUID,
+    TAG_PYTHON_TAGS
+)
 from game.nodes.base import Base
+from game.nodes.wrappermeta import WrapperMeta
+from game.utils import get_unique_name
 
 
 class NodePath(Base, metaclass=WrapperMeta):
@@ -28,12 +27,12 @@ class NodePath(Base, metaclass=WrapperMeta):
         super().__init__(*args, **kwargs)
         
         self.AddAttributes(
-            Attr('Name', str, NP.getName, NP.setName, initDefault=''),
-            Attr('Matrix', pc.Mat4, NP.getMat, NP.setMat),
-            CnnctnList('Lights', pc.Light, self.GetLights, NP.setLight, NP.clearLight, NP.clearLight),
-            Cnnctn('Texture', pc.Texture, NP.getTexture, NP.setTexture, NP.clearTexture, args=[1]),
-            NPTCnnctn('Fog ', pc.Fog, NP.getFog, NP.setFog, NP.clearFog),
-            Cnnctn('Shader', pc.Filename, self.GetShader, self.SetShader, NP.clearShader),
+            NodePathAttribute('Name', str, NP.getName, NP.setName, initDefault=''),
+            NodePathAttribute('Matrix', pc.Mat4, NP.getMat, NP.setMat),
+            ConnectionList('Lights', pc.Light, self.GetLights, NP.setLight, NP.clearLight, NP.clearLight),
+            Connection('Texture', pc.Texture, NP.getTexture, NP.setTexture, NP.clearTexture, args=[1]),
+            NodePathTargetConnection('Fog ', pc.Fog, NP.getFog, NP.setFog, NP.clearFog),
+            Connection('Shader', pc.Filename, self.GetShader, self.SetShader, NP.clearShader),
             parent='NodePath'
        )
     
