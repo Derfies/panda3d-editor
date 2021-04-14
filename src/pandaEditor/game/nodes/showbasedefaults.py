@@ -1,10 +1,10 @@
 from game.nodes.camera import Camera
 from game.nodes.modelnode import ModelNode
 from game.nodes.nodepath import NodePath
-from game.nodes.wrappermeta import WrapperMeta
+from game.nodes.othermeta import ComponentMetaClass
 
 
-class Render(NodePath, metaclass=WrapperMeta):
+class Render(NodePath, metaclass=ComponentMetaClass):
     
     @classmethod
     def Create(cls, *args, **kwargs):
@@ -19,7 +19,7 @@ class Render(NodePath, metaclass=WrapperMeta):
         pass
 
 
-class BaseCamera(ModelNode, metaclass=WrapperMeta):
+class BaseCamera(ModelNode, metaclass=ComponentMetaClass):
     
     @classmethod
     def Create(cls, *args, **kwargs):
@@ -28,7 +28,7 @@ class BaseCamera(ModelNode, metaclass=WrapperMeta):
         return wrpr
 
 
-class BaseCam(Camera, metaclass=WrapperMeta):
+class BaseCam(Camera, metaclass=ComponentMetaClass):
 
     @classmethod
     def Create(cls, *args, **kwargs):
@@ -37,7 +37,7 @@ class BaseCam(Camera, metaclass=WrapperMeta):
         return wrpr
 
 
-class Render2d(NodePath, metaclass=WrapperMeta):
+class Render2d(NodePath, metaclass=ComponentMetaClass):
     
     @classmethod
     def Create(cls, *args, **kwargs):
@@ -52,7 +52,7 @@ class Render2d(NodePath, metaclass=WrapperMeta):
         pass
     
 
-class Aspect2d(NodePath, metaclass=WrapperMeta):
+class Aspect2d(NodePath, metaclass=ComponentMetaClass):
     
     @classmethod
     def Create(cls, *args, **kwargs):
@@ -61,7 +61,7 @@ class Aspect2d(NodePath, metaclass=WrapperMeta):
         return wrpr
     
 
-class Pixel2d(NodePath, metaclass=WrapperMeta):
+class Pixel2d(NodePath, metaclass=ComponentMetaClass):
     
     @classmethod
     def Create(cls, *args, **kwargs):
@@ -70,7 +70,7 @@ class Pixel2d(NodePath, metaclass=WrapperMeta):
         return wrpr
     
 
-class Camera2d(NodePath, metaclass=WrapperMeta):
+class Camera2d(NodePath, metaclass=ComponentMetaClass):
     
     @classmethod
     def Create(cls, *args, **kwargs):
@@ -79,7 +79,7 @@ class Camera2d(NodePath, metaclass=WrapperMeta):
         return wrpr
     
 
-class Cam2d(NodePath, metaclass=WrapperMeta):
+class Cam2d(NodePath, metaclass=ComponentMetaClass):
     
     @classmethod
     def Create(cls, *args, **kwargs):

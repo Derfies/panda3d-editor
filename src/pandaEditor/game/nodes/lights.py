@@ -1,5 +1,4 @@
-import panda3d.core as pm
-from panda3d.core import Light as PandaLight
+import panda3d.core as pc
 
 from game.nodes.attributes import NodeAttribute
 from game.nodes.lensnode import LensNode
@@ -8,69 +7,70 @@ from game.nodes.nodepath import NodePath
 
 class Light(NodePath):
 
-    type_ = PandaLight
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.AddAttributes(
-            NodeAttribute(
-                'Color',
-                pm.Vec4,
-                PandaLight.getColor,
-                PandaLight.setColor
-            ),
-            parent='Light'
-        )
+    type_ = pc.Light
+    color = NodeAttribute('', pc.Vec4, pc.Light.get_color, pc.Light.set_color)
 
 
 class AmbientLight(Light):
 
-    type_ = pm.AmbientLight
+    type_ = pc.AmbientLight
 
 
 class DirectionalLight(Light):
 
-    type_ = pm.DirectionalLight
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.AddAttributes(
-            NodeAttribute('Direction', pm.Vec3, pm.DirectionalLight.getDirection, pm.DirectionalLight.setDirection),
-            NodeAttribute('Point', pm.Point3, pm.DirectionalLight.getPoint, pm.DirectionalLight.setPoint),
-            NodeAttribute('Specular Color', pm.Vec4, pm.DirectionalLight.getSpecularColor, pm.DirectionalLight.setSpecularColor),
-            NodeAttribute('Shadow Caster', bool, pm.DirectionalLight.isShadowCaster, pm.DirectionalLight.setShadowCaster),
-            parent='DirectionalLight'
-        )
+    type_ = pc.DirectionalLight
+    direction = NodeAttribute(
+        '',
+        pc.Vec3,
+        pc.DirectionalLight.get_direction,
+        pc.DirectionalLight.set_direction,
+    )
+    point = NodeAttribute(
+        '',
+        pc.Point3,
+        pc.DirectionalLight.get_point,
+        pc.DirectionalLight.set_point,
+    )
+    specular_colour = NodeAttribute(
+        '',
+        pc.Point3,
+        pc.DirectionalLight.get_specular_color,
+        pc.DirectionalLight.set_specular_color,
+    )
+    shadow_caster = NodeAttribute(
+        '',
+        bool,
+        pc.DirectionalLight.is_shadow_caster,
+        pc.DirectionalLight.set_shadow_caster,
+    )
 
 
 class PointLight(Light):
 
-    type_ = pm.PointLight
+    type_ = pc.PointLight
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.AddAttributes(
-            NodeAttribute('Attenuation', pm.Vec3, pm.PointLight.getAttenuation, pm.PointLight.setAttenuation),
-            NodeAttribute('Point', pm.Point3, pm.PointLight.getPoint, pm.PointLight.setPoint),
-            NodeAttribute('Specular Color', pm.Vec4, pm.PointLight.getSpecularColor, pm.PointLight.setSpecularColor),
+            NodeAttribute('Attenuation', pc.Vec3, pc.PointLight.getAttenuation, pc.PointLight.setAttenuation),
+            NodeAttribute('Point', pc.Point3, pc.PointLight.getPoint, pc.PointLight.setPoint),
+            NodeAttribute('Specular Color', pc.Vec4, pc.PointLight.getSpecularColor, pc.PointLight.setSpecularColor),
             parent='PointLight'
         )
 
 
 class Spotlight(Light, LensNode):
 
-    type_ = pm.Spotlight
+    type_ = pc.Spotlight
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.AddAttributes(
-            NodeAttribute('Attenuation', pm.Vec3, pm.Spotlight.getAttenuation, pm.Spotlight.setAttenuation),
-            NodeAttribute('Exponent', float, pm.Spotlight.getExponent, pm.Spotlight.setExponent),
-            NodeAttribute('Specular Color', pm.Vec4, pm.Spotlight.getSpecularColor, pm.Spotlight.setSpecularColor),
-            NodeAttribute('Shadow Caster', bool, pm.Spotlight.isShadowCaster, pm.Spotlight.setShadowCaster),
+            NodeAttribute('Attenuation', pc.Vec3, pc.Spotlight.getAttenuation, pc.Spotlight.setAttenuation),
+            NodeAttribute('Exponent', float, pc.Spotlight.getExponent, pc.Spotlight.setExponent),
+            NodeAttribute('Specular Color', pc.Vec4, pc.Spotlight.getSpecularColor, pc.Spotlight.setSpecularColor),
+            NodeAttribute('Shadow Caster', bool, pc.Spotlight.isShadowCaster, pc.Spotlight.setShadowCaster),
             parent='Spotlight'
         )

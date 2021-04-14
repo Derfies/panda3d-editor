@@ -2,10 +2,10 @@ from panda3d.bullet import BulletWorld
 
 from game.nodes.attributes import NodePathTargetConnection
 from game.nodes.base import Base
-from game.nodes.wrappermeta import WrapperMeta
+from game.nodes.othermeta import ComponentMetaClass
 
 
-class SceneRoot(Base, metaclass=WrapperMeta):
+class SceneRoot(Base, metaclass=ComponentMetaClass):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

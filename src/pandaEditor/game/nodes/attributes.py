@@ -1,10 +1,10 @@
 import p3d
 from p3d import commonUtils as cUtils
-from game.nodes.wrappermeta import WrapperMeta
+from game.nodes.wrappermeta import BaseMetaClass
 from game.utils import get_lower_camel_case
 
 
-class Base(metaclass=WrapperMeta):
+class Base(metaclass=BaseMetaClass):
     
     def __init__(
         self,
@@ -46,6 +46,7 @@ class Base(metaclass=WrapperMeta):
         self.initName = initName
         
     def GetSource(self):
+        #print('GET SOURCE:', self.srcComp)
         if self.srcFn is None:
             src = self.srcComp
         else:
@@ -58,6 +59,7 @@ class Base(metaclass=WrapperMeta):
     def Get(self):
         args = self.getArgs[:]
         args.insert(0, self.GetSource())
+        print(self.getFn, '->', args)
         return self.getFn(*args)
     
     def Set(self, val):
@@ -67,7 +69,7 @@ class Base(metaclass=WrapperMeta):
         return self.setFn(*args)
 
 
-class Connection(Base, metaclass=WrapperMeta):
+class Connection(Base, metaclass=BaseMetaClass):
 
     def __init__(
         self,
@@ -87,6 +89,7 @@ class Connection(Base, metaclass=WrapperMeta):
         self.cnnctn = True
 
     def GetSource(self):
+        #print('GET SOURCE:', self.srcComp)
         return self.srcComp
 
     def GetTarget(self, comp):
@@ -110,7 +113,7 @@ class Connection(Base, metaclass=WrapperMeta):
         self.clearFn(self.GetSource())
 
 
-class NodePathSourceConnection(Connection, metaclass=WrapperMeta):
+class NodePathSourceConnection(Connection, metaclass=BaseMetaClass):
 
     def GetSource(self, comp):
         try:
@@ -119,7 +122,7 @@ class NodePathSourceConnection(Connection, metaclass=WrapperMeta):
             return comp
 
 
-class NodePathTargetConnection(Connection, metaclass=WrapperMeta):
+class NodePathTargetConnection(Connection, metaclass=BaseMetaClass):
 
     def GetTarget(self, comp):
         try:
@@ -155,13 +158,13 @@ class ConnectionList(Connection):
         self.removeFn(self.GetSource(), self.GetTarget(tgtComp))
 
 
-class NodePathSourceConnectionList(ConnectionList, metaclass=WrapperMeta):
+class NodePathSourceConnectionList(ConnectionList, metaclass=BaseMetaClass):
 
     def GetSource(self):
         return self.srcComp.node()
 
 
-class NodePathTargetConnectionList(ConnectionList, metaclass=WrapperMeta):
+class NodePathTargetConnectionList(ConnectionList, metaclass=BaseMetaClass):
 
     def GetTarget(self, comp):
         try:
@@ -184,24 +187,30 @@ class UnserializeMixin:
                 self.Set(val)
 
 
-class Attribute(UnserializeMixin, Base, metaclass=WrapperMeta):
+class Attribute(UnserializeMixin, Base, metaclass=BaseMetaClass):
 
     pass
 
 
-class NodeAttribute(UnserializeMixin, Base, metaclass=WrapperMeta):
+class NodeAttribute(UnserializeMixin, Base, metaclass=BaseMetaClass):
 
     def GetSource(self):
         return self.srcComp.node()
 
 
-class NodePathAttribute(UnserializeMixin, Base, metaclass=WrapperMeta):
+class NodePathAttribute(UnserializeMixin, Base, metaclass=BaseMetaClass):
 
     def GetSource(self):
         return self.srcComp
 
 
-class PyTagAttribute(UnserializeMixin, Base, metaclass=WrapperMeta):
+# class NodePathAttribute2(UnserializeMixin, Base, metaclass=BaseMetaClass):
+#
+#     def __init__(self, *args, **kwargs):
+#         super()
+
+
+class PyTagAttribute(UnserializeMixin, Base, metaclass=BaseMetaClass):
 
     def __init__(self, *args, **kwargs):
         self.pyTagName = kwargs.pop('pyTagName')
@@ -211,7 +220,7 @@ class PyTagAttribute(UnserializeMixin, Base, metaclass=WrapperMeta):
         return self.srcComp.getPythonTag(self.pyTagName)
 
 
-class NodePathObjectAttribute(PyTagAttribute, metaclass=WrapperMeta):
+class NodePathObjectAttribute(PyTagAttribute, metaclass=BaseMetaClass):
 
     def __init__(self, label, pType, name, pyTagName=None):
         if pyTagName is None:

@@ -246,46 +246,80 @@ class PropertiesPanel(wx.Panel):
         
         self.propAttrMap = {}
                         
-        # Build all properties from attributes.
-        comps = self.base.selection.comps
-        wrprCls = base.node_manager.get_common_wrapper(comps)
-        wrprs = [wrprCls(comp) for comp in comps]
-        for i, attr in enumerate(wrprs[0].GetAttributes(addons=True)):
-            
-            # Find the correct property to display this attribute
+        # # Build all properties from attributes.
+        # comps = self.base.selection.comps
+        # wrprCls = base.node_manager.get_common_wrapper(comps)
+        # wrprs = [wrprCls(comp) for comp in comps]
+        # for i, attr in enumerate(wrprs[0].GetAttributes(addons=True)):
+        #
+        #     #print('here:', attr.srcComp)
+        #
+        #     # Find the correct property to display this attribute
+        #     if attr.type in self.propMap and attr.getFn is not None:
+        #         propCls = self.propMap[attr.type]
+        #         if attr.type is not None:
+        #             prop = propCls(attr.label, '', attr.Get())
+        #             if attr.setFn is None:
+        #                 prop.Enable(False)
+        #         else:
+        #             prop = propCls(attr.label)
+        #     elif hasattr(attr, 'cnnctn'):
+        #         val = attr.Get()
+        #         try:
+        #             objIter = iter(val)
+        #             prop = custProps.ConnectionListProperty(attr.label, '', attr.Get())
+        #         except TypeError:
+        #             prop = custProps.ConnectionProperty(attr.label, '', attr.Get())
+        #     else:
+        #         continue
+        #
+        #     if hasattr(attr, 'parent') and attr.parent not in self.propAttrMap and attr.parent is not None:
+        #         pProp = wxpg.PropertyCategory(attr.parent)
+        #         self.propAttrMap[attr.parent] = pProp
+        #         self.pg.Append(pProp)
+        #
+        #     allAttrs = [wrpr.GetAttributes(addons=True)[i] for wrpr in wrprs]
+        #     prop.SetAttribute(ATTRIBUTE_TAG, allAttrs)
+        #     self.propAttrMap[attr.label] = prop
+        #
+        #     # Append to property grid or the last property if it is a
+        #     # child.
+        #     if hasattr(attr, 'parent') and attr.parent in self.propAttrMap:
+        #         self.propAttrMap[attr.parent].AddPrivateChild(prop)
+        #     else:
+        #         self.pg.Append(prop)
+        #
+        # return
+
+        self.propAttrMap = {}
+
+
+        for i, (name, attr) in enumerate(wrprs[0]._declared_fields.items()):
+            #category, attr = data
+            #print(wrprs[0].data, type(wrprs[0].data))
+            attr.srcComp = wrprs[0].data
+            #print(attr.srcComp)
+
             if attr.type in self.propMap and attr.getFn is not None:
-                propCls = self.propMap[attr.type]
+                prop_cls = self.propMap[attr.type]
                 if attr.type is not None:
-                    prop = propCls(attr.label, '', attr.Get())
+                    prop = prop_cls(name, '', attr.Get())
                     if attr.setFn is None:
                         prop.Enable(False)
                 else:
-                    prop = propCls(attr.label)
-            elif hasattr(attr, 'cnnctn'):
-                val = attr.Get()
-                try:
-                    objIter = iter(val)
-                    prop = custProps.ConnectionListProperty(attr.label, '', attr.Get())
-                except TypeError:
-                    prop = custProps.ConnectionProperty(attr.label, '', attr.Get())
-            else:
-                continue
-            
-            if hasattr(attr, 'parent') and attr.parent not in self.propAttrMap and attr.parent is not None:
-                pProp = wxpg.PropertyCategory(attr.parent)
-                self.propAttrMap[attr.parent] = pProp
+                    prop = prop_cls(attr.label)
+
+                #self.pg.Append(prop)
+
+            if attr.category not in self.propAttrMap:
+                pProp = wxpg.PropertyCategory(attr.category)
+                self.propAttrMap[attr.category] = pProp
                 self.pg.Append(pProp)
-            
-            allAttrs = [wrpr.GetAttributes(addons=True)[i] for wrpr in wrprs]
-            prop.SetAttribute(ATTRIBUTE_TAG, allAttrs)
-            self.propAttrMap[attr.label] = prop
-                
-            # Append to property grid or the last property if it is a 
-            # child.
-            if hasattr(attr, 'parent') and attr.parent in self.propAttrMap:
-                self.propAttrMap[attr.parent].AddPrivateChild(prop)
-            else:
-                self.pg.Append(prop)
+
+            self.propAttrMap[attr.category].AddPrivateChild(prop)
+
+            #allAttrs = [data[1] for i, (name, data) in enumerate(wrprs[0]._declared_fields.items())]
+            #prop.SetAttribute(ATTRIBUTE_TAG, allAttrs)
                             
     def OnPgChanged(self, evt):
         """

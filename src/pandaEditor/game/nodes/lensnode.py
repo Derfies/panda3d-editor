@@ -3,10 +3,10 @@ from panda3d.core import Lens
 
 from game.nodes.attributes import Attribute
 from game.nodes.nodepath import NodePath
-from game.nodes.wrappermeta import WrapperMeta
+from game.nodes.othermeta import ComponentMetaClass
 
 
-class LensNode(NodePath, metaclass=WrapperMeta):
+class LensNode(NodePath, metaclass=ComponentMetaClass):
     
     type_ = pm.LensNode
     

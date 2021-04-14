@@ -1,9 +1,9 @@
 import panda3d.core as pm
 
 from game.nodes.nodepath import NodePath
-from game.nodes.wrappermeta import WrapperMeta
+from game.nodes.othermeta import ComponentMetaClass
 
 
-class ModelNode(NodePath, metaclass=WrapperMeta):
+class ModelNode(NodePath, metaclass=ComponentMetaClass):
     
     type_ = pm.ModelNode

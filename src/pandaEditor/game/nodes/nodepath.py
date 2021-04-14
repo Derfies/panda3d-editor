@@ -15,13 +15,15 @@ from game.nodes.constants import (
     TAG_PYTHON_TAGS
 )
 from game.nodes.base import Base
-from game.nodes.wrappermeta import WrapperMeta
+from game.nodes.othermeta import ComponentMetaClass
 from game.utils import get_unique_name
 
 
-class NodePath(Base, metaclass=WrapperMeta):
+class NodePath(Base, metaclass=ComponentMetaClass):
     
     type_ = NP
+
+    name = NodePathAttribute('', str, pc.NodePath.get_name, pc.NodePath.set_name)
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

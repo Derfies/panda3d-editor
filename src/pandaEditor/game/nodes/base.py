@@ -2,10 +2,10 @@ import copy
 
 from p3d import commonUtils as cUtils
 from game.utils import get_lower_camel_case
-from game.nodes.wrappermeta import WrapperMeta
+from game.nodes.othermeta import ComponentMetaClass
 
 
-class Base(metaclass=WrapperMeta):
+class Base(metaclass=ComponentMetaClass):
     
     def __init__(self, data):
         self.data = data
