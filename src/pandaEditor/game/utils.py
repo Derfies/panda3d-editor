@@ -26,4 +26,4 @@ def get_unique_name(name, elems):
 
 
 def get_lower_camel_case(name):
-    return name[0].lower() + name[1:]
+    return name[0].lower() + name[1:] if name else name
