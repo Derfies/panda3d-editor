@@ -1,10 +1,8 @@
-from panda3d.bullet import BulletWorld as BW
+from panda3d.bullet import BulletWorld
 
-#from game.nodes.manager import import_wrapper
-from game.nodes.wrappermeta import WrapperMeta
-
+from game.nodes.attributes import NodePathTargetConnection
 from game.nodes.base import Base
-#Cnnctn = import_wrapper('nodes.attributes.NodePathTargetConnection')
+from game.nodes.wrappermeta import WrapperMeta
 
 
 class SceneRoot(Base, metaclass=WrapperMeta):
@@ -12,16 +10,16 @@ class SceneRoot(Base, metaclass=WrapperMeta):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-       #  self.AddAttributes(
-       #      Cnnctn(
-       #          'PhysicsWorld',
-       #          BW,
-       #          base.scene.GetPhysicsWorld,
-       #          base.scene.SetPhysicsWorld,
-       #          base.scene.ClearPhysicsWorld
-       #      ),
-       #      parent='Scene'
-       # )
+        self.AddAttributes(
+            NodePathTargetConnection(
+                'PhysicsWorld',
+                BulletWorld,
+                base.scene.GetPhysicsWorld,
+                base.scene.SetPhysicsWorld,
+                base.scene.ClearPhysicsWorld
+            ),
+            parent='Scene'
+       )
     
     @classmethod
     def Create(cls, *args, **kwargs):

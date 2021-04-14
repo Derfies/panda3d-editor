@@ -1,14 +1,11 @@
 import panda3d.core as pm
 from direct.actor.Actor import Actor as P3dActor
 
+from game.nodes.attributes import PyTagAttribute
 from game.nodes.constants import (
     TAG_ACTOR, TAG_MODEL_PATH, TAG_NODE_TYPE, TAG_NODE_UUID
 )
-from game.nodes.manager import import_wrapper
-
-
-PTAttr = import_wrapper('nodes.attributes.PyTagAttribute')
-ModelRoot = import_wrapper('nodes.modelRoot.ModelRoot')
+from game.nodes.modelroot import ModelRoot
 
 
 class Actor(ModelRoot):
@@ -17,7 +14,13 @@ class Actor(ModelRoot):
         super().__init__(*args, **kwargs)
         
         self.AddAttributes(
-            PTAttr('Anims', dict, self.GetAnimDict, self.SetAnimDict, pyTagName=TAG_ACTOR),
+            PyTagAttribute(
+                'Anims',
+                dict,
+                self.GetAnimDict,
+                self.SetAnimDict,
+                pyTagName=TAG_ACTOR
+            ),
             parent='Actor'
        )
     

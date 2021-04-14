@@ -20,7 +20,6 @@ from pandaEditor.game.plugins.base import Base as GamePluginBase
 from pandaEditor.game.showbase import ShowBase as GameShowBase
 from pandaEditor.nodes.manager import Manager as NodeManager
 from pandaEditor.plugins.manager import Manager as PluginManager
-print('USING:', PluginManager)
 from pandaEditor.plugins.base import Base as EditorPluginBase
 from pandaEditor.sceneParser import SceneParser
 
@@ -138,11 +137,10 @@ class ShowBase(GameShowBase):
         self.windowEvent(None)
 
     def load_plugins(self):
-        self.plugin_manager.setCategoriesFilter({
-            'editor': EditorPluginBase,
-            'game': GamePluginBase,
-        })
-        print('editor load_plugins:', self.plugin_manager.__class__)
+        # self.plugin_manager.setCategoriesFilter({
+        #     'editor': EditorPluginBase,
+        #     'game': GamePluginBase,
+        # })
         super().load_plugins()
 
     def SetupEdRender(self):

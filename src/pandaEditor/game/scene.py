@@ -8,7 +8,7 @@ class Scene(Object):
     cType = 'SceneRoot'
 
     def __init__(self, *args, **kwargs):
-        Object.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         
         self.comps = {}
         base.scene = self

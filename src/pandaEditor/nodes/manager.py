@@ -22,7 +22,10 @@ class Manager(GameManager):
 
         # Intersect the mros to get the common classes.
         first_mro = mros[0]
-        common_bases = sorted(set(first_mro).intersection(*mros), key=first_mro.index)
+        common_bases = sorted(
+            set(first_mro).intersection(*mros),
+            key=first_mro.index
+        )
         common_wrapper = type(
             common_bases[0].__name__,
             tuple(common_bases),

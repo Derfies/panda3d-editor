@@ -739,18 +739,18 @@ class MainFrame(wx.Frame):
         mColl = CustomMenu()
         mColl.AppendActionItems(collActns, self)
         
-        texActns = [
-            ActionItem('Texture', '', self.OnCreate, args='Texture')#,
-            #ActionItem('Texture Stage', '', self.OnCreate, args='TextureStage')
-        ]
-        mTex = CustomMenu()
-        mTex.AppendActionItems(texActns, self)
+        # texActns = [
+        #     ActionItem('Texture', '', self.OnCreate, args='Texture')#,
+        #     #ActionItem('Texture Stage', '', self.OnCreate, args='TextureStage')
+        # ]
+        # mTex = CustomMenu()
+        # mTex.AppendActionItems(texActns, self)
         
         shaActns = [
             ActionItem('Shader', '', self.OnCreate, args='Shader')
         ]
-        mSha = CustomMenu()
-        mSha.AppendActionItems(shaActns, self)
+        # mSha = CustomMenu()
+        # mSha.AppendActionItems(shaActns, self)
         
         bltActions = [
             ActionItem('World', '', self.OnCreate, args='BulletWorld'),
@@ -770,8 +770,8 @@ class MainFrame(wx.Frame):
         self.mCreate.AppendActionItem(ActionItem('Fog', '', self.OnCreate, args='Fog'), self)
         self.mCreate.AppendSubMenu(mColl, '&Collision')
         self.mCreate.AppendSubMenu(mLights, '&Lights')
-        self.mCreate.AppendSubMenu(mTex, '&Texture')
-        self.mCreate.AppendSubMenu(mSha, '&Shader')
+        # self.mCreate.AppendSubMenu(mTex, '&Texture')
+        # self.mCreate.AppendSubMenu(mSha, '&Shader')
         self.mCreate.AppendSubMenu(mBlt, '&Bullet')
         self.mCreate.AppendSeparator()
         self.mCreate.AppendActionItem(ActionItem('Prefab', '', self.OnCreatePrefab), self)

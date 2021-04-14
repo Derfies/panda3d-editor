@@ -75,7 +75,7 @@ class ResourcesPanel(wx.Panel):
 
         menu = wx.Menu()
         mItem = wx.MenuItem(menu, wx.NewId(), 'Open in Explorer')
-        menu.AppendItem(mItem)
+        menu.Append(mItem)
         wxUtils.IdBind(menu, wx.EVT_MENU, mItem.GetId(), self.OnOpenFile, itemId)
         self.PopupMenu(menu)
         menu.Destroy()

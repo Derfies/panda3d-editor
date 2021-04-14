@@ -1,19 +1,17 @@
-#from game.nodes.attributes import NodePathAttribute as Attr
-from nodes.constants import TAG_IGNORE
-from pandaEditor.nodes.nodepath import NodePath
+from game.nodes.attributes import NodePathAttribute
+from pandaEditor.nodes.constants import TAG_IGNORE
 
 
 TAG_FRUSTUM = 'P3D_Fustum'
 
 
-class LensNode(NodePath):
+class LensNode:
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        return
         
         i = self.attributes.index(self.FindProperty('fov'))
-        self.AddAttributes(Attr('Show Frustum', bool, self.GetFrustumVisible, self.SetFrustumVisible, w=False), index=i + 1)
+        self.AddAttributes(NodePathAttribute('Show Frustum', bool, self.GetFrustumVisible, self.SetFrustumVisible, w=False), index=i + 1)
         
     def OnSelect(self):
         """
@@ -28,7 +26,7 @@ class LensNode(NodePath):
         super().OnSelect()
         
         if frusVis:
-            self.SetFrustumVisible(np, True)
+            self.SetFrustumVisible(self.data, True)
         
     def GetFrustumVisible(self, np):
         """

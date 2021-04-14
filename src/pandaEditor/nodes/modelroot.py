@@ -1,8 +1,7 @@
 from game.nodes.constants import TAG_MODEL_ROOT_CHILD
-from game.nodes.modelRoot import ModelRoot as GameModelRoot
 
 
-class ModelRoot(GameModelRoot):
+class ModelRoot:
     
     @classmethod
     def Create(cls, *args, **kwargs):

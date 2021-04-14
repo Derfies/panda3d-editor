@@ -4,12 +4,12 @@ import panda3d.core as pm
 from panda3d.core import NodePath as NP
 from direct.directtools.DirectSelection import DirectBoundingBox
 
-import commands as cmds
-from nodes.constants import (
+from pandaEditor import commands
+from game.nodes.attributes import NodePathAttribute
+from game.nodes.constants import TAG_MODEL_ROOT_CHILD
+from pandaEditor.nodes.constants import (
     TAG_BBOX, TAG_IGNORE, TAG_MODIFIED, TAG_PICKABLE
 )
-from game.nodes.constants import TAG_MODEL_ROOT_CHILD
-from pandaEditor.nodes.attributes import NodePathAttribute
 
 
 class NodePath:
@@ -19,8 +19,6 @@ class NodePath:
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        return
         
         # Find the index of the 'name' property so we can add position, 
         # rotation and scale properties immediately after it.
@@ -154,7 +152,7 @@ class NodePath:
     def OnDragDrop(self, dragComps, dropNp):
         dragNps = [dragComp for dragComp in dragComps if type(dragComp) == pm.NodePath]
         if dragNps:
-            cmds.Parent(dragNps, dropNp)
+            commands.Parent(dragNps, dropNp)
             
     def IsOfType(self, cType):
         return self.data.node().isOfType(cType)

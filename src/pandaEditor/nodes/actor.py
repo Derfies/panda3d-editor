@@ -1,18 +1,17 @@
 from nodes.constants import TAG_PICKABLE
-from game.nodes.actor import Actor as GameActor
 from game.nodes.constants import TAG_MODEL_PATH
 
 
-class Actor(GameActor):
+class Actor:
     
     @classmethod
     def Create(cls, *args, **kwargs):
-        wrpr = super(Actor, cls).Create(*args, **kwargs)
+        wrpr = super().Create(*args, **kwargs)
         wrpr.data.setPythonTag(TAG_PICKABLE, True)
         return wrpr
     
     def Duplicate(self):
-        dupeNp = GameActor.Duplicate(self)
+        dupeNp = super().Duplicate()
         dupeNp.setPythonTag(TAG_PICKABLE, True)
         return dupeNp
     

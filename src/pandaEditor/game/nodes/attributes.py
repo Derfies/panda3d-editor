@@ -195,7 +195,7 @@ class NodeAttribute(UnserializeMixin, Base, metaclass=WrapperMeta):
         return self.srcComp.node()
 
 
-class NodePathAttribute(UnserializeMixin, Base):
+class NodePathAttribute(UnserializeMixin, Base, metaclass=WrapperMeta):
 
     def GetSource(self):
         return self.srcComp

@@ -160,7 +160,7 @@ class ConnectionBaseProperty(wxpg.BaseProperty):
         pass
     
     def ValidateDropItem(self, x, y):
-        for comp in wx.GetApp().frame.pnlSceneGraph.dragComps:
+        for comp in wx.GetApp().GetTopWindow().pnlSceneGraph.dragComps:
             cnnctn = self.GetAttribute('attr')[0]
             wrpr = base.node_manager.Wrap(comp)
             if wrpr.IsOfType(cnnctn.type):

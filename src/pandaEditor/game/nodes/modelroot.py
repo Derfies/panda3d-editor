@@ -1,14 +1,11 @@
 import panda3d.core as pm
 from panda3d.core import ModelRoot as MR
 
+from game.nodes.attributes import NodeAttribute
 from game.nodes.constants import (
     TAG_MODEL_ROOT_CHILD, TAG_NODE_TYPE
 )
-from game.nodes.manager import import_wrapper
-
-
-Attr = import_wrapper('nodes.attributes.NodeAttribute')
-NodePath = import_wrapper('nodes.nodePath.NodePath')
+from game.nodes.nodepath import NodePath
 
 
 class ModelRoot(NodePath):
@@ -19,7 +16,7 @@ class ModelRoot(NodePath):
         NodePath.__init__(self, *args, **kwargs)
         
         self.AddAttributes(
-            Attr('ModelPath', pm.Filename, self.GetFullPath, initDefault=''),
+            NodeAttribute('ModelPath', pm.Filename, self.GetFullPath, initDefault=''),
             parent='ModelRoot'
        )
     

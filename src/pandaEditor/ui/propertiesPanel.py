@@ -202,20 +202,20 @@ class PropertiesPanel(wx.Panel):
         
         # Define how each type of value should be edited
         self.propMap = {
-            None:wxpg.PropertyCategory,
-            pm.Vec2:custProps.Float2Property,
-            pm.Vec3:custProps.Float3Property,
-            pm.Vec4:custProps.Float4Property,
-            pm.Point2:custProps.Point2Property,
-            pm.Point3:custProps.Point3Property,
-            pm.Point4:custProps.Point4Property,
-            pm.NodePath:custProps.NodePathProperty,
-            int:wxpg.IntProperty,
-            str:wxpg.StringProperty,
-            bool:wxpg.BoolProperty,
-            float:wxpg.FloatProperty,
-            Filename:custProps.FilePathProperty,
-            dict:custProps.DictProperty
+            None: wxpg.PropertyCategory,
+            pm.Vec2: custProps.Float2Property,
+            pm.Vec3: custProps.Float3Property,
+            pm.Vec4: custProps.Float4Property,
+            pm.Point2: custProps.Point2Property,
+            pm.Point3: custProps.Point3Property,
+            pm.Point4: custProps.Point4Property,
+            pm.NodePath: custProps.NodePathProperty,
+            int: wxpg.IntProperty,
+            str: wxpg.StringProperty,
+            bool: wxpg.BoolProperty,
+            float: wxpg.FloatProperty,
+            Filename: custProps.FilePathProperty,
+            dict: custProps.DictProperty
         }
         
         # Bind publisher events

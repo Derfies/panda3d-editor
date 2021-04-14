@@ -1,7 +1,27 @@
+from game.nodes.actor import Actor
 from game.nodes.base import Base
-from game.nodes.ambientlight import AmbientLight
+from game.nodes.camera import Camera
+from game.nodes.collision import (
+    CollisionBox,
+    CollisionInvSphere,
+    CollisionNode,
+    CollisionRay,
+    CollisionSphere,
+    CollisionTube,
+)
 from game.nodes.constants import TAG_NODE_TYPE
+from game.nodes.fog import Fog
+from game.nodes.lensnode import LensNode
+from game.nodes.lights import (
+    AmbientLight,
+    DirectionalLight,
+    PointLight,
+    Spotlight
+)
+from game.nodes.modelnode import ModelNode
+from game.nodes.modelroot import ModelRoot
 from game.nodes.nodepath import NodePath
+from game.nodes.pandanode import PandaNode
 from game.nodes.sceneroot import SceneRoot
 from game.nodes.showbasedefaults import (
     Aspect2d,
@@ -19,18 +39,34 @@ class Manager:
     
     def __init__(self):
         self.wrappers = {
+            'Actor': Actor,
             'AmbientLight': AmbientLight,
             'Aspect2d': Aspect2d,
             'Base': Base,
             'BaseCam': BaseCam,
             'BaseCamera': BaseCamera,
             'Cam2d': Cam2d,
+            'Camera': Camera,
             'Camera2d': Camera2d,
+            'CollisionBox': CollisionBox,
+            'CollisionInvSphere': CollisionInvSphere,
+            'CollisionNode': CollisionNode,
+            'CollisionRay': CollisionRay,
+            'CollisionSphere': CollisionSphere,
+            'CollisionTube': CollisionTube,
+            'DirectionalLight': DirectionalLight,
+            'Fog': Fog,
+            'LensNode': LensNode,
+            'ModelNode': ModelNode,
+            'ModelRoot': ModelRoot,
             'NodePath': NodePath,
+            'PandaNode': PandaNode,
             'Pixel2d': Pixel2d,
+            'PointLight': PointLight,
             'Render': Render,
             'Render2d': Render2d,
             'SceneRoot': SceneRoot,
+            'Spotlight': Spotlight,
         }
         
     def Create(self, nTypeStr, *args):

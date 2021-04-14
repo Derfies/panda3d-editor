@@ -29,9 +29,9 @@ class NodePathTargetConnection(RegisterMixin):
     pass
 
 
-class ConnectionList(RegisterMixin):
-
-    pass
+# class ConnectionList(RegisterMixin):
+#
+#     pass
 
 
 class NodePathSourceConnectionList(RegisterMixin):

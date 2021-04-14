@@ -75,6 +75,7 @@ class DragDropManager:
             return wrpr.GetPossibleConnections(self.dragComps)
 
     def OnDropItem(self, str, parent, x, y):
+        print('OnDropItem')
 
         # Get the item at the drop point
         dropComp = parent.GetDroppedObject(x, y)
@@ -102,6 +103,7 @@ class DragDropManager:
             menu.Destroy()
 
     def OnConnect(self, evt):
+        print('OnConnect')
         dragComps = self.base.dDropMgr.dragComps
         cnnctn = self.data[evt.GetId()]
         cmds.Connect(dragComps, cnnctn, cnnctn.Connect)

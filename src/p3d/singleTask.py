@@ -64,4 +64,3 @@ class SingleTask(Object):
         False otherwise.
         """
         return self._task in taskMgr.getAllTasks()
-        
