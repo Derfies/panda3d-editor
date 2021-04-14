@@ -26,11 +26,15 @@ class Manager(GameManager):
             set(first_mro).intersection(*mros),
             key=first_mro.index
         )
-        common_wrapper = type(
-            common_bases[0].__name__,
-            tuple(common_bases),
-            {'change_mro': False}
-        )
+        try:
+            common_wrapper = type(
+                common_bases[0].__name__,
+                tuple(common_bases),
+                {'change_mro': False}
+            )
+        except TypeError as e:
+            logger.error(f'Failed to create wrapper: {tuple(common_bases)}')
+            raise
         common_base_names = [b.__name__ for b in common_bases]
         logger.info(f'Using bases for common wrapper: {common_base_names}')
         return common_wrapper

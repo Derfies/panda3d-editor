@@ -127,6 +127,7 @@ class SceneGraphBasePanel(wx.Panel):
             dragComps = self.base.selection.comps
         else:
             dragComps = [item.GetData()]
+        self.dragComps = dragComps
         self.base.dDropMgr.Start(self, dragComps, item.GetData())
         
     def GetDroppedObject(self, x, y):

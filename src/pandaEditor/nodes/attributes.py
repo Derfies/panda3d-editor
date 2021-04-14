@@ -1,55 +1,6 @@
 from p3d import commonUtils as cUtils
 
 
-class RegisterMixin:
-    
-    def Set(self, tgtComp):
-        base.scene.ClearConnections(self.srcComp)
-        
-        super(RegisterMixin, self).Set(tgtComp)
-    
-    def Connect(self, tgtComp):
-        super(RegisterMixin, self).Connect(tgtComp)
-        
-        base.scene.RegisterConnection(tgtComp, self)
-        
-    def Break(self, tgtComp):
-        super(RegisterMixin, self).Break(tgtComp)
-        
-        base.scene.DeregisterConnection(tgtComp, self)
-
-
-class Connection(RegisterMixin):
-
-    pass
-
-
-class NodePathTargetConnection(RegisterMixin):
-
-    pass
-
-
-# class ConnectionList(RegisterMixin):
-#
-#     pass
-
-
-class NodePathSourceConnectionList(RegisterMixin):
-
-    pass
-
-
-class NodePathTargetConnectionList(RegisterMixin):
-
-    pass
-
-
-class NodePathSourceConnection(RegisterMixin):
-
-    pass
-
-
-
 class SerializeMixin:
 
     def SerializeToString(self):
@@ -66,26 +17,84 @@ class SerializeMixin:
             return cUtils.SerializeToString(pVal)
 
 
-class Attribute(SerializeMixin):
+
+class RegisterMixin:
+    
+    def Set(self, tgtComp):
+        base.scene.ClearConnections(self.srcComp)
+        
+        super().Set(tgtComp)
+    
+    def Connect(self, tgtComp):
+        print(self.__class__.mro())
+        super().Connect(tgtComp)
+        
+        base.scene.RegisterConnection(tgtComp, self)
+        
+    def Break(self, tgtComp):
+        super().Break(tgtComp)
+        
+        base.scene.DeregisterConnection(tgtComp, self)
+
+
+class Base(SerializeMixin):
 
     pass
 
-
-class NodeAttribute(SerializeMixin):
-
-    pass
-
-
-class NodePathAttribute(SerializeMixin):
+#
+class Connection(RegisterMixin):
 
     pass
+#
+#
+# class NodePathTargetConnection(RegisterMixin):
+#
+#     pass
+#
+#
+# # class ConnectionList(RegisterMixin):
+# #
+# #     pass
+#
+#
+# class NodePathSourceConnectionList(RegisterMixin):
+#
+#     pass
+#
+#
+# class NodePathTargetConnectionList(RegisterMixin):
+#
+#     pass
+#
+#
+# class NodePathSourceConnection(RegisterMixin):
+#
+#     pass
 
 
-class PyTagAttribute(SerializeMixin):
-
-    pass
 
 
-class NodePathObjectAttribute(SerializeMixin):
 
-    pass
+# class Attribute(SerializeMixin):
+#
+#     pass
+#
+#
+# class NodeAttribute(SerializeMixin):
+#
+#     pass
+#
+#
+# class NodePathAttribute(SerializeMixin):
+#
+#     pass
+#
+#
+# class PyTagAttribute(SerializeMixin):
+#
+#     pass
+#
+#
+# class NodePathObjectAttribute(SerializeMixin):
+#
+#     pass

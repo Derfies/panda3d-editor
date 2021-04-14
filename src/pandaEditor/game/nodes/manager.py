@@ -1,5 +1,14 @@
 from game.nodes.actor import Actor
 from game.nodes.base import Base
+from game.nodes.bullet import (
+    BulletBoxShape,
+    BulletCapsuleShape,
+    BulletCharacterControllerNode,
+    BulletDebugNode,
+    BulletPlaneShape,
+    BulletRigidBodyNode,
+    BulletWorld,
+)
 from game.nodes.camera import Camera
 from game.nodes.collision import (
     CollisionBox,
@@ -45,6 +54,13 @@ class Manager:
             'Base': Base,
             'BaseCam': BaseCam,
             'BaseCamera': BaseCamera,
+            'BulletBoxShape': BulletBoxShape,
+            'BulletCapsuleShape': BulletCapsuleShape,
+            'BulletCharacterControllerNode': BulletCharacterControllerNode,
+            'BulletDebugNode': BulletDebugNode,
+            'BulletPlaneShape': BulletPlaneShape,
+            'BulletRigidBodyNode': BulletRigidBodyNode,
+            'BulletWorld': BulletWorld,
             'Cam2d': Cam2d,
             'Camera': Camera,
             'Camera2d': Camera2d,

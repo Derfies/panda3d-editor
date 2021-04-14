@@ -191,7 +191,7 @@ class ConnectionProperty(ConnectionBaseProperty):
         self.PostChangedEvent()
     
     def OnDropItem(self, arg):
-        val = wx.GetApp().frame.pnlSceneGraph.dragComps[0]
+        val = wx.GetApp().GetTopWindow().pnlSceneGraph.dragComps[0]
         self.SetValue(val)
         self.PostChangedEvent()
         
@@ -225,10 +225,13 @@ class ConnectionListProperty(ConnectionBaseProperty):
         self.PostChangedEvent()
     
     def OnDropItem(self, arg):
-        val = self.GetValue()
+
+        import pickle
+
+        val = list(self.GetValue())
         if val is None:
             val = []
-        val.extend(wx.GetApp().frame.pnlSceneGraph.dragComps)
+        val.extend(wx.GetApp().GetTopWindow().pnlSceneGraph.dragComps)
         self.SetValue(val)
         self.PostChangedEvent()
         
