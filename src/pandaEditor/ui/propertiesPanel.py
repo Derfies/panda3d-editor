@@ -304,19 +304,22 @@ class PropertiesPanel(wx.Panel):
         #     print(e)
 
         objs = self.base.selection.comps
+        print('ONE:', get_base().node_manager.GetWrapper(objs[0]).mro())
         comp_cls = get_base().node_manager.get_common_wrapper(objs)
+        print('common:', comp_cls, comp_cls.mro())
         comps = [comp_cls(obj) for obj in objs]
+        print(comp_cls._declared_fields)
 
         for attr_name, attr in comps[0].attributes2.items():
 
-            if attr.type not in self.propMap or attr.getFn is None:
+            if attr.type not in self.propMap:# or attr.getFn is None:
                 continue
 
             prop_cls = self.propMap[attr.type]
             attr_label = ' '.join(word.title() for word in attr_name.split('_'))
             prop = prop_cls(attr_label, attr_name, attr.value)  # TODO: Do common value.
-            if attr.setFn is None:
-                prop.Enable(False)
+            # if attr.setFn is None:
+            #     prop.Enable(False)
 
             if attr.category not in self.propAttrMap:
                 parent_prop = wxpg.PropertyCategory(attr.category)

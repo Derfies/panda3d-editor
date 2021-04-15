@@ -10,16 +10,16 @@ class SceneRoot(Base, metaclass=ComponentMetaClass):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        self.AddAttributes(
-            NodePathTargetConnection(
-                'PhysicsWorld',
-                BulletWorld,
-                base.scene.GetPhysicsWorld,
-                base.scene.SetPhysicsWorld,
-                base.scene.ClearPhysicsWorld
-            ),
-            parent='Scene'
-       )
+       #  self.AddAttributes(
+       #      NodePathTargetConnection(
+       #          'PhysicsWorld',
+       #          BulletWorld,
+       #          base.scene.GetPhysicsWorld,
+       #          base.scene.SetPhysicsWorld,
+       #          base.scene.ClearPhysicsWorld
+       #      ),
+       #      parent='Scene'
+       # )
     
     @classmethod
     def Create(cls, *args, **kwargs):

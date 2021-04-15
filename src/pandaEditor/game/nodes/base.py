@@ -22,6 +22,9 @@ class Base(metaclass=ComponentMetaClass):
             self.attributes2[name] = new_attr
             new_attr.parent = self
             new_attr.data = new_attr.srcComp = self.data
+
+            # Replace the class attribute with the instantiated one.
+            setattr(self, name, new_attr)
         
         self.attributes = []
         self.cnnctns = []

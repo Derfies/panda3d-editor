@@ -16,6 +16,6 @@ class LensNodeAttribute(Attribute):
 class LensNode(NodePath, metaclass=ComponentMetaClass):
     
     type_ = pm.LensNode
-    fov = LensNodeAttribute('', pm.Vec2, Lens.get_fov, Lens.set_fov)
-    near = LensNodeAttribute('', float, Lens.get_near, Lens.set_near)
-    far = LensNodeAttribute('', float, Lens.get_far, Lens.set_far)
+    fov = LensNodeAttribute(pm.Vec2, Lens.get_fov, Lens.set_fov)
+    near = LensNodeAttribute(float, Lens.get_near, Lens.set_near)
+    far = LensNodeAttribute(float, Lens.get_far, Lens.set_far)

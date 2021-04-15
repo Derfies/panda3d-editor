@@ -8,7 +8,7 @@ class Base(metaclass=BaseMetaClass):
     
     def __init__(
         self,
-        label,
+        #label,
         type_=None,
         getFn=None,
         setFn=None,
@@ -22,7 +22,7 @@ class Base(metaclass=BaseMetaClass):
         initDefault=None,
         initName=None,
     ):
-        self.label = label
+        self.label = ''
         self.type = type_
         self.getFn = getFn
         self.setFn = setFn
