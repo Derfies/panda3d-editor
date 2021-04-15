@@ -6,19 +6,16 @@ from game.nodes.nodepath import NodePath
 from game.nodes.othermeta import ComponentMetaClass
 
 
+class LensNodeAttribute(Attribute):
+
+    @property
+    def source(self):
+        return self.parent.data.node().get_lens()
+
+
 class LensNode(NodePath, metaclass=ComponentMetaClass):
     
     type_ = pm.LensNode
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        
-        self.AddAttributes(
-            Attribute('Fov', pm.Vec2, Lens.get_fov, Lens.set_fov, self.get_lens),
-            Attribute('Near', float, Lens.get_near, Lens.set_near, self.get_lens),
-            Attribute('Far', float, Lens.get_far, Lens.set_far, self.get_lens),
-            parent='LensNode'
-        )
-
-    def get_lens(self, np):
-        return np.node().get_lens()
+    fov = LensNodeAttribute('', pm.Vec2, Lens.get_fov, Lens.set_fov)
+    near = LensNodeAttribute('', float, Lens.get_near, Lens.set_near)
+    far = LensNodeAttribute('', float, Lens.get_far, Lens.set_far)

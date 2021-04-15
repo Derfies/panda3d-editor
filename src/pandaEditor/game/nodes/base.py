@@ -6,9 +6,22 @@ from game.nodes.othermeta import ComponentMetaClass
 
 
 class Base(metaclass=ComponentMetaClass):
+
+    # def __new__(cls, *args, **kwargs):
+    #     # print(cls, args, kwargs)
+    #     return super().__new__(*args, **kwargs)
     
     def __init__(self, data):
         self.data = data
+
+        self.attributes2 = {}
+
+        # Set data for all attributes.
+        for name, attr in self._declared_fields.items():
+            new_attr = copy.deepcopy(attr)
+            self.attributes2[name] = new_attr
+            new_attr.parent = self
+            new_attr.data = new_attr.srcComp = self.data
         
         self.attributes = []
         self.cnnctns = []

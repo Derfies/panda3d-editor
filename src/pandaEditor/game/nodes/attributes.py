@@ -21,7 +21,7 @@ class Base(metaclass=BaseMetaClass):
         parent=None,
         initDefault=None,
         initName=None,
-   ):
+    ):
         self.label = label
         self.type = type_
         self.getFn = getFn
@@ -55,11 +55,14 @@ class Base(metaclass=BaseMetaClass):
             src = self.srcFn(*args)
             
         return src
+
+    @property
+    def source(self):
+        return self.parent.data
         
     def Get(self):
         args = self.getArgs[:]
         args.insert(0, self.GetSource())
-        print(self.getFn, '->', args)
         return self.getFn(*args)
     
     def Set(self, val):
@@ -67,6 +70,16 @@ class Base(metaclass=BaseMetaClass):
         args.insert(0, self.GetSource())
         args.append(val)
         return self.setFn(*args)
+
+    @property
+    def value(self):
+        return self.getFn(self.source, *self.srcArgs[:])
+
+    @value.setter
+    def value(self, value):
+        return self.setFn(self.source, *self.srcArgs[:], value)
+
+
 
 
 class Connection(Base, metaclass=BaseMetaClass):

@@ -1,3 +1,5 @@
+import copy
+
 from collections import OrderedDict
 
 from game.nodes.attributes import Base
@@ -36,4 +38,13 @@ class ComponentMetaClass(BaseMetaClass):
             for name, f in base._declared_fields.items() if name not in known
         ]
 
-        return OrderedDict(base_fields + fields)
+        # print('DO COPY')
+        #
+        # return OrderedDict(
+        #     copy.deepcopy(base_fields) +
+        #     copy.deepcopy(fields)
+        # )
+        return OrderedDict(
+            base_fields +
+            fields
+        )

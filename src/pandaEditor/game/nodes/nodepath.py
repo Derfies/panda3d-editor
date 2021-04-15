@@ -24,6 +24,7 @@ class NodePath(Base, metaclass=ComponentMetaClass):
     type_ = NP
 
     name = NodePathAttribute('', str, pc.NodePath.get_name, pc.NodePath.set_name)
+
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

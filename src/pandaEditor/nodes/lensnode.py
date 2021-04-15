@@ -4,14 +4,27 @@ from pandaEditor.nodes.constants import TAG_IGNORE
 
 TAG_FRUSTUM = 'P3D_Fustum'
 
+def foo(*args):
+    print(args)
+
+
+def bar(*args):
+    print(args)
+
+
+class FrustrumAttribute(NodePathAttribute):
+    pass
+
 
 class LensNode:
+
+    show_frustrum = FrustrumAttribute('', bool, foo, bar, w=False)
     
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        
-        i = self.attributes.index(self.FindProperty('fov'))
-        self.AddAttributes(NodePathAttribute('Show Frustum', bool, self.GetFrustumVisible, self.SetFrustumVisible, w=False), index=i + 1)
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #
+    #     i = self.attributes.index(self.FindProperty('fov'))
+    #     self.AddAttributes(NodePathAttribute('Show Frustum', bool, self.GetFrustumVisible, self.SetFrustumVisible, w=False), index=i + 1)
         
     def OnSelect(self):
         """

@@ -1,5 +1,6 @@
 import logging
 
+from direct.showbase.PythonUtil import getBase as get_base
 import wx
 
 from wxExtra import wxpg
@@ -291,35 +292,42 @@ class PropertiesPanel(wx.Panel):
         #
         # return
 
-        self.propAttrMap = {}
+        # for comp in wrprs:
+        #     print('comp:', comp, comp.data)
+        #     for name, attr in comp.attributes2.items():
+        #         print('    ', name, '->', attr, ':', attr.data, attr.value)
+        # self.propAttrMap = {}
 
+        # try:
+        #     print(wrprs[0].attributes2['name'].value)
+        # except Exception as e:
+        #     print(e)
 
-        for i, (name, attr) in enumerate(wrprs[0]._declared_fields.items()):
-            #category, attr = data
-            #print(wrprs[0].data, type(wrprs[0].data))
-            attr.srcComp = wrprs[0].data
-            #print(attr.srcComp)
+        objs = self.base.selection.comps
+        comp_cls = get_base().node_manager.get_common_wrapper(objs)
+        comps = [comp_cls(obj) for obj in objs]
 
-            if attr.type in self.propMap and attr.getFn is not None:
-                prop_cls = self.propMap[attr.type]
-                if attr.type is not None:
-                    prop = prop_cls(name, '', attr.Get())
-                    if attr.setFn is None:
-                        prop.Enable(False)
-                else:
-                    prop = prop_cls(attr.label)
+        for attr_name, attr in comps[0].attributes2.items():
 
-                #self.pg.Append(prop)
+            if attr.type not in self.propMap or attr.getFn is None:
+                continue
+
+            prop_cls = self.propMap[attr.type]
+            attr_label = ' '.join(word.title() for word in attr_name.split('_'))
+            prop = prop_cls(attr_label, attr_name, attr.value)  # TODO: Do common value.
+            if attr.setFn is None:
+                prop.Enable(False)
 
             if attr.category not in self.propAttrMap:
-                pProp = wxpg.PropertyCategory(attr.category)
-                self.propAttrMap[attr.category] = pProp
-                self.pg.Append(pProp)
+                parent_prop = wxpg.PropertyCategory(attr.category)
+                self.propAttrMap[attr.category] = parent_prop
+                self.pg.Append(parent_prop)
 
             self.propAttrMap[attr.category].AddPrivateChild(prop)
 
-            #allAttrs = [data[1] for i, (name, data) in enumerate(wrprs[0]._declared_fields.items())]
-            #prop.SetAttribute(ATTRIBUTE_TAG, allAttrs)
+            # Collect all attributes and attach them to the property.
+            all_attrs = [comp.attributes2[attr_name] for comp in comps]
+            prop.SetAttribute(ATTRIBUTE_TAG, all_attrs)
                             
     def OnPgChanged(self, evt):
         """

@@ -46,7 +46,7 @@ class SetAttribute(Edit):
         
         # Save old values. I've had to cast the value back into its own type
         # so as to get a copy - undo doesn't seem to work otherwise.
-        self.oldVal = attr.type(attr.Get())
+        self.oldVal = attr.type(attr.value)
     
     def Undo(self):
         Edit.Undo(self)
@@ -56,7 +56,7 @@ class SetAttribute(Edit):
     def Redo(self):
         Edit.Redo(self)
         
-        self.attr.Set(self.val)
+        self.attr.value = self.val
         
 
 class Connect(Edit):
