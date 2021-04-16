@@ -20,7 +20,7 @@ class SceneParser(object):
     def GetCreateKwargs(self, wrprCls, elem):
         kwargs = {}
         
-        for attr in wrprCls(None).GetCreateAttributes():
+        for attr in wrprCls(None).create_attributes:
             pElem = elem.find(".//Item[@name='" + attr.name + "']")
             if pElem is not None:
                 kwargs[attr.initName] = pElem.get('value')

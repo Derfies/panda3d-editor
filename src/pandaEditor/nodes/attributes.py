@@ -1,7 +1,7 @@
 from p3d import commonUtils as cUtils
 
 
-class SerializeMixin:
+class Base:
 
     def SerializeToString(self):
         if self.getFn is None:
@@ -18,7 +18,7 @@ class SerializeMixin:
 
 
 
-class RegisterMixin:
+class Connection:
     
     def Set(self, tgtComp):
         base.scene.ClearConnections(self.srcComp)
@@ -26,10 +26,11 @@ class RegisterMixin:
         super().Set(tgtComp)
     
     def Connect(self, tgtComp):
-        print(self.__class__.mro())
-        super().Connect(tgtComp)
-        
-        base.scene.RegisterConnection(tgtComp, self)
+        pass
+        # print(self.__class__.mro())
+        # super().Connect(tgtComp)
+        #
+        # base.scene.RegisterConnection(tgtComp, self)
         
     def Break(self, tgtComp):
         super().Break(tgtComp)
@@ -37,64 +38,11 @@ class RegisterMixin:
         base.scene.DeregisterConnection(tgtComp, self)
 
 
-class Base(SerializeMixin):
-
-    pass
-
-#
-class Connection(RegisterMixin):
-
-    pass
-#
-#
-# class NodePathTargetConnection(RegisterMixin):
+# class Base(SerializeMixin):
 #
 #     pass
 #
 #
-# # class ConnectionList(RegisterMixin):
-# #
-# #     pass
-#
-#
-# class NodePathSourceConnectionList(RegisterMixin):
-#
-#     pass
-#
-#
-# class NodePathTargetConnectionList(RegisterMixin):
-#
-#     pass
-#
-#
-# class NodePathSourceConnection(RegisterMixin):
-#
-#     pass
-
-
-
-
-
-# class Attribute(SerializeMixin):
-#
-#     pass
-#
-#
-# class NodeAttribute(SerializeMixin):
-#
-#     pass
-#
-#
-# class NodePathAttribute(SerializeMixin):
-#
-#     pass
-#
-#
-# class PyTagAttribute(SerializeMixin):
-#
-#     pass
-#
-#
-# class NodePathObjectAttribute(SerializeMixin):
+# class Connection(RegisterMixin):
 #
 #     pass

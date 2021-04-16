@@ -19,10 +19,10 @@ class Base(metaclass=BaseMetaClass):
         w=True,
         srcComp=None,
         parent=None,
-        initDefault=None,
+        init_arg=None,
         initName=None,
     ):
-        self.label = ''
+        #self.label = ''
         self.type = type_
         self.getFn = getFn
         self.setFn = setFn
@@ -35,41 +35,50 @@ class Base(metaclass=BaseMetaClass):
         self.srcComp = srcComp
         self.parent = parent
         
-        self.initDefault = initDefault
+        self.init_arg = init_arg
         self.initName = initName
         
-        name = self.label.replace(' ', '')
-        self.name = get_lower_camel_case(name)
+        # name = self.label.replace(' ', '')
+        # self.name = get_lower_camel_case(name)
+        #
+        # if initName is None:
+        #     initName = self.name
+        # self.initName = initName
+        #self._init_
+
+    @property
+    def label(self):
+        return ' '.join(word.title() for word in self.name.split('_'))
+
+    @property
+    def init_arg_name(self):
+        return self.name
         
-        if initName is None:
-            initName = self.name
-        self.initName = initName
-        
-    def GetSource(self):
-        #print('GET SOURCE:', self.srcComp)
-        if self.srcFn is None:
-            src = self.srcComp
-        else:
-            args = self.srcArgs[:]
-            args.insert(0, self.srcComp)
-            src = self.srcFn(*args)
-            
-        return src
+    # def GetSource(self):
+    #     #print('GET SOURCE:', self.srcComp)
+    #     if self.srcFn is None:
+    #         src = self.srcComp
+    #     else:
+    #         args = self.srcArgs[:]
+    #         args.insert(0, self.srcComp)
+    #         src = self.srcFn(*args)
+    #
+    #     return src
 
     @property
     def source(self):
         return self.parent.data
         
-    def Get(self):
-        args = self.getArgs[:]
-        args.insert(0, self.GetSource())
-        return self.getFn(*args)
-    
-    def Set(self, val):
-        args = self.setArgs[:]
-        args.insert(0, self.GetSource())
-        args.append(val)
-        return self.setFn(*args)
+    # def Get(self):
+    #     args = self.getArgs[:]
+    #     args.insert(0, self.GetSource())
+    #     return self.getFn(*args)
+    #
+    # def Set(self, val):
+    #     args = self.setArgs[:]
+    #     args.insert(0, self.GetSource())
+    #     args.append(val)
+    #     return self.setFn(*args)
 
     @property
     def value(self):
@@ -207,8 +216,11 @@ class Attribute(UnserializeMixin, Base, metaclass=BaseMetaClass):
 
 class NodeAttribute(UnserializeMixin, Base, metaclass=BaseMetaClass):
 
-    def GetSource(self):
-        return self.srcComp.node()
+    # def GetSource(self):
+    #     return self.srcComp.node()
+    @property
+    def source(self):
+        return self.parent.data.node()
 
 
 class NodePathAttribute(UnserializeMixin, Base, metaclass=BaseMetaClass):

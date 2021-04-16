@@ -1,4 +1,13 @@
+from direct.showbase.PythonUtil import getBase as get_base
+
 from game.nodes.constants import TAG_MODEL_ROOT_CHILD
+
+
+class ModelPathAttribute:
+
+    @property
+    def value(self):
+        return get_base().project.GetRelModelPath(super().value)
 
 
 class ModelRoot:
@@ -13,7 +22,3 @@ class ModelRoot:
             childNp.setPythonTag(TAG_MODEL_ROOT_CHILD, True)
         
         return wrpr
-    
-    def GetFullPath(self, node):
-        panda_path = super().GetFullPath(node)
-        return base.project.GetRelModelPath(panda_path)

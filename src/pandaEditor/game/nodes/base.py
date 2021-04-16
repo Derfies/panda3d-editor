@@ -6,10 +6,6 @@ from game.nodes.othermeta import ComponentMetaClass
 
 
 class Base(metaclass=ComponentMetaClass):
-
-    # def __new__(cls, *args, **kwargs):
-    #     # print(cls, args, kwargs)
-    #     return super().__new__(*args, **kwargs)
     
     def __init__(self, data):
         self.data = data
@@ -33,22 +29,31 @@ class Base(metaclass=ComponentMetaClass):
     
     @classmethod
     def Create(cls, *args, **kwargs):
+        #print(args, kwargs)
         wrpr = cls(None)
         
         createKwargs = {}
-        for attr in wrpr.GetCreateAttributes():
+        for attr in wrpr.create_attributes:
+            print('found create attr:', attr.name, 'in kwargs:', attr.name in kwargs)
             if attr.name in kwargs:
+
+                # Cast
                 val = cUtils.UnserializeFromString(kwargs[attr.name], attr.type)
                 if val is not None:
                     createKwargs[attr.name] = val
             else:
-                createKwargs[attr.initName] = attr.initDefault
+                print(cls, '->', attr.init_arg_name)
+                createKwargs[attr.init_arg_name] = attr.init_arg
         
         # Default create args to a string of the class name.
         if 'name' in createKwargs and not createKwargs['name']:
             createKwargs['name'] = get_lower_camel_case(cls.type_.__name__)
-        
-        wrpr.SetData(cls.type_(**createKwargs))
+
+        try:
+            wrpr.SetData(cls.type_(**createKwargs))
+        except Exception as e:
+            print('final:', cls, createKwargs)
+            raise
         
         return wrpr
     
@@ -168,12 +173,10 @@ class Base(metaclass=ComponentMetaClass):
         self.data = data
         for attr in self.attributes:
             attr.srcComp = data
-            
-    def GetCreateAttributes(self):
-        attrs = []
-        
-        for attr in self.GetAttributes():
-            if attr.initDefault is not None:
-                attrs.append(attr)
-                        
-        return attrs
+
+    @property
+    def create_attributes(self):
+        print('create_attributes:', self, self.attributes2)
+        for attr in self.attributes2.values():
+            print(attr.name, '->', attr.init_arg)
+        return filter(lambda a: a.init_arg is not None, self.attributes2.values())

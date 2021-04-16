@@ -85,6 +85,7 @@ class ComponentMetaClass(BaseMetaClass):
                     continue
                 #print('    ->', cls, 'attr:', attr_name, cls.__name__)
                 attr.category = cls.__name__
+                attr.name = attr_name
                 attrs[attr_name] = attr
             # print('->', cls, )
             # for field_name, obj in dir(cls):

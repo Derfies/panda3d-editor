@@ -235,15 +235,15 @@ class PropertiesPanel(wx.Panel):
         self.bs1.Add(self.pg, 1, wx.EXPAND)
         self.SetSizer(self.bs1)
         
-    def BuildPropertyGrid(self, wrprs):
+    def BuildPropertyGrid(self):
         """
         Build the properties for the grid based on the contents of nps.
         """
         self.pg.Clear()
         
-        # Bail if there are no selected NodePaths.
-        if not wrprs:
-            return
+        # # Bail if there are no selected NodePaths.
+        # if not wrprs:
+        #     return
         
         self.propAttrMap = {}
                         
@@ -304,20 +304,29 @@ class PropertiesPanel(wx.Panel):
         #     print(e)
 
         objs = self.base.selection.comps
-        print('ONE:', get_base().node_manager.GetWrapper(objs[0]).mro())
+        if not objs:
+            return
         comp_cls = get_base().node_manager.get_common_wrapper(objs)
-        print('common:', comp_cls, comp_cls.mro())
         comps = [comp_cls(obj) for obj in objs]
-        print(comp_cls._declared_fields)
 
-        for attr_name, attr in comps[0].attributes2.items():
+        for attr in comps[0].attributes2.values():
 
             if attr.type not in self.propMap:# or attr.getFn is None:
                 continue
 
             prop_cls = self.propMap[attr.type]
-            attr_label = ' '.join(word.title() for word in attr_name.split('_'))
-            prop = prop_cls(attr_label, attr_name, attr.value)  # TODO: Do common value.
+            prop = prop_cls(attr.label, attr.name, attr.value)  # TODO: Do common value.
+
+            #print(attr.__dict__)
+            #print(getattr(comps[0], attr.name, None))
+            #print(attr.__class__.__dict__, attr.name)
+            print('->', type(attr).__dict__.get('value'))
+            if type(attr).__dict__.get('value') is not None:
+                print(type(attr).__dict__.get('value').fset)
+            #p#rint(attr.__dict__['value'])
+            #print(attr.value.__set__)
+            #print(getattr(prop_cls, attr.name))
+            # print(attr.__dict__[attr.name])
             # if attr.setFn is None:
             #     prop.Enable(False)
 
@@ -329,7 +338,7 @@ class PropertiesPanel(wx.Panel):
             self.propAttrMap[attr.category].AddPrivateChild(prop)
 
             # Collect all attributes and attach them to the property.
-            all_attrs = [comp.attributes2[attr_name] for comp in comps]
+            all_attrs = [comp.attributes2[attr.name] for comp in comps]
             prop.SetAttribute(ATTRIBUTE_TAG, all_attrs)
                             
     def OnPgChanged(self, evt):
@@ -369,7 +378,7 @@ class PropertiesPanel(wx.Panel):
             focusIndex = self.pg.GetFocusedPropertyControl()
         
         # Clear and rebuild property grid
-        self.BuildPropertyGrid(base.selection.wrprs)
+        self.BuildPropertyGrid()
         
         # Set all property expanded states back.
         for propLongLbl, expanded in self.propExps.items():

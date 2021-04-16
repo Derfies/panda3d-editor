@@ -33,7 +33,7 @@ class BulletBoxShape(Base):
 
         self.AddAttributes(
             Attribute('Half Extents', pm.Vec3, BBS.getHalfExtentsWithMargin,
-                 initDefault=pm.Vec3(0.5, 0.5, 0.5)),
+                 init_arg=pm.Vec3(0.5, 0.5, 0.5)),
             parent='BulletBoxShape'
         )
 
@@ -46,9 +46,9 @@ class BulletCapsuleShape(Base):
         super().__init__(*args, **kwargs)
 
         self.AddAttributes(
-            Attribute('Radius', float, BCS.getRadius, initDefault=0.5),
-            Attribute('Height', float, BCS.getHalfHeight, initDefault=1),
-            Attribute('Up', int, initDefault=ZUp),
+            Attribute('Radius', float, BCS.getRadius, init_arg=0.5),
+            Attribute('Height', float, BCS.getHalfHeight, init_arg=1),
+            Attribute('Up', int, init_arg=ZUp),
             parent='BulletCapsuleShape'
         )
 
@@ -61,8 +61,8 @@ class BulletCharacterControllerNode(NodePath):
         NodePath.__init__(self, *args, **kwargs)
 
         self.AddAttributes(
-            Attribute('Shape', BCS, initDefault=BCS(0.4, 1.75 - 2 * 0.4, ZUp)),
-            Attribute('step_height', float, initDefault=0.4),
+            Attribute('Shape', BCS, init_arg=BCS(0.4, 1.75 - 2 * 0.4, ZUp)),
+            Attribute('step_height', float, init_arg=0.4),
             Attribute('Name', str),
             parent='BulletCharacterControllerNode'
         )
@@ -103,8 +103,8 @@ class BulletPlaneShape(Base):
         super().__init__(*args, **kwargs)
 
         self.AddAttributes(
-            Attribute('Normal', pm.Vec3, initDefault=pm.Vec3(0, 0, 1)),
-            Attribute('Constant', int, initDefault=0),
+            Attribute('Normal', pm.Vec3, init_arg=pm.Vec3(0, 0, 1)),
+            Attribute('Constant', int, init_arg=0),
             parent='BulletBoxShape'
         )
 

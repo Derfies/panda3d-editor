@@ -22,7 +22,7 @@ from game.utils import get_unique_name
 class NodePath(Base, metaclass=ComponentMetaClass):
     
     type_ = NP
-    name = NodePathAttribute(str, pc.NodePath.get_name, pc.NodePath.set_name)
+    name = NodePathAttribute(str, pc.NodePath.get_name, pc.NodePath.set_name, init_arg='')
     matrix = NodePathAttribute(pc.Mat4, pc.NodePath.get_mat, pc.NodePath.set_mat)
     # matrix = NodePathAttribute('', pc.Mat4, pc.NodePath.get_mat,
     #                            pc.NodePath.set_mat)
@@ -36,7 +36,7 @@ class NodePath(Base, metaclass=ComponentMetaClass):
     #     super().__init__(*args, **kwargs)
     #
     #     self.AddAttributes(
-    #         NodePathAttribute('Name', str, NP.getName, NP.setName, initDefault=''),
+    #         NodePathAttribute('Name', str, NP.getName, NP.setName, init_arg=''),
     #         NodePathAttribute('Matrix', pc.Mat4, NP.getMat, NP.setMat),
     #         ConnectionList('Lights', pc.Light, self.GetLights, NP.setLight, NP.clearLight, NP.clearLight),
     #         Connection('Texture', pc.Texture, NP.getTexture, NP.setTexture, NP.clearTexture, args=[1]),

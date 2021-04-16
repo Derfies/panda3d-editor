@@ -1,32 +1,33 @@
-import panda3d.core as pm
-from panda3d.core import ModelRoot as MR
+import panda3d.core as pc
+#from panda3d.core import ModelRoot as MR
 
-from game.nodes.attributes import NodeAttribute
+from game.nodes.attributes import Attribute
 from game.nodes.constants import (
     TAG_MODEL_ROOT_CHILD, TAG_NODE_TYPE
 )
 from game.nodes.nodepath import NodePath
+from game.nodes.othermeta import ComponentMetaClass
+
+
+class ModelPathAttribute(Attribute, metaclass=ComponentMetaClass):
+
+    @property
+    def value(self):
+        return pc.ModelRoot.get_fullpath(self.parent.data.node())
 
 
 class ModelRoot(NodePath):
     
-    type_ = pm.ModelRoot
-    
-    def __init__(self, *args, **kwargs):
-        NodePath.__init__(self, *args, **kwargs)
-        
-        self.AddAttributes(
-            NodeAttribute('ModelPath', pm.Filename, self.GetFullPath, initDefault=''),
-            parent='ModelRoot'
-       )
-    
+    type_ = pc.ModelRoot
+    model_path = ModelPathAttribute(pc.Filename, init_arg='')
+
     @classmethod
     def Create(cls, *args, **kwargs):
         modelPath = kwargs.pop('modelPath', '')
         if not modelPath:
-            np = pm.NodePath(pm.ModelRoot(''))
+            np = pc.NodePath(pc.ModelRoot(''))
         else:
-            filePath = pm.Filename.fromOsSpecific(modelPath)
+            filePath = pc.Filename.fromOsSpecific(modelPath)
             try:
                 np = loader.loadModel(filePath)
             except:
@@ -34,7 +35,7 @@ class ModelRoot(NodePath):
                     np = loader.loadModel(filePath + '.bam')
                 except IOError:
                     print('Failed to load: ', filePath)
-                    np = pm.NodePath(pm.ModelRoot(''))
+                    np = pc.NodePath(pc.ModelRoot(''))
             np.setName(filePath.getBasenameWoExtension())
         
         wrpr = cls(np)
@@ -65,6 +66,3 @@ class ModelRoot(NodePath):
         """
         if not np.getPythonTag(TAG_MODEL_ROOT_CHILD):
             np.reparentTo(self.data)
-            
-    def GetFullPath(self, node):
-        return MR.get_fullpath(node)
