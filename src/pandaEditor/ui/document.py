@@ -10,33 +10,32 @@ class Document:
         self.contents = contents
         
         self.dirty = False
-        self.title = self.GetTitle()
-        
-    def GetTitle(self):
+
+    @property
+    def title(self):
         if self.filePath is not None:
             return os.path.basename(self.filePath)
         else:
             return 'untitled'
 
-    def Load(self):
-        self.contents.Load(self.filePath)
-        self.OnRefresh()
+    def load(self):
+        self.contents.load(self.filePath)
+        self.on_refresh()
 
-    def Save(self, **kwargs):
+    def save(self, **kwargs):
         filePath = kwargs.pop('filePath', self.filePath)
-        self.contents.Save(filePath)
-        self.title = self.GetTitle()
+        self.contents.save(filePath)
         self.dirty = False
-        self.OnRefresh()
+        self.on_refresh()
         
-    def OnRefresh(self, comps=None):
+    def on_refresh(self, comps=None):
         """
         Broadcast the update message without setting the dirty flag. Methods
         subscribed to this message will rebuild ui widgets completely.
         """
         pub.sendMessage('Update', comps=comps)
 
-    def OnModified(self, comps=None):
+    def on_modified(self, comps=None):
         """
         Broadcast the update message and set the dirty flag. Methods
         subscribed to this message will rebuild ui widgets completely.
@@ -44,7 +43,7 @@ class Document:
         self.dirty = True
         pub.sendMessage('Update', comps=comps)
         
-    def OnSelectionModified(self, task):
+    def on_selection_modified(self, task):
         """
         Broadcast the update selection message. Methods subscribed to this
         message should be quick and not force full rebuilds of ui widgets

@@ -31,8 +31,8 @@ class CollisionNode(NodePath):
        )
     
     @classmethod
-    def Create(cls, *args, **kwargs):
-        wrpr = super().Create(*args, **kwargs)
+    def create(cls, *args, **kwargs):
+        wrpr = super().create(*args, **kwargs)
         wrpr.data.show()
         return wrpr
     

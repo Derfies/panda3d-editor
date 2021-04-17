@@ -1,3 +1,4 @@
+from direct.showbase.PythonUtil import getBase as get_base
 import panda3d.core as pm
 
 from p3d.object import Object
@@ -8,19 +9,19 @@ from nodes.constants import TAG_IGNORE, TAG_PICKABLE
 
 
 class Selection(Object):
-    
+
     BBOX_TAG = 'bbox'
-    
+
     def __init__(self, base, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.base = base
         self.comps = []
         self.wrprs = []
-        
+
         # Create a marquee
         self.marquee = Marquee('marquee', *args, **kwargs)
-        
+
         # Create node picker - set its collision mask to hit both geom nodes
         # and collision nodes
         bitMask = pm.GeomNode.getDefaultCollideMask() | pm.CollisionNode.getDefaultCollideMask()
@@ -29,52 +30,52 @@ class Selection(Object):
             *args,
             fromCollideMask=bitMask, **kwargs
         )
-                
+
     def Get(self):
         """Return the selected components."""
         return self.comps
-    
+
     def GetNodePaths(self):
         nps = [
-            wrpr.data 
+            wrpr.data
             for wrpr in self.wrprs
             if type(wrpr.data ) == pm.NodePath
         ]
         return nps
-    
+
     def Clear(self):
         """Clear the selection list and run deselect handlers."""
         for wrpr in self.wrprs:
-            wrpr.OnDeselect()
+            wrpr.on_deselect()
         self.comps = []
         self.wrprs = []
-    
+
     def Add(self, comps):
         """
         Add the indicated components to the selection and run select handlers.
         """
         for comp in comps:
-            
+
             # Skip components already selected.
             if comp in self.comps:
                 continue
-            
-            wrpr = base.node_manager.Wrap(comp)
-            wrpr.OnSelect()
+
+            wrpr = get_base().node_manager.wrap(comp)
+            wrpr.on_select()
             self.comps.append(comp)
             self.wrprs.append(wrpr)
-    
+
     def Remove(self, comps):
         """
         Remove those components that were in the selection and run deselect
         handlers.
         """
         for wrpr in self.wrprs:
-            wrpr.OnDeselect()
-            
+            wrpr.on_deselect()
+
         self.comps = [comp for comp in self.comps if comp not in comps]
-        self.wrprs = [base.node_manager.Wrap(comp) for comp in self.comps]
-    
+        self.wrprs = [get_base().node_manager.wrap(comp) for comp in self.comps]
+
     def SelectParent(self):
         """
         Return a list of parent components from the selection. Include the
@@ -82,13 +83,13 @@ class Selection(Object):
         """
         comps = []
         for wrpr in self.wrprs:
-            pWrpr = wrpr.GetParent()
-            if pWrpr.data != base.scene:
+            pWrpr = wrpr.parent
+            if pWrpr.data != get_base().scene:
                 comps.append(pWrpr.data)
             else:
                 comps.append(wrpr.data)
         return comps
-        
+
     def SelectChild(self):
         """
         Return a list of child components from the selection. Include the
@@ -96,51 +97,51 @@ class Selection(Object):
         """
         comps = []
         for wrpr in self.wrprs:
-            cWrprs = wrpr.GetChildren()
+            cWrprs = wrpr.get_children()
             if cWrprs:
                 comps.append(cWrprs[0].data)
             else:
                 comps.append(wrpr.data)
         return comps
-            
+
     def SelectPrev(self):
         """
         For each component in the selection, return the component that appears
-        one before in the parent's list of children. 
+        one before in the parent's list of children.
         """
         comps = []
         for wrpr in self.wrprs:
-            pWrpr = wrpr.GetParent()
-            cComps = [cWrpr.data for cWrpr in pWrpr.GetChildren()]
-                
-            # Get the index of the child before this one - wrap around if the 
+            pWrpr = wrpr.parent
+            cComps = [cWrpr.data for cWrpr in pWrpr.get_children()]
+
+            # Get the index of the child before this one - wrap around if the
             # index has gone below zero.
             index = cComps.index(wrpr.data) - 1
             if index < 0:
                 index = len(cComps) - 1
-            
+
             comps.append(cComps[index])
         return comps
-        
+
     def SelectNext(self):
         """
         For each component in the selection, return the component that appears
-        one after in the parent's list of children. 
+        one after in the parent's list of children.
         """
         comps = []
         for wrpr in self.wrprs:
-            pWrpr = wrpr.GetParent()
-            cComps = [cWrpr.data for cWrpr in pWrpr.GetChildren()]
-            
-            # Get the index of the child after this one - wrap around if the 
+            pWrpr = wrpr.parent
+            cComps = [cWrpr.data for cWrpr in pWrpr.get_children()]
+
+            # Get the index of the child after this one - wrap around if the
             # index has gone over the number of children.
             index = cComps.index(wrpr.data) + 1
             if index > len(cComps) - 1:
                 index = 0
-            
+
             comps.append(cComps[index])
         return comps
-    
+
     def StartDragSelect(self, append=False):
         """
         Start the marquee and put the tool into append mode if specified.
@@ -148,7 +149,7 @@ class Selection(Object):
         if self.marquee.mouseWatcherNode.hasMouse():
             self.append = append
             self.marquee.Start()
-    
+
     def StopDragSelect(self):
         """
         Stop the marquee and get all the node paths under it with the correct
@@ -157,7 +158,7 @@ class Selection(Object):
 
         """
         self.marquee.Stop()
-        
+
         # Find all node paths below the root node which are inside the marquee
         # AND have the TAG_PICKABLE tag.
         nps = []
@@ -169,12 +170,12 @@ class Selection(Object):
                 pick_np not in nps
            ):
                 nps.append(pick_np)
-                    
+
         # Add any node path which was under the mouse to the selection.
         np = self.GetNodePathUnderMouse()
         if np is not None and pick_np not in nps:
             nps.append(np)
-        
+
         # In append mode add any NodePath which wasn't already in the selection
         # and remove any NodePath which was already selected.
         if self.append:
@@ -185,9 +186,9 @@ class Selection(Object):
                 else:
                     oldComps.append(np)
             nps = oldComps
-            
+
         return nps
-        
+
     def GetNodePathUnderMouse(self):
         """
         Returns the closest node under the mouse, or None if there isn't one.
@@ -198,7 +199,7 @@ class Selection(Object):
             return self.GetPickableNodePath(pickedNp)
         else:
             return None
-        
+
     def GetNodePathAtPosition(self, x, y):
         self.picker.OnUpdate(None, x, y)
         pickedNp = self.picker.GetFirstNodePath()
@@ -206,20 +207,20 @@ class Selection(Object):
             return self.GetPickableNodePath(pickedNp)
         else:
             return None
-        
+
     def GetPickableNodePath(self, np):
-        # if MOUSE_CTRL not in base.edCamera.mouse.modifiers:
+        # if MOUSE_CTRL not in get_base().edCamera.mouse.modifiers:
         #     np = np.findNetPythonTag(TAG_PICKABLE)
         # return None if np.isEmpty() else np
         if np.getPythonTag(TAG_IGNORE):
             return np.findNetPythonTag(TAG_PICKABLE)
-        elif MOUSE_CTRL in self.base.edCamera.mouse.modifiers:
+        elif MOUSE_CTRL in get_base().edCamera.mouse.modifiers:
            return np
         else:
             return np.findNetPythonTag(TAG_PICKABLE)
-        
+
     def Update(self):
         """Update the selection by running deselect and select handlers."""
         for wrpr in self.wrprs:
-            wrpr.OnDeselect()
-            wrpr.OnSelect()
+            wrpr.on_deselect()
+            wrpr.on_select()

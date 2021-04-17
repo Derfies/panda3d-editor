@@ -1,20 +1,10 @@
-import panda3d.core as pc
-
-from game.nodes.attributes import ConnectionList
+from direct.showbase.PythonUtil import getBase as get_base
 
 
 class Light:
     
-    def SetDefaultValues(self):
-        super().SetDefaultValues()
+    def set_default_values(self):
+        super().set_default_values()
 
-        cnnctn = ConnectionList(
-            'Lights',
-            pc.Light,
-            self.GetLights,
-            pc.NodePath.set_light,
-            pc.NodePath.clear_light,
-            pc.NodePath.clear_light,
-            base.scene.rootNp
-        )
-        cnnctn.Connect(self.data)
+        render = get_base().node_manager.wrap(get_base().render)
+        render.lights.connect(self.data)

@@ -342,7 +342,7 @@ class """ + fileName + """(p3d):
             cwd=tempDirPath
        )
         
-    def GetRelModelPath(self, pandaPath):
+    def get_rel_model_path(self, pandaPath):
         """
         Attempt to find the indicated file path on one of the model search 
         paths. If found then return a path relative to it. Also make sure to 

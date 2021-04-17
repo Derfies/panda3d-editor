@@ -2,12 +2,13 @@ import logging
 
 from direct.showbase.PythonUtil import getBase as get_base
 import wx
-
-from wxExtra import wxpg
 from pubsub import pub
 import panda3d.core as pm
 from panda3d.core import Filename
+
+from wxExtra import wxpg
 from pandaEditor import commands as cmds
+from game.nodes.attributes import Connection
 from . import customProperties as custProps
 
 
@@ -294,12 +295,12 @@ class PropertiesPanel(wx.Panel):
 
         # for comp in wrprs:
         #     print('comp:', comp, comp.data)
-        #     for name, attr in comp.attributes2.items():
+        #     for name, attr in comp.attributes.items():
         #         print('    ', name, '->', attr, ':', attr.data, attr.value)
         # self.propAttrMap = {}
 
         # try:
-        #     print(wrprs[0].attributes2['name'].value)
+        #     print(wrprs[0].attributes['name'].value)
         # except Exception as e:
         #     print(e)
 
@@ -309,20 +310,34 @@ class PropertiesPanel(wx.Panel):
         comp_cls = get_base().node_manager.get_common_wrapper(objs)
         comps = [comp_cls(obj) for obj in objs]
 
-        for attr in comps[0].attributes2.values():
+        for attr in comps[0].attributes.values():
 
-            if attr.type not in self.propMap:# or attr.getFn is None:
-                continue
+            # if attr.type not in self.propMap:# or attr.getFn is None:
+            #     continue
+            print(attr.name, attr)
 
-            prop_cls = self.propMap[attr.type]
-            prop = prop_cls(attr.label, attr.name, attr.value)  # TODO: Do common value.
+            #print(attr.label, isinstance(attr, Connection))
+
+            if not isinstance(attr, Connection):
+                if attr.type not in self.propMap:# or attr.getFn is None:
+                    continue
+                prop_cls = self.propMap[attr.type]
+                prop = prop_cls(attr.label, attr.name, attr.value)  # TODO: Do common value.
+
+            else:
+                val = attr.value
+                try:
+                    obj_iter = iter(val)
+                    prop = custProps.ConnectionListProperty(attr.label, attr.name, val)
+                except TypeError as e:
+                    prop = custProps.ConnectionProperty(attr.label, attr.name, val)
 
             #print(attr.__dict__)
             #print(getattr(comps[0], attr.name, None))
             #print(attr.__class__.__dict__, attr.name)
-            print('->', type(attr).__dict__.get('value'))
-            if type(attr).__dict__.get('value') is not None:
-                print(type(attr).__dict__.get('value').fset)
+            # print('->', type(attr).__dict__.get('value'))
+            # if type(attr).__dict__.get('value') is not None:
+            #     print(type(attr).__dict__.get('value').fset)
             #p#rint(attr.__dict__['value'])
             #print(attr.value.__set__)
             #print(getattr(prop_cls, attr.name))
@@ -338,7 +353,7 @@ class PropertiesPanel(wx.Panel):
             self.propAttrMap[attr.category].AddPrivateChild(prop)
 
             # Collect all attributes and attach them to the property.
-            all_attrs = [comp.attributes2[attr.name] for comp in comps]
+            all_attrs = [comp.attributes[attr.name] for comp in comps]
             prop.SetAttribute(ATTRIBUTE_TAG, all_attrs)
                             
     def OnPgChanged(self, evt):

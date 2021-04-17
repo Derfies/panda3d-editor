@@ -25,8 +25,8 @@ class Actor(ModelRoot):
        )
     
     @classmethod
-    def Create(cls, *args, **kwargs):
-        wrpr = super(Actor, cls).Create(*args, **kwargs)
+    def create(cls, *args, **kwargs):
+        wrpr = super(Actor, cls).create(*args, **kwargs)
         
         actor = P3dActor(wrpr.data)
         actor.setTag(TAG_NODE_TYPE, 'Actor')
@@ -36,8 +36,8 @@ class Actor(ModelRoot):
         
         return cls(actor.getGeomNode())
     
-    def Duplicate(self):
-        dupeNp = ModelRoot.Duplicate(self)
+    def duplicate(self):
+        dupeNp = ModelRoot.duplicate(self)
         
         actor = P3dActor(dupeNp)
         actor.setTag(TAG_NODE_TYPE, 'Actor')
@@ -58,7 +58,7 @@ class Actor(ModelRoot):
         animDict = {}
         for name in P3dActor.getAnimNames(actor):
             filePath = actor.getAnimFilename(name)
-            animDict[name] = base.project.GetRelModelPath(filePath)
+            animDict[name] = base.project.get_rel_model_path(filePath)
             
         return animDict
         

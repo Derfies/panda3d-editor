@@ -92,8 +92,8 @@ class MainFrame(wx.Frame):
         self.preMaxPos = None
         self.preMaxSize = None
         self.actns = {
-            ID_EDIT_UNDO: self.base.Undo,
-            ID_EDIT_REDO: self.base.Redo,
+            ID_EDIT_UNDO: self.base.undo,
+            ID_EDIT_REDO: self.base.redo,
             ID_EDIT_GROUP: self.base.Group,
             ID_EDIT_UNGROUP: self.base.Ungroup,
             ID_EDIT_PARENT: self.base.Parent,
@@ -126,7 +126,7 @@ class MainFrame(wx.Frame):
 
         # Build editor panels
         self.pnlSceneGraph = SceneGraphPanel(base, self, style=wx.SUNKEN_BORDER)
-        self.pnlLightLinker = LightLinkerPanel(base, self, style=wx.SUNKEN_BORDER)
+        #self.pnlLightLinker = LightLinkerPanel(base, self, style=wx.SUNKEN_BORDER)
         self.pnlProps = PropertiesPanel(base, self, style=wx.SUNKEN_BORDER)
         self.pnlRsrcs = ResourcesPanel(base, self, style=wx.SUNKEN_BORDER)
         self.pnlLog = LogPanel(self, style=wx.SUNKEN_BORDER)
@@ -222,7 +222,7 @@ class MainFrame(wx.Frame):
 
         # Create new document
         self.base.CreateScene()
-        self.base.doc.OnRefresh()
+        self.base.doc.on_refresh()
 
     def OnFileOpen(self, evt, filePath=None):
         """Create a new document and load the scene."""
@@ -245,7 +245,7 @@ class MainFrame(wx.Frame):
         # Create new document
         if filePath:
             self.base.CreateScene(filePath)
-            self.base.doc.Load()
+            self.base.doc.load()
 
     def OnFileSave(self, evt, saveAs=False):
         """Save the document."""
@@ -261,7 +261,7 @@ class MainFrame(wx.Frame):
                 return
 
         # Save the file
-        self.base.doc.Save()
+        self.base.doc.save()
 
     def OnFileSaveAs(self, evt):
         """
@@ -288,7 +288,7 @@ class MainFrame(wx.Frame):
         if dirPath:
             self.base.project.New(dirPath)
             self.SetProjectPath(dirPath)
-            self.base.doc.OnRefresh()
+            self.base.doc.on_refresh()
 
     def OnFileSetProject(self, evt):
         """
@@ -297,7 +297,7 @@ class MainFrame(wx.Frame):
         dirPath = wxUtils.director_dialog('Set Project Directory')
         if dirPath:
             self.SetProjectPath(dirPath)
-            self.base.doc.OnRefresh()
+            self.base.doc.on_refresh()
 
     def OnFileBuildProject(self, evt):
         """Build the current project to a p3d file."""
@@ -320,8 +320,8 @@ class MainFrame(wx.Frame):
         fn()
 
     def OnEngagePhysics(self, evt):
-        wrpr = base.node_manager.Wrap(base.scene.physicsWorld)
-        if base.scene.physicsTask not in taskMgr.getAllTasks():
+        wrpr = base.node_manager.wrap(base.scene.physics_world)
+        if base.scene.physics_task not in taskMgr.getAllTasks():
             wrpr.EnablePhysics()
         else:
             wrpr.DisablePhysics()
@@ -353,15 +353,15 @@ class MainFrame(wx.Frame):
         """
         comps = []
         for wrpr in self.base.selection.wrprs:
-            attr = wrpr.FindProperty('modelPath')
+            attr = wrpr.find_property('modelPath')
             if attr is None:
                 continue
 
             wrprCls = base.node_manager.nodeWrappers['Actor']
-            aWrpr = wrprCls.Create(modelPath=attr.Get())
+            aWrpr = wrprCls.create(modelPath=attr.Get())
             aWrpr.data.setTransform(wrpr.data.getTransform())
-            aWrpr.SetDefaultValues()
-            aWrpr.SetParent(wrpr.GetDefaultParent())
+            aWrpr.set_default_values()
+            aWrpr.parent = wrpr.default_parent
             cmds.Replace(wrpr.data, aWrpr.data)
 
     def OnCreatePrefab(self, evt):
@@ -372,7 +372,7 @@ class MainFrame(wx.Frame):
         dirPath = self.base.project.GetPrefabsDirectory()
         assetName = self.base.project.GetUniqueAssetName('prefab.xml', dirPath)
         assetPath = os.path.join(dirPath, assetName)
-        base.scnParser.Save(np, assetPath)
+        base.scene_parser.save(np, assetPath)
 
     def OnCreateCgShader(self, evt):
         """
@@ -395,19 +395,19 @@ class MainFrame(wx.Frame):
 
         # Make sure to call or else we won't see any changes.
         self._mgr.Update()
-        self.base.doc.OnRefresh()
+        self.base.doc.on_refresh()
 
     def OnXformSetActiveGizmo(self, evt):
-        if evt.GetId() == ID_XFORM_WORLD:
+        if evt.get_id() == ID_XFORM_WORLD:
             self.base.SetGizmoLocal(not evt.IsChecked())
             return
 
         arg = None
-        if evt.GetId() == ID_XFORM_POS:
+        if evt.get_id() == ID_XFORM_POS:
             arg = 'pos'
-        elif evt.GetId() == ID_XFORM_ROT:
+        elif evt.get_id() == ID_XFORM_ROT:
             arg = 'rot'
-        elif evt.GetId() == ID_XFORM_SCL:
+        elif evt.get_id() == ID_XFORM_SCL:
             arg = 'scl'
         self.base.SetActiveGizmo(arg)
 
@@ -506,10 +506,10 @@ class MainFrame(wx.Frame):
 
     def OnUpdateModify(self, msg):
         self.tbModify.EnableTool(ID_MODIFY_PHYSICS, False)
-        if base.scene.physicsWorld is not None:
+        if base.scene.physics_world is not None:
             self.tbModify.EnableTool(ID_MODIFY_PHYSICS, True)
 
-            if base.scene.physicsTask not in taskMgr.getAllTasks():
+            if base.scene.physics_task not in taskMgr.getAllTasks():
                 self.tbModify.ToggleTool(ID_MODIFY_PHYSICS, False)
             else:
                 self.tbModify.ToggleTool(ID_MODIFY_PHYSICS, True)
@@ -871,15 +871,15 @@ class MainFrame(wx.Frame):
                 .Left()
                 .Position(2)),
                 
-            ID_WIND_LIGHT_LINKER:(self.pnlLightLinker, True,
-                wx.aui.AuiPaneInfo()
-                .Name('pnlLightLinker')
-                .Caption('Light Linker')
-                .CloseButton(True)
-                .MaximizeButton(True)
-                .MinSize((100, 100))
-                .Right()
-                .Position(2)),
+            # ID_WIND_LIGHT_LINKER:(self.pnlLightLinker, True,
+            #     wx.aui.AuiPaneInfo()
+            #     .Name('pnlLightLinker')
+            #     .Caption('Light Linker')
+            #     .CloseButton(True)
+            #     .MaximizeButton(True)
+            #     .MinSize((100, 100))
+            #     .Right()
+            #     .Position(2)),
                 
             ID_WIND_RESOURCES:(self.pnlRsrcs, True,
                 wx.aui.AuiPaneInfo()

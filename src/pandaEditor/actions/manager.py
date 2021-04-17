@@ -16,7 +16,7 @@ class Manager:
         else:
             actn = self.undoList.pop()
             self.redoList.append(actn)
-            actn.Undo()
+            actn.undo()
 
     def Redo(self):
         if len(self.redoList) < 1:
@@ -24,17 +24,17 @@ class Manager:
         else:
             actn = self.redoList.pop()
             self.undoList.append(actn)
-            actn.Redo()
+            actn.redo()
         
     def ResetUndo(self):
         while self.undoList:
             actn = self.undoList.pop()
-            actn.Destroy()
+            actn.destroy()
             
     def ResetRedo(self):
         while self.redoList:
             actn = self.redoList.pop()
-            actn.Destroy()
+            actn.destroy()
 
     def Reset(self):
         self.ResetUndo()

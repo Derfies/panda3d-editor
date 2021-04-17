@@ -5,8 +5,6 @@ from importlib import import_module
 from panda3d.core import ConfigVariableBool
 
 
-
-
 logger = logging.getLogger(__name__)
 
 
@@ -29,7 +27,6 @@ class BaseMetaClass(type):
 
     @classmethod
     def get_mro(metacls, cls, mro):
-
         class_name = cls.__name__
         path = cls.__module__.split('.')
         if path[0] != 'game':
@@ -56,21 +53,11 @@ class BaseMetaClass(type):
         ]), None)
         if editor_cls is None:
             return mro
-        # if cls.__name__ == 'Attribute':
-        #    print(editor_cls.mro())
-        # mro = [editor_cls] + mro
-        # print('EDITOR:', editor_cls.mro())
-        # print('GAME:', mro)
-
-
-
 
         # Ignore the last mro "object" as it's common to both.
         mro = editor_cls.mro()[0:-1] + mro
         names = ', '.join([c.__name__ for c in mro])
-        print(f'Component: {cls.__name__} mro: {names}')
-
-        #cls._declared_fields = metacls._get_attributes(mro)
+        logger.info(f'Component: {cls.__name__} mro: {names}')
 
         return mro
 

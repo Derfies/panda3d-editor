@@ -81,8 +81,8 @@ class BulletDebugNode(NodePath):
         )
 
     @classmethod
-    def Create(cls, *args, **kwargs):
-        wrpr = super(BulletDebugNode, cls).Create(*args, **kwargs)
+    def create(cls, *args, **kwargs):
+        wrpr = super(BulletDebugNode, cls).create(*args, **kwargs)
         wrpr.SetWireframe(wrpr.data, True)
         wrpr.data.show()
         return wrpr
@@ -148,10 +148,10 @@ class BulletWorld(Base):
             parent='BulletWorld'
         )
 
-    def Destroy(self):
+    def destroy(self):
         if (
-            base.scene.physicsWorld is self.data and
-            base.scene.physicsTask in taskMgr.getAllTasks()
+            base.scene.physics_world is self.data and
+            base.scene.physics_task in taskMgr.getAllTasks()
         ):
             self.DisablePhysics()
 
@@ -173,7 +173,7 @@ class BulletWorld(Base):
             self.data.doPhysics(dt)
             return task.cont
 
-        base.scene.physicsTask = taskMgr.add(update, 'update')
+        base.scene.physics_task = taskMgr.add(update, 'update')
 
     def DisablePhysics(self):
-        taskMgr.remove(base.scene.physicsTask)
+        taskMgr.remove(base.scene.physics_task)

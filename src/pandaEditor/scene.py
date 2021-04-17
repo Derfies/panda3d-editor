@@ -1,3 +1,5 @@
+from direct.showbase.PythonUtil import getBase as get_base
+
 from pandaEditor.game.scene import Scene
 from pandaEditor.game.nodes.constants import TAG_NODE_TYPE
 
@@ -25,47 +27,47 @@ class Scene(Scene):
             'Cam2d'
         ]
         for cType in defaultCompTypes:
-            wrpr = base.node_manager.Create(cType)
-            wrpr.data.setTag(TAG_NODE_TYPE, cType)
+            wrpr = get_base().node_manager.create(cType)
+            wrpr.data.set_tag(TAG_NODE_TYPE, cType)
         
-    def Load(self, filePath):
+    def load(self, filePath):
         """Recreate a scene graph from file."""
-        base.scnParser.Load(self.rootNp, filePath)
+        get_base().scene_parser.load(self.rootNp, filePath)
     
-    def Save(self, filePath):
+    def save(self, filePath):
         """Save a scene graph to file."""
-        base.scnParser.Save(self, filePath)
+        get_base().scene_parser.save(self, filePath)
         
-    def Close(self):
+    def close(self):
         """Destroy the scene by removing all its components."""
-        def Destroy(wrpr):
-            for cWrpr in wrpr.GetChildren():
-                Destroy(cWrpr)
-            wrpr.Destroy()
+        def destroy(comp):
+            for child in comp.get_children():
+                destroy(child)
+            comp.destroy()
             
-        Destroy(base.node_manager.Wrap(self))
-        base.plugin_manager.on_scene_close()
+        destroy(get_base().node_manager.wrap(self))
+        get_base().plugin_manager.on_scene_close()
         
         # Now remove the root node. If the root node was render, reset base
         # in order to remove and recreate the default node set.
-        if self.rootNp is render:
-            base.Reset()
+        if self.rootNp is get_base().render:
+            get_base().reset()
 
         self.rootNp.removeNode()
         
-    def GetOutgoingConnections(self, wrpr):
+    def get_outgoing_connections(self, wrpr):
         """
         Return all outgoing connections for the indicated component wrapper.
         """
         outCnnctns = []
         
-        id = wrpr.GetId()
+        id = wrpr.id
         if id in self.cnnctns:
             outCnnctns.extend(self.cnnctns[id])
         
         return outCnnctns
     
-    def GetIncomingConnections(self, wrpr):
+    def get_incoming_connections(self, wrpr):
         """
         Return all incoming connections for the indicated component wrapper.
         """
@@ -78,23 +80,21 @@ class Scene(Scene):
         
         return incCnnctns
     
-    def RegisterConnection(self, comp, cnnctn):
+    def register_connection(self, cnnctn):
         """
         Register a connection to its target component. This allows us to find
         a connection and break it when a component is deleted.
         """
-        compId = base.node_manager.Wrap(comp).GetId()
-        self.cnnctns.setdefault(compId, [])
-        cnnctnLabels = [cnnctn.label for cnnctn in self.cnnctns[compId]]
-        if cnnctn.label not in cnnctnLabels:
-            self.cnnctns[compId].append(cnnctn)
+        comp_id = get_base().node_manager.wrap(cnnctn.data).id
+        self.cnnctns.setdefault(comp_id, set())
+        self.cnnctns[comp_id].add(cnnctn)
     
-    def DeregisterConnection(self, comp, cnnctn):
-        compId = base.node_manager.Wrap(comp).GetId()
+    def deregister_connection(self, comp, cnnctn):
+        compId = get_base().node_manager.wrap(comp).id
         if compId in self.cnnctns:
             del self.cnnctns[compId]
         
-    def ClearConnections(self, comp):
+    def clear_connections(self, comp):
         delIds = []
         for id, cnnctns in self.cnnctns.items():
             

@@ -9,7 +9,7 @@ from game.nodes.othermeta import ComponentMetaClass
 class LensNodeAttribute(Attribute):
 
     @property
-    def source(self):
+    def data(self):
         return self.parent.data.node().get_lens()
 
 

@@ -6,14 +6,14 @@ class Composite(Base):
     def __init__(self, actions):
         self.actions = actions
     
-    def Undo(self):
+    def undo(self):
         for actn in reversed(self.actions):
-            actn.Undo()
+            actn.undo()
     
-    def Redo(self):
+    def redo(self):
         for actn in self.actions:
-            actn.Redo()
+            actn.redo()
             
-    def Destroy(self):
+    def destroy(self):
         for actn in self.actions:
-            actn.Destroy()
+            actn.destroy()

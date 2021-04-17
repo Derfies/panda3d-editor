@@ -21,7 +21,7 @@ from pandaEditor.game.showbase import ShowBase as GameShowBase
 from pandaEditor.nodes.manager import Manager as NodeManager
 from pandaEditor.plugins.manager import Manager as PluginManager
 from pandaEditor.plugins.base import Base as EditorPluginBase
-from pandaEditor.sceneParser import SceneParser
+from pandaEditor.sceneparser import SceneParser
 
 
 class ShowBase(GameShowBase):
@@ -59,7 +59,7 @@ class ShowBase(GameShowBase):
         # aspect windows so aspect is fixed when the window is resized.
         self.forcedAspectWins.append((self.win, self.edCamera, self.edPixel2d))
 
-        self.Reset()
+        self.reset()
 
         # Create project manager
         self.project = Project(self)
@@ -103,8 +103,8 @@ class ShowBase(GameShowBase):
         self.actnMgr = actions.Manager()
 
         # Bind events
-        self.accept('z', self.Undo)
-        self.accept('shift-z', self.Redo)
+        self.accept('z', self.undo)
+        self.accept('shift-z', self.redo)
         self.accept('f', self.FrameSelection)
         self.accept('del', lambda fn: commands.Remove(fn()),
                     [self.selection.Get])
@@ -132,7 +132,7 @@ class ShowBase(GameShowBase):
 
         # Start with a new scene
         self.CreateScene()
-        self.doc.OnRefresh()
+        self.doc.on_refresh()
 
         self.windowEvent(None)
 
@@ -272,7 +272,7 @@ class ShowBase(GameShowBase):
         clearMask = pc.BitMask32()
         render.node().adjustDrawMask(showMask, hideMask, clearMask)
 
-    def Reset(self):
+    def reset(self):
 
 
         """Remove all default nodes and recreate them."""
@@ -466,7 +466,7 @@ class ShowBase(GameShowBase):
         selection modified message while transfoming.
         """
         self.gizmo = True
-        self._xformTask = taskMgr.add(self.doc.OnSelectionModified,
+        self._xformTask = taskMgr.add(self.doc.on_selection_modified,
                                        'SelectionModified')
 
     def StopTransform(self):
@@ -490,13 +490,13 @@ class ShowBase(GameShowBase):
 
         # Make sure to mark the NodePath as dirty in case it is a child of a
         # model root.
-        wrpr = self.node_manager.Wrap(np)
-        wrpr.SetModified(True)
+        wrpr = self.node_manager.wrap(np)
+        wrpr.modified = True
 
         # Call OnModified next frame. Not sure why but if we call it straight
         # away it causes a small jitter when xforming...
-        taskMgr.doMethodLater(0, self.doc.OnModified, 'dragDrop',
-                               [actGizmo.attachedNps])
+        taskMgr.doMethodLater(0, self.doc.on_modified, 'dragDrop',
+                              [actGizmo.attachedNps])
 
     def FrameSelection(self):
         """
@@ -531,7 +531,7 @@ class ShowBase(GameShowBase):
         # Close the current scene if there is one
         self.selection.Clear()
         if hasattr(self, 'scene'):
-            self.scene.Close()
+            self.scene.close()
 
         # Create a new scene
         self.scene = Scene()
@@ -548,17 +548,17 @@ class ShowBase(GameShowBase):
 
     def AddComponent(self, typeStr, *args, **kwargs):
         wrprCls = self.node_manager.GetWrapperByName(typeStr)
-        wrpr = wrprCls.Create(*args, **kwargs)
-        wrpr.SetDefaultValues()
-        wrpr.SetParent(wrpr.GetDefaultParent())
+        wrpr = wrprCls.create(*args, **kwargs)
+        wrpr.set_default_values()
+        wrpr.parent = wrpr.default_parent
 
         # Bit of a hack. Sometimes a wrapper can create multiple components
         # when Create is called. Make sure to set default values on all the
         # components that were created.
         if hasattr(wrpr, 'extraNps'):
             for np in wrpr.extraNps:
-                eWrpr = self.node_manager.Wrap(np)
-                eWrpr.SetDefaultValues()
+                eWrpr = self.node_manager.wrap(np)
+                eWrpr.set_default_values()
         commands.Add([wrpr.data])
 
         return wrpr
@@ -567,13 +567,13 @@ class ShowBase(GameShowBase):
         self.assetMgr.OnAssetModified(filePaths)
         self.plugin_manager.on_project_modified(filePaths)
 
-    def Undo(self):
+    def undo(self):
         self.actnMgr.Undo()
-        self.doc.OnModified()
+        self.doc.on_modified()
 
-    def Redo(self):
+    def redo(self):
         self.actnMgr.Redo()
-        self.doc.OnModified()
+        self.doc.on_modified()
 
     def Group(self):
         nps = self.selection.GetNodePaths()

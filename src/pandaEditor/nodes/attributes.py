@@ -1,13 +1,15 @@
+from direct.showbase.PythonUtil import getBase as get_base
+
 from p3d import commonUtils as cUtils
 
 
 class Base:
 
     def SerializeToString(self):
-        if self.getFn is None:
-            return None
+        # if self.getFn is None:
+        #     return None
 
-        pVal = self.Get()
+        pVal = self.value
         if isinstance(pVal, dict):
             propDict = {}
             for name, val in pVal.items():
@@ -20,22 +22,20 @@ class Base:
 
 class Connection:
     
-    def Set(self, tgtComp):
-        base.scene.ClearConnections(self.srcComp)
-        
-        super().Set(tgtComp)
+    # def Set(self, tgtComp):
+    #     get_base().scene.ClearConnections(self.srcComp)
+    #
+    #     super().Set(tgtComp)
     
-    def Connect(self, tgtComp):
-        pass
-        # print(self.__class__.mro())
-        # super().Connect(tgtComp)
-        #
-        # base.scene.RegisterConnection(tgtComp, self)
+    def connect(self, *args, **kwargs):
+        super().connect(*args, **kwargs)
+
+        get_base().scene.register_connection(self)
         
-    def Break(self, tgtComp):
-        super().Break(tgtComp)
+    def break_(self, tgtComp):
+        super().break_(tgtComp)
         
-        base.scene.DeregisterConnection(tgtComp, self)
+        get_base().scene.deregister_connection(tgtComp, self)
 
 
 # class Base(SerializeMixin):

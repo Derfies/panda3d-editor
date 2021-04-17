@@ -85,11 +85,11 @@ class Manager:
             'Spotlight': Spotlight,
         }
         
-    def Create(self, nTypeStr, *args):
+    def create(self, nTypeStr, *args):
         wrprCls = self.wrappers[nTypeStr]
-        return wrprCls.Create(*args)
+        return wrprCls.create(*args)
     
-    def Wrap(self, comp):
+    def wrap(self, comp):
         """
         Return a wrapper suitable for the indicated component. If the correct
         wrapper cannot be found, return a NodePath wrapper for NodePaths and
@@ -132,7 +132,8 @@ class Manager:
         
         typeStr = type(comp).__name__
         if typeStr == 'NodePath':
-            typeStr = comp.node().getTag(TAG_NODE_TYPE)
+            #print('IS EMPTY:', comp.get_name())
+            typeStr = comp.node().get_tag(TAG_NODE_TYPE)
             if not typeStr:
                 typeStr = type(comp.node()).__name__
                 

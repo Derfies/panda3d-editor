@@ -68,14 +68,13 @@ class DragDropManager:
                 #return False
         #return False
 
-        wrpr = base.node_manager.Wrap(dropComp)
+        wrpr = base.node_manager.wrap(dropComp)
         if wx.GetMouseState().CmdDown():
-            return wrpr.ValidateDragDrop(self.dragComps, dropComp)
+            return wrpr.validate_drag_drop(self.dragComps, dropComp)
         else:
-            return wrpr.GetPossibleConnections(self.dragComps)
+            return wrpr.get_possible_connections(self.dragComps)
 
     def OnDropItem(self, str, parent, x, y):
-        print('OnDropItem')
 
         # Get the item at the drop point
         dropComp = parent.GetDroppedObject(x, y)
@@ -87,14 +86,14 @@ class DragDropManager:
                 raise
         if dropComp is None:
             return
-        wrpr = self.base.node_manager.Wrap(dropComp)
+        wrpr = self.base.node_manager.wrap(dropComp)
         self.data = {}
         dragComps = self.base.dDropMgr.dragComps
         if wx.GetMouseState().CmdDown():
-            wrpr.OnDragDrop(dragComps, wrpr.data)
+            wrpr.on_drag_drop(dragComps, wrpr.data)
         else:
             menu = wx.Menu()
-            for cnnctn in wrpr.GetPossibleConnections(dragComps):
+            for cnnctn in wrpr.get_possible_connections(dragComps):
                 mItem = wx.MenuItem(menu, wx.NewId(), cnnctn.label)
                 menu.AppendItem(mItem)
                 menu.Bind(wx.EVT_MENU, self.OnConnect, id=mItem.GetId())
@@ -103,17 +102,16 @@ class DragDropManager:
             menu.Destroy()
 
     def OnConnect(self, evt):
-        print('OnConnect')
         dragComps = self.base.dDropMgr.dragComps
-        cnnctn = self.data[evt.GetId()]
-        cmds.Connect(dragComps, cnnctn, cnnctn.Connect)
+        cnnctn = self.data[evt.get_id()]
+        cmds.Connect(dragComps, cnnctn, cnnctn.connect)
 
     def add_model(self, file_path, np=None):
-        self.base.AddComponent('ModelRoot', modelPath=file_path)
+        self.base.AddComponent('ModelRoot', model_path=file_path)
 
     def AddShader(self, filePath, np=None):
-        wrpr = self.base.node_manager.Wrap(np)
-        prop = wrpr.FindProperty('shader')
+        wrpr = self.base.node_manager.wrap(np)
+        prop = wrpr.find_property('shader')
         cmds.SetAttribute([np], [prop], filePath)
 
     def AddTexture(self, filePath, np=None):
@@ -133,8 +131,8 @@ class DragDropManager:
         if theTex is not None and theTex in base.scene.comps.keys():
             logger.info('found in scene')
             if np is not None:
-                npWrpr = base.node_manager.Wrap(np)
-                npWrpr.FindProperty('texture').Set(theTex)
+                npWrpr = base.node_manager.wrap(np)
+                npWrpr.find_property('texture').Set(theTex)
 
         else:
 
@@ -143,9 +141,9 @@ class DragDropManager:
             #wrpr = base.node_manager.Wrap(loader.loadTexture(pandaPath))
             #wrpr.SetDefaultValues()
             #wrpr.SetParent(wrpr.GetDefaultParent())
-            wrpr.FindProperty('fullPath').Set(pandaPath)
+            wrpr.find_property('fullPath').Set(pandaPath)
             #pm.TexturePool.addTexture(wrpr.data)
 
             if np is not None:
-                npWrpr = base.node_manager.Wrap(np)
-                npWrpr.FindProperty('texture').Set(wrpr.data)
+                npWrpr = base.node_manager.wrap(np)
+                npWrpr.find_property('texture').Set(wrpr.data)

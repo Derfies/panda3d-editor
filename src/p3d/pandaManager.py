@@ -60,5 +60,5 @@ class PandaManager:
         for scriptPath in scriptPaths:
             logger.info('Reloading script: ', scriptPath)
             for pObj in self.pObjs[scriptPath]:
-                pObjWrpr = base.node_manager.Wrap(pObj)
+                pObjWrpr = base.node_manager.wrap(pObj)
                 pObjWrpr.ReloadScript(scriptPath)

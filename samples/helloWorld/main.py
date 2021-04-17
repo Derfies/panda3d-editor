@@ -22,7 +22,7 @@ class MyApp(ShowBase):
         self.task_mgr.add(self.spin_camera_task, 'spin_camera_task')
         
         # Find the panda actor placed in the scene.
-        panda_component = self.node_manager.Wrap(self.render.find('panda_walk_character'))
+        panda_component = self.node_manager.wrap(self.render.find('panda_walk_character'))
         self.panda_actor = panda_component.GetActor()
         self.panda_actor.loop('walk')
  

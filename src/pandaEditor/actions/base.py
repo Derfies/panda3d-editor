@@ -1,13 +1,13 @@
-class Base(object):
+class Base:
     
     def __call__(self):
-        self.Redo()
+        self.redo()
     
-    def Undo(self):
+    def undo(self):
         pass
     
-    def Redo(self):
+    def redo(self):
         pass
     
-    def Destroy(self):
+    def destroy(self):
         pass

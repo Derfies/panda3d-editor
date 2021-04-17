@@ -393,7 +393,7 @@ class BasePanel(wx.Panel):
     
     def ClearWindows(self):
         for win in self._windows:
-            win.Destroy()
+            win.destroy()
         self._windows = []
     
 

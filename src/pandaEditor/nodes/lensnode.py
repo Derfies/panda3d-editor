@@ -14,7 +14,7 @@ class FrustrumAttribute(Attribute):
 
         """
         return any(
-            child.getPythonTag(TAG_FRUSTUM)
+            child.get_python_tag(TAG_FRUSTUM)
             for child in self.parent.data.get_children()
         )
 
@@ -32,15 +32,15 @@ class FrustrumAttribute(Attribute):
             self.parent.data.node().show_frustum()
             after = set(self.parent.data.get_children())
             frustum = next(iter(after - before))
-            frustum.setPythonTag(TAG_FRUSTUM, True)
-            frustum.setPythonTag(TAG_IGNORE, True)
+            frustum.set_python_tag(TAG_FRUSTUM, True)
+            frustum.set_python_tag(TAG_IGNORE, True)
 
 
 class LensNode:
 
-    show_frustrum = FrustrumAttribute(bool, w=False)
+    show_frustrum = FrustrumAttribute(bool, serialise=False)
 
-    def OnSelect(self):
+    def on_select(self):
         """
         Selection handler. Make sure to disable the frustum if it was shown
         before running the select handler as the frustum will change the size
@@ -49,6 +49,6 @@ class LensNode:
         """
         visible = self.show_frustrum.value
         self.show_frustrum.value = False
-        super().OnSelect()
+        super().on_select()
         if visible:
             self.show_frustrum.value = True

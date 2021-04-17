@@ -5,16 +5,16 @@ class Edit(Base):
     
     def __init__(self, comp):
         self.comp = comp
-        wrpr = base.node_manager.Wrap(self.comp)
-        self.mod = wrpr.GetModified()
+        wrpr = base.node_manager.wrap(self.comp)
+        self.mod = wrpr.modified
     
-    def Undo(self):
-        wrpr = base.node_manager.Wrap(self.comp)
-        wrpr.SetModified(self.mod)
+    def undo(self):
+        wrpr = base.node_manager.wrap(self.comp)
+        wrpr.modified = self.mod
     
-    def Redo(self):
-        wrpr = base.node_manager.Wrap(self.comp)
-        wrpr.SetModified(True)
+    def redo(self):
+        wrpr = base.node_manager.wrap(self.comp)
+        wrpr.modified = True
         
 
 class Transform(Edit):
@@ -25,15 +25,15 @@ class Transform(Edit):
         self.xform = xform
         self.oldXform = oldXform
     
-    def Undo(self):
+    def undo(self):
         self.comp.setTransform(self.oldXform)
-        wrpr = base.node_manager.Wrap(self.comp)
-        wrpr.SetModified(self.mod)
+        wrpr = base.node_manager.wrap(self.comp)
+        wrpr.modified = self.mod
     
-    def Redo(self):
+    def redo(self):
         self.comp.setTransform(self.xform)
-        wrpr = base.node_manager.Wrap(self.comp)
-        wrpr.SetModified(True)
+        wrpr = base.node_manager.wrap(self.comp)
+        wrpr.modified = True
         
 
 class SetAttribute(Edit):
@@ -46,15 +46,15 @@ class SetAttribute(Edit):
         
         # Save old values. I've had to cast the value back into its own type
         # so as to get a copy - undo doesn't seem to work otherwise.
-        self.oldVal = attr.type(attr.value)
+        self.oldVal = attr.value#attr.type(attr.value)
     
-    def Undo(self):
-        Edit.Undo(self)
+    def undo(self):
+        Edit.undo(self)
         
         self.attr.Set(self.oldVal)
     
-    def Redo(self):
-        Edit.Redo(self)
+    def redo(self):
+        Edit.redo(self)
         
         self.attr.value = self.val
         
@@ -71,13 +71,13 @@ class Connect(Edit):
         # Save old values
         self.oldComps = self.cnnctn.Get()
     
-    def Undo(self):
-        Edit.Undo(self)
+    def undo(self):
+        Edit.undo(self)
         
         self.cnnctn.Set(self.oldComps)
     
-    def Redo(self):
-        Edit.Redo(self)
+    def redo(self):
+        Edit.redo(self)
         
         for tgtComp in self.tgtComps:
             self.fn(tgtComp)
@@ -94,12 +94,12 @@ class SetConnections(Edit):
         # Save old values
         self.oldComps = self.cnnctn.Get()
     
-    def Undo(self):
-        Edit.Undo(self)
+    def undo(self):
+        Edit.undo(self)
         
         self.cnnctn.Set(self.oldComps)
     
-    def Redo(self):
-        Edit.Redo(self)
+    def redo(self):
+        Edit.redo(self)
         
         self.cnnctn.Set(self.tgtComps)

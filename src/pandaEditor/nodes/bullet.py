@@ -1,3 +1,5 @@
+from direct.showbase.PythonUtil import getBase as get_base
+from panda3d import bullet
 from panda3d.bullet import BulletWorld as BW
 from panda3d.bullet import BulletRigidBodyNode as BRBN
 
@@ -10,20 +12,25 @@ from game.nodes.attributes import (
 
 
 class BulletWorld:
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        
-        i = self.attributes.index(self.FindProperty('rigidBody'))
-        self.AddAttributes(Attribute('Num Rigid Bodies', int, BW.getNumRigidBodies, w=False), index=i)
-    
+
+    num_rigid_bodies = Attribute(
+        int,
+        bullet.BulletWorld.get_num_rigid_bodies,
+        serialise=False
+    )
+
     def SetDefaultValues(self):
         super().SetDefaultValues()
         
         # Set this world as the default physics world if one has not already
         # been set.
-        if base.scene.physicsWorld is None:
-            cnnctn = Connection('PhysicsWorld', None, base.scene.GetPhysicsWorld, base.scene.SetPhysicsWorld, base.scene.ClearPhysicsWorld, srcComp=base.scene)
+        if get_base().scene.physics_world is None:
+            cnnctn = Connection(
+                None,
+                get_base().scene.get_physics_world,
+                get_base().scene.set_physics_world,
+                get_base().scene.clear_physics_world
+            )
             cnnctn.Connect(self.data)
 
 
@@ -33,10 +40,10 @@ class BulletCharacterControllerNode:
         super().SetDefaultValues()
 
         # Attempt to connect this node to the physics world if here is one.
-        if base.scene.physicsWorld is not None:
+        if base.scene.physics_world is not None:
             cnnctn = NodePathTargetConnectionList('Character', None, None, BW.attachCharacter,
-                                None, BW.removeCharacter,
-                                base.scene.physicsWorld)
+                                                  None, BW.removeCharacter,
+                                                  base.scene.physics_world)
             cnnctn.Connect(self.data)
 
 
@@ -53,8 +60,8 @@ class BulletRigidBodyNode:
         super().SetDefaultValues()
 
         # Attempt to connect this node to the physics world if here is one.
-        if base.scene.physicsWorld is not None:
+        if base.scene.physics_world is not None:
             cnnctn = NodePathTargetConnectionList('Rigid Body', None, None, BW.attachRigidBody,
-                                None, BW.removeRigidBody,
-                                base.scene.physicsWorld)
+                                                  None, BW.removeRigidBody,
+                                                  base.scene.physics_world)
             cnnctn.Connect(self.data)

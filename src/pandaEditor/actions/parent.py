@@ -9,8 +9,8 @@ class Parent(Base):
         
         self.oldParent = np.getParent()
     
-    def Undo(self):
+    def undo(self):
         self.np.wrtReparentTo(self.oldParent)
     
-    def Redo(self):
+    def redo(self):
         self.np.wrtReparentTo(self.parent)

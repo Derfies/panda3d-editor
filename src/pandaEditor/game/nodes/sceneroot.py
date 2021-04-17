@@ -1,4 +1,5 @@
 from panda3d.bullet import BulletWorld
+from direct.showbase.PythonUtil import getBase as get_base
 
 from game.nodes.attributes import NodePathTargetConnection
 from game.nodes.base import Base
@@ -22,21 +23,27 @@ class SceneRoot(Base, metaclass=ComponentMetaClass):
        # )
     
     @classmethod
-    def Create(cls, *args, **kwargs):
-        return cls(base.scene)
+    def create(cls, *args, **kwargs):
+        return cls(get_base().scene)
     
-    def AddChild(self, comp):
-        self.data.RegisterComponent(comp)
-        
-    def GetParent(self):
-        return None
-        
-    def SetParent(self, pComp):
-        
-        # SceneRoot is a special node which shouldn't be parented to anything.
+    def add_child(self, comp):
+        self.data.register_component(comp)
+
+    @property
+    def parent(self):
+        return get_base().node_manager.wrap(get_base().scene)
+
+    @parent.setter
+    def parent(self, value):
+
+        # Render is a default Panda NodePath which shouldn't be parented to
+        # anything.
         pass
-    
-    def SetId(self, id):
-        
-        # SceneRoot is a special node doesn't need an id.
+
+    @property
+    def id(self):
+        return None
+
+    @id.setter
+    def id(self, value):
         pass

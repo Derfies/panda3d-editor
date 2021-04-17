@@ -5,45 +5,50 @@ class SceneParser(object):
     
     """A class to load map files into Panda3D."""
     
-    def Load(self, rootNp, filePath):
+    def load(self, rootNp, filePath):
         """Load the scene from an xml file."""
         self.nodes = {}
         self.cnctns = {}
         
         tree = et.parse(filePath)
         sRootElem = tree.find(".//Component[@type='SceneRoot']")
-        self.LoadComponent(sRootElem, None)
+        self.load_component(sRootElem, None)
             
         # Load connections
-        self.LoadConnections()
+        self.load_connections()
         
-    def GetCreateKwargs(self, wrprCls, elem):
+    def get_create_kwargs(self, wrprCls, elem):
         kwargs = {}
         
         for attr in wrprCls(None).create_attributes:
             pElem = elem.find(".//Item[@name='" + attr.name + "']")
             if pElem is not None:
-                kwargs[attr.initName] = pElem.get('value')
+                kwargs[attr.init_arg_name] = pElem.get('value')
                 
         return kwargs
             
-    def LoadComponent(self, elem, pComp):
+    def load_component(self, elem, pComp):
         wrprCls = base.node_manager.GetWrapperByName(elem.get('type'))
         if wrprCls is not None:
             
-            args = self.GetCreateKwargs(wrprCls, elem)
+            args = self.get_create_kwargs(wrprCls, elem)
             if 'path' in elem.attrib:
                 args['parent'] = pComp
                 args['path'] = elem.attrib['path']
             
-            # Create the node and load its properties.
-            wrpr = wrprCls.Create(**args)
-            wrpr.SetParent(pComp)
-            
-            id = elem.get('id')
-            wrpr.SetId(id)
+            # Create the node and load it`s properties.
+            wrpr = wrprCls.create(**args)
+            if pComp is not None:
+                try:
+                    print(wrpr, wrpr.__class__.mro())
+                    wrpr.parent = pComp
+                except:
+                    print(wrpr, wrpr.parent, pComp)
+                    raise
+
+            wrpr.id = elem.get('id')
             self.nodes[id] = wrpr.data
-            self.LoadProperties(wrpr, elem)
+            self.load_properties(wrpr, elem)
             
             # Store connections so we can set them up once the rest of
             # the scene has been loaded.
@@ -59,9 +64,9 @@ class SceneParser(object):
             
             # Recurse through hierarchy.
             for cElem in elem.findall('Component'):
-                self.LoadComponent(cElem, wrpr.data)
+                self.load_component(cElem, wrpr)
             
-    def LoadProperties(self, wrpr, elem):
+    def load_properties(self, wrpr, elem):
         
         # Pull all properties from the xml for this component, then get the 
         # wrapper and set all of them.
@@ -77,9 +82,9 @@ class SceneParser(object):
                     itemDict[itemElem.get('name')] = itemElem.get('value')
                 propDict[propElem.get('name')] = itemDict
         
-        wrpr.SetPropertyData(propDict)
+        wrpr.set_property_data(propDict)
         
-    def LoadConnections(self):
+    def load_connections(self):
         for comp, cnctn in self.cnctns.items():
             
             # Swap uuids for NodePaths
@@ -90,5 +95,5 @@ class SceneParser(object):
                         cnctnDict.setdefault(key, [])
                         cnctnDict[key].append(self.nodes[val])
             
-            wrpr = base.node_manager.Wrap(comp)
-            wrpr.SetConnectionData(cnctnDict)
+            wrpr = base.node_manager.wrap(comp)
+            wrpr.set_connection_data(cnctnDict)

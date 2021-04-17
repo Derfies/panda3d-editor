@@ -1,4 +1,5 @@
 import panda3d.core as pm
+from direct.showbase.PythonUtil import getBase as get_base
 
 from pandaEditor import actions
 
@@ -10,13 +11,13 @@ def Add(comps):
 
     """
     actns = []
-    actns.append(actions.Deselect(base.selection.comps))
+    actns.append(actions.Deselect(get_base().selection.comps))
     actns.extend([actions.Add(comp) for comp in comps])
     actns.append(actions.Select(comps))
     actn = actions.Composite(actns)
-    base.actnMgr.Push(actn)
+    get_base().actnMgr.Push(actn)
     actn()
-    base.doc.OnModified(comps)
+    get_base().doc.on_modified(comps)
     
 
 def Remove(comps):
@@ -29,9 +30,9 @@ def Remove(comps):
     actns.append(actions.Deselect(comps))
     actns.extend([actions.Remove(comp) for comp in comps])
     actn = actions.Composite(actns)
-    base.actnMgr.Push(actn)
+    get_base().actnMgr.Push(actn)
     actn()
-    base.doc.OnModified(comps)
+    get_base().doc.on_modified(comps)
     
 
 def Duplicate(comps):
@@ -40,20 +41,20 @@ def Duplicate(comps):
     undo queue.
 
     """
-    selComps = base.selection.comps
-    base.selection.Clear()
+    selComps = get_base().selection.comps
+    get_base().selection.Clear()
     dupeComps = []
     for comp in comps:
-        wrpr = base.node_manager.Wrap(comp)
-        dupeComps.append(wrpr.Duplicate())
+        wrpr = get_base().node_manager.wrap(comp)
+        dupeComps.append(wrpr.duplicate())
     actns = []
     actns.append(actions.Deselect(selComps))
     actns.extend([actions.Add(dupeComp) for dupeComp in dupeComps])
     actns.append(actions.Select(dupeComps))
     actn = actions.Composite(actns)
-    base.actnMgr.Push(actn)
+    get_base().actnMgr.Push(actn)
     actn()
-    base.doc.OnModified(dupeComps)
+    get_base().doc.on_modified(dupeComps)
     
 
 def Replace(fromComp, toComp):
@@ -67,9 +68,9 @@ def Replace(fromComp, toComp):
         actions.Select([toComp])
     ]
     actn = actions.Composite(actns)
-    base.actnMgr.Push(actn)
+    get_base().actnMgr.Push(actn)
     actn()
-    base.doc.OnModified([fromComp, toComp])
+    get_base().doc.on_modified([fromComp, toComp])
     
 
 def Select(comps):
@@ -79,13 +80,13 @@ def Select(comps):
 
     """
     actns = [
-        actions.Deselect(base.selection.comps), 
+        actions.Deselect(get_base().selection.comps), 
         actions.Select(comps)
     ]
     actn = actions.Composite(actns)
-    base.actnMgr.Push(actn)
+    get_base().actnMgr.Push(actn)
     actn()
-    base.doc.OnRefresh(comps)
+    get_base().doc.on_refresh(comps)
     
 
 def SetAttribute(comps, attrs, val):
@@ -99,9 +100,9 @@ def SetAttribute(comps, attrs, val):
         for i in range(len(comps))
     ]
     actn = actions.Composite(actns)
-    base.actnMgr.Push(actn)
+    get_base().actnMgr.Push(actn)
     actn()
-    base.doc.OnModified(comps)
+    get_base().doc.on_modified(comps)
     
 
 def Parent(comps, pComp):
@@ -111,9 +112,9 @@ def Parent(comps, pComp):
     """
     actns = [actions.Parent(comp, pComp) for comp in comps]
     actn = actions.Composite(actns)
-    base.actnMgr.Push(actn)
+    get_base().actnMgr.Push(actn)
     actn()
-    base.doc.OnModified(comps)
+    get_base().doc.on_modified(comps)
     
 
 def Unparent():
@@ -140,9 +141,9 @@ def Group(nps):
     actns.append(actions.Deselect(nps))
     actns.append(actions.Select([grpNp]))
     actn = actions.Composite(actns)
-    base.actnMgr.Push(actn)
+    get_base().actnMgr.Push(actn)
     actn()
-    base.doc.OnModified(nps.append(grpNp))
+    get_base().doc.on_modified(nps.append(grpNp))
     
 
 def Ungroup(nps):
@@ -153,9 +154,9 @@ def Ungroup(nps):
     pNps = []
     cNpSets = []
     for np in nps:
-        wrpr = base.node_manager.Wrap(np)
-        pNps.append(wrpr.GetParent().data)
-        cNpSets.append([cWrpr.data for cWrpr in wrpr.GetChildren()])
+        wrpr = get_base().node_manager.wrap(np)
+        pNps.append(wrpr.parent.data)
+        cNpSets.append([cWrpr.data for cWrpr in wrpr.get_children()])
         
     # Remove those nodes which were empty NodePaths.
     rmvNps = [np for np in nps if np.node().isExactType(pm.PandaNode)]
@@ -168,9 +169,9 @@ def Ungroup(nps):
     actns.append(actions.Select([cNp for cNps in cNpSets for cNp in cNps]))
     
     actn = actions.Composite(actns)
-    base.actnMgr.Push(actn)
+    get_base().actnMgr.Push(actn)
     actn()
-    base.doc.OnModified(nps.append(rmvNps))
+    get_base().doc.on_modified(nps.append(rmvNps))
     
 
 def Connect(tgtComps, cnnctn, fn):
@@ -179,9 +180,9 @@ def Connect(tgtComps, cnnctn, fn):
 
     """
     actn = actions.Connect(tgtComps, cnnctn, fn)
-    base.actnMgr.Push(actn)
+    get_base().actnMgr.Push(actn)
     actn()
-    base.doc.OnModified()
+    get_base().doc.on_modified()
     
 
 def SetConnections(tgtComps, cnnctns):
@@ -191,6 +192,6 @@ def SetConnections(tgtComps, cnnctns):
     """
     actns = [actions.SetConnections(tgtComps, cnnctn) for cnnctn in cnnctns]
     actn = actions.Composite(actns)
-    base.actnMgr.Push(actn)
+    get_base().actnMgr.Push(actn)
     actn()
-    base.doc.OnModified()
+    get_base().doc.on_modified()

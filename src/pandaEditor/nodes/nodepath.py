@@ -1,11 +1,12 @@
 import copy
 
 import panda3d.core as pm
+from direct.showbase.PythonUtil import getBase as get_base
 from panda3d.core import NodePath as NP
 from direct.directtools.DirectSelection import DirectBoundingBox
 
 from pandaEditor import commands
-from game.nodes.attributes import NodePathAttribute
+from game.nodes.attributes import Attribute
 from game.nodes.constants import TAG_MODEL_ROOT_CHILD
 from pandaEditor.nodes.constants import (
     TAG_BBOX, TAG_IGNORE, TAG_MODIFIED, TAG_PICKABLE
@@ -50,10 +51,22 @@ class NodePath:
     #         NodePathAttribute('Sz', float, NP.getSz, NP.setSz, w=False),
     #         parent='Scale'
     #   )
-        
-    @classmethod
-    def SetPickable(cls, value=True):
-        cls.pickable = value
+
+    @property
+    def modified(self):
+        return self.data.get_python_tag(TAG_MODIFIED)
+
+    @modified.setter
+    def modified(self, value):
+        if self.data.get_python_tag(TAG_MODEL_ROOT_CHILD):
+            self.data.set_python_tag(TAG_MODIFIED, value)
+
+    @property
+    def savable(self):
+        if self.data.get_python_tag(TAG_MODEL_ROOT_CHILD):
+            return self.modified
+        else:
+            return True
         
     @classmethod
     def set_editor_geometry(cls, geo):
@@ -68,66 +81,59 @@ class NodePath:
         geo.node().adjustDrawMask(*base.GetEditorRenderMasks())
         cls.geo = geo
         
-    def SetupNodePath(self):
-        super().SetupNodePath()
+    def set_up_node_path(self):
+        super().set_up_node_path()
         
         if self.geo is not None:
-            self.geo.copyTo(self.data)
+            self.geo.copy_to(self.data)
             
         if self.pickable:
-            self.data.setPythonTag(TAG_PICKABLE, self.pickable)
+            self.data.set_python_tag(TAG_PICKABLE, self.pickable)
             
-    def OnSelect(self):
+    def on_select(self):
         """Add a bounding box to the indicated node."""
         bbox = DirectBoundingBox(self.data, (1, 1, 1, 1))
         bbox.show()
-        bbox.lines.setPythonTag(TAG_IGNORE, True)
-        bbox.lines.node().adjustDrawMask(*base.GetEditorRenderMasks())
+        bbox.lines.set_python_tag(TAG_IGNORE, True)
+        bbox.lines.node().adjust_draw_mask(*get_base().GetEditorRenderMasks())
         self.data.setPythonTag(TAG_BBOX, bbox)
         return bbox
     
-    def OnDeselect(self):
+    def on_deselect(self):
         """Remove the bounding box from the indicated node."""
-        bbox = self.data.getPythonTag(TAG_BBOX)
+        bbox = self.data.get_python_tag(TAG_BBOX)
         if bbox is not None:
-            bbox.lines.removeNode()
-        self.data.clearPythonTag(TAG_BBOX)
+            bbox.lines.remove_node()
+        self.data.clear_python_tag(TAG_BBOX)
     
-    def OnDelete(self, np):
+    def on_delete(self, np):
         pass
     
-    def GetPath(self):
-        modelRoot = self.data.findNetPythonTag(TAG_PICKABLE)
+    def get_path(self):
+        model_root = self.data.find_net_python_tag(TAG_PICKABLE)
         
         def Rec(tgtNp, np, path):
-            if np.compareTo(tgtNp) != 0:
-                path.insert(0, np.getName())
-                Rec(tgtNp, np.getParent(), path)
+            if np.compare_to(tgtNp) != 0:
+                path.insert(0, np.get_name())
+                Rec(tgtNp, np.get_parent(), path)
         
         path = []
-        Rec(modelRoot, self.data, path)
+        Rec(model_root, self.data, path)
         return '|'.join(path)
     
-    def GetAttrib(self):
+    def get_attrib(self):
         """
         If this node is a child of a model root, make sure to add its position
         in the hierarchy to the attrib dictionary.
         """
-        attrib = super().GetAttrib()
+        attrib = super().get_attrib()
         
-        if self.GetModified():
-            attrib['path'] = self.GetPath()
+        if self.modified:
+            attrib['path'] = self.get_path()
             
         return attrib
     
-    def GetModified(self):
-        return self.data.getPythonTag(TAG_MODIFIED)
-    
-    def SetModified(self, val):
-        if self.data.getPythonTag(TAG_MODEL_ROOT_CHILD):
-            self.data.setPythonTag(TAG_MODIFIED, val)
-    
-    def ValidateDragDrop(self, dragComps, dropComp):
+    def validate_drag_drop(self, dragComps, dropComp):
         dragNps = [dragComp for dragComp in dragComps if type(dragComp) == pm.NodePath]
         if not dragNps:
             return False
@@ -149,51 +155,45 @@ class NodePath:
         # Drop target item is ok, continue
         return True
     
-    def OnDragDrop(self, dragComps, dropNp):
+    def on_drag_drop(self, dragComps, dropNp):
         dragNps = [dragComp for dragComp in dragComps if type(dragComp) == pm.NodePath]
         if dragNps:
             commands.Parent(dragNps, dropNp)
             
-    def IsOfType(self, cType):
-        return self.data.node().isOfType(cType)
+    def is_of_type(self, cType):
+        return self.data.node().is_of_type(cType)
             
-    def SetDefaultValues(self):
+    def set_default_values(self):
         pass
         
-    def IsSaveable(self):
-        if self.data.getPythonTag(TAG_MODEL_ROOT_CHILD):
-            return self.GetModified()
-        else:
-            return True
-        
     @classmethod
-    def FindChild(cls, *args, **kwargs):
+    def find_child(cls, *args, **kwargs):
         np = super(NodePath, cls).FindChild(*args, **kwargs)
         np.setPythonTag(TAG_MODIFIED, True)
         return np
+
+    @property
+    def default_parent(self):
+        return get_base().node_manager.wrap(get_base().render)
     
-    def GetDefaultParent(self):
-        return base.render
-    
-    def GetChildren(self):
+    def get_children(self):
         """
         Return a list of wrappers for the children of this NodePath, ignoring
         those NodePaths tagged with TAG_IGNORE (like editor only geometry).
         """
-        children = [
-            cWrpr 
-            for cWrpr in super().GetChildren()
-            if not cWrpr.data.getPythonTag(TAG_IGNORE)
+        return [
+            comp
+            for comp in super().get_children()
+            if not comp.data.get_python_tag(TAG_IGNORE)
         ]
-        return children
     
-    def OnDuplicate(self, origNp, dupeNp):
-        super().OnDuplicate(origNp, dupeNp)
+    def on_duplicate(self, origNp, dupeNp):
+        super().on_duplicate(origNp, dupeNp)
         
-        wrpr = base.node_manager.Wrap(origNp)
-        cnnctns = base.scene.GetOutgoingConnections(wrpr)
+        wrpr = base.node_manager.wrap(origNp)
+        cnnctns = base.scene.get_outgoing_connections(wrpr)
         for cnnctn in cnnctns:
             newCnnctn = copy.copy(cnnctn)
-            newCnnctn.Connect(self.data)
+            newCnnctn.connect(self.data)
         
         self.data.setPythonTag(TAG_MODIFIED, origNp.getPythonTag(TAG_MODIFIED))

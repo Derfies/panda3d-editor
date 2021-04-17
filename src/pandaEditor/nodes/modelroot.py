@@ -7,18 +7,18 @@ class ModelPathAttribute:
 
     @property
     def value(self):
-        return get_base().project.GetRelModelPath(super().value)
+        return get_base().project.get_rel_model_path(super().value)
 
 
 class ModelRoot:
     
     @classmethod
-    def Create(cls, *args, **kwargs):
-        wrpr = super(ModelRoot, cls).Create(*args, **kwargs)
+    def create(cls, *args, **kwargs):
+        comp = super().create(*args, **kwargs)
         
         # Tag each descendant NodePath as a child of a model root. This edits
         # of these NodePaths to be saved out.
-        for childNp in wrpr.data.findAllMatches('**/*'):
-            childNp.setPythonTag(TAG_MODEL_ROOT_CHILD, True)
+        for child in comp.data.find_all_matches('**/*'):
+            child.set_python_tag(TAG_MODEL_ROOT_CHILD, True)
         
-        return wrpr
+        return comp

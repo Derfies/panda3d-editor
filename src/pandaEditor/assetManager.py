@@ -63,7 +63,7 @@ class AssetManager:
         
         wrprCls = self.base.node_manager.GetWrapperByName('ModelRoot')
         filePath = pm.Filename.toOsSpecific(pandaPath)
-        wrpr = wrprCls.Create(modelPath=filePath)
+        wrpr = wrprCls.create(model_path=filePath)
         
         # Now unhook all the NodePaths under the ModelRoot and reparent a new
         # copy to it. This will remove all sub ModelRoot changes at the moment
@@ -75,16 +75,16 @@ class AssetManager:
             inCnnctns = {}
             outCnnctns = {}
             for childNp in np.findAllMatches('**/*'):
-                cWrpr = self.base.node_manager.Wrap(childNp)
-                path = cWrpr.GetPath()
-                oldIds[path] = cWrpr.GetId()
-                for cnnctn in self.base.scene.GetIncomingConnections(cWrpr):
+                cWrpr = self.base.node_manager.wrap(childNp)
+                path = cWrpr.get_path()
+                oldIds[path] = cWrpr.id
+                for cnnctn in self.base.scene.get_incoming_connections(cWrpr):
                     # Need to break connection here?
                     inCnnctns.setdefault(path, [])
                     inCnnctns[path].append(cnnctn)
                     
-                for cnnctn in self.base.scene.GetOutgoingConnections(cWrpr):
-                    cnnctn.Break(cWrpr.data)
+                for cnnctn in self.base.scene.get_outgoing_connections(cWrpr):
+                    cnnctn.break_(cWrpr.data)
                     outCnnctns.setdefault(path, [])
                     outCnnctns[path].append(cnnctn)
             
@@ -95,32 +95,32 @@ class AssetManager:
             # Copy the new updated children under the old ModelRoot NodePath
             # so we retain its properties.
             for childNp in wrpr.data.getChildren():
-                cWrpr = self.base.node_manager.Wrap(childNp)
-                dupeNp = cWrpr.Duplicate(uniqueName=False)
+                cWrpr = self.base.node_manager.wrap(childNp)
+                dupeNp = cWrpr.duplicate(uniqueName=False)
                 dupeNp.reparentTo(np)
                 
             # Replace connections.
             for childNp in np.findAllMatches('**/*'):
-                cWrpr = self.base.node_manager.Wrap(childNp)
-                path = cWrpr.GetPath()
+                cWrpr = self.base.node_manager.wrap(childNp)
+                path = cWrpr.get_path()
                 
                 if path in outCnnctns:
                     for cnnctn in outCnnctns[path]:
-                        cnnctn.Connect(cWrpr.data)
+                        cnnctn.connect(cWrpr.data)
                         #print 'Relinking: ', cnnctn.label, ' to: ', cWrpr.data
                         
                 if path in inCnnctns:
-                    cWrpr.SetModified(True)
+                    cWrpr.modified = True
                     for cnnctn in inCnnctns[path]:
                         comps = cnnctn.Get()
                         cnnctn.srcComp = childNp
                         try:
                             for comp in comps:
-                                cnnctn.Connect(comp)
+                                cnnctn.connect(comp)
                         except TypeError:
-                            cnnctn.Connect(comps)
+                            cnnctn.connect(comps)
                           
                         #print 'Relinking: ', cnnctn.label, ' to: ', cWrpr.data
                         
                 # Fix up name and ids.
-                cWrpr.SetId(oldIds[path])
+                cWrpr.set_id(oldIds[path])

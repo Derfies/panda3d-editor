@@ -77,11 +77,10 @@ class SceneGraphBasePanel(wx.Panel):
 
         # Set the filter based on the flat menu selection.
         self.filter = None
-        val = self.fm.FindMenuItem(DISPLAY_NODEPATHS).IsChecked()
-        if val:
+        if self.fm.FindMenuItem(DISPLAY_NODEPATHS).IsChecked():
             self.filter = pm.PandaNode
 
-        self.base.doc.OnRefresh()
+        self.base.doc.on_refresh()
 
     def OnTreeBeginLabelEdit(self, evt):
         """
@@ -98,8 +97,8 @@ class SceneGraphBasePanel(wx.Panel):
     def OnTreeEndLabelEdit(self, evt):
         """Change the component's name to that of the new item's name."""
         def SetComponentName(comp, name):
-            wrpr = self.base.node_manager.Wrap(comp)
-            attr = wrpr.FindProperty('name')
+            wrpr = self.base.node_manager.wrap(comp)
+            attr = wrpr.find_property('name')
             if attr is not None:
                 wx.CallAfter(cmds.SetAttribute, [comp], [attr], name)
 
@@ -137,21 +136,20 @@ class SceneGraphBasePanel(wx.Panel):
         else:
             return dropItem.GetData()
         
-    def AddItem(self, wrpr, pItem):
+    def AddItem(self, comp, parent_item):
         """
         Traverse the scene from the root node, creating tree items for each
         component encountered.
         """
         # Bail if there is a filter set and the node is not derived from
         # that type.
-        if self.filter is not None and not wrpr.IsOfType(self.filter):
+        if self.filter is not None and not comp.is_of_type(self.filter):
             return
-            
-        item = self.tc.AppendItem(pItem, wrpr.GetName(), data=wrpr.data)
-        self._comps[wrpr.data] = item
-        
-        for cWrpr in wrpr.GetChildren():
-            self.AddItem(cWrpr, item)
+
+        item = self.tc.AppendItem(parent_item, comp.name_, data=comp.data)
+        self._comps[comp.data] = item
+        for child in comp.get_children():
+            self.AddItem(child, item)
             
     def RemoveItem(self, wrpr, delete=True):
         if wrpr.data in self._comps:
@@ -159,20 +157,22 @@ class SceneGraphBasePanel(wx.Panel):
                 self.tc.Delete(self._comps[wrpr.data])
             del self._comps[wrpr.data]
             
-        for cWrpr in wrpr.GetChildren():
+        for cWrpr in wrpr.get_children():
             self.RemoveItem(cWrpr, False)
             
-    def RefreshItem(self, wrpr):
-        pWrpr = wrpr.GetParent()
-        if pWrpr is None:
+    def RefreshItem(self, comp):
+        parent = comp.parent
+        if parent is None:
             return
         
-        if pWrpr.data in self._comps:
-            newItem = self.tc.SetItemParent(self._comps[wrpr.data], 
-                                             self._comps[pWrpr.data], 
-                                             wrpr.GetSiblingIndex())
-            self.tc.SetItemText(newItem, wrpr.GetName())
-            self.UpdateItemData(newItem)
+        if parent.data in self._comps:
+            new_item = self.tc.SetItemParent(
+                self._comps[comp.data],
+                self._comps[parent.data],
+                comp.get_sibling_index()
+            )
+            self.tc.SetItemText(new_item, comp.name_)
+            self.UpdateItemData(new_item)
             
     def UpdateItemData(self, item):
         data = self.tc.GetItemData(item)
@@ -198,8 +198,8 @@ class SceneGraphBasePanel(wx.Panel):
             self.Rebuild()
         else:
             for comp in comps:
-                wrpr = self.base.node_manager.Wrap(comp)
-                pWrpr = wrpr.GetParent()
+                wrpr = self.base.node_manager.wrap(comp)
+                pWrpr = wrpr.parent
                 if wrpr.data in self._comps:
                     if pWrpr is None and wrpr.data != self.base.scene:
                         
@@ -222,13 +222,13 @@ class SceneGraphBasePanel(wx.Panel):
         # Clear existing items and repopulate tree control
         self.tc.DeleteAllItems()
         self._comps = {}
-        rItem = self.tc.AddRoot('root')
-        wrpr = self.base.node_manager.Wrap(self.base.scene)
+        root_item = self.tc.AddRoot('root')
+        comp = self.base.node_manager.wrap(self.base.scene)
         if self.filter is None:
-            self.AddItem(wrpr, rItem)
+            self.AddItem(comp, root_item)
         else:
-            for cWrpr in wrpr.GetChildren(): 
-                self.AddItem(cWrpr, rItem)
+            for child in comp.get_children():
+                self.AddItem(child, root_item)
             
         # Get map of node paths to items after populating the tree control
         newItems = self.GetItemsDictionary()
