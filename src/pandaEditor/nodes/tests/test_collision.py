@@ -51,18 +51,6 @@ from game.nodes.showbasedefaults import (
 )
 from pandaEditor.scene import Scene
 
-#
-# class TestLightMixin(ComponentMixin):
-#
-#     component = Light
-#     create_kwargs = {'name': 'test'}
-#
-#     def test_create(self):
-#         node = super().test_create()
-#         self.assertEqual('test', node.name.value)
-#         self.assertEqual((1, 1, 1, 1), node.color.value)
-#         return node
-
 
 class TestCollisionNode(ComponentMixin, unittest.TestCase):
 
@@ -78,4 +66,35 @@ class TestCollisionBox(TestBaseMixin, unittest.TestCase):
 
     def test_create(self):
         node = super().test_create()
-        print('node:', node)
+
+
+class TestCollisionRay(TestBaseMixin, unittest.TestCase):
+
+    component = CollisionRay
+
+    def test_create(self):
+        node = super().test_create()
+
+
+class TestCollisionSphere(TestBaseMixin, unittest.TestCase):
+
+    component = CollisionSphere
+
+    def test_create(self):
+        node = super().test_create()
+
+
+class TestCollisionInvSphere(TestBaseMixin, unittest.TestCase):
+
+    component = CollisionInvSphere
+
+    def test_create(self):
+        node = super().test_create()
+
+
+class TestCollisionCapsule(TestBaseMixin, unittest.TestCase):
+
+    component = CollisionCapsule
+
+    def test_create(self):
+        node = super().test_create()
