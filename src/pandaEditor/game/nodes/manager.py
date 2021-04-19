@@ -6,6 +6,7 @@ from game.nodes.bullet import (
     BulletCharacterControllerNode,
     BulletDebugNode,
     BulletPlaneShape,
+    BulletSphereShape,
     BulletRigidBodyNode,
     BulletWorld,
 )
@@ -59,6 +60,7 @@ class Manager:
             'BulletCharacterControllerNode': BulletCharacterControllerNode,
             'BulletDebugNode': BulletDebugNode,
             'BulletPlaneShape': BulletPlaneShape,
+            'BulletSphereShape': BulletSphereShape,
             'BulletRigidBodyNode': BulletRigidBodyNode,
             'BulletWorld': BulletWorld,
             'Cam2d': Cam2d,

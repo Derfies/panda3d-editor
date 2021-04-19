@@ -11,9 +11,14 @@ from panda3d.bullet import ZUp
 
 from game.nodes.attributes import (
     Attribute,
-    #Connection,
+    Connection,
     Connections,
     NodeAttribute,
+    NodeConnection,
+    ToNodeConnection,
+    ToNodesConnection,
+    NodeToNodesConnection,
+    NodeConnections,
     # NodePathSourceConnections,
     # NodePathTargetConnection,
     # NodePathTargetConnections,
@@ -25,13 +30,24 @@ from game.nodes.nodepath import NodePath
 TAG_BULLET_DEBUG_WIREFRAME = 'P3D_BulletDebugWireframe'
 
 
+class BulletSphereShape(Base):
+
+    type_ = pb.BulletSphereShape
+    radius = Attribute(
+        float,
+        pb.BulletSphereShape.get_radius,
+        init_arg=0.5,
+    )
+
+
 class BulletBoxShape(Base):
 
     type_ = pb.BulletBoxShape
     half_extents = Attribute(
         pm.Vec3,
         pb.BulletBoxShape.get_half_extents_with_margin,
-        init_arg=pm.Vec3(0.5, 0.5, 0.5)
+        init_arg=pm.Vec3(0.5, 0.5, 0.5),
+        init_arg_name='halfExtents',
     )
 
 
@@ -54,78 +70,101 @@ class BulletCharacterControllerNode(NodePath):
     name = Attribute(str)
 
 
+class ShowWireframeAttribute(Attribute):
+
+    def __init__(self):
+        super().__init__(bool, self.get_wireframe, self.set_wireframe)
+
+    def get_wireframe(self, np):
+        return np.get_python_tag(TAG_BULLET_DEBUG_WIREFRAME)
+
+    def set_wireframe(self, np, value):
+        np.node().show_wireframe(value)
+        np.set_python_tag(TAG_BULLET_DEBUG_WIREFRAME, value)
+
+
 class BulletDebugNode(NodePath):
 
-    type_ = BDN
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.AddAttributes(
-            Attribute('Show Wireframe', bool, self.GetWireframe, self.SetWireframe),
-            parent='BulletDebugNode'
-        )
+    type_ = pb.BulletDebugNode
+    show_wireframe = ShowWireframeAttribute()
 
     @classmethod
     def create(cls, *args, **kwargs):
-        wrpr = super(BulletDebugNode, cls).create(*args, **kwargs)
-        wrpr.SetWireframe(wrpr.data, True)
-        wrpr.data.show()
-        return wrpr
-
-    def GetWireframe(self, np):
-        return np.getPythonTag(TAG_BULLET_DEBUG_WIREFRAME)
-
-    def SetWireframe(self, np, val):
-        np.node().showWireframe(val)
-        np.setPythonTag(TAG_BULLET_DEBUG_WIREFRAME, val)
+        comp = super().create(*args, **kwargs)
+        comp.show_wireframe.set(True)
+        comp.data.show()
+        return comp
 
 
 class BulletPlaneShape(Base):
 
     type_ = pb.BulletPlaneShape
-    normal = Attribute(pm.Vec3, init_arg=pm.Vec3(0, 0, 1)),
-    constant = Attribute(int, init_arg=0),
+    normal = Attribute(pm.Vec3, init_arg=pm.Vec3(0, 0, 1))
+    constant = Attribute(int, init_arg=0)
+
+
+class ShapesConnection(NodeConnections):
+
+    def __init__(self):
+        super().__init__(
+            pb.BulletShape,
+            pb.BulletRigidBodyNode.get_shapes,
+            pb.BulletRigidBodyNode.add_shape,
+            self.clear_shapes,
+        )
+
+    def clear_shapes(self, value):
+        num_shapes = self.data.get_num_shapes()
+        for i in range(num_shapes):
+            shape = self.data.get_shape(0)
+            self.data.remove_shape(shape)
 
 
 class BulletRigidBodyNode(NodePath):
 
-    type_ = BRBN
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.AddAttributes(
-            NodeAttribute('Angular Damping', float, BRBN.getAngularDamping, BRBN.setAngularDamping),
-            NodeAttribute('Gravity', pm.Vec3, BRBN.getGravity, BRBN.setGravity),
-            NodeAttribute('Mass', float, BRBN.getMass, BRBN.setMass),
-            NodePathSourceConnections ('Shapes', BS, BRBN.getShapes, BRBN.addShape, self.ClearShapes, BRBN.removeShape, self.data),
-            parent='BulletRigidBodyNode'
-        )
-
-    def ClearShapes(self, comp):
-        numShapes = comp.getNumShapes()
-        for i in range(numShapes):
-            shape = comp.getShape(0)
-            comp.removeShape(shape)
+    type_ = pb.BulletRigidBodyNode
+    angular_dampening = NodeAttribute(
+        float,
+        pb.BulletRigidBodyNode.getAngularDamping,
+        pb.BulletRigidBodyNode.setAngularDamping,
+    )
+    gravity = NodeAttribute(
+        pm.Vec3,
+        pb.BulletRigidBodyNode.getGravity,
+        pb.BulletRigidBodyNode.setGravity,
+    )
+    mass = NodeAttribute(
+        float,
+        pb.BulletRigidBodyNode.get_mass,
+        pb.BulletRigidBodyNode.set_mass,
+    )
+    shapes = ShapesConnection()
 
 
 class BulletWorld(Base):
 
-    type_ = BW
+    def _clear_rigid_bodies(comp):
+        for i in range(comp.get_num_rigid_bodies()):
+            comp.remove_rigid_body(comp.get_rigid_body(0))
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.AddAttributes(
-            Attribute('Gravity', pm.Vec3, BW.getGravity, BW.setGravity),
-            NodePathTargetConnections('Rigid Body', BRBN, BW.getRigidBodies, BW.attachRigidBody, self.ClearRigidBodies,
-                       BW.removeRigidBody, self.data),
-            NodePathTargetConnections('Character', BCCN, BW.getCharacters, BW.attachCharacter, self.ClearCharacters,
-                       BW.removeCharacter, self.data),
-            NodePathTargetConnection('Debug Node', BDN, self.GetDebugNode, BW.setDebugNode, BW.clearDebugNode, self.data),
-            parent='BulletWorld'
-        )
+    type_ = pb.BulletWorld
+    gravity = Attribute(
+        pm.Vec3,
+        pb.BulletWorld.get_gravity,
+        pb.BulletWorld.set_gravity,
+    )
+    debug_node = ToNodeConnection(
+        pb.BulletDebugNode,
+        pb.BulletWorld.get_debug_node,
+        pb.BulletWorld.set_debug_node,
+        pb.BulletWorld.clear_debug_node,
+    )
+    rigid_bodies = ToNodesConnection(
+        pb.BulletRigidBodyNode,
+        pb.BulletWorld.get_rigid_bodies,
+        pb.BulletWorld.attach_rigid_body,
+        _clear_rigid_bodies,
+    )
 
     def destroy(self):
         if (
@@ -133,10 +172,6 @@ class BulletWorld(Base):
             base.scene.physics_task in taskMgr.getAllTasks()
         ):
             self.DisablePhysics()
-
-    def ClearRigidBodies(self, comp):
-        for i in range(comp.getNumRigidBodies()):
-            comp.removeRigidBody(comp.getRigidBody(0))
 
     def ClearCharacters(self, comp):
         for i in range(comp.getNumCharacters()):

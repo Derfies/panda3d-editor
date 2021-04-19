@@ -1,5 +1,4 @@
 from direct.showbase.PythonUtil import getBase as get_base
-from panda3d.core import ConfigVariableBool
 
 from pandaEditor.game.scene import Scene
 from pandaEditor.game.nodes.constants import TAG_NODE_TYPE

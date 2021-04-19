@@ -19,49 +19,51 @@ class BulletWorld:
         serialise=False
     )
 
-    def SetDefaultValues(self):
-        super().SetDefaultValues()
-        
-        # Set this world as the default physics world if one has not already
-        # been set.
-        if get_base().scene.physics_world is None:
-            cnnctn = Connection(
-                None,
-                get_base().scene.get_physics_world,
-                get_base().scene.set_physics_world,
-                get_base().scene.clear_physics_world
-            )
-            cnnctn.Connect(self.data)
+    # def set_default_values(self):
+    #     super().set_default_values()
+    #
+    #     # Set this world as the default physics world if one has not already
+    #     # been set.
+    #     if get_base().scene.physics_world is None:
+    #         cnnctn = Connection(
+    #             None,
+    #             get_base().scene.get_physics_world,
+    #             get_base().scene.set_physics_world,
+    #             get_base().scene.clear_physics_world
+    #         )
+    #         cnnctn.connect(self.data)
 
 
 class BulletCharacterControllerNode:
 
-    def SetDefaultValues(self):
-        super().SetDefaultValues()
+    def set_default_values(self):
+        super().set_default_values()
 
         # Attempt to connect this node to the physics world if here is one.
         if base.scene.physics_world is not None:
             cnnctn = NodePathTargetConnectionList('Character', None, None, BW.attachCharacter,
                                                   None, BW.removeCharacter,
                                                   base.scene.physics_world)
-            cnnctn.Connect(self.data)
+            cnnctn.connect(self.data)
 
 
-class BulletRigidBodyNode:
+# class BulletRigidBodyNode:
+#
+#     pass
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #
+    #     i = self.attributes.index(self.FindProperty('shapes'))
+    #     self.AddAttributes(NodeAttribute ('Num Shapes', int, BRBN.getNumShapes, w=False), index=i)
+    #     self.AddAttributes(NodeAttribute ('Debug Enabled', bool, BRBN.isDebugEnabled, BRBN.setDebugEnabled, w=False))
 
-        i = self.attributes.index(self.FindProperty('shapes'))
-        self.AddAttributes(NodeAttribute ('Num Shapes', int, BRBN.getNumShapes, w=False), index=i)
-        self.AddAttributes(NodeAttribute ('Debug Enabled', bool, BRBN.isDebugEnabled, BRBN.setDebugEnabled, w=False))
-
-    def SetDefaultValues(self):
-        super().SetDefaultValues()
-
-        # Attempt to connect this node to the physics world if here is one.
-        if base.scene.physics_world is not None:
-            cnnctn = NodePathTargetConnectionList('Rigid Body', None, None, BW.attachRigidBody,
-                                                  None, BW.removeRigidBody,
-                                                  base.scene.physics_world)
-            cnnctn.Connect(self.data)
+    # def set_default_values(self):
+    #     super().set_default_values()
+    #
+    #     # Attempt to connect this node to the physics world if here is one.
+    #     if base.scene.physics_world is not None:
+    #         cnnctn = NodePathTargetConnectionList('Rigid Body', None, None, BW.attachRigidBody,
+    #                                               None, BW.removeRigidBody,
+    #                                               base.scene.physics_world)
+    #         cnnctn.Connect(self.data)

@@ -317,8 +317,8 @@ class PropertiesPanel(wx.Panel):
             #     continue
             try:
                 value = attr.get()
-            except TypeError:
-                print('skipping no get fn prop:', attr.name, attr.type)
+            except TypeError as e:
+                print('skipping no get fn prop:', attr.name, attr.type, e)
                 continue
 
             if isinstance(attr, Connections):

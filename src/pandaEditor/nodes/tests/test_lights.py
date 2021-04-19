@@ -2,8 +2,11 @@ import unittest
 
 from pandaEditor.nodes.tests.basecomponenttestcase import (
     TestBaseMixin,
-    ComponentMixin,
 )
+from pandaEditor.nodes.tests.test_nodepath import (
+    TestNodePathMixin,
+)
+
 from game.nodes.actor import Actor
 from game.nodes.base import Base
 from game.nodes.bullet import (
@@ -52,7 +55,7 @@ from game.nodes.showbasedefaults import (
 from pandaEditor.scene import Scene
 
 
-class TestLightMixin(ComponentMixin):
+class TestLightMixin(TestNodePathMixin):
 
     component = Light
     create_kwargs = {'name': 'test'}

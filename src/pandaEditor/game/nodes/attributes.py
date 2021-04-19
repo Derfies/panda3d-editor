@@ -73,6 +73,9 @@ class Connection(Base, metaclass=BaseMetaClass):
     def _get_target(self, obj):
         return obj
 
+    def set(self, value):
+        self.set_fn(self.data, self._get_target(value))
+
     def connect(self, value):
         self.set_fn(self.data, self._get_target(value))
 
@@ -106,6 +109,16 @@ class ToNodeConnection(Connection):
         return obj.node()
 
 
+class ToNodesConnection(Connections, ToNodeConnection):
+
+    pass
+
+
 class NodeToNodeConnection(NodeConnection, ToNodeConnection):
+
+    pass
+
+
+class NodeToNodesConnection(Connections, NodeToNodeConnection):
 
     pass

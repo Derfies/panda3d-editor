@@ -758,6 +758,7 @@ class MainFrame(wx.Frame):
             ActionItem('Rigid Body Node', '', self.OnCreate, args='BulletRigidBodyNode'),
             ActionItem('Character Controller Node', '', self.OnCreate, args='BulletCharacterControllerNode'),
             ActionItem('Box Shape', '', self.OnCreate, args='BulletBoxShape'),
+            ActionItem('Sphere Shape', '', self.OnCreate, args='BulletSphereShape'),
             ActionItem('Plane Shape', '', self.OnCreate, args='BulletPlaneShape'),
             ActionItem('Capsule Shape', '', self.OnCreate, args='BulletCapsuleShape')
         ]

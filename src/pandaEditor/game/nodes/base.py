@@ -44,7 +44,7 @@ class Base(metaclass=ComponentMetaClass):
         # Default create args to a string of the class name.
         if 'name' in createKwargs and not createKwargs['name']:
             createKwargs['name'] = get_lower_camel_case(cls.type_.__name__)
-        print('createKwargs:', createKwargs)
+        print('createKwargs:', cls, '->', createKwargs)
         wrpr.data = cls.type_(**createKwargs)
         return wrpr
 

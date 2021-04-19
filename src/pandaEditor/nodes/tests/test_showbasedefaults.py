@@ -2,7 +2,9 @@ import unittest
 
 from pandaEditor.nodes.tests.basecomponenttestcase import (
     TestBaseMixin,
-    ComponentMixin,
+)
+from pandaEditor.nodes.tests.test_nodepath import (
+    TestNodePathMixin,
 )
 from game.nodes.actor import Actor
 from game.nodes.base import Base
@@ -51,7 +53,7 @@ from game.nodes.showbasedefaults import (
 from pandaEditor.scene import Scene
 
 
-class TestRender(ComponentMixin, unittest.TestCase):
+class TestRender(TestNodePathMixin, unittest.TestCase):
 
     component = Render
 
@@ -61,7 +63,7 @@ class TestRender(ComponentMixin, unittest.TestCase):
         self.assertTrue(node.matrix.get().is_identity())
 
 
-class TestBaseCam(ComponentMixin, unittest.TestCase):
+class TestBaseCam(TestNodePathMixin, unittest.TestCase):
 
     component = BaseCam
 
@@ -71,7 +73,7 @@ class TestBaseCam(ComponentMixin, unittest.TestCase):
         self.assertTrue(node.matrix.get().is_identity())
 
 
-class TestBaseCamera(ComponentMixin, unittest.TestCase):
+class TestBaseCamera(TestNodePathMixin, unittest.TestCase):
 
     component = BaseCamera
 
@@ -81,7 +83,7 @@ class TestBaseCamera(ComponentMixin, unittest.TestCase):
         self.assertTrue(node.matrix.get().is_identity())
 
 
-class TestRender2d(ComponentMixin, unittest.TestCase):
+class TestRender2d(TestNodePathMixin, unittest.TestCase):
 
     component = Render2d
 
@@ -91,7 +93,7 @@ class TestRender2d(ComponentMixin, unittest.TestCase):
         self.assertTrue(node.matrix.get().is_identity())
 
 
-class TestAspect2d(ComponentMixin, unittest.TestCase):
+class TestAspect2d(TestNodePathMixin, unittest.TestCase):
 
     component = Aspect2d
 
@@ -101,7 +103,7 @@ class TestAspect2d(ComponentMixin, unittest.TestCase):
         self.assertFalse(node.matrix.get().is_identity())
 
 
-class TestPixel2d(ComponentMixin, unittest.TestCase):
+class TestPixel2d(TestNodePathMixin, unittest.TestCase):
 
     component = Pixel2d
 
@@ -111,7 +113,7 @@ class TestPixel2d(ComponentMixin, unittest.TestCase):
         self.assertFalse(node.matrix.get().is_identity())
 
 
-class TestCamera2d(ComponentMixin, unittest.TestCase):
+class TestCamera2d(TestNodePathMixin, unittest.TestCase):
 
     component = Camera2d
 
@@ -121,7 +123,7 @@ class TestCamera2d(ComponentMixin, unittest.TestCase):
         self.assertTrue(node.matrix.get().is_identity())
 
 
-class TestCam2d(ComponentMixin, unittest.TestCase):
+class TestCam2d(TestNodePathMixin, unittest.TestCase):
 
     component = Cam2d
 
