@@ -1,5 +1,5 @@
 from panda3d.core import Point3, NodePath, GeomEnums
-from panda3d.core import CollisionNode, CollisionTube
+from panda3d.core import CollisionNode, CollisionCapsule
 
 from .constants import *
 
@@ -93,7 +93,7 @@ class Axis(NodePath):
             # Should only be used for collision tubes
             if sizeStyle & TRANSLATE_POINT_B:
                 collSolid = nodePath.node().modifySolid(0)
-                if type(collSolid) == CollisionTube:
+                if type(collSolid) == CollisionCapsule:
                     
                     # Get the position of the capsule's B point relative to
                     # the axis end point (vector), then move the point and

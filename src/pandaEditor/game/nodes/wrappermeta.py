@@ -36,7 +36,6 @@ class BaseMetaClass(type):
             return mro
         path[0] = 'pandaEditor'
         search_path = '.'.join(path)
-        # print(f'Searching for: {search_path}.{class_name}')
 
         try:
             module = import_module(search_path)

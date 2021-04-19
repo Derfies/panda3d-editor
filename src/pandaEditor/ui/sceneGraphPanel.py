@@ -43,8 +43,8 @@ class SceneGraphPanel(SceneGraphBasePanel):
 
         """
         self.tc.Freeze()
-        
         super().OnUpdate(comps)
+
         items = [
             self._comps[comp] 
             for comp in self.base.selection.comps

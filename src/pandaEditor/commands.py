@@ -156,7 +156,7 @@ def Ungroup(nps):
     for np in nps:
         wrpr = get_base().node_manager.wrap(np)
         pNps.append(wrpr.parent.data)
-        cNpSets.append([cWrpr.data for cWrpr in wrpr.get_children()])
+        cNpSets.append([cWrpr.data for cWrpr in wrpr.children])
         
     # Remove those nodes which were empty NodePaths.
     rmvNps = [np for np in nps if np.node().isExactType(pm.PandaNode)]

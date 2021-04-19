@@ -1,7 +1,5 @@
 import uuid
 
-from direct.showbase.PythonUtil import getBase as get_base
-
 from p3d.object import Object
 
 
@@ -13,23 +11,20 @@ class Scene(Object):
         super().__init__(*args, **kwargs)
         
         self.comps = {}
-        get_base().scene = self
         self.physics_world = None
         self.physics_task = None
     
     def register_component(self, comp):
-        id = str(uuid.uuid4())
-        self.comps[comp] = id
+        self.comps[comp] = str(uuid.uuid4())
         
     def deregister_component(self, comp):
-        if comp in self.comps:
-            del self.comps[comp]
+        del self.comps[comp]
             
-    def get_physics_world(self, foo):
+    def get_physics_world(self):
         return self.physics_world
 
-    def set_physics_world(self, cookie, phWorld):
-        self.physics_world = phWorld
+    def set_physics_world(self, physics_world):
+        self.physics_world = physics_world
     
-    def clear_physics_world(self, cookie):
+    def clear_physics_world(self):
         self.physics_world = None

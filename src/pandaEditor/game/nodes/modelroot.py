@@ -10,11 +10,11 @@ from game.nodes.nodepath import NodePath
 from game.nodes.othermeta import ComponentMetaClass
 
 
-class ModelPathAttribute(Attribute, metaclass=ComponentMetaClass):
+class ModelPathAttribute(NodeAttribute, metaclass=ComponentMetaClass):
 
-    @property
-    def value(self):
-        return pc.ModelRoot.get_fullpath(self.data.node())
+    def __init__(self, *args, **kwargs):
+        kwargs['get_fn'] = pc.ModelRoot.get_fullpath
+        super().__init__(*args, **kwargs)
 
 
 class ModelRoot(NodePath):
@@ -67,4 +67,3 @@ class ModelRoot(NodePath):
         """
         if not np.get_python_tag(TAG_MODEL_ROOT_CHILD):
             np.reparent_to(self.data)
-

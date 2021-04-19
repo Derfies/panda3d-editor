@@ -53,6 +53,18 @@ class NodePath:
     #   )
 
     @property
+    def children(self):
+        """
+        Return a list of wrappers for the children of this NodePath, ignoring
+        those NodePaths tagged with TAG_IGNORE (like editor only geometry).
+        """
+        return [
+            comp
+            for comp in super().children
+            if not comp.data.get_python_tag(TAG_IGNORE)
+        ]
+
+    @property
     def modified(self):
         return self.data.get_python_tag(TAG_MODIFIED)
 
@@ -96,7 +108,7 @@ class NodePath:
         bbox.show()
         bbox.lines.set_python_tag(TAG_IGNORE, True)
         bbox.lines.node().adjust_draw_mask(*get_base().GetEditorRenderMasks())
-        self.data.setPythonTag(TAG_BBOX, bbox)
+        self.data.set_python_tag(TAG_BBOX, bbox)
         return bbox
     
     def on_deselect(self):
@@ -175,17 +187,6 @@ class NodePath:
     @property
     def default_parent(self):
         return get_base().node_manager.wrap(get_base().render)
-    
-    def get_children(self):
-        """
-        Return a list of wrappers for the children of this NodePath, ignoring
-        those NodePaths tagged with TAG_IGNORE (like editor only geometry).
-        """
-        return [
-            comp
-            for comp in super().get_children()
-            if not comp.data.get_python_tag(TAG_IGNORE)
-        ]
     
     def on_duplicate(self, origNp, dupeNp):
         super().on_duplicate(origNp, dupeNp)

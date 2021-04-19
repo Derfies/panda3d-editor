@@ -7,19 +7,17 @@ TAG_FRUSTUM = 'P3D_Fustum'
 
 class FrustrumAttribute(Attribute):
 
-    @property
-    def value(self):
+    def get(self):
         """
         Return True if the lens node's frustum is visible, False otherwise.
 
         """
         return any(
             child.get_python_tag(TAG_FRUSTUM)
-            for child in self.parent.data.get_children()
+            for child in self.parent.data.children
         )
 
-    @value.setter
-    def value(self, value):
+    def set(self, value):
         """
         Set the camera's frustum to be visible. Ensure it is tagged for removal
         and also so it doesn't appear in any of the scene graph panels.
@@ -28,9 +26,9 @@ class FrustrumAttribute(Attribute):
         if not value:
             self.parent.data.node().hide_frustum()
         else:
-            before = set(self.parent.data.get_children())
+            before = set(self.parent.data.children)
             self.parent.data.node().show_frustum()
-            after = set(self.parent.data.get_children())
+            after = set(self.parent.data.children)
             frustum = next(iter(after - before))
             frustum.set_python_tag(TAG_FRUSTUM, True)
             frustum.set_python_tag(TAG_IGNORE, True)
@@ -47,8 +45,8 @@ class LensNode:
         of the bounding box.
 
         """
-        visible = self.show_frustrum.value
-        self.show_frustrum.value = False
+        visible = self.show_frustrum.get()
+        self.show_frustrum.set(False)
         super().on_select()
         if visible:
-            self.show_frustrum.value = True
+            self.show_frustrum.set(True)

@@ -1,105 +1,102 @@
-from .base import Base
+from direct.showbase.PythonUtil import getBase as get_base
+
+from pandaEditor.actions.base import Base
 
 
 class Edit(Base):
     
-    def __init__(self, comp):
-        self.comp = comp
-        wrpr = base.node_manager.wrap(self.comp)
-        self.mod = wrpr.modified
+    def __init__(self, obj):
+        self.obj = obj
+        comp = get_base().node_manager.wrap(self.obj)
+        self.modified = comp.modified
     
     def undo(self):
-        wrpr = base.node_manager.wrap(self.comp)
-        wrpr.modified = self.mod
+        comp = get_base().node_manager.wrap(self.obj)
+        comp.modified = self.modified
     
     def redo(self):
-        wrpr = base.node_manager.wrap(self.comp)
-        wrpr.modified = True
-        
+        comp = get_base().node_manager.wrap(self.obj)
+        comp.modified = True
+
 
 class Transform(Edit):
     
-    def __init__(self, comp, xform, oldXform):
-        Edit.__init__(self, comp)
+    def __init__(self, obj, xform, old_xform):
+        super().__init__(obj)
         
         self.xform = xform
-        self.oldXform = oldXform
+        self.old_xform = old_xform
     
     def undo(self):
-        self.comp.setTransform(self.oldXform)
-        wrpr = base.node_manager.wrap(self.comp)
-        wrpr.modified = self.mod
+        self.obj.set_transform(self.old_xform)
+        comp = get_base().node_manager.wrap(self.obj)
+        comp.modified = self.modified
     
     def redo(self):
-        self.comp.setTransform(self.xform)
-        wrpr = base.node_manager.wrap(self.comp)
-        wrpr.modified = True
+        self.obj.set_transform(self.xform)
+        comp = get_base().node_manager.wrap(self.obj)
+        comp.modified = True
         
 
 class SetAttribute(Edit):
     
-    def __init__(self, comp, attr, val):
-        Edit.__init__(self, comp)
+    def __init__(self, obj, attr, value):
+        super().__init__(obj)
         
         self.attr = attr
-        self.val = val
-        
-        # Save old values. I've had to cast the value back into its own type
-        # so as to get a copy - undo doesn't seem to work otherwise.
-        self.oldVal = attr.value#attr.type(attr.value)
+        self.value = value
+        self.old_value = attr.get()
     
     def undo(self):
-        Edit.undo(self)
+        super().undo()
         
-        self.attr.Set(self.oldVal)
+        self.attr.set(self.old_value)
     
     def redo(self):
-        Edit.redo(self)
+        super().redo()
         
-        self.attr.value = self.val
+        self.attr.set(self.value)
         
 
 class Connect(Edit):
     
-    def __init__(self, tgtComps, cnnctn, fn):
-        Edit.__init__(self, cnnctn.srcComp)
+    def __init__(self, tgtobjs, cnnctn, fn):
+        super().__init__(cnnctn.srcobj)
         
-        self.tgtComps = tgtComps
+        self.tgtobjs = tgtobjs
         self.cnnctn = cnnctn
         self.fn = fn
-        
-        # Save old values
-        self.oldComps = self.cnnctn.Get()
+        self.oldobjs = self.cnnctn.get()
     
     def undo(self):
-        Edit.undo(self)
+        super().undo()
         
-        self.cnnctn.Set(self.oldComps)
+        self.cnnctn.set(self.oldobjs)
     
     def redo(self):
-        Edit.redo(self)
+        super().redo()
         
-        for tgtComp in self.tgtComps:
-            self.fn(tgtComp)
+        for tgtobj in self.tgtobjs:
+            self.fn(tgtobj)
             
 
 class SetConnections(Edit):
     
-    def __init__(self, tgtComps, cnnctn):
-        Edit.__init__(self, cnnctn.srcComp)
+    def __init__(self, tgtobjs, cnnctn):
+        super().__init__(cnnctn.data)
         
-        self.tgtComps = tgtComps
+        self.tgtobjs = tgtobjs
         self.cnnctn = cnnctn
         
         # Save old values
-        self.oldComps = self.cnnctn.Get()
+        self.oldobjs = self.cnnctn.get()
     
     def undo(self):
-        Edit.undo(self)
+        super().undo()
         
-        self.cnnctn.Set(self.oldComps)
+        self.cnnctn.set(self.oldobjs)
     
     def redo(self):
-        Edit.redo(self)
+        super().redo()
         
-        self.cnnctn.Set(self.tgtComps)
+        self.cnnctn.set(self.tgtobjs)

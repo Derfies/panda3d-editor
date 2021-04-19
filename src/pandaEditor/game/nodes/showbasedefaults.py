@@ -20,9 +20,6 @@ class Render(NodePath, metaclass=ComponentMetaClass):
 
     @parent.setter
     def parent(self, value):
-
-        # Render is a default Panda NodePath which shouldn't be parented to
-        # anything.
         pass
 
 
@@ -58,9 +55,6 @@ class Render2d(NodePath, metaclass=ComponentMetaClass):
 
     @parent.setter
     def parent(self, value):
-
-        # Render2d is a default Panda NodePath which shouldn't be parented to
-        # anything.
         pass
     
 

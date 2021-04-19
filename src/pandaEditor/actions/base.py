@@ -1,13 +1,18 @@
-class Base:
+import abc
+
+
+class Base(metaclass=abc.ABCMeta):
     
     def __call__(self):
         self.redo()
-    
+
+    @abc.abstractmethod
     def undo(self):
-        pass
-    
+        """"""
+
+    @abc.abstractmethod
     def redo(self):
-        pass
+        """"""
     
     def destroy(self):
         pass

@@ -1,4 +1,5 @@
 from direct.showbase.PythonUtil import getBase as get_base
+from panda3d.core import ConfigVariableBool
 
 from pandaEditor.game.scene import Scene
 from pandaEditor.game.nodes.constants import TAG_NODE_TYPE
@@ -9,7 +10,7 @@ class Scene(Scene):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        self.cnnctns = {}
+        self.connections = {}
         
         # 'Create' the default NodePaths that come from showbase. Calling the
         # create method in this way doesn't generate any new NodePaths, it
@@ -30,9 +31,9 @@ class Scene(Scene):
             wrpr = get_base().node_manager.create(cType)
             wrpr.data.set_tag(TAG_NODE_TYPE, cType)
         
-    def load(self, filePath):
+    def load(self, file_path):
         """Recreate a scene graph from file."""
-        get_base().scene_parser.load(self.rootNp, filePath)
+        get_base().scene_parser.load(file_path)
     
     def save(self, filePath):
         """Save a scene graph to file."""
@@ -41,7 +42,7 @@ class Scene(Scene):
     def close(self):
         """Destroy the scene by removing all its components."""
         def destroy(comp):
-            for child in comp.get_children():
+            for child in comp.children:
                 destroy(child)
             comp.destroy()
             
@@ -55,59 +56,52 @@ class Scene(Scene):
 
         self.rootNp.removeNode()
         
-    def get_outgoing_connections(self, wrpr):
+    def get_outgoing_connections(self, comp):
         """
-        Return all outgoing connections for the indicated component wrapper.
+        Return all outgoing connections for the indicated component.
         """
-        outCnnctns = []
-        
-        id = wrpr.id
-        if id in self.cnnctns:
-            outCnnctns.extend(self.cnnctns[id])
-        
-        return outCnnctns
+        return self.connections.get(comp.id, [])
     
-    def get_incoming_connections(self, wrpr):
+    def get_incoming_connections(self, comp):
         """
         Return all incoming connections for the indicated component wrapper.
         """
-        incCnnctns = []
-        
-        for id, cnnctns in self.cnnctns.items():
-            for cnnctn in cnnctns:
-                if cnnctn.srcComp == wrpr.data:
-                    incCnnctns.append(cnnctn)
-        
-        return incCnnctns
+        in_connections = []
+        for comp_id, connections in self.connections.items():
+            for connection in connections:
+                if connection.srcComp == comp.data:
+                    in_connections.append(connection)
+        return in_connections
     
-    def register_connection(self, cnnctn):
+    def register_connection(self, obj, connection):
         """
         Register a connection to its target component. This allows us to find
         a connection and break it when a component is deleted.
         """
-        comp_id = get_base().node_manager.wrap(cnnctn.data).id
-        self.cnnctns.setdefault(comp_id, set())
-        self.cnnctns[comp_id].add(cnnctn)
+        comp_id = get_base().node_manager.wrap(obj).id
+        self.connections.setdefault(comp_id, set())
+        self.connections[comp_id].add(connection)
     
-    def deregister_connection(self, comp, cnnctn):
-        compId = get_base().node_manager.wrap(comp).id
-        if compId in self.cnnctns:
-            del self.cnnctns[compId]
+    def deregister_connection(self, connection):
+        comp = connection.parent
+        comp_id = get_base().node_manager.wrap(comp).id
+        if comp_id in self.connections:
+            del self.connections[comp_id]
         
-    def clear_connections(self, comp):
-        delIds = []
-        for id, cnnctns in self.cnnctns.items():
-            
-            delCnnctns = []
-            for cnnctn in cnnctns:
-                if cnnctn.srcComp == comp:
-                    delCnnctns.append(cnnctn)
-                    
-            for delCnnctn in delCnnctns:
-                cnnctns.remove(delCnnctn)
-                
-            if not cnnctns:
-                delIds.append(id)
-                
-        for delId in delIds:
-            del self.cnnctns[delId]
+    # def clear_connections(self, comp):
+    #     delIds = []
+    #     for id, cnnctns in self.connections.items():
+    #
+    #         delCnnctns = []
+    #         for cnnctn in cnnctns:
+    #             if cnnctn.srcComp == comp:
+    #                 delCnnctns.append(cnnctn)
+    #
+    #         for delCnnctn in delCnnctns:
+    #             cnnctns.remove(delCnnctn)
+    #
+    #         if not cnnctns:
+    #             delIds.append(id)
+    #
+    #     for delId in delIds:
+    #         del self.connections[delId]

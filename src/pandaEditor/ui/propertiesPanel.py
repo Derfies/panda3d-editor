@@ -8,7 +8,7 @@ from panda3d.core import Filename
 
 from wxExtra import wxpg
 from pandaEditor import commands as cmds
-from game.nodes.attributes import Connection
+from game.nodes.attributes import Attribute, Connection, Connections
 from . import customProperties as custProps
 
 
@@ -312,43 +312,35 @@ class PropertiesPanel(wx.Panel):
 
         for attr in comps[0].attributes.values():
 
-            # if attr.type not in self.propMap:# or attr.getFn is None:
+            # if attr.get_fn is None:
+            #     print('skipping no get fn prop:', attr.name, attr.type)
             #     continue
-            print(attr.name, attr)
+            try:
+                value = attr.get()
+            except TypeError:
+                print('skipping no get fn prop:', attr.name, attr.type)
+                continue
 
-            #print(attr.label, isinstance(attr, Connection))
-
-            if not isinstance(attr, Connection):
-                if attr.type not in self.propMap:# or attr.getFn is None:
+            if isinstance(attr, Connections):
+                prop = custProps.ConnectionListProperty(attr.label, attr.name, value)
+            elif isinstance(attr, Connection):
+                prop = custProps.ConnectionProperty(attr.label, attr.name, value)
+            elif isinstance(attr, Attribute):
+                if attr.type not in self.propMap:
+                    print('skipping unknown type prop:', attr.name, attr.type)
                     continue
+
                 prop_cls = self.propMap[attr.type]
-                prop = prop_cls(attr.label, attr.name, attr.value)  # TODO: Do common value.
-
-            else:
-                val = attr.value
-                try:
-                    obj_iter = iter(val)
-                    prop = custProps.ConnectionListProperty(attr.label, attr.name, val)
-                except TypeError as e:
-                    prop = custProps.ConnectionProperty(attr.label, attr.name, val)
-
-            #print(attr.__dict__)
-            #print(getattr(comps[0], attr.name, None))
-            #print(attr.__class__.__dict__, attr.name)
-            # print('->', type(attr).__dict__.get('value'))
-            # if type(attr).__dict__.get('value') is not None:
-            #     print(type(attr).__dict__.get('value').fset)
-            #p#rint(attr.__dict__['value'])
-            #print(attr.value.__set__)
-            #print(getattr(prop_cls, attr.name))
-            # print(attr.__dict__[attr.name])
-            # if attr.setFn is None:
-            #     prop.Enable(False)
+                prop = prop_cls(attr.label, attr.name, value)  # TODO: Do common value.
+                # if attr.set_fn is None:
+                #     prop.Enable(False)
 
             if attr.category not in self.propAttrMap:
                 parent_prop = wxpg.PropertyCategory(attr.category)
                 self.propAttrMap[attr.category] = parent_prop
                 self.pg.Append(parent_prop)
+
+            print('Using prop type:', attr.name, type(prop))
 
             self.propAttrMap[attr.category].AddPrivateChild(prop)
 
@@ -371,11 +363,13 @@ class PropertiesPanel(wx.Panel):
         # Get the node property from the property and set it.
         prop = evt.GetProperty()
         attrs = prop.GetAttribute(ATTRIBUTE_TAG)
-        if not hasattr(attrs[0], 'cnnctn'):
-            cmds.SetAttribute(comps, attrs, prop.GetValue())
-        else:
+        #if not hasattr(attrs[0], 'cnnctn'):
+        print(attrs[0].name, attrs[0], type(attrs[0]), prop.GetValue())
+        if isinstance(attrs[0], Connection):
             cmds.SetConnections(prop.GetValue(), attrs)
-        
+        else:
+            cmds.SetAttribute(comps, attrs, prop.GetValue())
+
     def OnUpdate(self, comps=None):
         self.pg.Freeze()
         

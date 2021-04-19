@@ -5,9 +5,8 @@ from game.nodes.constants import TAG_MODEL_ROOT_CHILD
 
 class ModelPathAttribute:
 
-    @property
-    def value(self):
-        return get_base().project.get_rel_model_path(super().value)
+    def get(self):
+        return get_base().project.get_rel_model_path(super().get())
 
 
 class ModelRoot:

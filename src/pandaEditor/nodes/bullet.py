@@ -7,7 +7,7 @@ from game.nodes.attributes import (
     Attribute,
     Connection,
     NodeAttribute,
-    NodePathTargetConnectionList,
+    # NodePathTargetConnectionList,
 )
 
 

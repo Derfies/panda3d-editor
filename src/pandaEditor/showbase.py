@@ -1,6 +1,7 @@
 import panda3d.core as pc
 from direct.directtools.DirectGrid import DirectGrid
 from direct.showbase import ShowBaseGlobal
+from panda3d.core import ConfigVariableBool
 from pubsub import pub
 
 import p3d
@@ -32,6 +33,9 @@ class ShowBase(GameShowBase):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        if ConfigVariableBool('no_ui', False):
+            return
 
         self.forcedAspectWins = []
 

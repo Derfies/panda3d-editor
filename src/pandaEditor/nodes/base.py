@@ -2,7 +2,7 @@ from direct.showbase.PythonUtil import getBase as get_base
 
 from game.nodes.attributes import Connection
 from game.utils import get_lower_camel_case
-
+from p3d import commonUtils as cUtils
 
 
 class Base:
@@ -36,13 +36,9 @@ class Base:
         that values have been serialised to string.
         """
         propDict = {}
-        
-        for prop in self.get_attributes():
-            if prop.serialise and not isinstance(prop, Connection):#not hasattr(prop, 'cnnctn') :
-                propStr = prop.SerializeToString()
-                if propStr is not None:
-                    propDict[prop.name] = propStr
-            
+        for attr in self.attributes.values():
+            if attr.serialise and not isinstance(attr, Connection):
+                propDict[attr.name] = cUtils.serialize(attr.get())
         return propDict
     
     def get_connection_data(self):
@@ -50,7 +46,7 @@ class Base:
         
         # Put this component's connections into key / value pairs.
         for cnnctn in self.connections:
-            comps = cnnctn.value
+            comps = cnnctn.get()
             if comps is None:
                 continue
             
@@ -62,7 +58,6 @@ class Base:
             except TypeError as e:
                 wrpr = get_base().node_manager.wrap(comps)
                 ids.append(wrpr.id)
-                print('single')
             cnnctnDict[cnnctn.name] = ids
             
         return cnnctnDict
@@ -101,17 +96,20 @@ class Base:
         Return a list of connections that can be made with the given 
         components.
         """
-        cnnctns = []
+        connections = []
         
         for comp in comps:
             wrpr = get_base().node_manager.wrap(comp)
-            posCnnctns = [attr for attr in self.get_attributes() if hasattr(attr, 'cnnctn')]
-            posCnnctns.extend(self.connections)
-            for cnnctn in posCnnctns:
-                if wrpr.is_of_type(cnnctn.type) and cnnctn not in cnnctns:
-                    cnnctns.append(cnnctn)
+            #posCnnctns = [attr for attr in self.get_attributes() if hasattr(attr, 'cnnctn')]
+            #posCnnctns.extend(self.connections)
+            for connection in self.connections:
+                if (
+                    wrpr.is_of_type(connection.type) and
+                    connection not in connections
+                ):
+                    connections.append(connection)
         
-        return cnnctns
+        return connections
     
     def set_default_values(self):
         pass
@@ -136,5 +134,9 @@ class Base:
         parent = self.parent
         if parent is None:
             return None
-        objs = [child.data for child in parent.get_children()]
-        return objs.index(self.data)
+        objs = [child.data for child in parent.children]
+        try:
+            return objs.index(self.data)
+        except ValueError:
+            print('objs:', objs, 'find:', self.data, [type(o) for o in objs])
+            raise

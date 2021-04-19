@@ -1,13 +1,15 @@
-from .base import Base
+from direct.showbase.PythonUtil import getBase as get_base
+
+from pandaEditor.actions.base import Base
 
 
 class Select(Base):
     
-    def __init__(self, comps):
-        self.comps = comps
+    def __init__(self, objs):
+        self.objs = objs
     
     def undo(self):
-        base.selection.Remove(self.comps)
+        get_base().selection.Remove(self.objs)
     
     def redo(self):
-        base.selection.Add(self.comps)
+        get_base().selection.Add(self.objs)

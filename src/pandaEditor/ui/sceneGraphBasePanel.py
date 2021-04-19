@@ -148,7 +148,7 @@ class SceneGraphBasePanel(wx.Panel):
 
         item = self.tc.AppendItem(parent_item, comp.name_, data=comp.data)
         self._comps[comp.data] = item
-        for child in comp.get_children():
+        for child in comp.children:
             self.AddItem(child, item)
             
     def RemoveItem(self, wrpr, delete=True):
@@ -157,7 +157,7 @@ class SceneGraphBasePanel(wx.Panel):
                 self.tc.Delete(self._comps[wrpr.data])
             del self._comps[wrpr.data]
             
-        for cWrpr in wrpr.get_children():
+        for cWrpr in wrpr.children:
             self.RemoveItem(cWrpr, False)
             
     def RefreshItem(self, comp):
@@ -191,6 +191,8 @@ class SceneGraphBasePanel(wx.Panel):
         # No need to refresh a panel if it is hidden.
         if not self.IsShownOnScreen():
             return
+
+
         
         if comps is None:
             
@@ -227,7 +229,7 @@ class SceneGraphBasePanel(wx.Panel):
         if self.filter is None:
             self.AddItem(comp, root_item)
         else:
-            for child in comp.get_children():
+            for child in comp.children:
                 self.AddItem(child, root_item)
             
         # Get map of node paths to items after populating the tree control

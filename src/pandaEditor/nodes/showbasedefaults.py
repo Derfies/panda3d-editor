@@ -1,9 +1,7 @@
-from direct.showbase.PythonUtil import getBase as get_base
-
-from nodes.constants import TAG_IGNORE
 from game.nodes.camera import Camera
 from game.nodes.modelnode import ModelNode
 from game.nodes.pandanode import PandaNode
+from pandaEditor.nodes.constants import TAG_IGNORE
 
 
 class Render:

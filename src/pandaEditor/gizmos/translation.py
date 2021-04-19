@@ -33,7 +33,7 @@ class Translation(Base):
         vec.normalize()
         line = pm.NodePath(Line((0, 0, 0), vec))
         cone = pm.NodePath(Cone(0.05, 0.25, axis=vec, origin=vec * 0.125))
-        collTube = pm.CollisionTube((0,0,0), pm.Point3(vec) * 0.95, 0.05)
+        collTube = pm.CollisionCapsule((0,0,0), pm.Point3(vec) * 0.95, 0.05)
         
         # Create the axis, add the geometry and collision
         axis = Axis(self.name, vec, colour)

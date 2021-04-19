@@ -3,92 +3,91 @@ import panda3d.core as pc
 from game.nodes.attributes import (
     Attribute,
     NodeAttribute,
-    NodePathSourceConnectionList
+    NodeConnections,
 )
 from game.nodes.base import Base
 from game.nodes.nodepath import NodePath
 
 
+class SolidsConnection(NodeConnections):
+
+    def __init__(self):
+        super().__init__(
+            pc.CollisionSolid,
+            pc.CollisionNode.get_solids,
+            pc.CollisionNode.add_solid,
+            pc.CollisionNode.clear_solids,
+        )
+
+    def clear_solid(self, value):
+        solids = self.data.get_solids()
+        index = solids.index(value)
+        pc.CollisionNode.remove_solid(self.data, index)
+
+
 class CollisionNode(NodePath):
     
     type_ = pc.CollisionNode
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        
-        self.AddAttributes(
-            NodeAttribute('Num Solids', int, pc.CollisionNode.get_num_solids),
-            NodePathSourceConnectionList(
-                'Solids',
-                pc.CollisionSolid,
-                pc.CollisionNode.get_solids,
-                pc.CollisionNode.add_solid,
-                pc.CollisionNode.clear_solids,
-                self.RemoveSolid,
-                self.data
-            ),
-            parent='CollisionNode'
-       )
+    num_solids = NodeAttribute( # TODO: Move to editior wrapper.
+        int,
+        pc.CollisionNode.get_num_solids,
+        serialise=False
+    )
+    solids = SolidsConnection()
     
     @classmethod
     def create(cls, *args, **kwargs):
-        wrpr = super().create(*args, **kwargs)
-        wrpr.data.show()
-        return wrpr
-    
-    def RemoveSolid(self, srcComp, tgtComp):
-        solids = srcComp.getSolids()
-        index = solids.index(tgtComp)
-        CollisionNode.removeSolid(srcComp, index)
+        comp = super().create(*args, **kwargs)
+        comp.data.show()    # TODO: Expose as editor property
+        return comp
 
 
 class CollisionBox(Base):
     
     type_ = pc.CollisionBox
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.AddAttributes(
-            Attribute('X', float, init_arg=0.5),
-            Attribute('Y', float, init_arg=0.5),
-            Attribute('Z', float, init_arg=0.5),
-            Attribute('Center', pc.Point3, pc.CollisionBox.getCenter, pc.CollisionBox.setCenter,
-                 init_arg=pc.Point3(0)),
-            parent='CollisionBox'
-        )
+    x = Attribute(float, init_arg=0.5)
+    y = Attribute(float, init_arg=0.5)
+    z = Attribute(float, init_arg=0.5)
+    center = Attribute(
+        pc.Point3,
+        pc.CollisionBox.get_center,
+        pc.CollisionBox.set_center,
+        init_arg=pc.Point3(0),
+    )
 
 
 class CollisionRay(Base):
     
     type_ = pc.CollisionRay
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.AddAttributes(
-            Attribute('Origin', pc.Point3, pc.CollisionRay.getOrigin, pc.CollisionRay.setOrigin,
-                 init_arg=pc.Point3(0)),
-            Attribute('Direction', pc.Vec3, pc.CollisionRay.getDirection, pc.CollisionRay.setDirection,
-                 init_arg=pc.Vec3(0, 0, 1)),
-            parent='CollisionRay'
-        )
+    origin = Attribute(
+        pc.Point3,
+        pc.CollisionRay.get_origin,
+        pc.CollisionRay.set_origin,
+        init_arg=pc.Point3(0),
+    )
+    direction = Attribute(
+        pc.Vec3,
+        pc.CollisionRay.get_direction,
+        pc.CollisionRay.set_direction,
+        init_arg=pc.Vec3(0, 0, 1),
+    )
 
 
 class CollisionSphere(Base):
     
     type_ = pc.CollisionSphere
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.AddAttributes(
-            Attribute('Center', pc.Point3, pc.CollisionSphere.getCenter, pc.CollisionSphere.setCenter,
-                 init_arg=pc.Point3(0)),
-            Attribute('Radius', float, pc.CollisionSphere.getRadius, pc.CollisionSphere.setRadius,
-                 init_arg=0.5),
-            parent='CollisionSphere'
-        )
+    center = Attribute(
+        pc.Point3,
+        pc.CollisionSphere.get_center,
+        pc.CollisionSphere.set_center,
+        init_arg=pc.Point3(0),
+    )
+    radius = Attribute(
+        float,
+        pc.CollisionSphere.get_radius,
+        pc.CollisionSphere.set_radius,
+        init_arg=0.5,
+    )
 
 
 class CollisionInvSphere(CollisionSphere):
@@ -96,19 +95,26 @@ class CollisionInvSphere(CollisionSphere):
     type_ = pc.CollisionInvSphere
 
 
-class CollisionTube(Base):
+class CollisionCapsule(Base):
     
-    type_ = pc.CollisionTube
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.AddAttributes(
-            Attribute('Point A', pc.Point3, pc.CollisionTube.getPointA, pc.CollisionTube.setPointA,
-                 init_arg=pc.Point3(0), initName='a'),
-            Attribute('Point B', pc.Point3, pc.CollisionTube.getPointB, pc.CollisionTube.setPointB,
-                 init_arg=pc.Point3(0, 0, 1), initName='db'),
-            Attribute('Radius', float, pc.CollisionTube.getRadius, pc.CollisionTube.setRadius,
-                 init_arg=0.5),
-            parent='CollisionTube'
-        )
+    type_ = pc.CollisionCapsule
+    point_a = Attribute(
+        pc.Point3,
+        pc.CollisionCapsule.get_point_a,
+        pc.CollisionCapsule.set_point_a,
+        init_arg=pc.Point3(0),
+        init_arg_name='a',
+    )
+    point_b = Attribute(
+        pc.Point3,
+        pc.CollisionCapsule.get_point_b,
+        pc.CollisionCapsule.set_point_b,
+        init_arg=pc.Point3(0, 0, 1),
+        init_arg_name='db',
+    )
+    radius = Attribute(
+        float,
+        pc.CollisionCapsule.get_radius,
+        pc.CollisionCapsule.set_radius,
+        init_arg=0.5,
+    )

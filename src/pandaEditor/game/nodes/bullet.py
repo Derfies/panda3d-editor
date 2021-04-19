@@ -1,4 +1,5 @@
 import panda3d.core as pm
+import panda3d.bullet as pb
 from panda3d.bullet import BulletBoxShape as BBS
 from panda3d.bullet import BulletCapsuleShape as BCS
 from panda3d.bullet import BulletWorld as BW
@@ -11,11 +12,11 @@ from panda3d.bullet import ZUp
 from game.nodes.attributes import (
     Attribute,
     #Connection,
-    ConnectionList,
+    Connections,
     NodeAttribute,
-    NodePathSourceConnectionList,
-    NodePathTargetConnection,
-    NodePathTargetConnectionList,
+    # NodePathSourceConnections,
+    # NodePathTargetConnection,
+    # NodePathTargetConnections,
 )
 from game.nodes.base import Base
 from game.nodes.nodepath import NodePath
@@ -26,46 +27,31 @@ TAG_BULLET_DEBUG_WIREFRAME = 'P3D_BulletDebugWireframe'
 
 class BulletBoxShape(Base):
 
-    type_ = BBS
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.AddAttributes(
-            Attribute('Half Extents', pm.Vec3, BBS.getHalfExtentsWithMargin,
-                 init_arg=pm.Vec3(0.5, 0.5, 0.5)),
-            parent='BulletBoxShape'
-        )
+    type_ = pb.BulletBoxShape
+    half_extents = Attribute(
+        pm.Vec3,
+        pb.BulletBoxShape.get_half_extents_with_margin,
+        init_arg=pm.Vec3(0.5, 0.5, 0.5)
+    )
 
 
 class BulletCapsuleShape(Base):
 
-    type_ = BCS
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.AddAttributes(
-            Attribute('Radius', float, BCS.getRadius, init_arg=0.5),
-            Attribute('Height', float, BCS.getHalfHeight, init_arg=1),
-            Attribute('Up', int, init_arg=ZUp),
-            parent='BulletCapsuleShape'
-        )
+    type_ = pb.BulletCapsuleShape
+    radius = Attribute(float, pb.BulletCapsuleShape.get_radius, init_arg=0.5)
+    height = Attribute(float, pb.BulletCapsuleShape.get_half_height, init_arg=1)
+    up = Attribute(int, init_arg=pb.ZUp)
 
 
 class BulletCharacterControllerNode(NodePath):
 
-    type_ = BCCN
-
-    def __init__(self, *args, **kwargs):
-        NodePath.__init__(self, *args, **kwargs)
-
-        self.AddAttributes(
-            Attribute('Shape', BCS, init_arg=BCS(0.4, 1.75 - 2 * 0.4, ZUp)),
-            Attribute('step_height', float, init_arg=0.4),
-            Attribute('Name', str),
-            parent='BulletCharacterControllerNode'
-        )
+    type_ = pb.BulletCharacterControllerNode
+    shape = Attribute(
+        pb.BulletCapsuleShape,
+        init_arg=pb.BulletCapsuleShape(0.4, 1.75 - 2 * 0.4, pb.ZUp)
+    )
+    step_height = Attribute(float, init_arg=0.4)
+    name = Attribute(str)
 
 
 class BulletDebugNode(NodePath):
@@ -97,16 +83,9 @@ class BulletDebugNode(NodePath):
 
 class BulletPlaneShape(Base):
 
-    type_ = BPS
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        self.AddAttributes(
-            Attribute('Normal', pm.Vec3, init_arg=pm.Vec3(0, 0, 1)),
-            Attribute('Constant', int, init_arg=0),
-            parent='BulletBoxShape'
-        )
+    type_ = pb.BulletPlaneShape
+    normal = Attribute(pm.Vec3, init_arg=pm.Vec3(0, 0, 1)),
+    constant = Attribute(int, init_arg=0),
 
 
 class BulletRigidBodyNode(NodePath):
@@ -120,7 +99,7 @@ class BulletRigidBodyNode(NodePath):
             NodeAttribute('Angular Damping', float, BRBN.getAngularDamping, BRBN.setAngularDamping),
             NodeAttribute('Gravity', pm.Vec3, BRBN.getGravity, BRBN.setGravity),
             NodeAttribute('Mass', float, BRBN.getMass, BRBN.setMass),
-            NodePathSourceConnectionList ('Shapes', BS, BRBN.getShapes, BRBN.addShape, self.ClearShapes, BRBN.removeShape, self.data),
+            NodePathSourceConnections ('Shapes', BS, BRBN.getShapes, BRBN.addShape, self.ClearShapes, BRBN.removeShape, self.data),
             parent='BulletRigidBodyNode'
         )
 
@@ -140,9 +119,9 @@ class BulletWorld(Base):
 
         self.AddAttributes(
             Attribute('Gravity', pm.Vec3, BW.getGravity, BW.setGravity),
-            NodePathTargetConnectionList('Rigid Body', BRBN, BW.getRigidBodies, BW.attachRigidBody, self.ClearRigidBodies,
+            NodePathTargetConnections('Rigid Body', BRBN, BW.getRigidBodies, BW.attachRigidBody, self.ClearRigidBodies,
                        BW.removeRigidBody, self.data),
-            NodePathTargetConnectionList('Character', BCCN, BW.getCharacters, BW.attachCharacter, self.ClearCharacters,
+            NodePathTargetConnections('Character', BCCN, BW.getCharacters, BW.attachCharacter, self.ClearCharacters,
                        BW.removeCharacter, self.data),
             NodePathTargetConnection('Debug Node', BDN, self.GetDebugNode, BW.setDebugNode, BW.clearDebugNode, self.data),
             parent='BulletWorld'

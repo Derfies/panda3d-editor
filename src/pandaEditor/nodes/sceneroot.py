@@ -2,13 +2,11 @@ from direct.showbase.PythonUtil import getBase as get_base
 
 
 class SceneRoot:
-    
-    def get_children(self):
-        comps = (
-            get_base().render2d,
-            get_base().render
-        ) + tuple(get_base().scene.comps.keys())
+
+    # TODO: Move to game class?
+    @property
+    def children(self):
         return [
-            get_base().node_manager.wrap(comp)
-            for comp in comps
-        ]
+            get_base().node_manager.wrap(get_base().render2d),
+            get_base().node_manager.wrap(get_base().render),
+        ] + list(get_base().scene.comps.keys())

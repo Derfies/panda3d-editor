@@ -1,4 +1,7 @@
-from .base import Base
+from direct.showbase.PythonUtil import getBase as get_base
+
+from pandaEditor.actions.base import Base
+
 
 
 class Deselect(Base):
@@ -7,7 +10,7 @@ class Deselect(Base):
         self.comps = comps
     
     def undo(self):
-        base.selection.Add(self.comps)
+        get_base().selection.Add(self.comps)
     
     def redo(self):
-        base.selection.Remove(self.comps)
+        get_base().selection.Remove(self.comps)

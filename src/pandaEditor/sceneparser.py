@@ -1,21 +1,22 @@
 import xml.etree.ElementTree as et
+from direct.showbase.PythonUtil import getBase as get_base
 
-from game.sceneparser import SceneParser
+from game.sceneparser import SceneParser as GameSceneParser
 from utils import indent
 
 
-class SceneParser(SceneParser):
+class SceneParser(GameSceneParser):
     
-    def save(self, scene, filePath):
+    def save(self, scene, file_path):
         """Save the scene out to an xml file."""
         rootElem = et.Element('Scene')
-        wrpr = base.node_manager.wrap(scene)
-        self.save_component(wrpr, rootElem)
+        comp = get_base().node_manager.wrap(scene)
+        self.save_component(comp, rootElem)
         
         # Wrap with an element tree and write to file.
         tree = et.ElementTree(rootElem)
         indent(tree.getroot())
-        tree.write(filePath)
+        tree.write(file_path)
     
     def save_component(self, wrpr, pElem):
         """Serialise a component to an xml element."""
@@ -30,13 +31,8 @@ class SceneParser(SceneParser):
             self.save_properties(wrpr, elem)
             self.save_connections(wrpr, elem)
         
-        # Write out addons.
-        for cWrpr in wrpr.get_add_ons():
-            self.save_component(cWrpr, elem)
-        
         # Recurse through hierarchy.
-        children = wrpr.get_children()
-        for child in children:
+        for child in wrpr.children:
             self.save_component(child, elem)
                 
     def save_properties(self, wrpr, elem):
@@ -59,15 +55,15 @@ class SceneParser(SceneParser):
                 elem.append(self.save_item(pName, pVal))
             else:
                 subElem = et.SubElement(elem, 'Item')
-                subElem.set('name', pName)
+                subElem.set('name', pNpame)
                 for key, val in pVal.items():
                     subElem.append(self.save_item(key, val))
                 
     def save_item(self, name, value):
-        elem = et.Element('Item')
-        elem.set('name', name)
-        elem.set('value', value)
-        return elem
+        return et.Element('Item', {
+            'name': name,
+            'value': value,
+        })
                 
     def save_connections(self, wrpr, elem):
         cnctnDict = wrpr.get_connection_data()
@@ -76,6 +72,7 @@ class SceneParser(SceneParser):
         
         cnctnsElem = et.Element('Connections')
         for key, vals in cnctnDict.items():
+            print('save:', key, vals)
             for val in vals:
                 cnctnElem = et.SubElement(cnctnsElem, 'Connection')
                 cnctnElem.set('type', key)

@@ -39,7 +39,7 @@ class Selection(Object):
         nps = [
             wrpr.data
             for wrpr in self.wrprs
-            if type(wrpr.data ) == pm.NodePath
+            if isinstance(wrpr.data, pm.NodePath)
         ]
         return nps
 
@@ -97,9 +97,8 @@ class Selection(Object):
         """
         comps = []
         for wrpr in self.wrprs:
-            cWrprs = wrpr.get_children()
-            if cWrprs:
-                comps.append(cWrprs[0].data)
+            if wrpr.children:
+                comps.append(wrpr.children[0].data)
             else:
                 comps.append(wrpr.data)
         return comps
@@ -112,7 +111,7 @@ class Selection(Object):
         comps = []
         for wrpr in self.wrprs:
             pWrpr = wrpr.parent
-            cComps = [cWrpr.data for cWrpr in pWrpr.get_children()]
+            cComps = [cWrpr.data for cWrpr in pWrpr.children]
 
             # Get the index of the child before this one - wrap around if the
             # index has gone below zero.
@@ -131,7 +130,7 @@ class Selection(Object):
         comps = []
         for wrpr in self.wrprs:
             pWrpr = wrpr.parent
-            cComps = [cWrpr.data for cWrpr in pWrpr.get_children()]
+            cComps = [cWrpr.data for cWrpr in pWrpr.children]
 
             # Get the index of the child after this one - wrap around if the
             # index has gone over the number of children.

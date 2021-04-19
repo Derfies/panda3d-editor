@@ -16,7 +16,7 @@ from game.nodes.collision import (
     CollisionNode,
     CollisionRay,
     CollisionSphere,
-    CollisionTube,
+    CollisionCapsule,
 )
 from game.nodes.constants import TAG_NODE_TYPE
 from game.nodes.fog import Fog
@@ -65,11 +65,11 @@ class Manager:
             'Camera': Camera,
             'Camera2d': Camera2d,
             'CollisionBox': CollisionBox,
+            'CollisionCapsule': CollisionCapsule,
             'CollisionInvSphere': CollisionInvSphere,
             'CollisionNode': CollisionNode,
             'CollisionRay': CollisionRay,
             'CollisionSphere': CollisionSphere,
-            'CollisionTube': CollisionTube,
             'DirectionalLight': DirectionalLight,
             'Fog': Fog,
             'LensNode': LensNode,
@@ -132,7 +132,6 @@ class Manager:
         
         typeStr = type(comp).__name__
         if typeStr == 'NodePath':
-            #print('IS EMPTY:', comp.get_name())
             typeStr = comp.node().get_tag(TAG_NODE_TYPE)
             if not typeStr:
                 typeStr = type(comp.node()).__name__

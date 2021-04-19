@@ -26,4 +26,4 @@ class ShowBase(DirectShowBase):
 
     def load_scene(self, file_path):
         self.scene = Scene(self, filePath=file_path, camera=None)
-        self.scene_parser.load(self.scene.rootNp, file_path)
+        self.scene.load(file_path)

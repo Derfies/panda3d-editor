@@ -1,16 +1,16 @@
-from .base import Base
+from pandaEditor.actions.base import Base
 
 
 class Parent(Base):
     
-    def __init__(self, np, parent):
+    def __init__(self, np, pnp):
         self.np = np
-        self.parent = parent
+        self.pnp = pnp
         
-        self.oldParent = np.getParent()
+        self.old_parent = np.get_parent()
     
     def undo(self):
-        self.np.wrtReparentTo(self.oldParent)
+        self.np.wrt_reparent_to(self.old_parent)
     
     def redo(self):
-        self.np.wrtReparentTo(self.parent)
+        self.np.wrt_reparent_to(self.pnp)

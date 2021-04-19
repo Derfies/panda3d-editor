@@ -84,7 +84,7 @@ class AssetManager:
                     inCnnctns[path].append(cnnctn)
                     
                 for cnnctn in self.base.scene.get_outgoing_connections(cWrpr):
-                    cnnctn.break_(cWrpr.data)
+                    cnnctn.clear(cWrpr.data)
                     outCnnctns.setdefault(path, [])
                     outCnnctns[path].append(cnnctn)
             

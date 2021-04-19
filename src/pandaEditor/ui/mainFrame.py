@@ -398,16 +398,16 @@ class MainFrame(wx.Frame):
         self.base.doc.on_refresh()
 
     def OnXformSetActiveGizmo(self, evt):
-        if evt.get_id() == ID_XFORM_WORLD:
+        if evt.GetId() == ID_XFORM_WORLD:
             self.base.SetGizmoLocal(not evt.IsChecked())
             return
 
         arg = None
-        if evt.get_id() == ID_XFORM_POS:
+        if evt.GetId() == ID_XFORM_POS:
             arg = 'pos'
-        elif evt.get_id() == ID_XFORM_ROT:
+        elif evt.GetId() == ID_XFORM_ROT:
             arg = 'rot'
-        elif evt.get_id() == ID_XFORM_SCL:
+        elif evt.GetId() == ID_XFORM_SCL:
             arg = 'scl'
         self.base.SetActiveGizmo(arg)
 
@@ -734,7 +734,7 @@ class MainFrame(wx.Frame):
             ActionItem('Ray', '', self.OnCreate, args='CollisionRay'),
             ActionItem('Sphere', '', self.OnCreate, args='CollisionSphere'),
             ActionItem('Inverse Sphere', '', self.OnCreate, args='CollisionInvSphere'),
-            ActionItem('Tube', '', self.OnCreate, args='CollisionTube')
+            ActionItem('Capsule', '', self.OnCreate, args='CollisionCapsule')
         ]
         mColl = CustomMenu()
         mColl.AppendActionItems(collActns, self)

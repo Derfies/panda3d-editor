@@ -149,17 +149,13 @@ def ClosestPointToLine(c, a, b):
     return pc.Point3(x, y, z)
     
 
-def SerializeToString(val):
-    
-    def GetName(type_):
-        return type_.__name__
-    
-    fnMap = {
+def serialize(value):
+    fn_map = {
         bool: str,
         float: str,
         int: str,
         str: str,
-        type: GetName,
+        type: lambda x: x.__name__,
         pc.Vec2: FloatTuple2Str,
         pc.LVecBase2f: FloatTuple2Str,
         pc.Vec3: FloatTuple2Str,
@@ -173,16 +169,11 @@ def SerializeToString(val):
         pc.LMatrix4f: Mat42Str,
         pc.Filename: str
     }
-    
-    if type(val) in fnMap:
-        return fnMap[type(val)](val)
-    else:
-        return None
-    
+    return fn_map[type(value)](value)
 
-def UnserializeFromString(string, type_):
 
-    fnMap = {
+def unserialise(str_, type_):
+    fn_map = {
         bool: Str2Bool,
         float: float,
         int: int,
@@ -197,8 +188,4 @@ def UnserializeFromString(string, type_):
         pc.LMatrix4f: Str2Mat4,
         pc.Filename: str
     }
-    
-    if type_ in fnMap:
-        return fnMap[type_](string)
-    else:
-        return None
+    return fn_map[type_](str_)
