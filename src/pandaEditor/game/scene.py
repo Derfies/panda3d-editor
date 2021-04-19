@@ -19,12 +19,3 @@ class Scene(Object):
         
     def deregister_component(self, comp):
         del self.comps[comp]
-            
-    def get_physics_world(self):
-        return self.physics_world
-
-    def set_physics_world(self, physics_world):
-        self.physics_world = physics_world
-    
-    def clear_physics_world(self):
-        self.physics_world = None

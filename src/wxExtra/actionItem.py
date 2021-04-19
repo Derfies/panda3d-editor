@@ -37,5 +37,3 @@ class ActionItem(object):
     
     def GetKind(self):
         return self._kind
-    
-    

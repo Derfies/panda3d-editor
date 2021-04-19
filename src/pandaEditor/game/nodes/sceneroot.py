@@ -1,27 +1,29 @@
-from panda3d.bullet import BulletWorld
+import panda3d.bullet as pb
 from direct.showbase.PythonUtil import getBase as get_base
 
-# from game.nodes.attributes import NodePathTargetConnection
+from game.nodes.attributes import Connection
 from game.nodes.base import Base
 from game.nodes.othermeta import ComponentMetaClass
 
 
+class PhysicsWorldConnection(Connection):
+
+    def __init__(self):
+        super().__init__(pb.BulletWorld)
+
+    def get(self):
+        return self.parent.data.physics_world
+
+    def connect(self, physics_world):
+        self.parent.data.physics_world = physics_world
+
+    def clear(self):
+        self.parent.data.physics_world = None
+
+
 class SceneRoot(Base, metaclass=ComponentMetaClass):
 
-    # TODO: Move bullet world stuff into bullet context.
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #
-    #     self.AddAttributes(
-    #         NodePathTargetConnection(
-    #             'PhysicsWorld',
-    #             BulletWorld,
-    #             base.scene.GetPhysicsWorld,
-    #             base.scene.SetPhysicsWorld,
-    #             base.scene.ClearPhysicsWorld
-    #         ),
-    #         parent='Scene'
-    #    )
+    physics_world = PhysicsWorldConnection()
     
     @classmethod
     def create(cls, *args, **kwargs):
