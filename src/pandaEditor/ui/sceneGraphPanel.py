@@ -1,5 +1,6 @@
 import wx
 
+from direct.showbase.PythonUtil import getBase as get_base
 from pandaEditor import commands as cmds
 from pandaEditor.ui.sceneGraphBasePanel import SceneGraphBasePanel
 
@@ -24,10 +25,10 @@ class SceneGraphPanel(SceneGraphBasePanel):
             original.
 
             """
-            if x in self.base.selection.comps:
-                i = self.base.selection.comps.index(x)
+            if x in get_base().selection.comps:
+                i = get_base().selection.comps.index(x)
             else:
-                i = len(self.base.selection.comps)
+                i = len(get_base().selection.comps)
             return i
             
         items = self.GetValidSelections()
@@ -47,7 +48,7 @@ class SceneGraphPanel(SceneGraphBasePanel):
 
         items = [
             self._comps[comp] 
-            for comp in self.base.selection.comps
+            for comp in get_base().selection.comps
             if comp in self._comps
         ]
         self.SelectItems(items)

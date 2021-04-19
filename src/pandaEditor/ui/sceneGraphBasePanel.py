@@ -3,6 +3,7 @@ import panda3d.core as pm
 import wx.lib.agw.flatmenu as fm
 import wx.lib.agw.fmresources as fmr
 import wx.lib.agw.customtreectrl as ct
+from direct.showbase.PythonUtil import getBase as get_base
 from pubsub import pub
 
 import p3d
@@ -17,10 +18,9 @@ DISPLAY_NODEPATHS = wx.NewId()
 
 class SceneGraphBasePanel(wx.Panel):
     
-    def __init__(self, base, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.base = base
         self._comps = {}
         self.filter = pm.PandaNode
 
@@ -60,7 +60,7 @@ class SceneGraphBasePanel(wx.Panel):
         self.tc.Bind(wx.EVT_MIDDLE_DOWN, self.OnMiddleDown)
 
         # Build tree control drop target
-        self.dt = CustomDropTarget(self.base, self, ['filePath', 'nodePath'])
+        self.dt = CustomDropTarget(get_base(), self, ['filePath', 'nodePath'])
         self.tc.SetDropTarget(self.dt)
 
         # Bind publisher events
@@ -80,7 +80,7 @@ class SceneGraphBasePanel(wx.Panel):
         if self.fm.FindMenuItem(DISPLAY_NODEPATHS).IsChecked():
             self.filter = pm.PandaNode
 
-        self.base.doc.on_refresh()
+        get_base().doc.on_refresh()
 
     def OnTreeBeginLabelEdit(self, evt):
         """
@@ -97,7 +97,7 @@ class SceneGraphBasePanel(wx.Panel):
     def OnTreeEndLabelEdit(self, evt):
         """Change the component's name to that of the new item's name."""
         def SetComponentName(comp, name):
-            wrpr = self.base.node_manager.wrap(comp)
+            wrpr = get_base().node_manager.wrap(comp)
             attr = wrpr.find_property('name')
             if attr is not None:
                 wx.CallAfter(cmds.SetAttribute, [comp], [attr], name)
@@ -122,12 +122,12 @@ class SceneGraphBasePanel(wx.Panel):
 
         # If the item under the middle mouse click is part of the selection
         # then use the whole selection, otherwise just use the item.
-        if item.GetData() in self.base.selection.comps:
-            dragComps = self.base.selection.comps
+        if item.GetData() in get_base().selection.comps:
+            dragComps = get_base().selection.comps
         else:
             dragComps = [item.GetData()]
         self.dragComps = dragComps
-        self.base.dDropMgr.Start(self, dragComps, item.GetData())
+        get_base().dDropMgr.Start(self, dragComps, item.GetData())
         
     def GetDroppedObject(self, x, y):
         dropItem = self.tc.HitTest(wx.Point(x, y))[0]
@@ -200,10 +200,10 @@ class SceneGraphBasePanel(wx.Panel):
             self.Rebuild()
         else:
             for comp in comps:
-                wrpr = self.base.node_manager.wrap(comp)
+                wrpr = get_base().node_manager.wrap(comp)
                 pWrpr = wrpr.parent
                 if wrpr.data in self._comps:
-                    if pWrpr is None and wrpr.data != self.base.scene:
+                    if pWrpr is None and wrpr.data != get_base().scene:
                         
                         # Component has no parent - remove it.
                         self.RemoveItem(wrpr)
@@ -225,7 +225,7 @@ class SceneGraphBasePanel(wx.Panel):
         self.tc.DeleteAllItems()
         self._comps = {}
         root_item = self.tc.AddRoot('root')
-        comp = self.base.node_manager.wrap(self.base.scene)
+        comp = get_base().node_manager.wrap(get_base().scene)
         if self.filter is None:
             self.AddItem(comp, root_item)
         else:

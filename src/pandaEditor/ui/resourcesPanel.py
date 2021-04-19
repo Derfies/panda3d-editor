@@ -5,14 +5,13 @@ from pubsub import pub
 
 from p3d import wxPanda
 from wxExtra import DirTreeCtrl, utils as wxUtils
+from direct.showbase.PythonUtil import getBase as get_base
 
 
 class ResourcesPanel(wx.Panel):
     
-    def __init__(self, base, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        self.base = base
 
         # Bind project file events
         pub.subscribe(self.OnUpdate, 'projectFilesAdded')
@@ -100,7 +99,7 @@ class ResourcesPanel(wx.Panel):
 
         # Select it and start drag and drop operations.
         self.dtc.SelectItem(item_id)
-        self.base.dDropMgr.Start(
+        get_base().dDropMgr.Start(
             self,
             [self.dtc.GetItemPath(item_id)],
             self.dtc.GetItemPath(item_id)
@@ -113,7 +112,7 @@ class ResourcesPanel(wx.Panel):
         filePath = self.dtc.GetItemPath(itemId)
         ext = os.path.splitext(os.path.basename(self.dtc.GetItemText(itemId)))[1]
         if ext == '.xml':
-            self.base.frame.OnFileOpen(None, filePath)
+            get_base().frame.OnFileOpen(None, filePath)
         elif ext == '.py':
             os.startfile(filePath)
             

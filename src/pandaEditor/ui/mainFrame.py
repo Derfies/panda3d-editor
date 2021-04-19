@@ -15,9 +15,8 @@ from pandaEditor.constants import MODEL_EXTENSIONS
 from pandaEditor.ui.viewport import Viewport
 from pandaEditor.ui.resourcesPanel import ResourcesPanel
 from pandaEditor.ui.sceneGraphPanel import SceneGraphPanel
-from pandaEditor.ui.preferencesFrame import PreferencesFrame
 from pandaEditor.ui.propertiesPanel import PropertiesPanel
-from pandaEditor.ui.lightLinkerPanel import LightLinkerPanel
+from pandaEditor.ui.preferenceseditor import PreferencesEditor
 
 
 FRAME_TITLE = 'Panda Editor 0.1'
@@ -125,11 +124,10 @@ class MainFrame(wx.Frame):
         self.pnlViewport = Viewport(self.base, self)
 
         # Build editor panels
-        self.pnlSceneGraph = SceneGraphPanel(base, self, style=wx.SUNKEN_BORDER)
-        #self.pnlLightLinker = LightLinkerPanel(base, self, style=wx.SUNKEN_BORDER)
-        self.pnlProps = PropertiesPanel(base, self, style=wx.SUNKEN_BORDER)
-        self.pnlRsrcs = ResourcesPanel(base, self, style=wx.SUNKEN_BORDER)
-        self.pnlLog = LogPanel(self, style=wx.SUNKEN_BORDER)
+        self.pnlSceneGraph = SceneGraphPanel(self)
+        self.pnlProps = PropertiesPanel(self)
+        self.pnlRsrcs = ResourcesPanel(self)
+        self.pnlLog = LogPanel(self)
 
         # Build aui manager to hold all the widgets
         self.BuildAuiManager()
@@ -551,13 +549,16 @@ class MainFrame(wx.Frame):
         self.tbXform.Refresh()
 
     def OnShowPreferences(self, evt):
-        try:
-            self.frmPrefs.Close()
-        except:
-            pass
-        self.frmPrefs = PreferencesFrame(self)
-        self.frmPrefs.Center()
-        self.frmPrefs.Show()
+
+        self.prefs = PreferencesEditor()
+        self.prefs.Show(self)
+        # try:
+        #     self.frmPrefs.Close()
+        # except:
+        #     pass
+        # #self.frmPrefs = PreferencesFrame(self)
+        # self.frmPrefs.Center()
+        # self.frmPrefs.Show()
 
     def OnMove(self, evt):
         """

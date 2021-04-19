@@ -6,6 +6,7 @@ from pubsub import pub
 import panda3d.core as pm
 from panda3d.core import Filename
 
+from direct.showbase.PythonUtil import getBase as get_base
 from wxExtra import wxpg
 from pandaEditor import commands as cmds
 from game.nodes.attributes import Attribute, Connection, Connections
@@ -195,10 +196,9 @@ class PropertyGrid(wxpg.PropertyGrid):
 
 class PropertiesPanel(wx.Panel):
     
-    def __init__(self, base, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.base = base
         self.propExps = {}
         self.refocus = False
         
@@ -249,7 +249,7 @@ class PropertiesPanel(wx.Panel):
         self.propAttrMap = {}
                         
         # # Build all properties from attributes.
-        # comps = self.base.selection.comps
+        # comps = get_base().selection.comps
         # wrprCls = base.node_manager.get_common_wrapper(comps)
         # wrprs = [wrprCls(comp) for comp in comps]
         # for i, attr in enumerate(wrprs[0].GetAttributes(addons=True)):
@@ -304,7 +304,7 @@ class PropertiesPanel(wx.Panel):
         # except Exception as e:
         #     print(e)
 
-        objs = self.base.selection.comps
+        objs = get_base().selection.comps
         if not objs:
             return
         comp_cls = get_base().node_manager.get_common_wrapper(objs)
@@ -354,7 +354,7 @@ class PropertiesPanel(wx.Panel):
         into the grid.
         """
         # Should probably never get here...
-        comps = self.base.selection.comps
+        comps = get_base().selection.comps
         if not comps:
             return
         
