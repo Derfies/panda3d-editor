@@ -3,7 +3,7 @@ import copy
 from collections import OrderedDict
 
 from game.nodes.attributes import Base
-from game.nodes.wrappermeta import BaseMetaClass
+from game.nodes.basemetaclass import BaseMetaClass
 
 
 class ComponentMetaClass(BaseMetaClass):
@@ -29,10 +29,13 @@ class ComponentMetaClass(BaseMetaClass):
         from game.nodes.attributes import Base
 
         attrs = {}
-        for cls in mro:
+        for cls in reversed(mro):
             for attr_name in dir(cls):
+                # if attr_name in attrs:
+                #     continue
                 attr = getattr(cls, attr_name)
                 if not isinstance(attr, Base):
+                    #print('SKIPPING ATTRIBUTE:', attr)
                     continue
                 attr.category = cls.__name__
                 attr.name = attr_name
@@ -40,3 +43,9 @@ class ComponentMetaClass(BaseMetaClass):
 
         return attrs
 
+    @property
+    def create_attributes(cls):
+        return list(
+            filter(lambda a: a.init_arg is not None, cls._declared_fields.values())
+        )
+\

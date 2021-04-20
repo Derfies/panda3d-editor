@@ -7,20 +7,24 @@ from game.nodes.constants import (
     TAG_MODEL_ROOT_CHILD, TAG_NODE_TYPE
 )
 from game.nodes.nodepath import NodePath
-from game.nodes.othermeta import ComponentMetaClass
+from game.nodes.componentmetaclass import ComponentMetaClass
 
 
-class ModelPathAttribute(NodeAttribute, metaclass=ComponentMetaClass):
-
-    def __init__(self, *args, **kwargs):
-        kwargs['get_fn'] = pc.ModelRoot.get_fullpath
-        super().__init__(*args, **kwargs)
+# class ModelPathAttribute(NodeAttribute, metaclass=ComponentMetaClass):
+#
+#     def __init__(self, *args, **kwargs):
+#         kwargs['get_fn'] = pc.ModelRoot.get_fullpath
+#         super().__init__(*args, **kwargs)
 
 
 class ModelRoot(NodePath):
     
     type_ = pc.ModelRoot
-    model_path = ModelPathAttribute(pc.Filename, init_arg='')
+    model_path = NodeAttribute(
+        pc.Filename,
+        pc.ModelRoot.get_fullpath,
+        init_arg=''
+    )
 
     @classmethod
     def create(cls, *args, **kwargs):
@@ -38,15 +42,15 @@ class ModelRoot(NodePath):
                     print('Failed to load: ', filePath)
                     np = pc.NodePath(pc.ModelRoot(''))
             np.setName(filePath.getBasenameWoExtension())
-        
-        comp = cls(np)
-        comp.set_up_node_path()
+
+        comp = super().create(data=np)
         
         # Iterate over child nodes
+        # TBH I'm not even sure I know what this does.
         comp.extraNps = []
         def Recurse(node):
             nTypeStr = node.getTag(TAG_NODE_TYPE)
-            cWrprCls = get_base().node_manager.GetWrapperByName(nTypeStr)
+            cWrprCls = get_base().node_manager.get_component_by_name(nTypeStr)
             if cWrprCls is not None:
                 cWrpr = cWrprCls.create(inputNp=node)
                 comp.extraNps.append(cWrpr.data)
@@ -59,11 +63,11 @@ class ModelRoot(NodePath):
         
         return comp
     
-    def add_child(self, np):
+    def add_child(self, child):
         """
         Parent the indicated NodePath to the NodePath wrapped by this object.
         We don't have to parent NodePaths with the model root tag as they were
         created with the correct hierarchy to begin with.
         """
-        if not np.get_python_tag(TAG_MODEL_ROOT_CHILD):
-            np.reparent_to(self.data)
+        if not child.data.get_python_tag(TAG_MODEL_ROOT_CHILD):
+            child.data.reparent_to(self.data)

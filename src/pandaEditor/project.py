@@ -27,6 +27,7 @@ MODELS = 'models'
 SCRIPTS = 'scripts'
 PREFABS = 'prefabs'
 SHADERS = 'shaders'
+PARTICLES = 'particles'
 
 
 class DirectoryWatcher(DirectoryWatcher):
@@ -72,9 +73,10 @@ base.run()"""
         dirs = {
             SCENES: kwargs.pop('scenes', 'scenes'),
             MODELS: kwargs.pop('models', 'models'),
-            SCRIPTS: kwargs.pop('scripts', 'scripts'),
+            # SCRIPTS: kwargs.pop('scripts', 'scripts'),
             PREFABS: kwargs.pop('prefabs', 'prefabs'),
-            SHADERS: kwargs.pop('shaders', 'shaders')
+            PARTICLES: kwargs.pop('particles', 'shaders'),
+            # SHADERS: kwargs.pop('shaders', 'shaders')
         }
 
         # Create xml tags for project directories
@@ -150,7 +152,7 @@ base.run()"""
             dirType = dirElem.get('type')
             self.dirs[dirType] = dirName
             
-    def GetDirectory(self, dirType):
+    def get_directory(self, dirType):
         """Return the full path to the indicated directory type."""
         if self.path is not None and self.dirs:
             return os.path.join(self.path, self.dirs[dirType])
@@ -159,24 +161,24 @@ base.run()"""
     
     def GetScenesDirectory(self):
         """Return the full path to the scenes directory."""
-        return self.GetDirectory(SCENES)
+        return self.get_directory(SCENES)
 
     @property
     def models_directory(self):
         """Return the full path to the models directory."""
-        return self.GetDirectory(MODELS)
+        return self.get_directory(MODELS)
     
     def GetScriptsDirectory(self):
         """Return the full path to the scripts directory."""
-        return self.GetDirectory(SCRIPTS)
+        return self.get_directory(SCRIPTS)
     
     def GetPrefabsDirectory(self):
         """Return the full path to the prefabs directory."""
-        return self.GetDirectory(PREFABS)
+        return self.get_directory(PREFABS)
     
     def GetShadersDirectory(self):
         """Return the full path to the shaders directory."""
-        return self.GetDirectory(SHADERS)
+        return self.get_directory(SHADERS)
     
     def ImportAsset(self, file_path):
         
@@ -364,3 +366,9 @@ class """ + fileName + """(p3d):
         #         break
         
         return modelPath
+
+    def get_project_relative_path(self, file_path, directory):
+        start_path = self.path
+        if directory is not None:
+            start_path = self.get_directory(directory)
+        return os.path.relpath(file_path, start_path)

@@ -3,7 +3,7 @@ from direct.showbase.PythonUtil import getBase as get_base
 
 from game.nodes.attributes import Connection
 from game.nodes.base import Base
-from game.nodes.othermeta import ComponentMetaClass
+from game.nodes.componentmetaclass import ComponentMetaClass
 
 
 class PhysicsWorldConnection(Connection):

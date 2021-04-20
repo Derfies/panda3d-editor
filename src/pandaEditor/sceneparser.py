@@ -18,21 +18,21 @@ class SceneParser(GameSceneParser):
         indent(tree.getroot())
         tree.write(file_path)
     
-    def save_component(self, wrpr, pElem):
+    def save_component(self, comp, pElem):
         """Serialise a component to an xml element."""
         elem = pElem
-        if wrpr.savable:
+        if comp.savable:
             
             # Write out component header data, then properties and 
             # connections.
             elem = et.SubElement(pElem, 'Component')
-            for pName, pVal in wrpr.get_attrib().items():
+            for pName, pVal in comp.get_attrib().items():
                 elem.set(pName, pVal)
-            self.save_properties(wrpr, elem)
-            self.save_connections(wrpr, elem)
+            self.save_properties(comp, elem)
+            self.save_connections(comp, elem)
         
         # Recurse through hierarchy.
-        for child in wrpr.children:
+        for child in comp.children:
             self.save_component(child, elem)
                 
     def save_properties(self, wrpr, elem):
@@ -41,7 +41,8 @@ class SceneParser(GameSceneParser):
         then serialise it.
         """
         # Get a dictionary with all default values.
-        defPropDict = wrpr.__class__.get_default_property_data()
+        # haxxor - figure out a better way to do this...
+        defPropDict = {}#wrpr.__class__.get_default_property_data()
         
         propDict = wrpr.get_property_data()
         for pName, pVal in propDict.items():
@@ -72,7 +73,6 @@ class SceneParser(GameSceneParser):
         
         cnctnsElem = et.Element('Connections')
         for key, vals in cnctnDict.items():
-            print('save:', key, vals)
             for val in vals:
                 cnctnElem = et.SubElement(cnctnsElem, 'Connection')
                 cnctnElem.set('type', key)

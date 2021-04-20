@@ -1,4 +1,6 @@
-from game.nodes.wrappermeta import BaseMetaClass
+from direct.showbase.PythonUtil import getBase as get_base
+
+from game.nodes.basemetaclass import BaseMetaClass
 
 
 class Base(metaclass=BaseMetaClass):
@@ -33,7 +35,7 @@ class Base(metaclass=BaseMetaClass):
 
     @property
     def serialise(self):
-        return self._serialise and self.get_fn is not None
+        return self._serialise #and self.get_fn is not None
 
     def get(self):
         return self.get_fn(self.data)
@@ -120,5 +122,54 @@ class NodeToNodeConnection(NodeConnection, ToNodeConnection):
 
 
 class NodeToNodesConnection(Connections, NodeToNodeConnection):
+
+    pass
+
+
+class TagAttribute(Attribute):
+
+    def __init__(self, *args, **kwargs):
+        self.tag_name = kwargs.pop('tag_name')
+        super().__init__(*args, **kwargs)
+
+    def get(self):
+        return self.data.get_tag(self.tag_name)
+
+    def set(self, value):
+        return self.data.set_tag(self.tag_name, value)
+
+
+class PyTagAttribute(Attribute):
+
+    def __init__(self, *args, **kwargs):
+        self.pytag_name = kwargs.pop('pytag_name')
+        super().__init__(*args, **kwargs)
+
+    def get(self):
+        return self.data.get_python_tag(self.pytag_name)
+
+    def set(self, value):
+        return self.data.set_python_tag(self.pytag_name, value)
+
+
+class ProjectAssetMixin:
+
+    def __init__(self, *args, **kwargs):
+        self.directory = kwargs.pop('directory', None)
+        super().__init__(*args, **kwargs)
+
+    def get(self):
+        return get_base().project.get_project_relative_path(
+            super().get(),
+            self.directory,
+        )
+
+
+class NodeProjectAssetAttribute(ProjectAssetMixin, NodeAttribute):
+
+    pass
+
+
+class PyTagProjectAssetAttribute(ProjectAssetMixin, PyTagAttribute):
 
     pass

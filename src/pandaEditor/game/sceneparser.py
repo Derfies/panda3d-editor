@@ -18,43 +18,46 @@ class SceneParser:
         self.connections = {}
         
         tree = et.parse(file_path)
-        root_elem = tree.find('.//Component[@type="SceneRoot"]')
-        self.load_component(root_elem, None)
-            
-        # Load connections
+        root = tree.find('.//Component[@type="SceneRoot"]')
+        self.load_component(root, None)
         self.load_connections()
 
+    def get_attributes(self, pelem, comp_cls):
+        attrs = {}
+        for elem in pelem.findall('Item'):
+            name = elem.get('name')
+            value_str = elem.get('value')
+            value_type = comp_cls._declared_fields[name].type
+            attrs[name] = unserialise(value_str, value_type)
+        return attrs
+            
+    def load_component(self, elem, pcomp):
+        comp_type = elem.get('type')
+        comp_cls = get_base().node_manager.get_component_by_name(comp_type)
+        if comp_cls is not None:
 
-        
-    def get_create_kwargs(self, wrprCls, elem):
-        kwargs = {}
-        for attr in wrprCls(None).create_attributes:
-            pElem = elem.find(".//Item[@name='" + attr.name + "']")
-            if pElem is not None:
-                kwargs[attr.init_arg_name] = pElem.get('value')
-        return kwargs
-            
-    def load_component(self, elem, pComp):
-        wrprCls = get_base().node_manager.GetWrapperByName(elem.get('type'))
-        if wrprCls is not None:
-            
-            args = self.get_create_kwargs(wrprCls, elem)
+            # Collect attribute keys and values.
+            attrs = self.get_attributes(elem, comp_cls)
+            kwargs = {
+                attr.name: attrs.pop(attr.name)
+                for attr in comp_cls.create_attributes
+            }
+
+            # For sub-models edits we need to pull out the path for the
+            # constructor.
             if 'path' in elem.attrib:
-                args['parent'] = pComp
-                args['path'] = elem.attrib['path']
+                kwargs['path'] = elem.attrib['path']
+                kwargs['parent'] = pcomp
             
             # Create the node and load it`s properties.
-            wrpr = wrprCls.create(**args)
-            if pComp is not None:
-                try:
-                    wrpr.parent = pComp
-                except:
-                    print(wrpr, wrpr.parent, pComp)
-                    raise
+            comp = comp_cls.create(**kwargs)
+            if pcomp is not None:
+                comp.parent = pcomp
+            comp.id = elem.get('id')
+            self.nodes[comp.id] = comp.data
 
-            wrpr.id = elem.get('id')
-            self.nodes[wrpr.id] = wrpr.data
-            self.load_properties(wrpr, elem)
+            for name, value in attrs.items():
+                comp.attributes[name].set(value)
             
             # Store connections so we can set them up once the rest of
             # the scene has been loaded.
@@ -66,40 +69,11 @@ class SceneParser:
                     uuid = cnctnElem.get('value')
                     cnctnDict.setdefault(cType, [])
                     cnctnDict[cType].append(uuid)
-                self.connections[wrpr] = cnctnDict
+                self.connections[comp] = cnctnDict
             
             # Recurse through hierarchy.
             for cElem in elem.findall('Component'):
-                self.load_component(cElem, wrpr)
-            
-    def load_properties(self, comp, elem):
-        
-        # Pull all properties from the xml for this component, then get the 
-        # wrapper and set all of them.
-        propElems = elem.findall('Item')
-        propDict = {}
-        for propElem in propElems:
-            cElems = propElem.findall('Item')
-            if not cElems:
-                propDict[propElem.get('name')] = propElem.get('value')
-            else:
-                itemDict = {}
-                for itemElem in cElems:
-                    itemDict[itemElem.get('name')] = itemElem.get('value')
-                propDict[propElem.get('name')] = itemDict
-
-        for key, value_str in propDict.items():
-            attr = comp.attributes[key]
-            value = unserialise(value_str, attr.type)
-            try:
-                attr.set(value)
-            except Exception as e:
-
-                # TODO: Marshall properties first then remove those used in the
-                # constructor so we don't try setting things like model path
-                # here.
-                print(e)
-                logger.warning(f'Failed to set attribute: {attr.name}')
+                self.load_component(cElem, comp)
         
     def load_connections(self):
         for comp, connections in self.connections.items():

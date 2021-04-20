@@ -550,22 +550,34 @@ class ShowBase(GameShowBase):
         if newDoc:
             self.doc = Document(filePath, self.scene)
 
-    def AddComponent(self, typeStr, *args, **kwargs):
-        wrprCls = self.node_manager.GetWrapperByName(typeStr)
-        wrpr = wrprCls.create(*args, **kwargs)
-        wrpr.set_default_values()
-        wrpr.parent = wrpr.default_parent
+    def AddComponent(self, type_str, *args, **kwargs):
+        comp_cls = self.node_manager.get_component_by_name(type_str)
+
+        # Add any kwargs that are not part of the incoming dictionary.
+        # TODO: This feels pretty awkward.
+        for attr in comp_cls.create_attributes:
+            name = attr.init_arg_name
+            if name in kwargs:
+                continue
+            value = attr.init_arg
+            if name == 'name':
+                value = comp_cls.__name__[0].lower() + comp_cls.__name__[1:]
+            kwargs[name] = value
+
+        comp = comp_cls.create(*args, **kwargs)
+        comp.set_default_values()
+        comp.parent = comp.default_parent
 
         # Bit of a hack. Sometimes a wrapper can create multiple components
         # when Create is called. Make sure to set default values on all the
         # components that were created.
-        if hasattr(wrpr, 'extraNps'):
-            for np in wrpr.extraNps:
+        if hasattr(comp, 'extraNps'):
+            for np in comp.extraNps:
                 eWrpr = self.node_manager.wrap(np)
                 eWrpr.set_default_values()
-        commands.Add([wrpr.data])
+        commands.Add([comp.data])
 
-        return wrpr
+        return comp
 
     def OnProjectFilesModified(self, filePaths):
         self.assetMgr.OnAssetModified(filePaths)

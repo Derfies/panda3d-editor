@@ -17,6 +17,7 @@ class NodePath:
     
     geo = None
     pickable = True
+    serialise_descendants = True
     
     # def __init__(self, *args, **kwargs):
     #     super().__init__(*args, **kwargs)
@@ -51,6 +52,17 @@ class NodePath:
     #         NodePathAttribute('Sz', float, NP.getSz, NP.setSz, w=False),
     #         parent='Scale'
     #   )
+
+    @classmethod
+    def create(cls, *args, **kwargs):
+        comp = super().create(*args, **kwargs)
+
+        # Mark all nodes below this one so as to not serialise them.
+        if not cls.serialise_descendants:
+            for child in comp.data.find_all_matches('**/*'):
+                child.set_python_tag(TAG_MODEL_ROOT_CHILD, True)
+
+        return comp
 
     @property
     def children(self):
@@ -180,8 +192,11 @@ class NodePath:
         
     @classmethod
     def find_child(cls, *args, **kwargs):
-        np = super(NodePath, cls).FindChild(*args, **kwargs)
-        np.setPythonTag(TAG_MODIFIED, True)
+
+        # TODO: This is pretty dirty. We need to tag a sub-model child
+        # on load or else we might lose an edit.
+        np = super(NodePath, cls).find_child(*args, **kwargs)
+        np.set_python_tag(TAG_MODIFIED, True)
         return np
 
     @property

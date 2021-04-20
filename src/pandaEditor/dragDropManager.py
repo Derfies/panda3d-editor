@@ -18,9 +18,11 @@ class DragDropManager:
         self.dragComps = []
 
         # Define file types and their actions.
-        self.fileTypes = {}
+        self.file_types = {}
         for model_extn in constants.MODEL_EXTENSIONS:
-            self.fileTypes[model_extn] = self.add_model
+            self.file_types[model_extn] = self.add_model
+
+        self.file_types['.ptf'] = self.add_particles
         # self.fileTypes = {
         #     '.egg': self.AddModel,
         #     '.bam': self.AddModel,
@@ -33,8 +35,8 @@ class DragDropManager:
 
     def DoFileDrop(self, filePath, np):
         ext = os.path.splitext(filePath)[1]
-        if ext in self.fileTypes:
-            fn = self.fileTypes[ext]
+        if ext in self.file_types:
+            fn = self.file_types[ext]
             fn(filePath, np)
 
     def Start(self, src, dragComps, data):
@@ -61,7 +63,7 @@ class DragDropManager:
                 filePath = self.dragComps[0]
                 ext = os.path.splitext(filePath)[1]
                 #print 'in: ',  ext in self.fileTypes
-                return ext in self.fileTypes
+                return ext in self.file_types
             except Exception:
                 pass
                 #print e
@@ -108,6 +110,9 @@ class DragDropManager:
 
     def add_model(self, file_path, np=None):
         self.base.AddComponent('ModelRoot', model_path=file_path)
+
+    def add_particles(self, file_path, np=None):
+        self.base.AddComponent('ParticleEffect', config_path=file_path)
 
     def AddShader(self, filePath, np=None):
         wrpr = self.base.node_manager.wrap(np)

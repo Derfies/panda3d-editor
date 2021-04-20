@@ -1,23 +1,13 @@
-from direct.showbase.PythonUtil import getBase as get_base
+import panda3d.core as pc
 
-from game.nodes.constants import TAG_MODEL_ROOT_CHILD
-
-
-class ModelPathAttribute:
-
-    def get(self):
-        return get_base().project.get_rel_model_path(super().get())
+from game.nodes.attributes import NodeProjectAssetAttribute
 
 
 class ModelRoot:
-    
-    @classmethod
-    def create(cls, *args, **kwargs):
-        comp = super().create(*args, **kwargs)
-        
-        # Tag each descendant NodePath as a child of a model root. This edits
-        # of these NodePaths to be saved out.
-        for child in comp.data.find_all_matches('**/*'):
-            child.set_python_tag(TAG_MODEL_ROOT_CHILD, True)
-        
-        return comp
+
+    serialise_descendants = False
+    model_path = NodeProjectAssetAttribute(
+        pc.Filename,
+        pc.ModelRoot.get_fullpath,
+        init_arg=''
+    )

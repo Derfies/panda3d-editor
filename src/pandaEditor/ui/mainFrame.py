@@ -341,8 +341,8 @@ class MainFrame(wx.Frame):
         delta = pm.Vec2(-base.edCamera.getH() + yaw_pitch[0], -base.edCamera.getP() + yaw_pitch[1])
         base.edCamera.Orbit(delta)
 
-    def OnCreate(self, evt, typeStr):
-        self.base.AddComponent(typeStr)
+    def on_create(self, evt, type_):
+        self.base.AddComponent(type_)
 
     def OnCreateActor(self, evt):
         """
@@ -721,65 +721,47 @@ class MainFrame(wx.Frame):
     def BuildCreateMenu(self):
         """Build the create menu."""
         lightActns = [
-            ActionItem('Ambient', '', self.OnCreate, args='AmbientLight'),
-            ActionItem('Point', '', self.OnCreate, args='PointLight'),
-            ActionItem('Directional', '', self.OnCreate, args='DirectionalLight'),
-            ActionItem('Spot', '', self.OnCreate, args='Spotlight')
+            ActionItem('Ambient', '', self.on_create, args='AmbientLight'),
+            ActionItem('Point', '', self.on_create, args='PointLight'),
+            ActionItem('Directional', '', self.on_create, args='DirectionalLight'),
+            ActionItem('Spot', '', self.on_create, args='Spotlight')
         ]
         mLights = CustomMenu()
         mLights.AppendActionItems(lightActns, self)
         
         collActns = [
-            ActionItem('Node', '', self.OnCreate, args='CollisionNode'),
-            ActionItem('Box', '', self.OnCreate, args='CollisionBox'),
-            ActionItem('Ray', '', self.OnCreate, args='CollisionRay'),
-            ActionItem('Sphere', '', self.OnCreate, args='CollisionSphere'),
-            ActionItem('Inverse Sphere', '', self.OnCreate, args='CollisionInvSphere'),
-            ActionItem('Capsule', '', self.OnCreate, args='CollisionCapsule')
+            ActionItem('Node', '', self.on_create, args='CollisionNode'),
+            ActionItem('Box', '', self.on_create, args='CollisionBox', kwargs={'x': 0.5, 'y': 0.5, 'z': 0.5}),
+            ActionItem('Ray', '', self.on_create, args='CollisionRay'),
+            ActionItem('Sphere', '', self.on_create, args='CollisionSphere'),
+            ActionItem('Inverse Sphere', '', self.on_create, args='CollisionInvSphere'),
+            ActionItem('Capsule', '', self.on_create, args='CollisionCapsule')
         ]
         mColl = CustomMenu()
         mColl.AppendActionItems(collActns, self)
         
-        # texActns = [
-        #     ActionItem('Texture', '', self.OnCreate, args='Texture')#,
-        #     #ActionItem('Texture Stage', '', self.OnCreate, args='TextureStage')
-        # ]
-        # mTex = CustomMenu()
-        # mTex.AppendActionItems(texActns, self)
-        
-        shaActns = [
-            ActionItem('Shader', '', self.OnCreate, args='Shader')
-        ]
-        # mSha = CustomMenu()
-        # mSha.AppendActionItems(shaActns, self)
-        
         bltActions = [
-            ActionItem('World', '', self.OnCreate, args='BulletWorld'),
-            ActionItem('Debug Node', '', self.OnCreate, args='BulletDebugNode'),
-            ActionItem('Rigid Body Node', '', self.OnCreate, args='BulletRigidBodyNode'),
-            ActionItem('Character Controller Node', '', self.OnCreate, args='BulletCharacterControllerNode'),
-            ActionItem('Box Shape', '', self.OnCreate, args='BulletBoxShape'),
-            ActionItem('Sphere Shape', '', self.OnCreate, args='BulletSphereShape'),
-            ActionItem('Plane Shape', '', self.OnCreate, args='BulletPlaneShape'),
-            ActionItem('Capsule Shape', '', self.OnCreate, args='BulletCapsuleShape')
+            ActionItem('World', '', self.on_create, args='BulletWorld'),
+            ActionItem('Debug Node', '', self.on_create, args='BulletDebugNode'),
+            ActionItem('Rigid Body Node', '', self.on_create, args='BulletRigidBodyNode'),
+            ActionItem('Character Controller Node', '', self.on_create, args='BulletCharacterControllerNode'),
+            ActionItem('Box Shape', '', self.on_create, args='BulletBoxShape'),
+            ActionItem('Sphere Shape', '', self.on_create, args='BulletSphereShape'),
+            ActionItem('Plane Shape', '', self.on_create, args='BulletPlaneShape'),
+            ActionItem('Capsule Shape', '', self.on_create, args='BulletCapsuleShape')
         ]
         mBlt = CustomMenu()
         mBlt.AppendActionItems(bltActions, self)
         
         self.mCreate = CustomMenu()
-        self.mCreate.AppendActionItem(ActionItem('Panda Node', '', self.OnCreate, args='PandaNode'), self)
+        self.mCreate.AppendActionItem(ActionItem('Panda Node', '', self.on_create, args='PandaNode'), self)
         self.mCreate.AppendActionItem(ActionItem('Actor', '', self.OnCreateActor), self)
-        self.mCreate.AppendActionItem(ActionItem('Fog', '', self.OnCreate, args='Fog'), self)
+        self.mCreate.AppendActionItem(ActionItem('Fog', '', self.on_create, args='Fog'), self)
         self.mCreate.AppendSubMenu(mColl, '&Collision')
         self.mCreate.AppendSubMenu(mLights, '&Lights')
-        # self.mCreate.AppendSubMenu(mTex, '&Texture')
-        # self.mCreate.AppendSubMenu(mSha, '&Shader')
         self.mCreate.AppendSubMenu(mBlt, '&Bullet')
         self.mCreate.AppendSeparator()
         self.mCreate.AppendActionItem(ActionItem('Prefab', '', self.OnCreatePrefab), self)
-        #self.mCreate.AppendSeparator()
-        #self.mCreate.AppendActionItem(ActionItem('Cg Shader', '', self.OnCreateCgShader), self)
-        #self.mCreate.AppendActionItem(ActionItem('Glsl Shader', '', self.OnCreateGlslShader), self)
         
     def BuildWindowMenu(self):
         """Build show / hide controls for panes."""

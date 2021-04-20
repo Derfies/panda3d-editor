@@ -3,7 +3,7 @@ from panda3d.core import Lens
 
 from game.nodes.attributes import Attribute
 from game.nodes.nodepath import NodePath
-from game.nodes.othermeta import ComponentMetaClass
+from game.nodes.componentmetaclass import ComponentMetaClass
 
 
 class LensNodeAttribute(Attribute):

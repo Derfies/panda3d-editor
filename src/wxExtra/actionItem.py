@@ -1,15 +1,16 @@
 import wx
 
 
-class ActionItem(object):
+class ActionItem:
     
-    def __init__(self, text, iconPath, cmd, id=None, args=[], helpStr='', 
-                  kind=wx.ITEM_NORMAL):
+    def __init__(self, text, iconPath, cmd, id=None, args=None, kwargs=None,
+                 helpStr='', kind=wx.ITEM_NORMAL):
         self._text = text
         self._iconPath = iconPath
         self._cmd = cmd
         self._id = id
-        self._args = args
+        self._args = args or []
+        self._kwargs = kwargs or {}
         self._helpStr = helpStr
         self._kind = kind
         
@@ -31,6 +32,9 @@ class ActionItem(object):
     
     def GetArguments(self):
         return self._args
+
+    def GetKwarguments(self):
+        return self._kwargs
     
     def GetHelpString(self):
         return self._helpStr

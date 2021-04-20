@@ -2,10 +2,8 @@ import copy
 
 from direct.showbase.PythonUtil import getBase as get_base
 
-from p3d import commonUtils as cUtils
 from game.nodes.attributes import Connection
-from game.nodes.othermeta import ComponentMetaClass
-from game.utils import get_lower_camel_case
+from game.nodes.componentmetaclass import ComponentMetaClass
 
 
 class Base(metaclass=ComponentMetaClass):
@@ -28,25 +26,14 @@ class Base(metaclass=ComponentMetaClass):
     
     @classmethod
     def create(cls, *args, **kwargs):
-        wrpr = cls(None)
-        
-        createKwargs = {}
-        for attr in wrpr.create_attributes:
-            if attr.name in kwargs:
-
-                # Cast
-                val = cUtils.unserialise(kwargs[attr.name], attr.type)
-                if val is not None:
-                    createKwargs[attr.name] = val
-            else:
-                createKwargs[attr.init_arg_name] = attr.init_arg
-        
-        # Default create args to a string of the class name.
-        if 'name' in createKwargs and not createKwargs['name']:
-            createKwargs['name'] = get_lower_camel_case(cls.type_.__name__)
-        print('createKwargs:', cls, '->', createKwargs)
-        wrpr.data = cls.type_(**createKwargs)
-        return wrpr
+        data = kwargs.pop('data', None)
+        if data is None:
+            try:
+                data = cls.type_(**kwargs)
+            except TypeError as e:
+                print(cls, args, kwargs, e)
+                raise
+        return cls(data)
 
     def __hash__(self):
         return hash(self.data)
@@ -106,10 +93,6 @@ class Base(metaclass=ComponentMetaClass):
         cOrigWrprs = origWrpr.children
         for i in range(len(cDupeWrprs)):
             self.fix_up_duplicate_children(cOrigWrprs[i].data, cDupeWrprs[i].data)
-
-    @property
-    def create_attributes(self):
-        return filter(lambda a: a.init_arg is not None, self.attributes.values())
 
     def on_duplicate(self, orig, dupe):
         raise NotImplementedError

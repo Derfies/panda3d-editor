@@ -32,6 +32,7 @@ from game.nodes.modelnode import ModelNode
 from game.nodes.modelroot import ModelRoot
 from game.nodes.nodepath import NodePath
 from game.nodes.pandanode import PandaNode
+from game.nodes.particleeffect import ParticleEffect
 from game.nodes.sceneroot import SceneRoot
 from game.nodes.showbasedefaults import (
     Aspect2d,
@@ -79,6 +80,7 @@ class Manager:
             'ModelRoot': ModelRoot,
             'NodePath': NodePath,
             'PandaNode': PandaNode,
+            'ParticleEffect': ParticleEffect,
             'Pixel2d': Pixel2d,
             'PointLight': PointLight,
             'Render': Render,
@@ -114,7 +116,7 @@ class Manager:
         type_ = self.GetTypeString(comp)
         return self.wrappers.get(type_)
     
-    def GetWrapperByName(self, c_type):
+    def get_component_by_name(self, c_type):
         return self.wrappers.get(c_type)
         
     def GetTypeString(self, comp):

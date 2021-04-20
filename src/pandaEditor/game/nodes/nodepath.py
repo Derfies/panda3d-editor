@@ -14,7 +14,7 @@ from game.nodes.constants import (
     TAG_PYTHON_TAGS
 )
 from game.nodes.base import Base
-from game.nodes.othermeta import ComponentMetaClass
+from game.nodes.componentmetaclass import ComponentMetaClass
 from game.utils import get_unique_name
 
 
@@ -56,10 +56,16 @@ class NodePath(Base, metaclass=ComponentMetaClass):
         path = kwargs.pop('path', None)
         if path is None:
             comp = super().create(*args, **kwargs)
-            comp.data = pc.NodePath(comp.data)
+            # HAXXOR
+            # Sometimes the data being wrapped is already a node path so this
+            # step is unnecessary.
+            if not isinstance(comp.data, pc.NodePath):
+                comp.data = pc.NodePath(comp.data)
             comp.set_up_node_path()
         else:
-            comp = cls(cls.FindChild(path, kwargs.pop('parent')))
+
+            # TODO: Move to model path?
+            comp = cls(cls.find_child(path, kwargs.pop('parent')))
         return comp
 
     @property
@@ -141,13 +147,13 @@ class NodePath(Base, metaclass=ComponentMetaClass):
         child.data.reparent_to(self.data)
         
     @classmethod
-    def FindChild(cls, path, parent):
+    def find_child(cls, path, parent):
         buffer = path.split('|')
-        np = parent
+        np = parent.data
         for elem in buffer:
-            childNames = [child.getName() for child in np.getChildren()]
-            index = childNames.index(elem)
-            np = np.getChildren()[index]
+            child_names = [child.get_name() for child in np.get_children()]
+            index = child_names.index(elem)
+            np = np.get_children()[index]
                     
         return np
 

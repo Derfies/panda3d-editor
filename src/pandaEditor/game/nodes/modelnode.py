@@ -1,7 +1,7 @@
 import panda3d.core as pm
 
 from game.nodes.nodepath import NodePath
-from game.nodes.othermeta import ComponentMetaClass
+from game.nodes.componentmetaclass import ComponentMetaClass
 
 
 class ModelNode(NodePath, metaclass=ComponentMetaClass):

@@ -340,8 +340,6 @@ class PropertiesPanel(wx.Panel):
                 self.propAttrMap[attr.category] = parent_prop
                 self.pg.Append(parent_prop)
 
-            print('Using prop type:', attr.name, type(prop))
-
             self.propAttrMap[attr.category].AddPrivateChild(prop)
 
             # Collect all attributes and attach them to the property.

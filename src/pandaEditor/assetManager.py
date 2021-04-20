@@ -61,7 +61,7 @@ class AssetManager:
             if np.node().getFullpath() == pandaPath
         ]
         
-        wrprCls = self.base.node_manager.GetWrapperByName('ModelRoot')
+        wrprCls = self.base.node_manager.get_component_by_name('ModelRoot')
         filePath = pm.Filename.toOsSpecific(pandaPath)
         wrpr = wrprCls.create(model_path=filePath)
         

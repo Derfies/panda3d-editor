@@ -96,11 +96,11 @@ class SceneGraphBasePanel(wx.Panel):
 
     def OnTreeEndLabelEdit(self, evt):
         """Change the component's name to that of the new item's name."""
-        def SetComponentName(comp, name):
-            wrpr = get_base().node_manager.wrap(comp)
-            attr = wrpr.find_property('name')
+        def SetComponentName(obj, name):
+            comp = get_base().node_manager.wrap(obj)
+            attr = comp.name
             if attr is not None:
-                wx.CallAfter(cmds.SetAttribute, [comp], [attr], name)
+                wx.CallAfter(cmds.SetAttribute, [obj], [attr], name)
 
         comp = evt.GetItem().GetData()
         name = evt.GetLabel()
