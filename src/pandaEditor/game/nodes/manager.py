@@ -103,14 +103,8 @@ class Manager:
         if wrprCls is not None:
             return wrprCls(comp)
         else:
-            wrprCls = self.GetDefaultWrapper(comp)
+            wrprCls = self.get_default_wrapper(comp)
             return wrprCls(comp)
-        
-    def GetDefaultWrapper(self, comp):
-        if hasattr(comp, 'getPythonTag'):
-            return self.wrappers['NodePath']
-        else:
-            return self.wrappers['Base']
         
     def GetWrapper(self, comp):
         type_ = self.GetTypeString(comp)

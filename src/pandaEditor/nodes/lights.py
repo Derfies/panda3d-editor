@@ -7,4 +7,4 @@ class Light:
         super().set_default_values()
 
         render = get_base().node_manager.wrap(get_base().render)
-        render.lights.connect(self.data)
+        #render.lights.connect(self.data)

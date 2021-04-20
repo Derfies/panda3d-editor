@@ -27,7 +27,8 @@ class SceneParser:
         for elem in pelem.findall('Item'):
             name = elem.get('name')
             value_str = elem.get('value')
-            value_type = comp_cls._declared_fields[name].type
+            print(name, comp_cls, comp_cls.__dict__)
+            value_type = comp_cls.__dict__[name].type#getattr(, name).type#._declared_fields[name].type
             attrs[name] = unserialise(value_str, value_type)
         return attrs
             

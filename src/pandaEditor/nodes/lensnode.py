@@ -5,38 +5,43 @@ from pandaEditor.nodes.constants import TAG_IGNORE
 TAG_FRUSTUM = 'P3D_Fustum'
 
 
-class FrustrumAttribute(Attribute):
+#class FrustrumAttribute(Attribute):
 
-    def get(self):
-        """
-        Return True if the lens node's frustum is visible, False otherwise.
+def get(data):
+    """
+    Return True if the lens node's frustum is visible, False otherwise.
 
-        """
-        return any(
-            child.get_python_tag(TAG_FRUSTUM)
-            for child in self.parent.data.children
-        )
+    """
+    return any(
+        child.get_python_tag(TAG_FRUSTUM)
+        for child in data.get_parent().get_children()
+    )
 
-    def set(self, value):
-        """
-        Set the camera's frustum to be visible. Ensure it is tagged for removal
-        and also so it doesn't appear in any of the scene graph panels.
+def set(data, value):
+    """
+    Set the camera's frustum to be visible. Ensure it is tagged for removal
+    and also so it doesn't appear in any of the scene graph panels.
 
-        """
-        if not value:
-            self.parent.data.node().hide_frustum()
-        else:
-            before = set(self.parent.data.children)
-            self.parent.data.node().show_frustum()
-            after = set(self.parent.data.children)
-            frustum = next(iter(after - before))
-            frustum.set_python_tag(TAG_FRUSTUM, True)
-            frustum.set_python_tag(TAG_IGNORE, True)
+    """
+    if not value:
+        data.node().hide_frustum()
+    else:
+        before = set(data.get_children())
+        data.node().show_frustum()
+        after = set(data.get_children())
+        frustum = next(iter(after - before))
+        frustum.set_python_tag(TAG_FRUSTUM, True)
+        frustum.set_python_tag(TAG_IGNORE, True)
 
 
 class LensNode:
 
-    show_frustrum = FrustrumAttribute(bool, serialise=False)
+    show_frustrum = Attribute(
+        bool,
+        get,
+        set,
+        serialise=False
+    )
 
     def on_select(self):
         """
@@ -45,8 +50,8 @@ class LensNode:
         of the bounding box.
 
         """
-        visible = self.show_frustrum.get()
-        self.show_frustrum.set(False)
+        visible = self.show_frustrum
+        self.show_frustrum = False
         super().on_select()
         if visible:
-            self.show_frustrum.set(True)
+            self.show_frustrum = True

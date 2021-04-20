@@ -12,14 +12,14 @@ class Base(metaclass=ComponentMetaClass):
         self.data = data
 
         # Set data for all attributes.
-        self.attributes = {}
-        for name, attr in self._declared_fields.items():
-            copy_attr = copy.deepcopy(attr)
-            copy_attr.parent = self
-            self.attributes[name] = copy_attr
-
-            # Replace the class attribute with the instantiated one.
-            setattr(self, name, copy_attr)
+        # self.attributes = {}
+        # for name, attr in self._declared_fields.items():
+        #     copy_attr = copy.deepcopy(attr)
+        #     copy_attr.parent = self
+        #     self.attributes[name] = copy_attr
+        #
+        #     # Replace the class attribute with the instantiated one.
+        #     setattr(self, name, copy_attr)
 
         self._children = []
         self.createArgs = {}
@@ -79,7 +79,7 @@ class Base(metaclass=ComponentMetaClass):
 
     @property
     def connections(self):
-        return filter(lambda a: isinstance(a, Connection), self.attributes.values())
+        return []#filter(lambda a: isinstance(a, Connection), self.attributes.values())
     
     def add_child(self, comp):
         raise NotImplementedError

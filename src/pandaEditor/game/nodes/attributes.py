@@ -27,7 +27,7 @@ class Base(metaclass=BaseMetaClass):
 
     @property
     def init_arg_name(self):
-        return self._init_arg_name or self.name
+        return self._init_arg_name# or self.name
 
     @property
     def data(self):
@@ -37,11 +37,20 @@ class Base(metaclass=BaseMetaClass):
     def serialise(self):
         return self._serialise #and self.get_fn is not None
 
-    def get(self):
-        return self.get_fn(self.data)
+    def __get__(self, instance, owner):
+        #print('GET CALLED')
+        #print(instance, owner)
+        return self.get_fn(instance.data)
 
-    def set(self, value):
-        self.set_fn(self.data, value)
+    def __set__(self, instance, value):
+        #print(instance, value)
+        self.set_fn(instance.data, value)
+
+    # def get(self):
+    #     return self.get_fn(self.data)
+    #
+    # def set(self, value):
+    #     self.set_fn(self.data, value)
 
 
 class Attribute(Base, metaclass=BaseMetaClass):

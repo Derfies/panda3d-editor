@@ -18,19 +18,21 @@ from game.nodes.componentmetaclass import ComponentMetaClass
 from game.utils import get_unique_name
 
 
-class Lights(Connections):
-
-    def __init__(self):
-        super().__init__(
-            pc.Light,
-            self.get_lights,
-            pc.NodePath.set_light,
-            pc.NodePath.clear_light,
-        )
-
-    def get_lights(self, data):
-        attrib = data.get_attrib(pc.LightAttrib)
-        return attrib.get_on_lights() if attrib is not None else None
+# class Lights(Connections):
+#
+#     def __init__(self):
+#         super().__init__(
+#             pc.Light,
+#             self.get_lights,
+#             pc.NodePath.set_light,
+#             pc.NodePath.clear_light,
+#         )
+#
+#
+def get_lights(data):
+    print('GET LIGHTS:', data)
+    attrib = data.get_attrib(pc.LightAttrib)
+    return attrib.get_on_lights() if attrib is not None else []
 
 
 class NodePath(Base, metaclass=ComponentMetaClass):
@@ -38,7 +40,12 @@ class NodePath(Base, metaclass=ComponentMetaClass):
     type_ = pc.NodePath
     name = Attribute(str, pc.NodePath.get_name, pc.NodePath.set_name, init_arg='')
     matrix = Attribute(pc.Mat4, pc.NodePath.get_mat, pc.NodePath.set_mat)
-    lights = Lights()
+    lights = Connections(
+        pc.Light,
+        get_lights,
+        pc.NodePath.set_light,
+        pc.NodePath.clear_light,
+    )
     fog = ToNodeConnection(
         pc.Fog,
         pc.NodePath.get_fog,

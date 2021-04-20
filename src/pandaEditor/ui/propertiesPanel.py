@@ -9,7 +9,7 @@ from panda3d.core import Filename
 from direct.showbase.PythonUtil import getBase as get_base
 from wxExtra import wxpg
 from pandaEditor import commands as cmds
-from game.nodes.attributes import Attribute, Connection, Connections
+from game.nodes.attributes import Attribute, Connection, Connections, Base
 from . import customProperties as custProps
 
 
@@ -260,18 +260,18 @@ class PropertiesPanel(wx.Panel):
         #     if attr.type in self.propMap and attr.getFn is not None:
         #         propCls = self.propMap[attr.type]
         #         if attr.type is not None:
-        #             prop = propCls(attr.label, '', attr.Get())
+        #             prop = propCls(attr_label, '', attr.Get())
         #             if attr.setFn is None:
         #                 prop.Enable(False)
         #         else:
-        #             prop = propCls(attr.label)
+        #             prop = propCls(attr_label)
         #     elif hasattr(attr, 'cnnctn'):
         #         val = attr.Get()
         #         try:
         #             objIter = iter(val)
-        #             prop = custProps.ConnectionListProperty(attr.label, '', attr.Get())
+        #             prop = custProps.ConnectionListProperty(attr_label, '', attr.Get())
         #         except TypeError:
-        #             prop = custProps.ConnectionProperty(attr.label, '', attr.Get())
+        #             prop = custProps.ConnectionProperty(attr_label, '', attr.Get())
         #     else:
         #         continue
         #
@@ -282,7 +282,7 @@ class PropertiesPanel(wx.Panel):
         #
         #     allAttrs = [wrpr.GetAttributes(addons=True)[i] for wrpr in wrprs]
         #     prop.SetAttribute(ATTRIBUTE_TAG, allAttrs)
-        #     self.propAttrMap[attr.label] = prop
+        #     self.propAttrMap[attr_label] = prop
         #
         #     # Append to property grid or the last property if it is a
         #     # child.
@@ -310,41 +310,102 @@ class PropertiesPanel(wx.Panel):
         comp_cls = get_base().node_manager.get_common_wrapper(objs)
         comps = [comp_cls(obj) for obj in objs]
 
-        for attr in comps[0].attributes.values():
+        #print('comp_cls:', comp_cls, comp_cls.mro())
+        #
+        # #
+        # #print(comp_cls.__dict__)
+        # for key, value in comp_cls.__dict__.items():
+        #     if isinstance(value, Base):
+        #         #print(comp_cls, key, type(value), value)
+        #         print(key, '->', getattr(comps[0], key))
+        #
+        # import inspect
+        #
+        # def isprop(v):
+        #     return isinstance(v, Attribute)
+        #
+        # propnames = [name for (name, value) in
+        #              inspect.getmembers(comp_cls, isprop)]
+        # print('propnames:', propnames)
+        # #
+        # print(comp_cls, comp_cls.mro(), comp_cls.__dict__)
+        #object = comp_cls
+
+        # import types
+        #
+        # names = dir(object)
+        # # :dd any DynamicClassAttributes to the list of names if object is a class;
+        # # this may result in duplicate entries if, for example, a virtual
+        # # attribute with the same name as a DynamicClassAttribute exists
+        # try:
+        #     for base in object.__bases__:
+        #         for k, v in base.__dict__.items():
+        #             if isinstance(v, types.DynamicClassAttribute):
+        #                 names.append(k)
+        # except AttributeError:
+        #     pass
+        #
+        # processed = set()
+        # for key in names:
+        #     # First try to get the value via getattr.  Some descriptors don't
+        #     # like calling their __get__ (see bug #1785), so fall back to
+        #     # looking in the __dict__.
+        #     # try:
+        #     #     value = getattr(object, key)
+        #     #     # handle the duplicate key
+        #     #     if key in processed:
+        #     #         raise AttributeError
+        #     # except AttributeError:
+        #     for base in object.mro():
+        #         if key in base.__dict__:
+        #             value = base.__dict__[key]
+        #
+        #     if not isinstance(value, Base):
+        #         continue
+
+            # print(key, '->', value, getattr(comps[0], key))
+        #print(comp_cls.frobulate)
+
+        #return
+
+        #for attr in comps[0].attributes.values():
+        for attr_name, attr in comp_cls.frobulate.items():
+            
+            attr_label = ' '.join(word.title() for word in attr_name.split('_'))
 
             # if attr.get_fn is None:
-            #     print('skipping no get fn prop:', attr.name, attr.type)
+            #     print('skipping no get fn prop:', attr_name, attr.type)
             #     continue
             try:
-                value = attr.get()
+                value = getattr(comps[0], attr_name)#attr.get()
             except TypeError as e:
-                print('skipping no get fn prop:', attr.name, attr.type, e)
+                print('skipping no get fn prop:', attr_name, attr.type, e)
                 continue
 
             if isinstance(attr, Connections):
-                prop = custProps.ConnectionListProperty(attr.label, attr.name, value)
+                prop = custProps.ConnectionListProperty(attr_label, attr_name, value)
             elif isinstance(attr, Connection):
-                prop = custProps.ConnectionProperty(attr.label, attr.name, value)
+                prop = custProps.ConnectionProperty(attr_label, attr_name, value)
             elif isinstance(attr, Attribute):
                 if attr.type not in self.propMap:
-                    print('skipping unknown type prop:', attr.name, attr.type)
+                    print('skipping unknown type prop:', attr_name, attr.type)
                     continue
 
                 prop_cls = self.propMap[attr.type]
-                prop = prop_cls(attr.label, attr.name, value)  # TODO: Do common value.
+                prop = prop_cls(attr_label, attr_name, value)  # TODO: Do common value.
                 # if attr.set_fn is None:
                 #     prop.Enable(False)
 
-            if attr.category not in self.propAttrMap:
-                parent_prop = wxpg.PropertyCategory(attr.category)
-                self.propAttrMap[attr.category] = parent_prop
-                self.pg.Append(parent_prop)
-
-            self.propAttrMap[attr.category].AddPrivateChild(prop)
+            # if attr.category not in self.propAttrMap:
+            #     parent_prop = wxpg.PropertyCategory(attr.category)
+            #     self.propAttrMap[attr.category] = parent_prop
+            self.pg.Append(prop)
+            #
+            # self.propAttrMap[attr.category].AddPrivateChild(prop)
 
             # Collect all attributes and attach them to the property.
-            all_attrs = [comp.attributes[attr.name] for comp in comps]
-            prop.SetAttribute(ATTRIBUTE_TAG, all_attrs)
+            #all_attrs = [comp.__dict__[attr_name] for comp in comps]
+            #prop.SetAttribute(ATTRIBUTE_TAG, all_attrs)
                             
     def OnPgChanged(self, evt):
         """

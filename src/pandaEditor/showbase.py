@@ -555,8 +555,8 @@ class ShowBase(GameShowBase):
 
         # Add any kwargs that are not part of the incoming dictionary.
         # TODO: This feels pretty awkward.
-        for attr in comp_cls.create_attributes:
-            name = attr.init_arg_name
+        for attr_name, attr in comp_cls.create_attributes.items():
+            name = attr._init_arg_name or attr_name#attr.init_arg_name
             if name in kwargs:
                 continue
             value = attr.init_arg
