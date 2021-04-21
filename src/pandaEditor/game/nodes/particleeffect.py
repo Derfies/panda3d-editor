@@ -12,7 +12,7 @@ from game.nodes.nodepath import NodePath
 class ParticleEffect(NodePath):
 
     type_ = DirectParticleEffect
-    config_path = PyTagAttribute(str, init_arg='', pytag_name='particle_effect_config_path')
+#    config_path = PyTagAttribute(str, init_arg='', pytag_name='particle_effect_config_path')
 
     @classmethod
     def create(cls, *args, **kwargs):
@@ -36,6 +36,6 @@ class ParticleEffect(NodePath):
 
         comp = super().create(data=effect)
         if file_path is not None:
-            comp.config_path.set(file_path)
+            comp.config_path = file_path
 
         return comp

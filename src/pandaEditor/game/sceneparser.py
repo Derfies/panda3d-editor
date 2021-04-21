@@ -24,12 +24,11 @@ class SceneParser:
 
     def get_attributes(self, pelem, comp_cls):
         attrs = {}
+        cls_attrs = comp_cls.properties
         for elem in pelem.findall('Item'):
             name = elem.get('name')
             value_str = elem.get('value')
-            print(name, comp_cls, comp_cls.__dict__)
-            value_type = comp_cls.__dict__[name].type#getattr(, name).type#._declared_fields[name].type
-            attrs[name] = unserialise(value_str, value_type)
+            attrs[name] = unserialise(value_str, cls_attrs[name].type)
         return attrs
             
     def load_component(self, elem, pcomp):
@@ -40,8 +39,8 @@ class SceneParser:
             # Collect attribute keys and values.
             attrs = self.get_attributes(elem, comp_cls)
             kwargs = {
-                attr.name: attrs.pop(attr.name)
-                for attr in comp_cls.create_attributes
+                attr_name: attrs.pop(attr_name)
+                for attr_name, attr in comp_cls.create_attributes.items()
             }
 
             # For sub-models edits we need to pull out the path for the
@@ -55,10 +54,10 @@ class SceneParser:
             if pcomp is not None:
                 comp.parent = pcomp
             comp.id = elem.get('id')
-            self.nodes[comp.id] = comp.data
+            self.nodes[comp.id] = comp
 
             for name, value in attrs.items():
-                comp.attributes[name].set(value)
+                setattr(comp, name, value)
             
             # Store connections so we can set them up once the rest of
             # the scene has been loaded.
@@ -80,4 +79,5 @@ class SceneParser:
         for comp, connections in self.connections.items():
             for name, comp_ids in connections.items():
                 for comp_id in comp_ids:
-                    comp.attributes[name].connect(self.nodes[comp_id])
+                    setattr(comp, name, self.nodes[comp_id])
+                    #comp.attributes[name].connect(self.nodes[comp_id])

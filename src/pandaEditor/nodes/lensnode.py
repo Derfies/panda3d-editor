@@ -5,19 +5,17 @@ from pandaEditor.nodes.constants import TAG_IGNORE
 TAG_FRUSTUM = 'P3D_Fustum'
 
 
-#class FrustrumAttribute(Attribute):
-
-def get(data):
+def get_frustrum(data):
     """
     Return True if the lens node's frustum is visible, False otherwise.
 
     """
     return any(
         child.get_python_tag(TAG_FRUSTUM)
-        for child in data.get_parent().get_children()
+        for child in data.get_children()
     )
 
-def set(data, value):
+def set_frustrum(data, value):
     """
     Set the camera's frustum to be visible. Ensure it is tagged for removal
     and also so it doesn't appear in any of the scene graph panels.
@@ -38,8 +36,8 @@ class LensNode:
 
     show_frustrum = Attribute(
         bool,
-        get,
-        set,
+        get_frustrum,
+        set_frustrum,
         serialise=False
     )
 

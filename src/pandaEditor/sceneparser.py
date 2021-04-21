@@ -1,8 +1,15 @@
+import collections
+import logging
+
 import xml.etree.ElementTree as et
 from direct.showbase.PythonUtil import getBase as get_base
 
+from p3d.commonUtils import serialise
 from game.sceneparser import SceneParser as GameSceneParser
 from utils import indent
+
+
+logger = logging.getLogger(__name__)
 
 
 class SceneParser(GameSceneParser):
@@ -35,41 +42,37 @@ class SceneParser(GameSceneParser):
         for child in comp.children:
             self.save_component(child, elem)
                 
-    def save_properties(self, wrpr, elem):
+    def save_properties(self, comp, elem):
         """
         Get a dictionary representing all the properties for the component
         then serialise it.
         """
-        # Get a dictionary with all default values.
-        # haxxor - figure out a better way to do this...
-        defPropDict = {}#wrpr.__class__.get_default_property_data()
-        
-        propDict = wrpr.get_property_data()
-        for pName, pVal in propDict.items():
-            if not type(pVal) == dict:
+        for attr_name, attr in comp.__class__.attributes.items():
+            if not attr.serialise:
+                continue
+            value = getattr(comp, attr_name)
+            if value is None:
+                logger.warning(f'Skipped serialising None value: {attr_name}')
+                continue
+            item_elem = et.SubElement(elem, 'Item')
+            item_elem.set('name', attr_name)
+            item_elem.set('value', serialise(value))
                 
-                # Compare the value to the default - serialise if they are
-                # different.
-                if pName in defPropDict and pVal == defPropDict[pName]:
-                    continue
-                
-                elem.append(self.save_item(pName, pVal))
-            else:
-                subElem = et.SubElement(elem, 'Item')
-                subElem.set('name', pNpame)
-                for key, val in pVal.items():
-                    subElem.append(self.save_item(key, val))
-                
-    def save_item(self, name, value):
-        return et.Element('Item', {
-            'name': name,
-            'value': value,
-        })
-                
-    def save_connections(self, wrpr, elem):
-        cnctnDict = wrpr.get_connection_data()
-        if not cnctnDict:
-            return
+    def save_connections(self, comp, elem):
+        cnctnDict = {}
+        for cnn_name, cnn in comp.__class__.connections.items():
+            targets = getattr(comp, cnn_name)
+            if targets is None:
+                logger.warning(f'Skipped serialising None value: {cnn_name}')
+                continue
+
+            # Always treat connections as lists.
+            if not isinstance(targets, collections.MutableSequence):
+                targets = [targets]
+            #print('targets:', targets)
+            for target in targets:
+                print(cnn_name, target, target.id)
+                cnctnDict.setdefault(cnn_name, []).append(target.id)
         
         cnctnsElem = et.Element('Connections')
         for key, vals in cnctnDict.items():

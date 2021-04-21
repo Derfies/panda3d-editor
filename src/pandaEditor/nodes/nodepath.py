@@ -1,6 +1,6 @@
 import copy
 
-import panda3d.core as pm
+import panda3d.core as pc
 from direct.showbase.PythonUtil import getBase as get_base
 from panda3d.core import NodePath as NP
 from direct.directtools.DirectSelection import DirectBoundingBox
@@ -158,7 +158,7 @@ class NodePath:
         return attrib
     
     def validate_drag_drop(self, dragComps, dropComp):
-        dragNps = [dragComp for dragComp in dragComps if type(dragComp) == pm.NodePath]
+        dragNps = [dragComp for dragComp in dragComps if type(dragComp) == pc.NodePath]
         if not dragNps:
             return False
         
@@ -180,7 +180,7 @@ class NodePath:
         return True
     
     def on_drag_drop(self, dragComps, dropNp):
-        dragNps = [dragComp for dragComp in dragComps if type(dragComp) == pm.NodePath]
+        dragNps = [dragComp for dragComp in dragComps if type(dragComp) == pc.NodePath]
         if dragNps:
             commands.Parent(dragNps, dropNp)
             
@@ -203,13 +203,14 @@ class NodePath:
     def default_parent(self):
         return get_base().node_manager.wrap(get_base().render)
     
-    def on_duplicate(self, origNp, dupeNp):
-        super().on_duplicate(origNp, dupeNp)
+    def on_duplicate(self, orig, dupe):
+        super().on_duplicate(orig, dupe)
         
-        wrpr = base.node_manager.wrap(origNp)
-        cnnctns = base.scene.get_outgoing_connections(wrpr)
+        #wrpr = get_base().node_manager.wrap(orig)
+        cnnctns = get_base().scene.get_outgoing_connections(orig)
+        print('cnnctns:', cnnctns)
         for cnnctn in cnnctns:
             newCnnctn = copy.copy(cnnctn)
-            newCnnctn.connect(self.data)
+            newCnnctn.connect(self)
         
-        self.data.setPythonTag(TAG_MODIFIED, origNp.getPythonTag(TAG_MODIFIED))
+        self.data.set_python_tag(TAG_MODIFIED, orig.get_python_tag(TAG_MODIFIED))

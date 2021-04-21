@@ -23,7 +23,9 @@ class BaseMetaClass(type):
             ConfigVariableBool('editor_mode', False)
         )
         mro = super().mro()
-        return cls.get_mro(cls, mro) if change_mro else mro
+        if change_mro:
+            return cls.get_mro(cls, mro)
+        return mro
 
     @classmethod
     def get_mro(metacls, cls, mro):

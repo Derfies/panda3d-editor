@@ -1,20 +1,38 @@
-import copy
 import types
 
-from collections import OrderedDict
-
-from game.nodes.attributes import Base
+from game.nodes.attributes import Base, Attribute, Connection, ReadOnlyAttribute
 from game.nodes.basemetaclass import BaseMetaClass
 
 
 class ComponentMetaClass(BaseMetaClass):
 
+    def __new__(metacls, name, bases, attrs):
+        cls = super().__new__(metacls, name, bases, attrs)
+
+        cls.properties  # HAXXOR need to init properties at least once.
+
+        return cls
+
     @property
-    def frobulate(cls):
+    def properties(cls):
+
+        results = {}
+        for base in cls.mro():
+            for key, value in base.__dict__.items():
+                if not isinstance(value, Base):
+                    continue
+                value.category = base.__name__  # HAXXOR
+                value.name = key
+                # print('    ', key)
+                #if key.startswith('ph'):
+                #    print('FOUND:', key)
+                results[key] = value
+        return results
+
+        '''
 
         mro = cls.mro()
         results = {}
-        #processed = set()
         names = dir(cls)
         # :dd any DynamicClassAttributes to the list of names if object is a class;
         # this may result in duplicate entries if, for example, a virtual
@@ -24,75 +42,52 @@ class ComponentMetaClass(BaseMetaClass):
                 for k, v in base.__dict__.items():
                     if isinstance(v, types.DynamicClassAttribute):
                         names.append(k)
-        except AttributeError:
-            pass
+                    else:
+                        print('ignore:', k)
+        except AttributeError as e:
+            print('error:', e)
 
+        print('cls:', cls)
         for key in names:
+            print('found key:', key)
             # First try to get the value via getattr.  Some descriptors don't
             # like calling their __get__ (see bug #1785), so fall back to
             # looking in the __dict__.
             for base in mro:
+                print('    base:', base, base.__dict__)
                 if key in base.__dict__:
                     value = base.__dict__[key]
+                    if isinstance(value, Base):
+                        value.category = base.__name__  # HAXXOR
                     break
 
             if not isinstance(value, Base):
                 continue
             results[key] = value
 
-        #print(results)
-
         return results
-    '''
-    pass
+        '''
 
-    @classmethod
-    def get_mro(metacls, cls, mro):
-        mro = super().get_mro(cls, mro)
-
-        # HAXX
-        class_name = cls.__name__
-        path = cls.__module__.split('.')
-        if path[0] != 'game':
-            return mro
-
-        #cls._declared_fields = metacls._get_attributes(mro)
-        return mro
-
-    @classmethod
-    def _get_attributes(metacls, mro):
-
-        from game.nodes.attributes import Base
-
-
-
-        attrs = {}
-        # for cls in reversed(mro):
-        #     print(cls)
-        #     print('    ', cls.__dict__)
-            # for attr_name in dir(cls):
-            #     print(cls, attr_name, getattr(cls, attr_name))
-                # if attr_name in attrs:
-                #     continue
-                # attr = getattr(cls, attr_name)
-                # if not isinstance(attr, Base):
-                #     #print('SKIPPING ATTRIBUTE:', attr)
-                #     continue
-                # attr.category = cls.__name__
-                # attr.name = attr_name
-                # attrs[attr_name] = attr
-
-        return attrs
-    '''
     @property
-    def create_attributes(cls):
-        # return list(
-        #     filter(lambda a: a.init_arg is not None, cls._declared_fields.values())
-        # )
-        # for key, value in cls.frobulate.items():
-        #     print(key, value, value.init_arg)
+    def attributes(cls):
         return {
             key: value
-            for key, value in cls.frobulate.items()
-            if isinstance(value, Base) and value.init_arg is not None
+            for key, value in cls.properties.items()
+            if isinstance(value, ReadOnlyAttribute)
+        }
+
+    @property
+    def connections(cls):
+        return {
+            key: value
+            for key, value in cls.properties.items()
+            if isinstance(value, Connection)
+        }
+
+    @property
+    def create_attributes(cls):
+        return {
+            key: value
+            for key, value in cls.attributes.items()
+            if value.init_arg is not None
         }

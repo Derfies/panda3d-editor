@@ -96,7 +96,7 @@ class AssetManager:
             # so we retain its properties.
             for childNp in wrpr.data.getChildren():
                 cWrpr = self.base.node_manager.wrap(childNp)
-                dupeNp = cWrpr.duplicate(uniqueName=False)
+                dupeNp = cWrpr.duplicate(unique_name=False)
                 dupeNp.reparentTo(np)
                 
             # Replace connections.

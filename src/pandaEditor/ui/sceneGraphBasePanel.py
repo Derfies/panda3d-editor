@@ -96,11 +96,9 @@ class SceneGraphBasePanel(wx.Panel):
 
     def OnTreeEndLabelEdit(self, evt):
         """Change the component's name to that of the new item's name."""
-        def SetComponentName(obj, name):
-            comp = get_base().node_manager.wrap(obj)
-            attr = comp.name
-            if attr is not None:
-                wx.CallAfter(cmds.SetAttribute, [obj], [attr], name)
+        def SetComponentName(comp, name):
+            if hasattr(comp, 'name'):
+                wx.CallAfter(cmds.SetAttribute, [comp], 'name', name)
 
         comp = evt.GetItem().GetData()
         name = evt.GetLabel()
@@ -146,29 +144,29 @@ class SceneGraphBasePanel(wx.Panel):
         if self.filter is not None and not comp.is_of_type(self.filter):
             return
 
-        item = self.tc.AppendItem(parent_item, comp.name_, data=comp.data)
-        self._comps[comp.data] = item
+        item = self.tc.AppendItem(parent_item, comp.name_, data=comp)
+        self._comps[comp] = item
         for child in comp.children:
             self.AddItem(child, item)
             
-    def RemoveItem(self, wrpr, delete=True):
-        if wrpr.data in self._comps:
+    def RemoveItem(self, comp, delete=True):
+        if comp in self._comps:
             if delete:
-                self.tc.Delete(self._comps[wrpr.data])
-            del self._comps[wrpr.data]
+                self.tc.Delete(self._comps[comp])
+            del self._comps[comp]
             
-        for cWrpr in wrpr.children:
-            self.RemoveItem(cWrpr, False)
+        for ccomp in comp.children:
+            self.RemoveItem(ccomp, False)
             
     def RefreshItem(self, comp):
         parent = comp.parent
         if parent is None:
             return
         
-        if parent.data in self._comps:
+        if parent in self._comps:
             new_item = self.tc.SetItemParent(
-                self._comps[comp.data],
-                self._comps[parent.data],
+                self._comps[comp],
+                self._comps[parent],
                 comp.get_sibling_index()
             )
             self.tc.SetItemText(new_item, comp.name_)
@@ -192,30 +190,27 @@ class SceneGraphBasePanel(wx.Panel):
         if not self.IsShownOnScreen():
             return
 
-
-        
+        # If no components were specified - do a full rebuild.
         if comps is None:
-            
-            # No components were specified - do a full rebuild.
             self.Rebuild()
-        else:
-            for comp in comps:
-                wrpr = get_base().node_manager.wrap(comp)
-                pWrpr = wrpr.parent
-                if wrpr.data in self._comps:
-                    if pWrpr is None and wrpr.data != get_base().scene:
-                        
-                        # Component has no parent - remove it.
-                        self.RemoveItem(wrpr)
-                    else:
-                        
-                        # Component found in the tree - refresh it.
-                        self.RefreshItem(wrpr)
-                elif pWrpr is not None and pWrpr.data in self._comps:
-                    
-                    # Component not found in the tree - add it.
-                    self.AddItem(wrpr, self._comps[pWrpr.data])
-    
+            return
+
+        for comp in comps:
+            pcomp = comp.parent
+            if comp in self._comps:
+                if pcomp is None and comp.data != get_base().scene:
+
+                    # Component has no parent - remove it.
+                    self.RemoveItem(comp)
+                else:
+
+                    # Component found in the tree - refresh it.
+                    self.RefreshItem(comp)
+            elif pcomp is not None and pcomp in self._comps:
+
+                # Component not found in the tree - add it.
+                self.AddItem(comp, self._comps[pcomp])
+
     def Rebuild(self):
         """Do a complete rebuild of the scene graph."""
         # Get map of node paths to items before populating the tree control

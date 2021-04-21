@@ -18,19 +18,7 @@ from game.nodes.componentmetaclass import ComponentMetaClass
 from game.utils import get_unique_name
 
 
-# class Lights(Connections):
-#
-#     def __init__(self):
-#         super().__init__(
-#             pc.Light,
-#             self.get_lights,
-#             pc.NodePath.set_light,
-#             pc.NodePath.clear_light,
-#         )
-#
-#
 def get_lights(data):
-    print('GET LIGHTS:', data)
     attrib = data.get_attrib(pc.LightAttrib)
     return attrib.get_on_lights() if attrib is not None else []
 
@@ -39,11 +27,17 @@ class NodePath(Base, metaclass=ComponentMetaClass):
     
     type_ = pc.NodePath
     name = Attribute(str, pc.NodePath.get_name, pc.NodePath.set_name, init_arg='')
+    color_scale = Attribute(
+        pc.LColor,
+        pc.NodePath.get_color_scale,
+        pc.NodePath.set_color_scale
+    )
     matrix = Attribute(pc.Mat4, pc.NodePath.get_mat, pc.NodePath.set_mat)
     lights = Connections(
         pc.Light,
         get_lights,
         pc.NodePath.set_light,
+        pc.NodePath.clear_light,
         pc.NodePath.clear_light,
     )
     fog = ToNodeConnection(
@@ -61,18 +55,15 @@ class NodePath(Base, metaclass=ComponentMetaClass):
 
         """
         path = kwargs.pop('path', None)
-        if path is None:
-            comp = super().create(*args, **kwargs)
-            # HAXXOR
-            # Sometimes the data being wrapped is already a node path so this
-            # step is unnecessary.
-            if not isinstance(comp.data, pc.NodePath):
-                comp.data = pc.NodePath(comp.data)
-            comp.set_up_node_path()
-        else:
+        if path is not None:
+            return cls(cls.find_child(path, kwargs.pop('parent')))
 
-            # TODO: Move to model path?
-            comp = cls(cls.find_child(path, kwargs.pop('parent')))
+        # Sometimes the data being wrapped is already a node path so this
+        # step is unnecessary.
+        comp = super().create(*args, **kwargs)
+        if not isinstance(comp.data, pc.NodePath):
+            comp.data = pc.NodePath(comp.data)
+        comp.set_up_node_path()
         return comp
 
     @property
@@ -97,20 +88,20 @@ class NodePath(Base, metaclass=ComponentMetaClass):
     def destroy(self):
         self.data.remove_node()
         
-    def duplicate(self, uniqueName=True):
-        dupeNp = self.data.copyTo(self.data.getParent())
+    def duplicate(self, unique_name=True):
+        dupe_np = self.data.copyTo(self.data.get_parent())
         
         # Make sure the duplicated NodePath has a unique name to all its 
         # siblings.
-        if uniqueName:
-            siblingNames = [
-                np.getName() 
-                for np in self.data.getParent().getChildren()
+        if unique_name:
+            sibling_names = [
+                np.get_name()
+                for np in self.data.get_parent().get_children()
             ]
-            dupeNp.setName(get_unique_name(self.data.getName(), siblingNames))
+            dupe_np.set_name(get_unique_name(self.data.get_name(), sibling_names))
         
-        self.fix_up_duplicate_children(self.data, dupeNp)
-        return dupeNp
+        self.fix_up_duplicate_children(self.data, dupe_np)
+        return dupe_np
 
     @property
     def children(self):

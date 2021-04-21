@@ -5,57 +5,48 @@ from pandaEditor.actions.base import Base
 
 class Edit(Base):
     
-    def __init__(self, obj):
-        self.obj = obj
-        comp = get_base().node_manager.wrap(self.obj)
-        self.modified = comp.modified
+    def __init__(self, comp):
+        self.comp = comp
+        self.old_modified = comp.modified
     
     def undo(self):
-        comp = get_base().node_manager.wrap(self.obj)
-        comp.modified = self.modified
+        self.comp.modified = self.old_modified
     
     def redo(self):
-        comp = get_base().node_manager.wrap(self.obj)
-        comp.modified = True
+        self.comp.modified = True
 
 
 class Transform(Edit):
     
-    def __init__(self, obj, xform, old_xform):
-        super().__init__(obj)
-        
+    def __init__(self, comp, xform, old_xform):
+        super().__init__(comp)
         self.xform = xform
         self.old_xform = old_xform
     
     def undo(self):
-        self.obj.set_transform(self.old_xform)
-        comp = get_base().node_manager.wrap(self.obj)
-        comp.modified = self.modified
+        super().undo()
+        self.comp.data.set_transform(self.old_xform)
     
     def redo(self):
-        self.obj.set_transform(self.xform)
-        comp = get_base().node_manager.wrap(self.obj)
-        comp.modified = True
+        super().redo()
+        self.comp.data.set_transform(self.xform)
         
 
 class SetAttribute(Edit):
     
-    def __init__(self, obj, attr, value):
-        super().__init__(obj)
-        
-        self.attr = attr
+    def __init__(self, comp, name, value):
+        super().__init__(comp)
+        self.name = name
         self.value = value
-        self.old_value = attr.get()
+        self.old_value = getattr(comp, name)
     
     def undo(self):
         super().undo()
-        
-        self.attr.set(self.old_value)
+        setattr(self.comp, self.name, self.old_value)
     
     def redo(self):
         super().redo()
-        
-        self.attr.set(self.value)
+        setattr(self.comp, self.name, self.value)
         
 
 class Connect(Edit):
@@ -94,7 +85,7 @@ class SetConnections(Edit):
     def undo(self):
         super().undo()
         
-        self.cnnctn.set(self.oldobjs)
+        self.cnnctn = self.oldobjs
     
     def redo(self):
         super().redo()

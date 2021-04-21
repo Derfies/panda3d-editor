@@ -10,19 +10,7 @@ class Base(metaclass=ComponentMetaClass):
     
     def __init__(self, data):
         self.data = data
-
-        # Set data for all attributes.
-        # self.attributes = {}
-        # for name, attr in self._declared_fields.items():
-        #     copy_attr = copy.deepcopy(attr)
-        #     copy_attr.parent = self
-        #     self.attributes[name] = copy_attr
-        #
-        #     # Replace the class attribute with the instantiated one.
-        #     setattr(self, name, copy_attr)
-
         self._children = []
-        self.createArgs = {}
     
     @classmethod
     def create(cls, *args, **kwargs):
@@ -55,6 +43,11 @@ class Base(metaclass=ComponentMetaClass):
 
     @property
     def parent(self):
+
+        # Return None if the component isn't registered - it may have been
+        # detached.
+        if self not in get_base().scene.comps:
+            return None
         return get_base().node_manager.wrap(get_base().scene)
 
     @parent.setter
@@ -77,9 +70,9 @@ class Base(metaclass=ComponentMetaClass):
         get_base().scene.register_component(dupe)
         return dupe
 
-    @property
-    def connections(self):
-        return []#filter(lambda a: isinstance(a, Connection), self.attributes.values())
+    # @property
+    # def connections(self):
+    #     return []#filter(lambda a: isinstance(a, Connection), self.attributes.values())
     
     def add_child(self, comp):
         raise NotImplementedError

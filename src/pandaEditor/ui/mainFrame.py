@@ -152,8 +152,8 @@ class MainFrame(wx.Frame):
         # current location on disk
         defaultDir = ''
         defaultFile = ''
-        if self.base.doc.filePath is not None:
-            defaultDir, defaultFile = os.path.split(self.base.doc.filePath)
+        if self.base.doc.file_path is not None:
+            defaultDir, defaultFile = os.path.split(self.base.doc.file_path)
         elif self.base.project.path is not None:
             defaultDir = self.base.project.GetScenesDirectory()
 
@@ -249,12 +249,12 @@ class MainFrame(wx.Frame):
         """Save the document."""
         # Set a file path for the document if one does not exist, or for save
         # as
-        if self.base.doc.filePath is None or saveAs:
+        if self.base.doc.file_path is None or saveAs:
 
             # Query a new save path
             filePath = self._GetSavePath()
             if filePath:
-                self.base.doc.filePath = filePath
+                self.base.doc.file_path = filePath
             else:
                 return
 

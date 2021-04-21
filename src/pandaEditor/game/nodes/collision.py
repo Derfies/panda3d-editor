@@ -1,39 +1,41 @@
 import panda3d.core as pc
 
 from game.nodes.attributes import (
+    Base as BaseAttribute,
     Attribute,
-    NodeAttribute,
+    #NodeAttribute,
     NodeConnections,
 )
 from game.nodes.base import Base
 from game.nodes.nodepath import NodePath
 
 
-class SolidsConnection(NodeConnections):
-
-    def __init__(self):
-        super().__init__(
-            pc.CollisionSolid,
-            pc.CollisionNode.get_solids,
-            pc.CollisionNode.add_solid,
-            pc.CollisionNode.clear_solids,
-        )
-
-    def clear_solid(self, value):
-        solids = self.data.get_solids()
-        index = solids.index(value)
-        pc.CollisionNode.remove_solid(self.data, index)
+# class SolidsConnection(NodeConnections):
+#
+#     def __init__(self):
+#         super().__init__(
+#             pc.CollisionSolid,
+#             pc.CollisionNode.get_solids,
+#             pc.CollisionNode.add_solid,
+#             pc.CollisionNode.clear_solids,
+#         )
+#
+#     def clear_solid(self, value):
+#         solids = self.data.get_solids()
+#         index = solids.index(value)
+#         pc.CollisionNode.remove_solid(self.data, index)
 
 
 class CollisionNode(NodePath):
     
     type_ = pc.CollisionNode
-    num_solids = NodeAttribute( # TODO: Move to editior wrapper.
-        int,
-        pc.CollisionNode.get_num_solids,
-        serialise=False
+    solids = NodeConnections(
+        pc.CollisionSolid,
+        pc.CollisionNode.get_solids,
+        pc.CollisionNode.add_solid,
+        pc.CollisionNode.clear_solids,
+        None,
     )
-    solids = SolidsConnection()
     
     @classmethod
     def create(cls, *args, **kwargs):
@@ -45,9 +47,9 @@ class CollisionNode(NodePath):
 class CollisionBox(Base):
     
     type_ = pc.CollisionBox
-    x = Attribute(float, init_arg=0.5)
-    y = Attribute(float, init_arg=0.5)
-    z = Attribute(float, init_arg=0.5)
+    x = BaseAttribute(float, init_arg=0.5)
+    y = BaseAttribute(float, init_arg=0.5)
+    z = BaseAttribute(float, init_arg=0.5)
     center = Attribute(
         pc.Point3,
         pc.CollisionBox.get_center,

@@ -12,18 +12,16 @@ class Selection(Object):
 
     BBOX_TAG = 'bbox'
 
-    def __init__(self, base, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.base = base
         self.comps = []
-        self.wrprs = []
 
-        # Create a marquee
+        # Create a marquee.
         self.marquee = Marquee('marquee', *args, **kwargs)
 
         # Create node picker - set its collision mask to hit both geom nodes
-        # and collision nodes
+        # and collision nodes.
         bitMask = pm.GeomNode.getDefaultCollideMask() | pm.CollisionNode.getDefaultCollideMask()
         self.picker = MousePicker(
             'picker',
@@ -31,26 +29,25 @@ class Selection(Object):
             fromCollideMask=bitMask, **kwargs
         )
 
-    def Get(self):
+    def get(self):
         """Return the selected components."""
         return self.comps
 
-    def GetNodePaths(self):
-        nps = [
-            wrpr.data
-            for wrpr in self.wrprs
-            if isinstance(wrpr.data, pm.NodePath)
+    @property
+    def node_paths(self):
+        return [
+            comp.data
+            for comp in self.comps
+            if isinstance(comp.data, pm.NodePath)
         ]
-        return nps
 
-    def Clear(self):
+    def clear(self):
         """Clear the selection list and run deselect handlers."""
-        for wrpr in self.wrprs:
-            wrpr.on_deselect()
+        for comp in self.comps:
+            comp.on_deselect()
         self.comps = []
-        self.wrprs = []
 
-    def Add(self, comps):
+    def add(self, comps):
         """
         Add the indicated components to the selection and run select handlers.
         """
@@ -59,48 +56,43 @@ class Selection(Object):
             # Skip components already selected.
             if comp in self.comps:
                 continue
-
-            wrpr = get_base().node_manager.wrap(comp)
-            wrpr.on_select()
+            comp.on_select()
             self.comps.append(comp)
-            self.wrprs.append(wrpr)
 
-    def Remove(self, comps):
+    def remove(self, comps):
         """
         Remove those components that were in the selection and run deselect
         handlers.
         """
-        for wrpr in self.wrprs:
-            wrpr.on_deselect()
-
+        for comp in self.comps:
+            comp.on_deselect()
         self.comps = [comp for comp in self.comps if comp not in comps]
-        self.wrprs = [get_base().node_manager.wrap(comp) for comp in self.comps]
 
-    def SelectParent(self):
+    def select_parent(self):
         """
         Return a list of parent components from the selection. Include the
         original component if no suitable parent is found.
         """
         comps = []
-        for wrpr in self.wrprs:
-            pWrpr = wrpr.parent
-            if pWrpr.data != get_base().scene:
-                comps.append(pWrpr.data)
+        for comp in self.comps:
+            pcomp = comp.parent
+            if pcomp.data != get_base().scene:
+                comps.append(pcomp.data)
             else:
-                comps.append(wrpr.data)
+                comps.append(comp.data)
         return comps
 
-    def SelectChild(self):
+    def select_child(self):
         """
         Return a list of child components from the selection. Include the
         original component if no children are found.
         """
         comps = []
-        for wrpr in self.wrprs:
-            if wrpr.children:
-                comps.append(wrpr.children[0].data)
+        for comp in self.comps:
+            if comp.children:
+                comps.append(comp.children[0].data)
             else:
-                comps.append(wrpr.data)
+                comps.append(comp.data)
         return comps
 
     def SelectPrev(self):
@@ -167,7 +159,7 @@ class Selection(Object):
                 pick_np is not None and
                 self.marquee.IsNodePathInside(pick_np) and
                 pick_np not in nps
-           ):
+            ):
                 nps.append(pick_np)
 
         # Add any node path which was under the mouse to the selection.
@@ -177,16 +169,17 @@ class Selection(Object):
 
         # In append mode add any NodePath which wasn't already in the selection
         # and remove any NodePath which was already selected.
+        # TODO: This doesn't run deselect handlers.
+        comps = [get_base().node_manager.wrap(np) for np in nps]
         if self.append:
-            oldComps = self.comps
-            for np in nps:
-                if np in self.comps:
-                    oldComps.remove(np)
+            old_comps = self.comps
+            for comp in comps:
+                if comp in self.comps:
+                    old_comps.remove(comp)
                 else:
-                    oldComps.append(np)
-            nps = oldComps
-
-        return nps
+                    old_comps.append(comp)
+            comps = old_comps
+        return comps
 
     def GetNodePathUnderMouse(self):
         """
@@ -218,8 +211,8 @@ class Selection(Object):
         else:
             return np.findNetPythonTag(TAG_PICKABLE)
 
-    def Update(self):
+    def update(self):
         """Update the selection by running deselect and select handlers."""
-        for wrpr in self.wrprs:
-            wrpr.on_deselect()
-            wrpr.on_select()
+        for comp in self.comps:
+            comp.on_deselect()
+            comp.on_select()

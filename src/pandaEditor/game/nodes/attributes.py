@@ -1,6 +1,38 @@
+from collections import MutableSequence
+
 from direct.showbase.PythonUtil import getBase as get_base
 
 from game.nodes.basemetaclass import BaseMetaClass
+
+
+class ConnectionTargets(MutableSequence):
+
+    def __init__(self, parent, instance, data):
+        self.parent = parent
+        self.instance = instance
+        self.data = [get_base().node_manager.wrap(d) for d in data]
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, index):
+        return self.data[index]
+
+    def __setitem__(self, index, value):
+        self.data[index] = value
+        self.update()
+
+    def __delitem__(self, index):
+        del self.data[index]
+        self.update()
+
+    def insert(self, index, value):
+        self.__setitem__(slice(index, index), [value])
+
+    def update(self):
+        self.parent.clear_all(self.instance)
+        for obj in self.data:
+            setattr(self.instance, self.parent.name, obj)
 
 
 class Base(metaclass=BaseMetaClass):
@@ -8,105 +40,101 @@ class Base(metaclass=BaseMetaClass):
     def __init__(
         self,
         type_,
-        get_fn=None,
-        set_fn=None,
-        init_arg=None,
-        init_arg_name=None,
-        serialise=True,
+        # get_fn=None,
+        # set_fn=None,
+        **kwargs
+        # init_arg=None,
+        # init_arg_name=None,
+        # serialise=True,
     ):
         self.type = type_
-        self.get_fn = get_fn
-        self.set_fn = set_fn
-        self.init_arg = init_arg
-        self._init_arg_name = init_arg_name
-        self._serialise = serialise
+        #self.get_fn = kwargs.get('get_fn')
+        self.init_arg = kwargs.get('init_arg')
+        self.init_arg_name = kwargs.get('init_arg_name')
+        self.serialise = kwargs.get('serialise', True)
 
-    @property
-    def label(self):
-        return ' '.join(word.title() for word in self.name.split('_'))
-
-    @property
-    def init_arg_name(self):
-        return self._init_arg_name# or self.name
-
-    @property
-    def data(self):
-        return self.parent.data
-
-    @property
-    def serialise(self):
-        return self._serialise #and self.get_fn is not None
+    def _get_data(self, instance):
+        return instance.data
 
     def __get__(self, instance, owner):
-        #print('GET CALLED')
-        #print(instance, owner)
-        return self.get_fn(instance.data)
+        return self.get_fn(self._get_data(instance))
 
     def __set__(self, instance, value):
-        #print(instance, value)
-        self.set_fn(instance.data, value)
-
-    # def get(self):
-    #     return self.get_fn(self.data)
-    #
-    # def set(self, value):
-    #     self.set_fn(self.data, value)
+        self.set_fn(self._get_data(instance), value)
 
 
-class Attribute(Base, metaclass=BaseMetaClass):
+class NodeMixin:
+
+    def _get_data(self, instance):
+        return super()._get_data(instance).node()
+
+
+class ReadOnlyAttribute(Base, metaclass=BaseMetaClass):
+
+    def __init__(self, type_, get_fn, **kwargs):
+        super().__init__(type_, **kwargs)
+
+        self.get_fn = get_fn
+
+
+class Attribute(ReadOnlyAttribute, metaclass=BaseMetaClass):
+
+    def __init__(self, type_, get_fn, set_fn, **kwargs):
+        super().__init__(type_, get_fn, **kwargs)
+
+        self.set_fn = set_fn
+
+
+class NodeAttribute(NodeMixin, Attribute, metaclass=BaseMetaClass):
 
     pass
 
 
-class NodeAttribute(Attribute, metaclass=BaseMetaClass):
+class ReadOnlyNodeAttribute(NodeMixin, ReadOnlyAttribute, metaclass=BaseMetaClass):
 
-    @property
-    def data(self):
-        return super().data.node()
+    pass
 
 
 class Connection(Base, metaclass=BaseMetaClass):
 
-    def __init__(
-        self,
-        type_,
-        get_fn=None,
-        set_fn=None,
-        clear_fn=None,
-        init_arg=None,
-        init_arg_name=None,
-        serialise=True,
-    ):
-        super().__init__(type_, get_fn, set_fn, init_arg, init_arg_name, serialise)
+    def __init__(self, type_, get_fn, set_fn, clear_fn, **kwargs):
+        super().__init__(type_, **kwargs)
 
+        self.get_fn = get_fn
+        self.set_fn = set_fn
         self.clear_fn = clear_fn
 
-    def _get_target(self, obj):
-        return obj
+    def _get_target(self, value):
 
-    def set(self, value):
-        self.set_fn(self.data, self._get_target(value))
+        # Note that value might be None if we're setting the connection to null.
+        return value.data if value is not None else None
 
-    def connect(self, value):
-        self.set_fn(self.data, self._get_target(value))
+    def __get__(self, instance, owner):
+        obj = self.get_fn(self._get_data(instance))
+        return get_base().node_manager.wrap(obj) if obj is not None else None
 
-    def clear(self, value):
-        self.clear_fn(self.data, value)
+    def __set__(self, instance, value):
+        super().__set__(instance, self._get_target(value))
 
 
 class Connections(Connection):
 
-    def set(self, values):
-        self.clear_fn(self.data)
-        for value in values:
-            self.connect(value)
+    def __init__(self, type_, get_fn, set_fn, clear_fn, clear_all_fn, **kwargs):
+        super().__init__(type_, get_fn, set_fn, clear_fn, **kwargs)
+
+        self.clear_all_fn = clear_all_fn
+
+    def __get__(self, instance, owner):
+        objs = self.get_fn(self._get_data(instance))
+        return ConnectionTargets(self, instance, objs)
+
+    def clear_all(self, instance):
+        return self.clear_all_fn(self._get_data(instance))
 
 
-class NodeConnection(Connection):
+class NodeConnection(NodeMixin, Connection):
 
-    @property
-    def data(self):
-        return super().data.node()
+    pass
 
 
 class NodeConnections(Connections, NodeConnection):
@@ -154,11 +182,11 @@ class PyTagAttribute(Attribute):
         self.pytag_name = kwargs.pop('pytag_name')
         super().__init__(*args, **kwargs)
 
-    def get(self):
-        return self.data.get_python_tag(self.pytag_name)
+    def __get__(self, instance, owner):
+        return instance.data.get_python_tag(self.pytag_name)
 
-    def set(self, value):
-        return self.data.set_python_tag(self.pytag_name, value)
+    def __set__(self, instance, value):
+        instance.data.set_python_tag(self.pytag_name, value)
 
 
 class ProjectAssetMixin:
@@ -167,11 +195,15 @@ class ProjectAssetMixin:
         self.directory = kwargs.pop('directory', None)
         super().__init__(*args, **kwargs)
 
-    def get(self):
+    def __get__(self, *args, **kwargs):
         return get_base().project.get_project_relative_path(
-            super().get(),
+            super().__get__(*args, **kwargs),
             self.directory,
         )
+
+
+class ReadOnlyNodeProjectAssetAttribute(ProjectAssetMixin, ReadOnlyNodeAttribute):
+    pass
 
 
 class NodeProjectAssetAttribute(ProjectAssetMixin, NodeAttribute):

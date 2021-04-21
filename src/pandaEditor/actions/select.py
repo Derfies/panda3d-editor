@@ -5,11 +5,11 @@ from pandaEditor.actions.base import Base
 
 class Select(Base):
     
-    def __init__(self, objs):
-        self.objs = objs
+    def __init__(self, comps):
+        self.comps = comps
     
     def undo(self):
-        get_base().selection.Remove(self.objs)
+        get_base().selection.remove(self.comps)
     
     def redo(self):
-        get_base().selection.Add(self.objs)
+        get_base().selection.add(self.comps)

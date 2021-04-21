@@ -41,20 +41,20 @@ def Duplicate(comps):
     undo queue.
 
     """
-    selComps = get_base().selection.comps
-    get_base().selection.Clear()
-    dupeComps = []
-    for comp in comps:
-        wrpr = get_base().node_manager.wrap(comp)
-        dupeComps.append(wrpr.duplicate())
+    sel_comps = get_base().selection.comps
+    get_base().selection.clear()
+    dupe_comps = [
+        comp.duplicate()
+        for comp in comps
+    ]
     actns = []
-    actns.append(actions.Deselect(selComps))
-    actns.extend([actions.Add(dupeComp) for dupeComp in dupeComps])
-    actns.append(actions.Select(dupeComps))
+    actns.append(actions.Deselect(sel_comps))
+    actns.extend([actions.Add(dupeComp) for dupeComp in dupe_comps])
+    actns.append(actions.Select(dupe_comps))
     actn = actions.Composite(actns)
     get_base().actnMgr.Push(actn)
     actn()
-    get_base().doc.on_modified(dupeComps)
+    get_base().doc.on_modified(dupe_comps)
     
 
 def Replace(fromComp, toComp):
@@ -89,14 +89,14 @@ def Select(comps):
     get_base().doc.on_refresh(comps)
     
 
-def SetAttribute(comps, attrs, val):
+def SetAttribute(comps, attr_name, value):
     """
     Create the set attribute action, execute it and push it onto the undo
     queue.
 
     """
     actns = [
-        actions.SetAttribute(comps[i], attrs[i], val)
+        actions.SetAttribute(comps[i], attr_name, value)
         for i in range(len(comps))
     ]
     actn = actions.Composite(actns)

@@ -10,7 +10,9 @@ from panda3d.bullet import BulletRigidBodyNode as BRBN, BulletShape as BS
 from panda3d.bullet import ZUp
 
 from game.nodes.attributes import (
+    Base as BaseAttribute,
     Attribute,
+    ReadOnlyAttribute,
     Connection,
     Connections,
     NodeAttribute,
@@ -33,7 +35,7 @@ TAG_BULLET_DEBUG_WIREFRAME = 'P3D_BulletDebugWireframe'
 class BulletSphereShape(Base):
 
     type_ = pb.BulletSphereShape
-    radius = Attribute(
+    radius = ReadOnlyAttribute(
         float,
         pb.BulletSphereShape.get_radius,
         init_arg=0.5,
@@ -43,7 +45,7 @@ class BulletSphereShape(Base):
 class BulletBoxShape(Base):
 
     type_ = pb.BulletBoxShape
-    half_extents = Attribute(
+    half_extents = ReadOnlyAttribute(
         pm.Vec3,
         pb.BulletBoxShape.get_half_extents_with_margin,
         init_arg=pm.Vec3(0.5, 0.5, 0.5),
@@ -54,20 +56,20 @@ class BulletBoxShape(Base):
 class BulletCapsuleShape(Base):
 
     type_ = pb.BulletCapsuleShape
-    radius = Attribute(float, pb.BulletCapsuleShape.get_radius, init_arg=0.5)
-    height = Attribute(float, pb.BulletCapsuleShape.get_half_height, init_arg=1)
-    up = Attribute(int, init_arg=pb.ZUp)
+    radius = ReadOnlyAttribute(float, pb.BulletCapsuleShape.get_radius, init_arg=0.5)
+    height = ReadOnlyAttribute(float, pb.BulletCapsuleShape.get_half_height, init_arg=1)
+    up = BaseAttribute(int, init_arg=pb.ZUp)
 
 
 class BulletCharacterControllerNode(NodePath):
 
     type_ = pb.BulletCharacterControllerNode
-    shape = Attribute(
+    shape = BaseAttribute(
         pb.BulletCapsuleShape,
         init_arg=pb.BulletCapsuleShape(0.4, 1.75 - 2 * 0.4, pb.ZUp)
     )
-    step_height = Attribute(float, init_arg=0.4)
-    name = Attribute(str)
+    step_height = BaseAttribute(float, init_arg=0.4)
+    #name = Attribute(str)
 
 
 class ShowWireframeAttribute(Attribute):
@@ -99,8 +101,8 @@ class BulletDebugNode(NodePath):
 class BulletPlaneShape(Base):
 
     type_ = pb.BulletPlaneShape
-    normal = Attribute(pm.Vec3, init_arg=pm.Vec3(0, 0, 1))
-    constant = Attribute(int, init_arg=0)
+    normal = BaseAttribute(pm.Vec3, init_arg=pm.Vec3(0, 0, 1))
+    constant = BaseAttribute(int, init_arg=0)
 
 
 class ShapesConnection(NodeConnections):
@@ -111,6 +113,7 @@ class ShapesConnection(NodeConnections):
             pb.BulletRigidBodyNode.get_shapes,
             pb.BulletRigidBodyNode.add_shape,
             self.clear_shapes,
+            None,
         )
 
     def clear_shapes(self, value):
@@ -164,6 +167,7 @@ class BulletWorld(Base):
         pb.BulletWorld.get_rigid_bodies,
         pb.BulletWorld.attach_rigid_body,
         _clear_rigid_bodies,
+        None,
     )
 
     def destroy(self):

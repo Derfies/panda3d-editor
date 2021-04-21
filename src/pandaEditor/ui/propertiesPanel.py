@@ -9,7 +9,7 @@ from panda3d.core import Filename
 from direct.showbase.PythonUtil import getBase as get_base
 from wxExtra import wxpg
 from pandaEditor import commands as cmds
-from game.nodes.attributes import Attribute, Connection, Connections, Base
+from game.nodes.attributes import Attribute, Connection, Connections, Base, ReadOnlyAttribute
 from . import customProperties as custProps
 
 
@@ -212,6 +212,7 @@ class PropertiesPanel(wx.Panel):
             pm.Point3: custProps.Point3Property,
             pm.Point4: custProps.Point4Property,
             pm.NodePath: custProps.NodePathProperty,
+            pm.LColor: custProps.Point4Property,
             int: wxpg.IntProperty,
             str: wxpg.StringProperty,
             bool: wxpg.BoolProperty,
@@ -304,15 +305,15 @@ class PropertiesPanel(wx.Panel):
         # except Exception as e:
         #     print(e)
 
-        objs = get_base().selection.comps
-        if not objs:
+        comps = get_base().selection.comps
+        if not comps:
             return
-        comp_cls = get_base().node_manager.get_common_wrapper(objs)
-        comps = [comp_cls(obj) for obj in objs]
+        comp_cls = get_base().node_manager.get_common_wrapper(comps)
+        comps = [comp_cls(comp.data) for comp in comps]
 
         #print('comp_cls:', comp_cls, comp_cls.mro())
         #
-        # #
+        # #fw
         # #print(comp_cls.__dict__)
         # for key, value in comp_cls.__dict__.items():
         #     if isinstance(value, Base):
@@ -364,12 +365,12 @@ class PropertiesPanel(wx.Panel):
         #         continue
 
             # print(key, '->', value, getattr(comps[0], key))
-        #print(comp_cls.frobulate)
+        #print(comp_cls.properties)
 
         #return
 
         #for attr in comps[0].attributes.values():
-        for attr_name, attr in comp_cls.frobulate.items():
+        for attr_name, attr in comp_cls.properties.items():
             
             attr_label = ' '.join(word.title() for word in attr_name.split('_'))
 
@@ -378,15 +379,16 @@ class PropertiesPanel(wx.Panel):
             #     continue
             try:
                 value = getattr(comps[0], attr_name)#attr.get()
-            except TypeError as e:
+            except (TypeError, AttributeError) as e:
                 print('skipping no get fn prop:', attr_name, attr.type, e)
                 continue
 
+            prop = None
             if isinstance(attr, Connections):
                 prop = custProps.ConnectionListProperty(attr_label, attr_name, value)
             elif isinstance(attr, Connection):
                 prop = custProps.ConnectionProperty(attr_label, attr_name, value)
-            elif isinstance(attr, Attribute):
+            elif isinstance(attr, ReadOnlyAttribute):
                 if attr.type not in self.propMap:
                     print('skipping unknown type prop:', attr_name, attr.type)
                     continue
@@ -396,16 +398,21 @@ class PropertiesPanel(wx.Panel):
                 # if attr.set_fn is None:
                 #     prop.Enable(False)
 
-            # if attr.category not in self.propAttrMap:
-            #     parent_prop = wxpg.PropertyCategory(attr.category)
-            #     self.propAttrMap[attr.category] = parent_prop
-            self.pg.Append(prop)
-            #
-            # self.propAttrMap[attr.category].AddPrivateChild(prop)
+            if attr.category not in self.propAttrMap:
+                parent_prop = wxpg.PropertyCategory(attr.category)
+                self.propAttrMap[attr.category] = parent_prop
+                self.pg.Append(parent_prop)
 
-            # Collect all attributes and attach them to the property.
-            #all_attrs = [comp.__dict__[attr_name] for comp in comps]
-            #prop.SetAttribute(ATTRIBUTE_TAG, all_attrs)
+            if prop is not None:
+                self.propAttrMap[attr.category].AddPrivateChild(prop)
+
+                # Collect all attributes and attach them to the property.
+                #all_attrs = [comp.__dict__[attr_name] for comp in comps]
+                #prop.SetAttribute(ATTRIBUTE_TAG, all_attrs)
+                prop_type = 'connection' if isinstance(attr, Connection) else 'attribute'
+                type_ = prop.SetAttribute('prop_type', prop_type)
+            else:
+                print('None prop:', attr_name)
                             
     def OnPgChanged(self, evt):
         """
@@ -421,13 +428,16 @@ class PropertiesPanel(wx.Panel):
         
         # Get the node property from the property and set it.
         prop = evt.GetProperty()
-        attrs = prop.GetAttribute(ATTRIBUTE_TAG)
+        print('SET:', prop.GetName())
+        #attrs = prop.GetAttribute(ATTRIBUTE_TAG)
+        type_ = prop.GetAttribute('prop_type')
         #if not hasattr(attrs[0], 'cnnctn'):
-        print(attrs[0].name, attrs[0], type(attrs[0]), prop.GetValue())
-        if isinstance(attrs[0], Connection):
-            cmds.SetConnections(prop.GetValue(), attrs)
+        # print(attrs[0].name, attrs[0], type(attrs[0]), prop.GetValue())
+        if type_ == 'connection':
+            cmds.SetConnections(comps, prop.GetValue())
         else:
-            cmds.SetAttribute(comps, attrs, prop.GetValue())
+            cmds.SetAttribute(comps, prop.GetName(), prop.GetValue())
+        #cmds.SetAttribute(comps, prop.GetName(), prop.GetValue())
 
     def OnUpdate(self, comps=None):
         self.pg.Freeze()
@@ -474,7 +484,7 @@ class PropertiesPanel(wx.Panel):
         Update the position, rotation and scale properties during the 
         transform operation.
         """
-        wrpr = base.selection.wrprs[0]
+        wrpr = get_base().selection.comps[0]
         labelFnDict = {
             'Position':wrpr.data.getPos,
             'Rotation':wrpr.data.getHpr,

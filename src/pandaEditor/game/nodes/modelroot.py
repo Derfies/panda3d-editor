@@ -1,26 +1,17 @@
 import panda3d.core as pc
 from direct.showbase.PythonUtil import getBase as get_base
-#from panda3d.core import ModelRoot as MR
 
-from game.nodes.attributes import Attribute, NodeAttribute
+from game.nodes.attributes import ReadOnlyNodeAttribute
 from game.nodes.constants import (
     TAG_MODEL_ROOT_CHILD, TAG_NODE_TYPE
 )
 from game.nodes.nodepath import NodePath
-from game.nodes.componentmetaclass import ComponentMetaClass
-
-
-# class ModelPathAttribute(NodeAttribute, metaclass=ComponentMetaClass):
-#
-#     def __init__(self, *args, **kwargs):
-#         kwargs['get_fn'] = pc.ModelRoot.get_fullpath
-#         super().__init__(*args, **kwargs)
 
 
 class ModelRoot(NodePath):
     
     type_ = pc.ModelRoot
-    model_path = NodeAttribute(
+    model_path = ReadOnlyNodeAttribute(
         pc.Filename,
         pc.ModelRoot.get_fullpath,
         init_arg=''

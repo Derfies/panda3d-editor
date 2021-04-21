@@ -34,9 +34,9 @@ class Scene(Scene):
         """Recreate a scene graph from file."""
         get_base().scene_parser.load(file_path)
     
-    def save(self, filePath):
+    def save(self, file_path):
         """Save a scene graph to file."""
-        get_base().scene_parser.save(self, filePath)
+        get_base().scene_parser.save(self, file_path)
         
     def close(self):
         """Destroy the scene by removing all its components."""
@@ -72,14 +72,14 @@ class Scene(Scene):
                     in_connections.append(connection)
         return in_connections
     
-    def register_connection(self, obj, connection):
+    def register_connection(self, source, target, name):
         """
         Register a connection to its target component. This allows us to find
         a connection and break it when a component is deleted.
+
         """
-        comp_id = get_base().node_manager.wrap(obj).id
-        self.connections.setdefault(comp_id, set())
-        self.connections[comp_id].add(connection)
+        print('register:', target.id, '->', source, name)
+        self.connections.setdefault(target.id, set()).add((source, name))
     
     def deregister_connection(self, connection):
         comp = connection.parent

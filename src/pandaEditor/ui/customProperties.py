@@ -200,13 +200,9 @@ class ConnectionListProperty(ConnectionBaseProperty):
     
     def BuildControl(self, parent):
         ctrl = ConnectionBaseProperty.BuildControl(self, parent, -1)
-        
-        comps = self.GetValue()
-        if comps is not None:
-            for i in range(len(comps)):
-                wrpr = base.node_manager.wrap(comps[i])
-                ctrl.Append(wrpr.name_, wrpr.data)
-        
+        comps = self.GetValue() or []
+        for comp in comps:
+            ctrl.Append(comp.name_, comp)
         return ctrl
     
     def OnKeyUp(self, evt):

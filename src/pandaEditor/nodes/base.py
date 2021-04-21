@@ -1,17 +1,17 @@
 from direct.showbase.PythonUtil import getBase as get_base
 
-from game.nodes.attributes import Connection
 from game.utils import get_lower_camel_case
-from p3d import commonUtils as cUtils
 
 
 class Base:
 
     @property
     def name_(self):
+
+        # TODO: Rename to "display_name" or similar.
         try:
-            return self.data.get_name()
-        except:
+            return getattr(self, 'name')
+        except Exception as e:
             return get_lower_camel_case(self.data.__class__.__name__)
 
     def validate_drag_drop(self, dragComp, dropComp):
@@ -30,37 +30,37 @@ class Base:
             del attrib['id']
         return attrib
         
-    def get_property_data(self):
-        """
-        Return a dictionary of all properties as key / value pairs. Make sure
-        that values have been serialised to string.
-        """
-        propDict = {}
-        for attr in self.attributes.values():
-            if attr.serialise and not isinstance(attr, Connection):
-                propDict[attr.name] = cUtils.serialize(attr.get())
-        return propDict
+    # def get_property_data(self):
+    #     """
+    #     Return a dictionary of all properties as key / value pairs. Make sure
+    #     that values have been serialised to string.
+    #     """
+    #     propDict = {}
+    #     for attr in self.attributes.values():
+    #         if attr.serialise and not isinstance(attr, Connection):
+    #             propDict[attr.name] = cUtils.serialise(attr.get())
+    #     return propDict
     
-    def get_connection_data(self):
-        cnnctnDict = {}
-        
-        # Put this component's connections into key / value pairs.
-        for cnnctn in self.connections:
-            comps = cnnctn.get()
-            if comps is None:
-                continue
-            
-            ids = []
-            try:
-                for comp in comps:
-                    wrpr = get_base().node_manager.wrap(comp)
-                    ids.append(wrpr.id)
-            except TypeError as e:
-                wrpr = get_base().node_manager.wrap(comps)
-                ids.append(wrpr.id)
-            cnnctnDict[cnnctn.name] = ids
-            
-        return cnnctnDict
+    # def get_connection_data(self):
+    #     cnnctnDict = {}
+    #
+    #     # Put this component's connections into key / value pairs.
+    #     for cnnctn in self.connections:
+    #         comps = cnnctn.get()
+    #         if comps is None:
+    #             continue
+    #
+    #         ids = []
+    #         try:
+    #             for comp in comps:
+    #                 wrpr = get_base().node_manager.wrap(comp)
+    #                 ids.append(wrpr.id)
+    #         except TypeError as e:
+    #             wrpr = get_base().node_manager.wrap(comps)
+    #             ids.append(wrpr.id)
+    #         cnnctnDict[cnnctn.name] = ids
+    #
+    #     return cnnctnDict
 
     @property
     def modified(self):
@@ -118,13 +118,13 @@ class Base:
     def default_parent(self):
         return get_base().node_manager.wrap(get_base().scene)
     
-    @classmethod
-    def get_default_property_data(cls):
-        try:
-            defPropDict = cls.create().get_property_data()
-        except:
-            defPropDict = {}
-        return defPropDict
+    # @classmethod
+    # def get_default_property_data(cls):
+    #     try:
+    #         defPropDict = cls.create().get_property_data()
+    #     except:
+    #         defPropDict = {}
+    #     return defPropDict
     
     def get_sibling_index(self):
         """
@@ -134,9 +134,11 @@ class Base:
         parent = self.parent
         if parent is None:
             return None
-        objs = [child.data for child in parent.children]
-        try:
-            return objs.index(self.data)
-        except ValueError:
-            print('objs:', objs, 'find:', self.data, [type(o) for o in objs])
-            raise
+        #objs = [child.data for child in parent.children]
+        # try:
+        print('parent:', parent)
+        print('children:', parent.children)
+        return parent.children.index(self)
+        # except ValueError:
+        #     print('objs:', objs, 'find:', self.data, [type(o) for o in objs])
+        #     raise

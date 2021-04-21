@@ -111,18 +111,18 @@ class ShowBase(GameShowBase):
         self.accept('shift-z', self.redo)
         self.accept('f', self.FrameSelection)
         self.accept('del', lambda fn: commands.Remove(fn()),
-                    [self.selection.Get])
+                    [self.selection.get])
         self.accept('backspace', lambda fn: commands.Remove(fn()),
-                    [self.selection.Get])
+                    [self.selection.get])
         self.accept('control-d', lambda fn: commands.Duplicate(fn()),
-                    [self.selection.Get])
+                    [self.selection.get])
         self.accept('control-g', lambda fn: commands.Group(fn()),
-                    [self.selection.Get])
+                    [self.selection.get])
         self.accept('control-s', self.frame.OnFileSave, [None])
         self.accept('arrow_up', lambda fn: commands.Select(fn()),
-                    [self.selection.SelectParent])
+                    [self.selection.select_parent])
         self.accept('arrow_down', lambda fn: commands.Select(fn()),
-                    [self.selection.SelectChild])
+                    [self.selection.select_child])
         self.accept('arrow_left', lambda fn: commands.Select(fn()),
                     [self.selection.SelectPrev])
         self.accept('arrow_right', lambda fn: commands.Select(fn()),
@@ -480,34 +480,41 @@ class ShowBase(GameShowBase):
         queue.
         """
         # Remove the transform task
-        if self._xformTask in taskMgr.getAllTasks():
-            taskMgr.remove(self._xformTask)
+        if self._xformTask in self.task_mgr.getAllTasks():
+            self.task_mgr.remove(self._xformTask)
             self._xformTask = None
 
         actGizmo = self.gizmoMgr.GetActiveGizmo()
         actns = []
+        comps = []
         for i, np in enumerate(actGizmo.attachedNps):
-            actns.append(actions.Transform(np, np.getTransform(), actGizmo.initNpXforms[i]))
+            comp = self.node_manager.wrap(np)
+            comps.append(comp)
+            actns.append(actions.Transform(comp, np.getTransform(), actGizmo.initNpXforms[i]))
         actn = actions.Composite(actns)
         self.actnMgr.Push(actn)
         self.gizmo = False
 
         # Make sure to mark the NodePath as dirty in case it is a child of a
         # model root.
-        wrpr = self.node_manager.wrap(np)
-        wrpr.modified = True
+        comp = self.node_manager.wrap(np)
+        comp.modified = True
 
         # Call OnModified next frame. Not sure why but if we call it straight
         # away it causes a small jitter when xforming...
-        taskMgr.doMethodLater(0, self.doc.on_modified, 'dragDrop',
-                              [actGizmo.attachedNps])
+        self.task_mgr.doMethodLater(
+            0,
+            self.doc.on_modified,
+            'dragDrop',
+            [comps]
+        )
 
     def FrameSelection(self):
         """
         Call frame selection on the camera if there are some node paths in the
         selection.
         """
-        nps = self.selection.GetNodePaths()
+        nps = self.selection.node_paths
         if nps:
             self.edCamera.Frame(nps)
         else:
@@ -519,10 +526,10 @@ class ShowBase(GameShowBase):
         selected nodes are attached to the managed gizmos, then refresh the
         active one.
         """
-        nps = self.selection.GetNodePaths()
-        self.gizmoMgr.AttachNodePaths(nps)
+        #nps = self.selection.GetNodePaths()
+        self.gizmoMgr.AttachNodePaths(self.selection.node_paths)
         self.gizmoMgr.RefreshActiveGizmo()
-        self.selection.Update()
+        self.selection.update()
 
     def CreateScene(self, filePath=None, newDoc=True):
         """
@@ -533,7 +540,7 @@ class ShowBase(GameShowBase):
             self.actnMgr.Reset()
 
         # Close the current scene if there is one
-        self.selection.Clear()
+        self.selection.clear()
         if hasattr(self, 'scene'):
             self.scene.close()
 
@@ -556,7 +563,7 @@ class ShowBase(GameShowBase):
         # Add any kwargs that are not part of the incoming dictionary.
         # TODO: This feels pretty awkward.
         for attr_name, attr in comp_cls.create_attributes.items():
-            name = attr._init_arg_name or attr_name#attr.init_arg_name
+            name = attr.init_arg_name or attr_name#attr.init_arg_name
             if name in kwargs:
                 continue
             value = attr.init_arg
@@ -565,8 +572,8 @@ class ShowBase(GameShowBase):
             kwargs[name] = value
 
         comp = comp_cls.create(*args, **kwargs)
-        comp.set_default_values()
         comp.parent = comp.default_parent
+        comp.set_default_values()
 
         # Bit of a hack. Sometimes a wrapper can create multiple components
         # when Create is called. Make sure to set default values on all the
@@ -575,7 +582,7 @@ class ShowBase(GameShowBase):
             for np in comp.extraNps:
                 eWrpr = self.node_manager.wrap(np)
                 eWrpr.set_default_values()
-        commands.Add([comp.data])
+        commands.Add([comp])
 
         return comp
 

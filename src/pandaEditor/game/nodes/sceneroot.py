@@ -6,24 +6,22 @@ from game.nodes.base import Base
 from game.nodes.componentmetaclass import ComponentMetaClass
 
 
-class PhysicsWorldConnection(Connection):
+def get_physics_world(scene):
+    return scene.physics_world
 
-    def __init__(self):
-        super().__init__(pb.BulletWorld)
 
-    def get(self):
-        return self.parent.data.physics_world
-
-    def connect(self, physics_world):
-        self.parent.data.physics_world = physics_world
-
-    def clear(self):
-        self.parent.data.physics_world = None
+def set_physics_world(scene, world):
+    scene.physics_world = world
 
 
 class SceneRoot(Base, metaclass=ComponentMetaClass):
 
-    physics_world = PhysicsWorldConnection()
+    physics_world = Connection(
+        pb.BulletWorld,
+        get_physics_world,
+        set_physics_world,
+        None,
+    )
     
     @classmethod
     def create(cls, *args, **kwargs):

@@ -1,16 +1,15 @@
 import panda3d.core as pm
 from panda3d.core import Lens
 
-from game.nodes.attributes import Attribute
+from game.nodes.attributes import NodeAttribute
 from game.nodes.nodepath import NodePath
 from game.nodes.componentmetaclass import ComponentMetaClass
 
 
-class LensNodeAttribute(Attribute):
+class LensNodeAttribute(NodeAttribute):
 
-    @property
-    def data(self):
-        return self.parent.data.node().get_lens()
+    def _get_data(self, instance):
+        return super()._get_data(instance).get_lens()
 
 
 class LensNode(NodePath, metaclass=ComponentMetaClass):

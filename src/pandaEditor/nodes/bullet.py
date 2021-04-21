@@ -9,13 +9,15 @@ from game.nodes.attributes import (
     Attribute,
     Connection,
     NodeAttribute,
+ReadOnlyAttribute,
+ReadOnlyNodeAttribute
     # NodePathTargetConnectionList,
 )
 
 
 class BulletWorld:
 
-    num_rigid_bodies = Attribute(
+    num_rigid_bodies = ReadOnlyAttribute(
         int,
         bullet.BulletWorld.get_num_rigid_bodies,
         serialise=False
@@ -28,7 +30,7 @@ class BulletWorld:
         world = get_base().scene.physics_world
         if world is None:
             scene = get_base().node_manager.wrap(get_base().scene)
-            scene.physics_world.connect(self.data)
+            scene.physics_world = self
 
 
 class BulletCharacterControllerNode:
@@ -52,7 +54,7 @@ class BulletRigidBodyNode:
         pb.BulletRigidBodyNode.set_debug_enabled,
         serialise=False
     )
-    num_shapes = NodeAttribute(
+    num_shapes = ReadOnlyNodeAttribute(
         int,
         pb.BulletRigidBodyNode.get_num_shapes,
         serialise=False
