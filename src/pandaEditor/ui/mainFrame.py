@@ -7,6 +7,7 @@ from pubsub import pub
 import panda3d.core as pm
 
 import p3d
+from direct.showbase.PythonUtil import getBase as get_base
 from pandaEditor import commands as cmds
 from wxExtra import utils as wxUtils, ActionItem
 from wxExtra.logpanel import LogPanel
@@ -318,11 +319,11 @@ class MainFrame(wx.Frame):
         fn()
 
     def OnEngagePhysics(self, evt):
-        wrpr = base.node_manager.wrap(base.scene.physics_world)
-        if base.scene.physics_task not in taskMgr.getAllTasks():
-            wrpr.EnablePhysics()
+        comp = get_base().node_manager.wrap(get_base().scene.physics_world)
+        if get_base().scene.physics_task not in get_base().taskMgr.getAllTasks():
+            comp.EnablePhysics()
         else:
-            wrpr.DisablePhysics()
+            comp.DisablePhysics()
 
     def OnViewGrid(self, evt):
         """

@@ -99,6 +99,9 @@ class Base:
     @property
     def default_parent(self):
         return get_base().node_manager.wrap(get_base().scene)
+
+    def set_default_parent(self):
+        self.parent = self.default_parent
     
     # @classmethod
     # def get_default_property_data(cls):

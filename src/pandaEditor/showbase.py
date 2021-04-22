@@ -572,7 +572,7 @@ class ShowBase(GameShowBase):
             kwargs[name] = value
 
         comp = comp_cls.create(*args, **kwargs)
-        comp.parent = comp.default_parent
+        comp.set_default_parent()
         comp.set_default_values()
 
         # Bit of a hack. Sometimes a wrapper can create multiple components

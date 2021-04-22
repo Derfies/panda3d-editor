@@ -125,7 +125,7 @@ class SceneGraphBasePanel(wx.Panel):
         else:
             drag_comps = [item.GetData()]
         self.drag_comps = drag_comps
-        get_base().drag_drop_manager.start(self, drag_comps, item.GetData())
+        get_base().drag_drop_manager.start(self, drag_comps, item.GetData().data)
         
     def GetDroppedObject(self, x, y):
         dropItem = self.tc.HitTest(wx.Point(x, y))[0]

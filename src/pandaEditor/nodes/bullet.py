@@ -3,16 +3,18 @@ from panda3d import bullet
 
 import panda3d.bullet as pb
 from panda3d.bullet import BulletWorld as BW
-from panda3d.bullet import BulletRigidBodyNode as BRBN
+
 
 from game.nodes.attributes import (
     Attribute,
     Connection,
     NodeAttribute,
-ReadOnlyAttribute,
-ReadOnlyNodeAttribute
-    # NodePathTargetConnectionList,
+    ReadOnlyAttribute,
+    ReadOnlyNodeAttribute
 )
+
+
+TAG_BULLET_DEBUG_WIREFRAME = 'P3D_BulletDebugWireframe'
 
 
 class BulletWorld:
@@ -31,6 +33,29 @@ class BulletWorld:
         if world is None:
             scene = get_base().node_manager.wrap(get_base().scene)
             scene.physics_world = self
+
+
+def get_wireframe(obj):
+    return obj.get_python_tag(TAG_BULLET_DEBUG_WIREFRAME)
+
+
+def set_wireframe(obj, value):
+    obj.node().show_wireframe(value)
+    obj.set_python_tag(TAG_BULLET_DEBUG_WIREFRAME, value)
+
+
+class BulletDebugNode:
+
+    show_wireframe = Attribute(bool, get_wireframe, set_wireframe)
+
+    def set_default_values(self):
+        super().set_default_values()
+
+        # Connect this node to the physics world if there is one.
+        world = get_base().scene.physics_world
+        if world is not None:
+            world_comp = get_base().node_manager.wrap(world)
+            world_comp.debug_node = self
 
 
 class BulletCharacterControllerNode:
@@ -63,8 +88,8 @@ class BulletRigidBodyNode:
     def set_default_values(self):
         super().set_default_values()
 
-        # Connect this node to the physics world if here is one.
-        bullet_world = get_base().scene.physics_world
-        if bullet_world is not None:
-            world = get_base().node_manager.wrap(bullet_world)
-            world.rigid_bodies.append(self)
+        # Connect this node to the physics world if there is one.
+        world = get_base().scene.physics_world
+        if world is not None:
+            world_comp = get_base().node_manager.wrap(world)
+            world_comp.rigid_bodies.append(self)

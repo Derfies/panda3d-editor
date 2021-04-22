@@ -3,38 +3,21 @@ import panda3d.core as pc
 from game.nodes.attributes import (
     Base as BaseAttribute,
     Attribute,
-    #NodeAttribute,
-    NodeConnections,
+    Connections,
 )
 from game.nodes.base import Base
 from game.nodes.nodepath import NodePath
 
 
-# class SolidsConnection(NodeConnections):
-#
-#     def __init__(self):
-#         super().__init__(
-#             pc.CollisionSolid,
-#             pc.CollisionNode.get_solids,
-#             pc.CollisionNode.add_solid,
-#             pc.CollisionNode.clear_solids,
-#         )
-#
-#     def clear_solid(self, value):
-#         solids = self.data.get_solids()
-#         index = solids.index(value)
-#         pc.CollisionNode.remove_solid(self.data, index)
-
-
 class CollisionNode(NodePath):
     
     type_ = pc.CollisionNode
-    solids = NodeConnections(
+    solids = Connections(
         pc.CollisionSolid,
         pc.CollisionNode.get_solids,
         pc.CollisionNode.add_solid,
         pc.CollisionNode.clear_solids,
-        None,
+        node_data=True,
     )
     
     @classmethod

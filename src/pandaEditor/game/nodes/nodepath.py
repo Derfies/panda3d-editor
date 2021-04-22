@@ -38,7 +38,6 @@ class NodePath(Base, metaclass=ComponentMetaClass):
         get_lights,
         pc.NodePath.set_light,
         pc.NodePath.clear_light,
-        pc.NodePath.clear_light,
     )
     fog = ToNodeConnection(
         pc.Fog,

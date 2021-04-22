@@ -99,6 +99,7 @@ class ResourcesPanel(wx.Panel):
 
         # Select it and start drag and drop operations.
         self.dtc.SelectItem(item_id)
+        print('self.dtc.GetItemPath(item_id:', self.dtc.GetItemPath(item_id))
         get_base().drag_drop_manager.start(
             self,
             [self.dtc.GetItemPath(item_id)],

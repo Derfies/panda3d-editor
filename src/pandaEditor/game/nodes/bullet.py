@@ -1,13 +1,6 @@
 import panda3d.core as pm
 import panda3d.bullet as pb
-from panda3d.bullet import BulletBoxShape as BBS
-from panda3d.bullet import BulletCapsuleShape as BCS
-from panda3d.bullet import BulletWorld as BW
-from panda3d.bullet import BulletDebugNode as BDN
-from panda3d.bullet import BulletCharacterControllerNode as BCCN
-from panda3d.bullet import BulletPlaneShape as BPS
-from panda3d.bullet import BulletRigidBodyNode as BRBN, BulletShape as BS
-from panda3d.bullet import ZUp
+from direct.showbase.PythonUtil import getBase as get_base
 
 from game.nodes.attributes import (
     Base as BaseAttribute,
@@ -15,21 +8,9 @@ from game.nodes.attributes import (
     ReadOnlyAttribute,
     Connection,
     Connections,
-    NodeAttribute,
-    NodeConnection,
-    ToNodeConnection,
-    ToNodesConnection,
-    NodeToNodesConnection,
-    NodeConnections,
-    # NodePathSourceConnections,
-    # NodePathTargetConnection,
-    # NodePathTargetConnections,
 )
 from game.nodes.base import Base
 from game.nodes.nodepath import NodePath
-
-
-TAG_BULLET_DEBUG_WIREFRAME = 'P3D_BulletDebugWireframe'
 
 
 class BulletSphereShape(Base):
@@ -69,26 +50,11 @@ class BulletCharacterControllerNode(NodePath):
         init_arg=pb.BulletCapsuleShape(0.4, 1.75 - 2 * 0.4, pb.ZUp)
     )
     step_height = BaseAttribute(float, init_arg=0.4)
-    #name = Attribute(str)
-
-
-class ShowWireframeAttribute(Attribute):
-
-    def __init__(self):
-        super().__init__(bool, self.get_wireframe, self.set_wireframe)
-
-    def get_wireframe(self, np):
-        return np.get_python_tag(TAG_BULLET_DEBUG_WIREFRAME)
-
-    def set_wireframe(self, np, value):
-        np.node().show_wireframe(value)
-        np.set_python_tag(TAG_BULLET_DEBUG_WIREFRAME, value)
 
 
 class BulletDebugNode(NodePath):
 
     type_ = pb.BulletDebugNode
-    show_wireframe = ShowWireframeAttribute()
 
     @classmethod
     def create(cls, *args, **kwargs):
@@ -105,48 +71,45 @@ class BulletPlaneShape(Base):
     constant = BaseAttribute(int, init_arg=0)
 
 
-class ShapesConnection(NodeConnections):
-
-    def __init__(self):
-        super().__init__(
-            pb.BulletShape,
-            pb.BulletRigidBodyNode.get_shapes,
-            pb.BulletRigidBodyNode.add_shape,
-            self.clear_shapes,
-            None,
-        )
-
-    def clear_shapes(self, value):
-        num_shapes = self.data.get_num_shapes()
-        for i in range(num_shapes):
-            shape = self.data.get_shape(0)
-            self.data.remove_shape(shape)
+def clear_shapes(obj):
+    num_shapes = obj.get_num_shapes()
+    for i in range(num_shapes):
+        obj.remove_shape(obj.get_shape(0))
 
 
 class BulletRigidBodyNode(NodePath):
 
     type_ = pb.BulletRigidBodyNode
-    angular_dampening = NodeAttribute(
+    angular_dampening = Attribute(
         float,
         pb.BulletRigidBodyNode.getAngularDamping,
         pb.BulletRigidBodyNode.setAngularDamping,
+        node_data=True,
     )
-    gravity = NodeAttribute(
+    gravity = Attribute(
         pm.Vec3,
         pb.BulletRigidBodyNode.getGravity,
         pb.BulletRigidBodyNode.setGravity,
+        node_data=True,
     )
-    mass = NodeAttribute(
+    mass = Attribute(
         float,
         pb.BulletRigidBodyNode.get_mass,
         pb.BulletRigidBodyNode.set_mass,
+        node_data=True,
     )
-    shapes = ShapesConnection()
+    shapes = Connections(
+        pb.BulletShape,
+        pb.BulletRigidBodyNode.get_shapes,
+        pb.BulletRigidBodyNode.add_shape,
+        clear_shapes,
+        node_data=True,
+    )
 
 
-def clear_rigid_bodies(comp):
-    for i in range(comp.get_num_rigid_bodies()):
-        comp.remove_rigid_body(comp.get_rigid_body(0))
+def clear_rigid_bodies(obj):
+    for i in range(obj.get_num_rigid_bodies()):
+        obj.remove_rigid_body(obj.get_rigid_body(0))
 
 
 class BulletWorld(Base):
@@ -157,24 +120,25 @@ class BulletWorld(Base):
         pb.BulletWorld.get_gravity,
         pb.BulletWorld.set_gravity,
     )
-    debug_node = ToNodeConnection(
+    debug_node = Connection(
         pb.BulletDebugNode,
         pb.BulletWorld.get_debug_node,
         pb.BulletWorld.set_debug_node,
         pb.BulletWorld.clear_debug_node,
+        node_target=True,
     )
-    rigid_bodies = ToNodesConnection(
+    rigid_bodies = Connections(
         pb.BulletRigidBodyNode,
         pb.BulletWorld.get_rigid_bodies,
         pb.BulletWorld.attach,
-        pb.BulletWorld.remove,
         clear_rigid_bodies,
+        node_target=True,
     )
 
     def destroy(self):
         if (
-            base.scene.physics_world is self.data and
-            base.scene.physics_task in taskMgr.getAllTasks()
+            get_base().scene.physics_world is self.data and
+            get_base().scene.physics_task in taskMgr.getAllTasks()
         ):
             self.DisablePhysics()
 
@@ -187,12 +151,14 @@ class BulletWorld(Base):
 
     def EnablePhysics(self):
 
+        #world =
+
         def update(task):
             dt = globalClock.getDt()
             self.data.doPhysics(dt)
             return task.cont
 
-        base.scene.physics_task = taskMgr.add(update, 'update')
+        get_base().scene.physics_task = get_base().task_mgr.add(update, 'update')
 
     def DisablePhysics(self):
-        taskMgr.remove(base.scene.physics_task)
+        get_base().task_mgr.remove(get_base().scene.physics_task)

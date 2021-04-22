@@ -8,63 +8,48 @@ from game.nodes.basemetaclass import BaseMetaClass
 
 class ConnectionTargets(MutableSequence):
 
-    def __init__(self, parent, instance, data):
+    def __init__(self, parent, instance, comps):
         self.parent = parent
         self.instance = instance
-        self.data = data
+        self.comps = comps
 
     def __len__(self):
-        return len(self.data)
+        return len(self.comps)
+
+    def __bool__(self):
+        return len(self.comps) > 0
 
     def __getitem__(self, index):
-        return self.data[index]
+        return self.comps[index]
 
     def __setitem__(self, index, value):
-        self.data[index] = value
+        self.comps[index] = value
         self.update()
 
     def __delitem__(self, index):
-        del self.data[index]
+        del self.comps[index]
         self.update()
 
     def insert(self, index, value):
         self.__setitem__(slice(index, index), [value])
 
     def update(self):
-        self.parent.clear_all(self.instance)
-        for obj in self.data:
-            setattr(self.instance, self.parent.name, obj)
-
-    # def remove(self, obj):
-    #     print(self.data, 'remove:', obj)
-    #     print(obj in self.data)
-    #     print(obj.data in [d.data for d in self.data])
-    #     print('obj hash:', hash(obj))
-    #     print('data hash:', [hash(obj) for obj in self.data])
-    #     print('obj hash2:', hash(obj.data))
-    #     print('data hash2:', [hash(obj.data) for obj in self.data])
+        self.parent.clear(self.instance)
+        for comp in self.comps:
+            setattr(self.instance, self.parent.name, comp)
 
 
 class Base(metaclass=BaseMetaClass):
     
-    def __init__(
-        self,
-        type_,
-        # get_fn=None,
-        # set_fn=None,
-        **kwargs
-        # init_arg=None,
-        # init_arg_name=None,
-        # serialise=True,
-    ):
+    def __init__(self, type_, **kwargs):
         self.type = type_
-        #self.get_fn = kwargs.get('get_fn')
         self.init_arg = kwargs.get('init_arg')
         self.init_arg_name = kwargs.get('init_arg_name')
         self.serialise = kwargs.get('serialise', True)
+        self.node_data = kwargs.get('node_data', False)
 
     def _get_data(self, instance):
-        return instance.data
+        return instance.data if not self.node_data else instance.data.node()
 
     def __get__(self, instance, owner):
         return self.get_fn(self._get_data(instance))
@@ -115,11 +100,12 @@ class Connection(Base, metaclass=BaseMetaClass):
         self.get_fn = get_fn
         self.set_fn = set_fn
         self.clear_fn = clear_fn
+        self.node_target = kwargs.get('node_target', False)
 
     def _get_target(self, value):
-
-        # Note that value might be None if we're setting the connection to null.
-        return value.data if value is not None else None
+        if value is None:
+            return None
+        return value.data if not self.node_target else value.data.node()
 
     def __get__(self, instance, owner):
         obj = self.get_fn(self._get_data(instance))
@@ -133,27 +119,26 @@ class Connections(Connection):
 
     many = True
 
-    def __init__(self, type_, get_fn, set_fn, clear_fn, clear_all_fn, **kwargs):
-        super().__init__(type_, get_fn, set_fn, clear_fn, **kwargs)
+    # def __init__(self, type_, get_fn, set_fn, clear_fn, **kwargs):
+    #     super().__init__(type_, get_fn, set_fn, clear_fn, **kwargs)
 
-        self.clear_all_fn = clear_all_fn
+        # self.clear_fn = clear_fn
 
     def __get__(self, instance, owner):
 
         # This sucks. Some functions return nodes however our architecture
         # expects these to be node paths.
-        objs = [
-            obj if isinstance(obj, pc.NodePath) else pc.NodePath(obj)
-            for obj in self.get_fn(self._get_data(instance))
-        ]
+        objs = self.get_fn(self._get_data(instance))
+        if self.node_target:
+            objs = [pc.NodePath(obj) for obj in objs]
         return ConnectionTargets(
             self,
             instance,
             [get_base().node_manager.wrap(obj) for obj in objs]
         )
 
-    def clear_all(self, instance):
-        return self.clear_all_fn(self._get_data(instance))
+    def clear(self, instance):
+        return self.clear_fn(self._get_data(instance))
 
 
 class NodeConnection(NodeMixin, Connection):

@@ -39,12 +39,12 @@ class DragDropManager:
             fn = self.file_types[ext]
             fn(filePath, np)
 
-    def start(self, src, drag_comps, comp):
+    def start(self, src, drag_comps, data):
         self.drag_comps = drag_comps
 
         # TODO: Figure out why a component doesn't pickle properly.
         do = wx.CustomDataObject('NodePath')
-        do.SetData(pickle.dumps(comp.data))
+        do.SetData(pickle.dumps(data))
 
         # Create the drop source and begin the drag and drop operation.
         ds = wx.DropSource(src)
