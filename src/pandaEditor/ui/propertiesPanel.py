@@ -384,15 +384,19 @@ class PropertiesPanel(wx.Panel):
                 continue
 
             prop = None
+            prop_type = None    # TODO: This doesn't feel very OO.
             if isinstance(attr, Connections):
                 prop = custProps.ConnectionListProperty(attr_label, attr_name, value)
+                prop_type = 'connections'
             elif isinstance(attr, Connection):
                 prop = custProps.ConnectionProperty(attr_label, attr_name, value)
+                prop_type = 'connection'
             elif isinstance(attr, ReadOnlyAttribute):
                 if attr.type not in self.propMap:
                     print('skipping unknown type prop:', attr_name, attr.type)
                     continue
 
+                prop_type = 'attribute'
                 prop_cls = self.propMap[attr.type]
                 prop = prop_cls(attr_label, attr_name, value)  # TODO: Do common value.
                 # if attr.set_fn is None:
@@ -403,16 +407,14 @@ class PropertiesPanel(wx.Panel):
                 self.propAttrMap[attr.category] = parent_prop
                 self.pg.Append(parent_prop)
 
-            if prop is not None:
-                self.propAttrMap[attr.category].AddPrivateChild(prop)
+            if prop is None:
+                logger.warning(f'Couldn\'t resolve property: {attr_name}')
+                continue
 
-                # Collect all attributes and attach them to the property.
-                #all_attrs = [comp.__dict__[attr_name] for comp in comps]
-                #prop.SetAttribute(ATTRIBUTE_TAG, all_attrs)
-                prop_type = 'connection' if isinstance(attr, Connection) else 'attribute'
-                type_ = prop.SetAttribute('prop_type', prop_type)
-            else:
-                print('None prop:', attr_name)
+            # TODO: clean up these attributes.
+            self.propAttrMap[attr.category].AddPrivateChild(prop)
+            prop.SetAttribute('prop_type', prop_type)
+            prop.SetAttribute('prop_value_type', attr.type)
                             
     def OnPgChanged(self, evt):
         """
@@ -428,16 +430,16 @@ class PropertiesPanel(wx.Panel):
         
         # Get the node property from the property and set it.
         prop = evt.GetProperty()
-        print('SET:', prop.GetName())
-        #attrs = prop.GetAttribute(ATTRIBUTE_TAG)
+        name, value = prop.GetName(), prop.GetValue()
+
+        # TODO: Figure out if we need "connect" at all.
         type_ = prop.GetAttribute('prop_type')
-        #if not hasattr(attrs[0], 'cnnctn'):
-        # print(attrs[0].name, attrs[0], type(attrs[0]), prop.GetValue())
-        if type_ == 'connection':
-            cmds.SetConnections(comps, prop.GetValue())
+        if type_ == 'connections':
+            cmds.set_connections(comps, name, value)
+        elif type_ == 'connection':
+            cmds.set_attribute(comps, name, value)
         else:
-            cmds.SetAttribute(comps, prop.GetName(), prop.GetValue())
-        #cmds.SetAttribute(comps, prop.GetName(), prop.GetValue())
+            cmds.set_attribute(comps, name, value)
 
     def OnUpdate(self, comps=None):
         self.pg.Freeze()

@@ -75,13 +75,20 @@ class TestBulletWorld(TestBaseMixin, unittest.TestCase):
         node = super().test_create()
 
     def test_set_debug_node(self):
-        debug = pb.BulletDebugNode()
-        world = pb.BulletWorld()
-        BulletWorld(world).debug_node.set(pc.NodePath(debug))
-        self.assertEqual(debug, world.get_debug_node())
+        debug, world = pc.NodePath(pb.BulletDebugNode()), pb.BulletWorld()
+        debug_comp, world_comp = BulletDebugNode(debug), BulletWorld(world)
+        world_comp.debug_node = debug_comp
+        self.assertEqual(debug.node(), world.get_debug_node())
 
-    def test_set_rigid_body(self):
-        rigid_body = pb.BulletRigidBodyNode()
-        world = pb.BulletWorld()
-        BulletWorld(world).rigid_bodies.connect(pc.NodePath(rigid_body))
-        self.assertEqual(rigid_body, world.get_rigid_bodies()[0])
+    def test_append_rigid_body(self):
+        rigid, world = pc.NodePath(pb.BulletRigidBodyNode()), pb.BulletWorld()
+        rigid_comp, world_comp = BulletRigidBodyNode(rigid), BulletWorld(world)
+        world_comp.rigid_bodies.append(rigid_comp)
+        self.assertEqual(rigid.node(), world.get_rigid_bodies()[0])
+
+    def test_remove_rigid_body(self):
+        rigid, world = pc.NodePath(pb.BulletRigidBodyNode()), pb.BulletWorld()
+        world.attach(rigid.node())
+        rigid_comp, world_comp = BulletRigidBodyNode(rigid), BulletWorld(world)
+        world_comp.rigid_bodies.remove(rigid_comp)
+        self.assertEqual(0, len(world.get_rigid_bodies()))

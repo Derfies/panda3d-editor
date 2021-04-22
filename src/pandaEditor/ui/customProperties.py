@@ -2,6 +2,7 @@ import os
 
 import wx
 import panda3d.core as pm
+from direct.showbase.PythonUtil import getBase as get_base
 from panda3d.core import Filename
 
 from wxExtra import wxpg, CompositeDropTarget
@@ -136,7 +137,7 @@ class NodePathProperty(wxpg.StringProperty):
         return True
     
     def OnDropItem(self, arg):
-        np = wx.GetApp().frame.pnlSceneGraph.dragComps[0]
+        np = wx.GetApp().frame.pnlSceneGraph.drag_comps[0]
         self.SetValue(np)
         
         self.PostChangedEvent()
@@ -160,12 +161,10 @@ class ConnectionBaseProperty(wxpg.BaseProperty):
         pass
     
     def ValidateDropItem(self, x, y):
-        for comp in wx.GetApp().GetTopWindow().pnlSceneGraph.dragComps:
-            cnnctn = self.GetAttribute('attr')[0]
-            wrpr = base.node_manager.wrap(comp)
-            if wrpr.is_of_type(cnnctn.type):
+        for comp in wx.GetApp().GetTopWindow().pnlSceneGraph.drag_comps:
+            prop_type = self.GetAttribute('prop_value_type')
+            if comp.is_of_type(prop_type):
                 return True
-        
         return False
     
 
@@ -177,7 +176,7 @@ class ConnectionProperty(ConnectionBaseProperty):
         
         comp = self.GetValue()
         if comp is not None:
-            wrpr = base.node_manager.wrap(comp)
+            wrpr = get_base().node_manager.wrap(comp)
             ctrl.Append(wrpr.name_)
             ctrl.SetClientData(0, wrpr.data)
         
@@ -191,7 +190,7 @@ class ConnectionProperty(ConnectionBaseProperty):
         self.PostChangedEvent()
     
     def OnDropItem(self, arg):
-        val = wx.GetApp().GetTopWindow().pnlSceneGraph.dragComps[0]
+        val = wx.GetApp().GetTopWindow().pnlSceneGraph.drag_comps[0]
         self.SetValue(val)
         self.PostChangedEvent()
         
@@ -227,7 +226,7 @@ class ConnectionListProperty(ConnectionBaseProperty):
         val = list(self.GetValue())
         if val is None:
             val = []
-        val.extend(wx.GetApp().GetTopWindow().pnlSceneGraph.dragComps)
+        val.extend(wx.GetApp().GetTopWindow().pnlSceneGraph.drag_comps)
         self.SetValue(val)
         self.PostChangedEvent()
         

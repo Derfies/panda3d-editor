@@ -62,8 +62,8 @@ class TestLightMixin(TestNodePathMixin):
 
     def test_create(self):
         node = super().test_create()
-        self.assertEqual('test', node.name.get())
-        self.assertEqual((1, 1, 1, 1), node.color.get())
+        self.assertEqual('test', node.name)
+        self.assertEqual((1, 1, 1, 1), node.color_scale)
         return node
 
 

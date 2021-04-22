@@ -59,8 +59,8 @@ class TestRender(TestNodePathMixin, unittest.TestCase):
 
     def test_create(self):
         node = super().test_create()
-        self.assertEqual('render', node.name.get())
-        self.assertTrue(node.matrix.get().is_identity())
+        self.assertEqual('render', node.name)
+        self.assertTrue(node.matrix.is_identity())
 
 
 class TestBaseCam(TestNodePathMixin, unittest.TestCase):
@@ -69,8 +69,8 @@ class TestBaseCam(TestNodePathMixin, unittest.TestCase):
 
     def test_create(self):
         node = super().test_create()
-        self.assertEqual('cam', node.name.get())
-        self.assertTrue(node.matrix.get().is_identity())
+        self.assertEqual('cam', node.name)
+        self.assertTrue(node.matrix.is_identity())
 
 
 class TestBaseCamera(TestNodePathMixin, unittest.TestCase):
@@ -79,8 +79,8 @@ class TestBaseCamera(TestNodePathMixin, unittest.TestCase):
 
     def test_create(self):
         node = super().test_create()
-        self.assertEqual('camera', node.name.get())
-        self.assertTrue(node.matrix.get().is_identity())
+        self.assertEqual('camera', node.name)
+        self.assertTrue(node.matrix.is_identity())
 
 
 class TestRender2d(TestNodePathMixin, unittest.TestCase):
@@ -89,8 +89,8 @@ class TestRender2d(TestNodePathMixin, unittest.TestCase):
 
     def test_create(self):
         node = super().test_create()
-        self.assertEqual('render2d', node.name.get())
-        self.assertTrue(node.matrix.get().is_identity())
+        self.assertEqual('render2d', node.name)
+        self.assertTrue(node.matrix.is_identity())
 
 
 class TestAspect2d(TestNodePathMixin, unittest.TestCase):
@@ -99,8 +99,8 @@ class TestAspect2d(TestNodePathMixin, unittest.TestCase):
 
     def test_create(self):
         node = super().test_create()
-        self.assertEqual('aspect2d', node.name.get())
-        self.assertFalse(node.matrix.get().is_identity())
+        self.assertEqual('aspect2d', node.name)
+        self.assertFalse(node.matrix.is_identity())
 
 
 class TestPixel2d(TestNodePathMixin, unittest.TestCase):
@@ -109,8 +109,8 @@ class TestPixel2d(TestNodePathMixin, unittest.TestCase):
 
     def test_create(self):
         node = super().test_create()
-        self.assertEqual('pixel2d', node.name.get())
-        self.assertFalse(node.matrix.get().is_identity())
+        self.assertEqual('pixel2d', node.name)
+        self.assertFalse(node.matrix.is_identity())
 
 
 class TestCamera2d(TestNodePathMixin, unittest.TestCase):
@@ -119,8 +119,8 @@ class TestCamera2d(TestNodePathMixin, unittest.TestCase):
 
     def test_create(self):
         node = super().test_create()
-        self.assertEqual('camera2d', node.name.get())
-        self.assertTrue(node.matrix.get().is_identity())
+        self.assertEqual('camera2d', node.name)
+        self.assertTrue(node.matrix.is_identity())
 
 
 class TestCam2d(TestNodePathMixin, unittest.TestCase):
@@ -129,8 +129,8 @@ class TestCam2d(TestNodePathMixin, unittest.TestCase):
 
     def test_create(self):
         node = super().test_create()
-        self.assertEqual('cam2d', node.name.get())
-        self.assertTrue(node.matrix.get().is_identity())
+        self.assertEqual('cam2d', node.name)
+        self.assertTrue(node.matrix.is_identity())
 #
 #
 # class TestAmbientLight(BaseMixin, unittest.TestCase):
@@ -139,7 +139,7 @@ class TestCam2d(TestNodePathMixin, unittest.TestCase):
 #
 #     def test_create(self):
 #         node = super().test_create()
-#         self.assertEqual('test', node.name.get())
+#         self.assertEqual('test', node.name)
 #
 #
 
@@ -154,7 +154,7 @@ class TestCam2d(TestNodePathMixin, unittest.TestCase):
 #
 #     def test_create(self):
 #         node = super().test_create()
-#         self.assertEqual('test', node.name.get())
+#         self.assertEqual('test', node.name)
 #
 #
 # class TestCamera(BaseMixin, unittest.TestCase):
@@ -163,7 +163,7 @@ class TestCam2d(TestNodePathMixin, unittest.TestCase):
 #
 #     def test_create(self):
 #         node = super().test_create()
-#         self.assertEqual('test', node.name.get())
+#         self.assertEqual('test', node.name)
 #
 #
 # class TestCamera2d(BaseMixin, unittest.TestCase):
@@ -172,7 +172,7 @@ class TestCam2d(TestNodePathMixin, unittest.TestCase):
 #
 #     def test_create(self):
 #         node = super().test_create()
-#         self.assertEqual('test', node.name.get())
+#         self.assertEqual('test', node.name)
 #
 #
 # class TestFog(BaseMixin, unittest.TestCase):
@@ -181,7 +181,7 @@ class TestCam2d(TestNodePathMixin, unittest.TestCase):
 #
 #     def test_create(self):
 #         node = super().test_create()
-#         self.assertEqual('test', node.name.get())
+#         self.assertEqual('test', node.name)
 #
 #
 # class TestLensNode(BaseMixin, unittest.TestCase):
@@ -190,7 +190,7 @@ class TestCam2d(TestNodePathMixin, unittest.TestCase):
 #
 #     def test_create(self):
 #         node = super().test_create()
-#         self.assertEqual('test', node.name.get())
+#         self.assertEqual('test', node.name)
 #
 #
 # class TestModelNode(BaseMixin, unittest.TestCase):
@@ -199,7 +199,7 @@ class TestCam2d(TestNodePathMixin, unittest.TestCase):
 #
 #     def test_create(self):
 #         node = super().test_create()
-#         self.assertEqual('test', node.name.get())
+#         self.assertEqual('test', node.name)
 #
 #
 # class TestModelRoot(BaseMixin, unittest.TestCase):
@@ -208,7 +208,7 @@ class TestCam2d(TestNodePathMixin, unittest.TestCase):
 #
 #     def test_create(self):
 #         node = super().test_create()
-#         self.assertEqual('test', node.name.get())
+#         self.assertEqual('test', node.name)
 #
 #
 # class TestNodePath(BaseMixin, unittest.TestCase):
@@ -217,7 +217,7 @@ class TestCam2d(TestNodePathMixin, unittest.TestCase):
 #
 #     def test_create(self):
 #         node = super().test_create()
-#         self.assertEqual('test', node.name.get())
+#         self.assertEqual('test', node.name)
 #
 #
 # class TestPandaNode(BaseMixin, unittest.TestCase):
@@ -226,7 +226,7 @@ class TestCam2d(TestNodePathMixin, unittest.TestCase):
 #
 #     def test_create(self):
 #         node = super().test_create()
-#         self.assertEqual('test', node.name.get())
+#         self.assertEqual('test', node.name)
 #
 #
 # class TestPixel2d(BaseMixin, unittest.TestCase):
@@ -235,7 +235,7 @@ class TestCam2d(TestNodePathMixin, unittest.TestCase):
 #
 #     def test_create(self):
 #         node = super().test_create()
-#         self.assertEqual('test', node.name.get())
+#         self.assertEqual('test', node.name)
 #
 #
 # class TestPointLight(BaseMixin, unittest.TestCase):
@@ -244,7 +244,7 @@ class TestCam2d(TestNodePathMixin, unittest.TestCase):
 #
 #     def test_create(self):
 #         node = super().test_create()
-#         self.assertEqual('test', node.name.get())
+#         self.assertEqual('test', node.name)
 #
 #
 # class TestSceneRoot(BaseMixin, unittest.TestCase):
@@ -254,7 +254,7 @@ class TestCam2d(TestNodePathMixin, unittest.TestCase):
 #     def test_create(self):
 #         self.base.scene = Scene()
 #         node = super().test_create()
-#         self.assertEqual('test', node.name.get())
+#         self.assertEqual('test', node.name)
 #
 #
 # class TestSpotlight(BaseMixin, unittest.TestCase):
@@ -263,4 +263,4 @@ class TestCam2d(TestNodePathMixin, unittest.TestCase):
 #
 #     def test_create(self):
 #         node = super().test_create()
-#         self.assertEqual('test', node.name.get())
+#         self.assertEqual('test', node.name)

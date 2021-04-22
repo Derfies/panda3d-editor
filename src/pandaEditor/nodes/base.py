@@ -74,15 +74,6 @@ class Base:
     def savable(self):
         return True
     
-    def on_select(self):
-        pass
-    
-    def on_deselect(self):
-        pass
-    
-    def on_drag_drop(self, dragComp, dropComp):
-        pass
-    
     # def connect(self, comps, mode):
     #     if mode in cnnctnMap:
     #         cnnctn = cnnctnMap[mode](self.data, comps)
@@ -93,23 +84,14 @@ class Base:
     
     def get_possible_connections(self, comps):
         """
-        Return a list of connections that can be made with the given 
+        Return a dict of connections that can be made with the given
         components.
+
         """
-        connections = []
-        
+        conns = self.__class__.connections
         for comp in comps:
-            wrpr = get_base().node_manager.wrap(comp)
-            #posCnnctns = [attr for attr in self.get_attributes() if hasattr(attr, 'cnnctn')]
-            #posCnnctns.extend(self.connections)
-            for connection in self.connections:
-                if (
-                    wrpr.is_of_type(connection.type) and
-                    connection not in connections
-                ):
-                    connections.append(connection)
-        
-        return connections
+            conns.update(comp.__class__.connections)
+        return conns
     
     def set_default_values(self):
         pass
@@ -134,11 +116,13 @@ class Base:
         parent = self.parent
         if parent is None:
             return None
-        #objs = [child.data for child in parent.children]
-        # try:
-        print('parent:', parent)
-        print('children:', parent.children)
         return parent.children.index(self)
-        # except ValueError:
-        #     print('objs:', objs, 'find:', self.data, [type(o) for o in objs])
-        #     raise
+
+    def on_select(self):
+        pass
+
+    def on_deselect(self):
+        pass
+
+    def on_drag_drop(self, dragComp, dropComp):
+        pass

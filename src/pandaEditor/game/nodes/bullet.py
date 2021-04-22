@@ -93,7 +93,7 @@ class BulletDebugNode(NodePath):
     @classmethod
     def create(cls, *args, **kwargs):
         comp = super().create(*args, **kwargs)
-        comp.show_wireframe.set(True)
+        comp.show_wireframe = True
         comp.data.show()
         return comp
 
@@ -144,11 +144,12 @@ class BulletRigidBodyNode(NodePath):
     shapes = ShapesConnection()
 
 
-class BulletWorld(Base):
+def clear_rigid_bodies(comp):
+    for i in range(comp.get_num_rigid_bodies()):
+        comp.remove_rigid_body(comp.get_rigid_body(0))
 
-    def _clear_rigid_bodies(comp):
-        for i in range(comp.get_num_rigid_bodies()):
-            comp.remove_rigid_body(comp.get_rigid_body(0))
+
+class BulletWorld(Base):
 
     type_ = pb.BulletWorld
     gravity = Attribute(
@@ -165,9 +166,9 @@ class BulletWorld(Base):
     rigid_bodies = ToNodesConnection(
         pb.BulletRigidBodyNode,
         pb.BulletWorld.get_rigid_bodies,
-        pb.BulletWorld.attach_rigid_body,
-        _clear_rigid_bodies,
-        None,
+        pb.BulletWorld.attach,
+        pb.BulletWorld.remove,
+        clear_rigid_bodies,
     )
 
     def destroy(self):

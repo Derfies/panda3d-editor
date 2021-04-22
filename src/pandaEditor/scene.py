@@ -78,7 +78,6 @@ class Scene(Scene):
         a connection and break it when a component is deleted.
 
         """
-        print('register:', target.id, '->', source, name)
         self.connections.setdefault(target.id, set()).add((source, name))
     
     def deregister_connection(self, connection):

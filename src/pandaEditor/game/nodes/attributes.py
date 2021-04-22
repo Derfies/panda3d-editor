@@ -1,5 +1,6 @@
 from collections import MutableSequence
 
+import panda3d.core as pc
 from direct.showbase.PythonUtil import getBase as get_base
 
 from game.nodes.basemetaclass import BaseMetaClass
@@ -10,7 +11,7 @@ class ConnectionTargets(MutableSequence):
     def __init__(self, parent, instance, data):
         self.parent = parent
         self.instance = instance
-        self.data = [get_base().node_manager.wrap(d) for d in data]
+        self.data = data
 
     def __len__(self):
         return len(self.data)
@@ -33,6 +34,15 @@ class ConnectionTargets(MutableSequence):
         self.parent.clear_all(self.instance)
         for obj in self.data:
             setattr(self.instance, self.parent.name, obj)
+
+    # def remove(self, obj):
+    #     print(self.data, 'remove:', obj)
+    #     print(obj in self.data)
+    #     print(obj.data in [d.data for d in self.data])
+    #     print('obj hash:', hash(obj))
+    #     print('data hash:', [hash(obj) for obj in self.data])
+    #     print('obj hash2:', hash(obj.data))
+    #     print('data hash2:', [hash(obj.data) for obj in self.data])
 
 
 class Base(metaclass=BaseMetaClass):
@@ -97,6 +107,8 @@ class ReadOnlyNodeAttribute(NodeMixin, ReadOnlyAttribute, metaclass=BaseMetaClas
 
 class Connection(Base, metaclass=BaseMetaClass):
 
+    many = False
+
     def __init__(self, type_, get_fn, set_fn, clear_fn, **kwargs):
         super().__init__(type_, **kwargs)
 
@@ -119,14 +131,26 @@ class Connection(Base, metaclass=BaseMetaClass):
 
 class Connections(Connection):
 
+    many = True
+
     def __init__(self, type_, get_fn, set_fn, clear_fn, clear_all_fn, **kwargs):
         super().__init__(type_, get_fn, set_fn, clear_fn, **kwargs)
 
         self.clear_all_fn = clear_all_fn
 
     def __get__(self, instance, owner):
-        objs = self.get_fn(self._get_data(instance))
-        return ConnectionTargets(self, instance, objs)
+
+        # This sucks. Some functions return nodes however our architecture
+        # expects these to be node paths.
+        objs = [
+            obj if isinstance(obj, pc.NodePath) else pc.NodePath(obj)
+            for obj in self.get_fn(self._get_data(instance))
+        ]
+        return ConnectionTargets(
+            self,
+            instance,
+            [get_base().node_manager.wrap(obj) for obj in objs]
+        )
 
     def clear_all(self, instance):
         return self.clear_all_fn(self._get_data(instance))
@@ -145,7 +169,7 @@ class NodeConnections(Connections, NodeConnection):
 class ToNodeConnection(Connection):
 
     def _get_target(self, obj):
-        return obj.node()
+        return obj.data.node()
 
 
 class ToNodesConnection(Connections, ToNodeConnection):

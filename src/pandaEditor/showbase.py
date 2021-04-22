@@ -102,9 +102,9 @@ class ShowBase(GameShowBase):
         )
 
         # Create our managers.
-        self.assetMgr = AssetManager(self)
-        self.dDropMgr = DragDropManager(self)
-        self.actnMgr = actions.Manager()
+        self.asset_manager = AssetManager(self)
+        self.drag_drop_manager = DragDropManager(self)
+        self.action_manager = actions.Manager()
 
         # Bind events
         self.accept('z', self.undo)
@@ -492,7 +492,7 @@ class ShowBase(GameShowBase):
             comps.append(comp)
             actns.append(actions.Transform(comp, np.getTransform(), actGizmo.initNpXforms[i]))
         actn = actions.Composite(actns)
-        self.actnMgr.Push(actn)
+        self.action_manager.push(actn)
         self.gizmo = False
 
         # Make sure to mark the NodePath as dirty in case it is a child of a
@@ -537,7 +537,7 @@ class ShowBase(GameShowBase):
         """
         # Reset undo queue if creating a new document
         if newDoc:
-            self.actnMgr.Reset()
+            self.action_manager.Reset()
 
         # Close the current scene if there is one
         self.selection.clear()
@@ -587,15 +587,15 @@ class ShowBase(GameShowBase):
         return comp
 
     def OnProjectFilesModified(self, filePaths):
-        self.assetMgr.OnAssetModified(filePaths)
+        self.asset_manager.OnAssetModified(filePaths)
         self.plugin_manager.on_project_modified(filePaths)
 
     def undo(self):
-        self.actnMgr.Undo()
+        self.action_manager.Undo()
         self.doc.on_modified()
 
     def redo(self):
-        self.actnMgr.Redo()
+        self.action_manager.Redo()
         self.doc.on_modified()
 
     def Group(self):

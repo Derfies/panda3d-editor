@@ -40,6 +40,6 @@ class Manager:
         self.ResetUndo()
         self.ResetRedo()
 
-    def Push(self, actn):
+    def push(self, actn):
         self.undoList.append(actn)
         self.ResetRedo()

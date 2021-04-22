@@ -10,6 +10,6 @@ game.load('scenes/helloWorld.xml')
 
 # Initialise the PandaObject manager and start all scripts.
 base.pandaMgr.Init()
-base.pandaMgr.Start()
+base.pandaMgr.start()
         
 run()

@@ -98,7 +98,7 @@ class SceneGraphBasePanel(wx.Panel):
         """Change the component's name to that of the new item's name."""
         def SetComponentName(comp, name):
             if hasattr(comp, 'name'):
-                wx.CallAfter(cmds.SetAttribute, [comp], 'name', name)
+                wx.CallAfter(cmds.set_attribute, [comp], 'name', name)
 
         comp = evt.GetItem().GetData()
         name = evt.GetLabel()
@@ -121,11 +121,11 @@ class SceneGraphBasePanel(wx.Panel):
         # If the item under the middle mouse click is part of the selection
         # then use the whole selection, otherwise just use the item.
         if item.GetData() in get_base().selection.comps:
-            dragComps = get_base().selection.comps
+            drag_comps = get_base().selection.comps
         else:
-            dragComps = [item.GetData()]
-        self.dragComps = dragComps
-        get_base().dDropMgr.Start(self, dragComps, item.GetData())
+            drag_comps = [item.GetData()]
+        self.drag_comps = drag_comps
+        get_base().drag_drop_manager.start(self, drag_comps, item.GetData())
         
     def GetDroppedObject(self, x, y):
         dropItem = self.tc.HitTest(wx.Point(x, y))[0]

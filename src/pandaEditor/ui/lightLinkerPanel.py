@@ -94,4 +94,4 @@ class LightLinkerPanel(wx.Panel):
         # Construct the attribute and set it.
         attr = Attr('OnLight', pm.LightAttrib, NP.getAttrib, 
                      NP.setAttrib, getArgs=[pm.LightAttrib])
-        cmds.SetAttribute([np], attr, attrib)
+        cmds.set_attribute([np], attr, attrib)

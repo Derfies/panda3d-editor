@@ -67,4 +67,4 @@ class BulletRigidBodyNode:
         bullet_world = get_base().scene.physics_world
         if bullet_world is not None:
             world = get_base().node_manager.wrap(bullet_world)
-            world.rigid_bodies.connect(self.data)
+            world.rigid_bodies.append(self)

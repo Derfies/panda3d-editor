@@ -15,7 +15,7 @@ class DragDropManager:
 
     def __init__(self, base):
         self.base = base
-        self.dragComps = []
+        self.drag_comps = []
 
         # Define file types and their actions.
         self.file_types = {}
@@ -39,50 +39,44 @@ class DragDropManager:
             fn = self.file_types[ext]
             fn(filePath, np)
 
-    def Start(self, src, dragComps, data):
-        self.dragComps = dragComps
+    def start(self, src, drag_comps, comp):
+        self.drag_comps = drag_comps
 
-        # Create a custom data object that we can drop onto the toolbar
-        # which contains the tool's id as a string
+        # TODO: Figure out why a component doesn't pickle properly.
         do = wx.CustomDataObject('NodePath')
-        do.SetData(pickle.dumps(data))
+        do.SetData(pickle.dumps(comp.data))
 
-        # Create the drop source and begin the drag and drop operation
+        # Create the drop source and begin the drag and drop operation.
         ds = wx.DropSource(src)
         ds.SetData(do)
         ds.DoDragDrop(True)
 
-        # Clear drag node paths
-        self.dragComps = []
+        # Clear drag node paths.
+        self.drag_comps = []
 
     def ValidateDropItem(self, x, y, parent):
         dropComp = parent.GetDroppedObject(x, y)
-        #if dropComp is None:
-        if len(self.dragComps) == 1:
+        if len(self.drag_comps) == 1:
             try:
-                filePath = self.dragComps[0]
+                filePath = self.drag_comps[0]
                 ext = os.path.splitext(filePath)[1]
-                #print 'in: ',  ext in self.fileTypes
                 return ext in self.file_types
-            except Exception:
-                pass
-                #print e
-                #return False
-        #return False
+            except Exception as e:
+                logger.warning(str(e))
 
         wrpr = base.node_manager.wrap(dropComp)
         if wx.GetMouseState().CmdDown():
-            return wrpr.validate_drag_drop(self.dragComps, dropComp)
+            return wrpr.validate_drag_drop(self.drag_comps, dropComp)
         else:
-            return wrpr.get_possible_connections(self.dragComps)
+            return wrpr.get_possible_connections(self.drag_comps)
 
     def OnDropItem(self, str, parent, x, y):
 
         # Get the item at the drop point
         dropComp = parent.GetDroppedObject(x, y)
-        if len(self.dragComps) == 1:
+        if len(self.drag_comps) == 1:
             try:
-                filePath = self.dragComps[0]
+                filePath = self.drag_comps[0]
                 self.DoFileDrop(filePath, dropComp)
             except:
                 raise
@@ -90,7 +84,7 @@ class DragDropManager:
             return
         wrpr = self.base.node_manager.wrap(dropComp)
         self.data = {}
-        dragComps = self.base.dDropMgr.dragComps
+        dragComps = self.base.drag_drop_manager.drag_comps
         if wx.GetMouseState().CmdDown():
             wrpr.on_drag_drop(dragComps, wrpr.data)
         else:
@@ -104,9 +98,9 @@ class DragDropManager:
             menu.Destroy()
 
     def OnConnect(self, evt):
-        dragComps = self.base.dDropMgr.dragComps
+        dragComps = self.base.drag_drop_manager.drag_comps
         cnnctn = self.data[evt.get_id()]
-        cmds.Connect(dragComps, cnnctn, cnnctn.connect)
+        cmds.connect(dragComps, cnnctn, cnnctn.connect)
 
     def add_model(self, file_path, np=None):
         self.base.AddComponent('ModelRoot', model_path=file_path)
@@ -117,7 +111,7 @@ class DragDropManager:
     def AddShader(self, filePath, np=None):
         wrpr = self.base.node_manager.wrap(np)
         prop = wrpr.find_property('shader')
-        cmds.SetAttribute([np], [prop], filePath)
+        cmds.set_attribute([np], [prop], filePath)
 
     def AddTexture(self, filePath, np=None):
         pandaPath = pm.Filename.fromOsSpecific(filePath)

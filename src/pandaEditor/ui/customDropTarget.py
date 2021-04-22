@@ -21,7 +21,7 @@ class CustomDropTarget(wx.TextDropTarget):
     def OnDragOver(self, x, y, d):
         
         # Return x.DragNone if the validation fails
-        if not self.base.dDropMgr.ValidateDropItem(x, y, self.parent):
+        if not self.base.drag_drop_manager.ValidateDropItem(x, y, self.parent):
             return wx.DragNone
         else:
             return d
@@ -34,6 +34,6 @@ class CustomDropTarget(wx.TextDropTarget):
             # Call the method on the string taken from the data object
             format = self.doc.GetReceivedFormat().GetId()
             do = self.formats[format]
-            self.base.dDropMgr.OnDropItem(do.GetData(), self.parent, x, y)
+            self.base.drag_drop_manager.OnDropItem(do.GetData(), self.parent, x, y)
         
         return d

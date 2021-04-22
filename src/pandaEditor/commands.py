@@ -2,6 +2,12 @@ import panda3d.core as pm
 from direct.showbase.PythonUtil import getBase as get_base
 
 from pandaEditor import actions
+from pandaEditor.actions import (
+    Composite,
+    #Connect,
+    SetAttribute,
+    SetConnections,
+)
 
 
 def Add(comps):
@@ -15,7 +21,7 @@ def Add(comps):
     actns.extend([actions.Add(comp) for comp in comps])
     actns.append(actions.Select(comps))
     actn = actions.Composite(actns)
-    get_base().actnMgr.Push(actn)
+    get_base().action_manager.push(actn)
     actn()
     get_base().doc.on_modified(comps)
     
@@ -30,7 +36,7 @@ def Remove(comps):
     actns.append(actions.Deselect(comps))
     actns.extend([actions.Remove(comp) for comp in comps])
     actn = actions.Composite(actns)
-    get_base().actnMgr.Push(actn)
+    get_base().action_manager.push(actn)
     actn()
     get_base().doc.on_modified(comps)
     
@@ -52,7 +58,7 @@ def Duplicate(comps):
     actns.extend([actions.Add(dupeComp) for dupeComp in dupe_comps])
     actns.append(actions.Select(dupe_comps))
     actn = actions.Composite(actns)
-    get_base().actnMgr.Push(actn)
+    get_base().action_manager.push(actn)
     actn()
     get_base().doc.on_modified(dupe_comps)
     
@@ -68,7 +74,7 @@ def Replace(fromComp, toComp):
         actions.Select([toComp])
     ]
     actn = actions.Composite(actns)
-    get_base().actnMgr.Push(actn)
+    get_base().action_manager.push(actn)
     actn()
     get_base().doc.on_modified([fromComp, toComp])
     
@@ -84,26 +90,53 @@ def Select(comps):
         actions.Select(comps)
     ]
     actn = actions.Composite(actns)
-    get_base().actnMgr.Push(actn)
+    get_base().action_manager.push(actn)
     actn()
     get_base().doc.on_refresh(comps)
     
 
-def SetAttribute(comps, attr_name, value):
+def set_attribute(comps, name, value):
     """
     Create the set attribute action, execute it and push it onto the undo
     queue.
 
     """
-    actns = [
-        actions.SetAttribute(comps[i], attr_name, value)
-        for i in range(len(comps))
-    ]
-    actn = actions.Composite(actns)
-    get_base().actnMgr.Push(actn)
-    actn()
+    action = Composite([
+        SetAttribute(comp, name, value)
+        for comp in comps
+    ])
+    get_base().action_manager.push(action)
+    action()
     get_base().doc.on_modified(comps)
-    
+
+
+# def connect(comps, name, value):
+#     """
+#     Create the connect action, execute it and push it onto the undo queue.
+#
+#     """
+#     action = Composite([
+#         Connect(comp, name, value)
+#         for comp in comps
+#     ])
+#     get_base().action_manager.push(action)
+#     action()
+#     get_base().doc.on_modified()
+
+
+def set_connections(comps, name, value):
+    """
+    Create the connect action, execute it and push it onto the undo queue.
+
+    """
+    action = Composite([
+        SetConnections(comp, name, value)
+        for comp in comps
+    ])
+    get_base().action_manager.push(action)
+    action()
+    get_base().doc.on_modified()
+
 
 def Parent(comps, pComp):
     """
@@ -112,7 +145,7 @@ def Parent(comps, pComp):
     """
     actns = [actions.Parent(comp, pComp) for comp in comps]
     actn = actions.Composite(actns)
-    get_base().actnMgr.Push(actn)
+    get_base().action_manager.push(actn)
     actn()
     get_base().doc.on_modified(comps)
     
@@ -141,7 +174,7 @@ def Group(nps):
     actns.append(actions.Deselect(nps))
     actns.append(actions.Select([grpNp]))
     actn = actions.Composite(actns)
-    get_base().actnMgr.Push(actn)
+    get_base().action_manager.push(actn)
     actn()
     get_base().doc.on_modified(nps.append(grpNp))
     
@@ -169,29 +202,6 @@ def Ungroup(nps):
     actns.append(actions.Select([cNp for cNps in cNpSets for cNp in cNps]))
     
     actn = actions.Composite(actns)
-    get_base().actnMgr.Push(actn)
+    get_base().action_manager.push(actn)
     actn()
     get_base().doc.on_modified(nps.append(rmvNps))
-    
-
-def Connect(tgtComps, cnnctn, fn):
-    """
-    Create the connect action, execute it and push it onto the undo queue.
-
-    """
-    actn = actions.Connect(tgtComps, cnnctn, fn)
-    get_base().actnMgr.Push(actn)
-    actn()
-    get_base().doc.on_modified()
-    
-
-def SetConnections(tgtComps, cnnctns):
-    """
-    Create the connect action, execute it and push it onto the undo queue.
-
-    """
-    actns = [actions.SetConnections(tgtComps, cnnctn) for cnnctn in cnnctns]
-    actn = actions.Composite(actns)
-    get_base().actnMgr.Push(actn)
-    actn()
-    get_base().doc.on_modified()

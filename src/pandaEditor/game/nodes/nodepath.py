@@ -66,6 +66,13 @@ class NodePath(Base, metaclass=ComponentMetaClass):
         comp.set_up_node_path()
         return comp
 
+    def __hash__(self):
+
+        #print('self:', self, self.data, type(self.data))
+
+        # HAXX
+        return hash(self.data.get_key())
+
     @property
     def id(self):
         return self.data.get_tag(TAG_NODE_UUID)

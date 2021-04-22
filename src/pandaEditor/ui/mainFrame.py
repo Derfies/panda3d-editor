@@ -492,11 +492,11 @@ class MainFrame(wx.Frame):
         Update the edit menu. Disable undo or redo queus if they are empty
         and make sure to refresh the toolbar.
         """
-        val = len(self.base.actnMgr.undoList) > 0
+        val = len(self.base.action_manager.undoList) > 0
         self.mEdit.Enable(ID_EDIT_UNDO, val)
         self.tbEdit.EnableTool(ID_EDIT_UNDO, val)
 
-        val = len(self.base.actnMgr.redoList) > 0
+        val = len(self.base.action_manager.redoList) > 0
         self.mEdit.Enable(ID_EDIT_REDO, val)
         self.tbEdit.EnableTool(ID_EDIT_REDO, val)
 

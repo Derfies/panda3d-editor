@@ -21,11 +21,10 @@ class ComponentMetaClass(BaseMetaClass):
             for key, value in base.__dict__.items():
                 if not isinstance(value, Base):
                     continue
-                value.category = base.__name__  # HAXXOR
+
+                # TODO: Need a better way to set category / name data.
+                value.category = base.__name__
                 value.name = key
-                # print('    ', key)
-                #if key.startswith('ph'):
-                #    print('FOUND:', key)
                 results[key] = value
         return results
 
