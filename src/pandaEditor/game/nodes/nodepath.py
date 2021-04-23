@@ -5,8 +5,8 @@ from direct.showbase.PythonUtil import getBase as get_base
 
 from game.nodes.attributes import (
     Attribute,
+    Connection,
     Connections,
-    ToNodeConnection,
 )
 from game.nodes.constants import (
     TAG_ACTOR,
@@ -39,11 +39,12 @@ class NodePath(Base, metaclass=ComponentMetaClass):
         pc.NodePath.set_light,
         pc.NodePath.clear_light,
     )
-    fog = ToNodeConnection(
+    fog = Connection(
         pc.Fog,
         pc.NodePath.get_fog,
         pc.NodePath.set_fog,
-        pc.NodePath.clear_fog
+        pc.NodePath.clear_fog,
+        node_target=True,
     )
     
     @classmethod

@@ -47,6 +47,7 @@ class Base(metaclass=BaseMetaClass):
         self.init_arg_name = kwargs.get('init_arg_name')
         self.serialise = kwargs.get('serialise', True)
         self.node_data = kwargs.get('node_data', False)
+        self.read_only = kwargs.get('read_only', False)
 
     def _get_data(self, instance):
         return instance.data if not self.node_data else instance.data.node()
@@ -80,9 +81,9 @@ class Attribute(ReadOnlyAttribute, metaclass=BaseMetaClass):
         self.set_fn = set_fn
 
 
-class NodeAttribute(NodeMixin, Attribute, metaclass=BaseMetaClass):
-
-    pass
+# class NodeAttribute(NodeMixin, Attribute, metaclass=BaseMetaClass):
+#
+#     pass
 
 
 class ReadOnlyNodeAttribute(NodeMixin, ReadOnlyAttribute, metaclass=BaseMetaClass):
@@ -112,7 +113,11 @@ class Connection(Base, metaclass=BaseMetaClass):
         return get_base().node_manager.wrap(obj) if obj is not None else None
 
     def __set__(self, instance, value):
-        super().__set__(instance, self._get_target(value))
+        #if not value is None:
+        if not value:
+            self.clear_fn(self._get_data(instance))
+        else:
+            super().__set__(instance, self._get_target(value))
 
 
 class Connections(Connection):
@@ -137,52 +142,56 @@ class Connections(Connection):
             [get_base().node_manager.wrap(obj) for obj in objs]
         )
 
+    # def __set__(self, instance, values):
+    #     for value in values:
+    #         super().__set__(instance, self._get_target(value))
+
     def clear(self, instance):
         return self.clear_fn(self._get_data(instance))
 
 
-class NodeConnection(NodeMixin, Connection):
-
-    pass
-
-
-class NodeConnections(Connections, NodeConnection):
-
-    pass
+# class NodeConnection(NodeMixin, Connection):
+#
+#     pass
 
 
-class ToNodeConnection(Connection):
-
-    def _get_target(self, obj):
-        return obj.data.node()
-
-
-class ToNodesConnection(Connections, ToNodeConnection):
-
-    pass
+# class NodeConnections(Connections, NodeConnection):
+#
+#     pass
 
 
-class NodeToNodeConnection(NodeConnection, ToNodeConnection):
-
-    pass
-
-
-class NodeToNodesConnection(Connections, NodeToNodeConnection):
-
-    pass
+# class ToNodeConnection(Connection):
+#
+#     def _get_target(self, obj):
+#         return None if obj is None else obj.data.node()
 
 
-class TagAttribute(Attribute):
+# class ToNodesConnection(Connections, ToNodeConnection):
+#
+#     pass
 
-    def __init__(self, *args, **kwargs):
-        self.tag_name = kwargs.pop('tag_name')
-        super().__init__(*args, **kwargs)
 
-    def get(self):
-        return self.data.get_tag(self.tag_name)
+# class NodeToNodeConnection(NodeConnection, ToNodeConnection):
+#
+#     pass
 
-    def set(self, value):
-        return self.data.set_tag(self.tag_name, value)
+
+# class NodeToNodesConnection(Connections, NodeToNodeConnection):
+#
+#     pass
+
+
+# class TagAttribute(Attribute):
+#
+#     def __init__(self, *args, **kwargs):
+#         self.tag_name = kwargs.pop('tag_name')
+#         super().__init__(*args, **kwargs)
+#
+#     def get(self):
+#         return self.data.get_tag(self.tag_name)
+#
+#     def set(self, value):
+#         return self.data.set_tag(self.tag_name, value)
 
 
 class PyTagAttribute(Attribute):
@@ -215,9 +224,9 @@ class ReadOnlyNodeProjectAssetAttribute(ProjectAssetMixin, ReadOnlyNodeAttribute
     pass
 
 
-class NodeProjectAssetAttribute(ProjectAssetMixin, NodeAttribute):
-
-    pass
+# class NodeProjectAssetAttribute(ProjectAssetMixin, NodeAttribute):
+#
+#     pass
 
 
 class PyTagProjectAssetAttribute(ProjectAssetMixin, PyTagAttribute):

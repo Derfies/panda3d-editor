@@ -537,7 +537,7 @@ class ShowBase(GameShowBase):
         """
         # Reset undo queue if creating a new document
         if newDoc:
-            self.action_manager.Reset()
+            self.action_manager.reset()
 
         # Close the current scene if there is one
         self.selection.clear()
@@ -591,11 +591,11 @@ class ShowBase(GameShowBase):
         self.plugin_manager.on_project_modified(filePaths)
 
     def undo(self):
-        self.action_manager.Undo()
+        self.action_manager.undo()
         self.doc.on_modified()
 
     def redo(self):
-        self.action_manager.Redo()
+        self.action_manager.redo()
         self.doc.on_modified()
 
     def Group(self):

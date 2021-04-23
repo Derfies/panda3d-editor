@@ -85,21 +85,3 @@ class Scene(Scene):
         comp_id = get_base().node_manager.wrap(comp).id
         if comp_id in self.connections:
             del self.connections[comp_id]
-        
-    # def clear_connections(self, comp):
-    #     delIds = []
-    #     for id, cnnctns in self.connections.items():
-    #
-    #         delCnnctns = []
-    #         for cnnctn in cnnctns:
-    #             if cnnctn.srcComp == comp:
-    #                 delCnnctns.append(cnnctn)
-    #
-    #         for delCnnctn in delCnnctns:
-    #             cnnctns.remove(delCnnctn)
-    #
-    #         if not cnnctns:
-    #             delIds.append(id)
-    #
-    #     for delId in delIds:
-    #         del self.connections[delId]

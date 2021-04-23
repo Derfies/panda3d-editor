@@ -8,7 +8,6 @@ from panda3d.bullet import BulletWorld as BW
 from game.nodes.attributes import (
     Attribute,
     Connection,
-    NodeAttribute,
     ReadOnlyAttribute,
     ReadOnlyNodeAttribute
 )
@@ -73,11 +72,12 @@ class BulletCharacterControllerNode:
 
 class BulletRigidBodyNode:
 
-    debug_enabled = NodeAttribute(
+    debug_enabled = Attribute(
         bool,
         pb.BulletRigidBodyNode.is_debug_enabled,
         pb.BulletRigidBodyNode.set_debug_enabled,
-        serialise=False
+        node_data=True,
+        serialise=False,
     )
     num_shapes = ReadOnlyNodeAttribute(
         int,
