@@ -171,8 +171,9 @@ base.run()"""
     def GetScriptsDirectory(self):
         """Return the full path to the scripts directory."""
         return self.get_directory(SCRIPTS)
-    
-    def GetPrefabsDirectory(self):
+
+    @property
+    def prefabs_directory(self):
         """Return the full path to the prefabs directory."""
         return self.get_directory(PREFABS)
     

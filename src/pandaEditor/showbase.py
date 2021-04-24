@@ -597,6 +597,7 @@ class ShowBase(GameShowBase):
         root_comp = self.node_manager.wrap(self.render)
         prefab_comp = self.scene_parser.load(file_path, root_comp)
         commands.add([prefab_comp])
+        return prefab_comp
 
     def OnProjectFilesModified(self, filePaths):
         self.asset_manager.OnAssetModified(filePaths)
