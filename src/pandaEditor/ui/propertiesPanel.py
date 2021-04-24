@@ -393,7 +393,7 @@ class PropertiesPanel(wx.Panel):
                 prop_type = 'connection'
             elif isinstance(attr, ReadOnlyAttribute):
                 if attr.type not in self.propMap:
-                    print('skipping unknown type prop:', attr_name, attr.type)
+                    logger.info(f'Skipping unknown type prop: {attr_name} {attr.type}')
                     continue
 
                 prop_type = 'attribute'

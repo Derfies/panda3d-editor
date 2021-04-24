@@ -18,6 +18,27 @@ class NodePath:
     geo = None
     pickable = True
     serialise_descendants = True
+
+    position = Attribute(
+        pc.Vec3,
+        pc.NodePath.get_pos,
+        pc.NodePath.set_pos,
+        serialise=False
+    )
+
+    rotation = Attribute(
+        pc.Vec3,
+        pc.NodePath.get_hpr,
+        pc.NodePath.set_hpr,
+        serialise=False
+    )
+
+    scale = Attribute(
+        pc.Vec3,
+        pc.NodePath.get_scale,
+        pc.NodePath.set_scale,
+        serialise=False
+    )
     
     # def __init__(self, *args, **kwargs):
     #     super().__init__(*args, **kwargs)

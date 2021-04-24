@@ -35,7 +35,7 @@ class SceneGraphPanel(SceneGraphBasePanel):
         if items:
             comps = [item.GetData() for item in items]
             comps.sort(key=lambda x: IndexInSelection(x, comps))
-            cmds.Select(comps)
+            cmds.select(comps)
             
     def OnUpdate(self, comps=None):
         """

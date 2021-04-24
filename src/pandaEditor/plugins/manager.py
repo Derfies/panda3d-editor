@@ -31,3 +31,11 @@ class Manager(GameManager):
     def on_project_modified(self, file_paths):
         for plugin in self.getPluginsOfCategory('editor'):
             plugin.plugin_object.on_project_modified(self.base, file_paths)
+
+    def on_build_ui(self):
+        for plugin in self.getAllPlugins():#'editor'):
+            try:
+                print(plugin)
+                plugin.plugin_object.on_build_ui()
+            except Exception as e:
+                print(e)

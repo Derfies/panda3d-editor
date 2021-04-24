@@ -96,7 +96,7 @@ class NodePath(Base, metaclass=ComponentMetaClass):
         self.data.remove_node()
         
     def duplicate(self, unique_name=True):
-        dupe_np = self.data.copyTo(self.data.get_parent())
+        dupe_np = self.data.copy_to(self.data.get_parent())
         
         # Make sure the duplicated NodePath has a unique name to all its 
         # siblings.
@@ -108,7 +108,7 @@ class NodePath(Base, metaclass=ComponentMetaClass):
             dupe_np.set_name(get_unique_name(self.data.get_name(), sibling_names))
         
         self.fix_up_duplicate_children(self.data, dupe_np)
-        return dupe_np
+        return get_base().node_manager.wrap(dupe_np)
 
     @property
     def children(self):

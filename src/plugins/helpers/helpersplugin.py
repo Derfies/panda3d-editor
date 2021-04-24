@@ -39,7 +39,7 @@ class HelpersPlugin(base.Base):
     def get_model_path(self, file_name):
         """
         Return the model path for the specified file name. Model paths are
-        given as absolute paths so there is not need to alter the model search
+        given as absolute paths so there is no need to alter the model search
         path - doing so may give weird results if there is a similarly named
         model in the user's project.
 

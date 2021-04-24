@@ -1,47 +1,50 @@
 import panda3d.core as pm
 from direct.showbase.PythonUtil import getBase as get_base
 
-from pandaEditor import actions
 from pandaEditor.actions import (
+    Add,
     Composite,
-    #Connect,
+    Deselect,
+    Parent,
+    Remove,
+    Select,
     SetAttribute,
     SetConnections,
 )
 
 
-def Add(comps):
+def add(comps):
     """
     Create the add composite action, execute it and push it onto the undo 
     queue.
 
     """
-    actns = []
-    actns.append(actions.Deselect(get_base().selection.comps))
-    actns.extend([actions.Add(comp) for comp in comps])
-    actns.append(actions.Select(comps))
-    actn = actions.Composite(actns)
-    get_base().action_manager.push(actn)
-    actn()
+    actions = []
+    actions.append(Deselect(get_base().selection.comps))
+    actions.extend([Add(comp) for comp in comps])
+    actions.append(Select(comps))
+    action = Composite(actions)
+    get_base().action_manager.push(action)
+    action()
     get_base().doc.on_modified(comps)
     
 
-def Remove(comps):
+def remove(comps):
     """
     Create the remove composite action, execute it and push it onto the undo 
     queue.
 
     """
-    actns = []
-    actns.append(actions.Deselect(comps))
-    actns.extend([actions.Remove(comp) for comp in comps])
-    actn = actions.Composite(actns)
-    get_base().action_manager.push(actn)
-    actn()
+    actions = []
+    actions.append(Deselect(comps))
+    actions.extend([Remove(comp) for comp in comps])
+    action = Composite(actions)
+    get_base().action_manager.push(action)
+    action()
     get_base().doc.on_modified(comps)
     
 
-def Duplicate(comps):
+def duplicate(comps):
     """
     Create the duplicate composite action, execute it and push it onto the 
     undo queue.
@@ -49,49 +52,44 @@ def Duplicate(comps):
     """
     sel_comps = get_base().selection.comps
     get_base().selection.clear()
-    dupe_comps = [
-        comp.duplicate()
-        for comp in comps
-    ]
-    actns = []
-    actns.append(actions.Deselect(sel_comps))
-    actns.extend([actions.Add(dupeComp) for dupeComp in dupe_comps])
-    actns.append(actions.Select(dupe_comps))
-    actn = actions.Composite(actns)
-    get_base().action_manager.push(actn)
-    actn()
+    dupe_comps = [comp.duplicate() for comp in comps]
+    actions = []
+    actions.append(Deselect(sel_comps))
+    actions.extend([Add(dupe_comp) for dupe_comp in dupe_comps])
+    actions.append(Select(dupe_comps))
+    action = Composite(actions)
+    get_base().action_manager.push(action)
+    action()
     get_base().doc.on_modified(dupe_comps)
-    
 
-def Replace(fromComp, toComp):
+
+def replace(fromComp, toComp):
     """
     
     """
-    actns = [
-        actions.Deselect([fromComp]),
-        actions.Remove(fromComp),
-        actions.Add(toComp),
-        actions.Select([toComp])
-    ]
-    actn = actions.Composite(actns)
-    get_base().action_manager.push(actn)
-    actn()
+    action = Composite([
+        Deselect([fromComp]),
+        Remove(fromComp),
+        Add(toComp),
+        Select([toComp])
+    ])
+    get_base().action_manager.push(action)
+    action()
     get_base().doc.on_modified([fromComp, toComp])
     
 
-def Select(comps):
+def select(comps):
     """
     Create the select composite action, execute it and push it onto the
     undo queue.
 
     """
-    actns = [
-        actions.Deselect(get_base().selection.comps), 
-        actions.Select(comps)
-    ]
-    actn = actions.Composite(actns)
-    get_base().action_manager.push(actn)
-    actn()
+    action = Composite([
+        Deselect(get_base().selection.comps),
+        Select(comps)
+    ])
+    get_base().action_manager.push(action)
+    action()
     get_base().doc.on_refresh(comps)
     
 
@@ -138,48 +136,55 @@ def set_connections(comps, name, value):
     get_base().doc.on_modified()
 
 
-def Parent(comps, pComp):
+def parent(comps, pcomp):
     """
     Create the parent action, execute it and push it onto the undo queue.
 
     """
-    actns = [actions.Parent(comp, pComp) for comp in comps]
-    actn = actions.Composite(actns)
-    get_base().action_manager.push(actn)
-    actn()
+    action = Composite([Parent(comp, pcomp) for comp in comps])
+    get_base().action_manager.push(action)
+    action()
     get_base().doc.on_modified(comps)
     
 
-def Unparent():
+def unparent():
     pass
     
 
-def Group(nps):
+def group(comps):
     """
     Create the group action, execute it and push it onto the undo queue.
 
     """
+    from game.nodes.pandanode import PandaNode
+
     # Find the lowest common ancestor for all NodePaths - this will be the
     # parent for the group NodePath.
-    cmmnNp = nps[0].getParent()
+    common_np = comps[0].data.get_parent()
+    nps = [comp.data for comp in comps]
     for np in nps:
-        cmmnNp = cmmnNp.getCommonAncestor(np)
+        common_np = common_np.get_common_ancestor(np)
+    common_comp = get_base().node_manager.wrap(common_np)
     
-    grpNp = pm.NodePath('group')
-    grpNp.reparentTo(cmmnNp)
+    # group_np = pm.NodePath('group')
+    # group_np.reparent_to(common_np)
+    # group_comp = get_base().node_manager.wrap(group_np)
+    group_comp = PandaNode.create(name='group')
+    group_comp.parent = common_comp
+    group_comp.set_default_values()
     
-    actns = []
-    actns.append(actions.Add(grpNp))
-    actns.extend([actions.Parent(np, grpNp) for np in nps])
-    actns.append(actions.Deselect(nps))
-    actns.append(actions.Select([grpNp]))
-    actn = actions.Composite(actns)
-    get_base().action_manager.push(actn)
-    actn()
-    get_base().doc.on_modified(nps.append(grpNp))
+    actions = []
+    actions.append(Add(group_comp))
+    actions.extend([Parent(comp, group_comp) for comp in comps])
+    actions.append(Deselect(comps))
+    actions.append(Select([group_comp]))
+    action = Composite(actions)
+    get_base().action_manager.push(action)
+    action()
+    get_base().doc.on_modified(None)    # Complex scene change - full refresh required.
     
 
-def Ungroup(nps):
+def ungroup(nps):
     """
     Create the ungroup action, execute it and push it onto the undo queue.
 

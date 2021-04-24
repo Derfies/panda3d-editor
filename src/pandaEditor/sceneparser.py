@@ -14,33 +14,36 @@ logger = logging.getLogger(__name__)
 
 class SceneParser(GameSceneParser):
     
-    def save(self, scene, file_path):
+    def save(self, obj, file_path):
         """Save the scene out to an xml file."""
-        rootElem = et.Element('Scene')
-        comp = get_base().node_manager.wrap(scene)
-        self.save_component(comp, rootElem)
+        comp = get_base().node_manager.wrap(obj)
+        relem = self.save_component(comp, None)
         
         # Wrap with an element tree and write to file.
-        tree = et.ElementTree(rootElem)
+        tree = et.ElementTree(relem)
         indent(tree.getroot())
         tree.write(file_path)
     
-    def save_component(self, comp, pElem):
+    def save_component(self, comp, pelem):
         """Serialise a component to an xml element."""
-        elem = pElem
+        elem = pelem
         if comp.savable:
             
             # Write out component header data, then properties and 
             # connections.
-            elem = et.SubElement(pElem, 'Component')
-            for pName, pVal in comp.get_attrib().items():
-                elem.set(pName, pVal)
+            elem = et.Element('Component')
+            if pelem is not None:
+                pelem.append(elem)
+            for name, value in comp.get_attrib().items():
+                elem.set(name, value)
             self.save_properties(comp, elem)
             self.save_connections(comp, elem)
         
         # Recurse through hierarchy.
         for child in comp.children:
             self.save_component(child, elem)
+
+        return elem
                 
     def save_properties(self, comp, elem):
         """

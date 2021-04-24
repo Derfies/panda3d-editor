@@ -57,7 +57,9 @@ ID_VIEW_BOTTOM = wx.NewId()
 ID_VIEW_FRONT = wx.NewId() 
 ID_VIEW_BACK = wx.NewId() 
 ID_VIEW_RIGHT = wx.NewId() 
-ID_VIEW_LEFT = wx.NewId() 
+ID_VIEW_LEFT = wx.NewId()
+
+ID_CREATE_PREFAB = wx.NewId()
 
 ID_LAYOUT_GAME = wx.NewId() 
 ID_LAYOUT_EDITOR = wx.NewId() 
@@ -94,10 +96,10 @@ class MainFrame(wx.Frame):
         self.actns = {
             ID_EDIT_UNDO: self.base.undo,
             ID_EDIT_REDO: self.base.redo,
-            ID_EDIT_GROUP: self.base.Group,
-            ID_EDIT_UNGROUP: self.base.Ungroup,
-            ID_EDIT_PARENT: self.base.Parent,
-            ID_EDIT_UNPARENT: self.base.Unparent
+            ID_EDIT_GROUP: self.base.group,
+            ID_EDIT_UNGROUP: self.base.ungroup,
+            ID_EDIT_PARENT: self.base.parent,
+            ID_EDIT_UNPARENT: self.base.unparent
         }
 
         # Bind frame events
@@ -361,17 +363,17 @@ class MainFrame(wx.Frame):
             aWrpr.data.setTransform(wrpr.data.getTransform())
             aWrpr.set_default_values()
             aWrpr.parent = wrpr.default_parent
-            cmds.Replace(wrpr.data, aWrpr.data)
+            cmds.replace(wrpr.data, aWrpr.data)
 
-    def OnCreatePrefab(self, evt):
+    def on_create_prefab(self, evt):
         """
         Create a new prefab for the selected object in the prefab directory.
         """
-        np = self.base.selection.GetNodePaths()[0]
-        dirPath = self.base.project.GetPrefabsDirectory()
-        assetName = self.base.project.GetUniqueAssetName('prefab.xml', dirPath)
-        assetPath = os.path.join(dirPath, assetName)
-        base.scene_parser.save(np, assetPath)
+        np = self.base.selection.node_paths[0]
+        dir_path = self.base.project.GetPrefabsDirectory()
+        asset_name = self.base.project.GetUniqueAssetName('prefab.xml', dir_path)
+        asset_path = os.path.join(dir_path, asset_name)
+        get_base().scene_parser.save(np, asset_path)
 
     def OnCreateCgShader(self, evt):
         """
@@ -451,6 +453,7 @@ class MainFrame(wx.Frame):
         self.OnUpdateFile(comps)
         self.OnUpdateEdit(comps)
         self.OnUpdateModify(comps)
+        self.on_update_create(comps)
         self.OnUpdateView(comps)
         self.OnUpdateProject(comps)
         self.OnUpdateXform(comps)
@@ -532,6 +535,9 @@ class MainFrame(wx.Frame):
 
         if self.base.project.path is not None:
             self.mProj.EnableAllTools(True)
+
+    def on_update_create(self, msg):
+        self.mCreate.Enable(ID_CREATE_PREFAB, len(get_base().selection.comps) == 1)
 
     def OnUpdateXform(self, msg):
         gizmo = self.base.gizmoMgr.GetActiveGizmo()
@@ -762,7 +768,7 @@ class MainFrame(wx.Frame):
         self.mCreate.AppendSubMenu(mLights, '&Lights')
         self.mCreate.AppendSubMenu(mBlt, '&Bullet')
         self.mCreate.AppendSeparator()
-        self.mCreate.AppendActionItem(ActionItem('Prefab', '', self.OnCreatePrefab), self)
+        self.mCreate.AppendActionItem(ActionItem('Prefab', '', self.on_create_prefab, ID_CREATE_PREFAB), self)
         
     def BuildWindowMenu(self):
         """Build show / hide controls for panes."""

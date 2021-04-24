@@ -93,21 +93,22 @@ class Manager:
         wrprCls = self.wrappers[nTypeStr]
         return wrprCls.create(*args)
     
-    def wrap(self, comp):
+    def wrap(self, obj):
         """
-        Return a wrapper suitable for the indicated component. If the correct
+        Return a wrapper suitable for the indicated object. If the correct
         wrapper cannot be found, return a NodePath wrapper for NodePaths and
         a Base wrapper for everything else.
+
         """
-        wrprCls = self.GetWrapper(comp)
-        if wrprCls is not None:
-            return wrprCls(comp)
+        comp_cls = self.GetWrapper(obj)
+        if comp_cls is not None:
+            return comp_cls(obj)
         else:
-            wrprCls = self.get_default_wrapper(comp)
-            return wrprCls(comp)
+            comp_cls = self.get_default_wrapper(obj)
+            return comp_cls(obj)
         
-    def GetWrapper(self, comp):
-        type_ = self.GetTypeString(comp)
+    def GetWrapper(self, obj):
+        type_ = self.GetTypeString(obj)
         return self.wrappers.get(type_)
     
     def get_component_by_name(self, c_type):

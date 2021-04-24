@@ -3,6 +3,7 @@ import os
 import pickle
 
 import wx
+from direct.showbase.PythonUtil import getBase as get_base
 
 from pandaEditor import commands as cmds
 from pandaEditor import constants
@@ -18,11 +19,12 @@ class DragDropManager:
         self.drag_comps = []
 
         # Define file types and their actions.
-        self.file_types = {}
-        for model_extn in constants.MODEL_EXTENSIONS:
-            self.file_types[model_extn] = self.add_model
-
+        self.file_types = {
+            model_extn: self.add_model
+            for model_extn in constants.MODEL_EXTENSIONS
+        }
         self.file_types['.ptf'] = self.add_particles
+        self.file_types['.xml'] = self.add_prefab   # Conflicts with scene xml
         # self.fileTypes = {
         #     '.egg': self.AddModel,
         #     '.bam': self.AddModel,
@@ -40,6 +42,7 @@ class DragDropManager:
             fn(filePath, np)
 
     def start(self, src, drag_comps, data):
+        logging.info(f'Starty drag drop: {drag_comps} -> {data}')
         self.drag_comps = drag_comps
 
         # TODO: Figure out why a component doesn't pickle properly.
@@ -89,6 +92,7 @@ class DragDropManager:
             wrpr.on_drag_drop(dragComps, wrpr.data)
         else:
             menu = wx.Menu()
+            print('dragComps:', dragComps)
             for cnnctn in wrpr.get_possible_connections(dragComps):
                 mItem = wx.MenuItem(menu, wx.NewId(), cnnctn.label)
                 menu.AppendItem(mItem)
@@ -103,46 +107,57 @@ class DragDropManager:
         cmds.connect(dragComps, cnnctn, cnnctn.connect)
 
     def add_model(self, file_path, np=None):
+        logging.info(f'Adding model: {file_path}')
         self.base.AddComponent('ModelRoot', model_path=file_path)
 
     def add_particles(self, file_path, np=None):
+        logging.info(f'Adding particle: {file_path}')
         self.base.AddComponent('ParticleEffect', config_path=file_path)
 
-    def AddShader(self, filePath, np=None):
-        wrpr = self.base.node_manager.wrap(np)
-        prop = wrpr.find_property('shader')
-        cmds.set_attribute([np], [prop], filePath)
+    def add_prefab(self, file_path, np=None):
+        self.base.add_prefab(file_path)
+        # np = self.base.selection.node_paths[0]ge
+        # dir_path = self.base.project.GetPrefabsDirectory()
+        # asset_name = self.base.project.GetUniqueAssetName('prefab.xml', dir_path)
+        # asset_path = os.path.join(dir_path, asset_name)
+        # root_comp = get_base().node_manager.wrap(get_base().render)
+        # get_base().scene_parser.load(file_path, root_comp)
 
-    def AddTexture(self, filePath, np=None):
-        pandaPath = pm.Filename.fromOsSpecific(filePath)
-
-        theTex = None
-        if pm.TexturePool.hasTexture(pandaPath):
-            logger.info('found in pool')
-            for tex in pm.TexturePool.findAllTextures():
-                if tex.getFilename() == pandaPath:
-                    theTex = tex
-
-        # Try to find it in the scene.
-        #for foo in base.scene.comps.keys():
-        #    print type(foo) , ' : ', foo
-        logger.info(theTex)
-        if theTex is not None and theTex in base.scene.comps.keys():
-            logger.info('found in scene')
-            if np is not None:
-                npWrpr = base.node_manager.wrap(np)
-                npWrpr.find_property('texture').Set(theTex)
-
-        else:
-
-            logger.info('creating new')
-            wrpr = self.AddComponent('Texture')
-            #wrpr = base.node_manager.Wrap(loader.loadTexture(pandaPath))
-            #wrpr.SetDefaultValues()
-            #wrpr.SetParent(wrpr.GetDefaultParent())
-            wrpr.find_property('fullPath').Set(pandaPath)
-            #pm.TexturePool.addTexture(wrpr.data)
-
-            if np is not None:
-                npWrpr = base.node_manager.wrap(np)
-                npWrpr.find_property('texture').Set(wrpr.data)
+    # def AddShader(self, filePath, np=None):
+    #     wrpr = self.base.node_manager.wrap(np)
+    #     prop = wrpr.find_property('shader')
+    #     cmds.set_attribute([np], [prop], filePath)
+    #
+    # def AddTexture(self, filePath, np=None):
+    #     pandaPath = pm.Filename.fromOsSpecific(filePath)
+    #
+    #     theTex = None
+    #     if pm.TexturePool.hasTexture(pandaPath):
+    #         logger.info('found in pool')
+    #         for tex in pm.TexturePool.findAllTextures():
+    #             if tex.getFilename() == pandaPath:
+    #                 theTex = tex
+    #
+    #     # Try to find it in the scene.
+    #     #for foo in base.scene.comps.keys():
+    #     #    print type(foo) , ' : ', foo
+    #     logger.info(theTex)
+    #     if theTex is not None and theTex in base.scene.comps.keys():
+    #         logger.info('found in scene')
+    #         if np is not None:
+    #             npWrpr = base.node_manager.wrap(np)
+    #             npWrpr.find_property('texture').Set(theTex)
+    #
+    #     else:
+    #
+    #         logger.info('creating new')
+    #         wrpr = self.AddComponent('Texture')
+    #         #wrpr = base.node_manager.Wrap(loader.loadTexture(pandaPath))
+    #         #wrpr.SetDefaultValues()
+    #         #wrpr.SetParent(wrpr.GetDefaultParent())
+    #         wrpr.find_property('fullPath').Set(pandaPath)
+    #         #pm.TexturePool.addTexture(wrpr.data)
+    #
+    #         if np is not None:
+    #             npWrpr = base.node_manager.wrap(np)
+    #             npWrpr.find_property('texture').Set(wrpr.data)

@@ -1,3 +1,5 @@
+import logging
+
 import panda3d.core as pc
 from direct.directtools.DirectGrid import DirectGrid
 from direct.showbase import ShowBaseGlobal
@@ -23,6 +25,9 @@ from pandaEditor.nodes.manager import Manager as NodeManager
 from pandaEditor.plugins.manager import Manager as PluginManager
 from pandaEditor.plugins.base import Base as EditorPluginBase
 from pandaEditor.sceneparser import SceneParser
+
+
+logger = logging.getLogger(__name__)
 
 
 class ShowBase(GameShowBase):
@@ -110,22 +115,22 @@ class ShowBase(GameShowBase):
         self.accept('z', self.undo)
         self.accept('shift-z', self.redo)
         self.accept('f', self.FrameSelection)
-        self.accept('del', lambda fn: commands.Remove(fn()),
+        self.accept('del', lambda fn: commands.remove(fn()),
                     [self.selection.get])
-        self.accept('backspace', lambda fn: commands.Remove(fn()),
+        self.accept('backspace', lambda fn: commands.remove(fn()),
                     [self.selection.get])
-        self.accept('control-d', lambda fn: commands.Duplicate(fn()),
+        self.accept('control-d', lambda fn: commands.duplicate(fn()),
                     [self.selection.get])
-        self.accept('control-g', lambda fn: commands.Group(fn()),
+        self.accept('control-g', lambda fn: commands.group(fn()),
                     [self.selection.get])
         self.accept('control-s', self.frame.OnFileSave, [None])
-        self.accept('arrow_up', lambda fn: commands.Select(fn()),
+        self.accept('arrow_up', lambda fn: commands.select(fn()),
                     [self.selection.select_parent])
-        self.accept('arrow_down', lambda fn: commands.Select(fn()),
+        self.accept('arrow_down', lambda fn: commands.select(fn()),
                     [self.selection.select_child])
-        self.accept('arrow_left', lambda fn: commands.Select(fn()),
+        self.accept('arrow_left', lambda fn: commands.select(fn()),
                     [self.selection.SelectPrev])
-        self.accept('arrow_right', lambda fn: commands.Select(fn()),
+        self.accept('arrow_right', lambda fn: commands.select(fn()),
                     [self.selection.SelectNext])
         self.accept('projectFilesModified', self.OnProjectFilesModified)
 
@@ -133,6 +138,7 @@ class ShowBase(GameShowBase):
         # self.game = EditorBase(self)
 
         self.load_plugins()
+        self.plugin_manager.on_build_ui()
 
         # Start with a new scene
         self.CreateScene()
@@ -452,7 +458,7 @@ class ShowBase(GameShowBase):
         is being used.
         """
         if self.selection.marquee.IsRunning():
-            commands.Select(self.selection.StopDragSelect())
+            commands.select(self.selection.StopDragSelect())
         elif self.gizmoMgr.IsDragging() or self.gizmo:
             self.StopTransform()
 
@@ -582,9 +588,15 @@ class ShowBase(GameShowBase):
             for np in comp.extraNps:
                 eWrpr = self.node_manager.wrap(np)
                 eWrpr.set_default_values()
-        commands.Add([comp])
+        commands.add([comp])
 
         return comp
+
+    def add_prefab(self, file_path):
+        logger.info(f'Adding prefab: {file_path}')
+        root_comp = self.node_manager.wrap(self.render)
+        prefab_comp = self.scene_parser.load(file_path, root_comp)
+        commands.add([prefab_comp])
 
     def OnProjectFilesModified(self, filePaths):
         self.asset_manager.OnAssetModified(filePaths)
@@ -598,18 +610,16 @@ class ShowBase(GameShowBase):
         self.action_manager.redo()
         self.doc.on_modified()
 
-    def Group(self):
-        nps = self.selection.GetNodePaths()
-        if nps:
-            commands.Group(nps)
+    def group(self):
+        if self.selection.comps:
+            commands.group(self.selection.comps)
 
-    def Ungroup(self):
-        nps = self.selection.GetNodePaths()
-        if nps:
-            commands.Ungroup(nps)
+    def ungroup(self):
+        if self.selection.comps:
+            commands.ungroup(self.selection.comps)
 
-    def Parent(self):
+    def parent(self):
         pass
 
-    def Unparent(self):
+    def unparent(self):
         pass
