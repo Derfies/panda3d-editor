@@ -1,3 +1,4 @@
+import os
 import logging
 
 import panda3d.core as pc
@@ -624,3 +625,12 @@ class ShowBase(GameShowBase):
 
     def unparent(self):
         pass
+
+    def write_bam_file(self):
+        sel_comps = self.selection.comps
+        self.selection.clear()
+        for comp in sel_comps:
+            model_name = comp.data.get_name()
+            bam_path = os.path.join(self.project.models_directory, model_name) + '.bam'
+            comp.data.write_bam_file(pc.Filename.from_os_specific(bam_path))
+        self.selection.add(sel_comps)

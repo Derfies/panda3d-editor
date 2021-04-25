@@ -42,6 +42,7 @@ ID_EDIT_GROUP = wx.NewId()
 ID_EDIT_UNGROUP = wx.NewId()
 ID_EDIT_PARENT = wx.NewId()
 ID_EDIT_UNPARENT = wx.NewId()
+ID_EDIT_WRITE_BAM_FILE = wx.NewId()
 
 ID_MODIFY_PHYSICS = wx.NewId()
 
@@ -99,7 +100,8 @@ class MainFrame(wx.Frame):
             ID_EDIT_GROUP: self.base.group,
             ID_EDIT_UNGROUP: self.base.ungroup,
             ID_EDIT_PARENT: self.base.parent,
-            ID_EDIT_UNPARENT: self.base.unparent
+            ID_EDIT_UNPARENT: self.base.unparent,
+            ID_EDIT_WRITE_BAM_FILE: self.base.write_bam_file,
         }
 
         # Bind frame events
@@ -505,6 +507,8 @@ class MainFrame(wx.Frame):
         self.mEdit.Enable(ID_EDIT_REDO, val)
         self.tbEdit.EnableTool(ID_EDIT_REDO, val)
 
+        self.mEdit.Enable(ID_EDIT_WRITE_BAM_FILE, len(get_base().selection.comps) > 0)
+
         self.tbEdit.Refresh()
 
     def OnUpdateModify(self, msg):
@@ -644,8 +648,10 @@ class MainFrame(wx.Frame):
         self.mEdit.AppendActionItems(commonActns, self)
         self.mEdit.AppendSeparator()
         self.mEdit.AppendActionItems(grpActns, self)
-        #self.mEdit.AppendSeparator()
-        #self.mEdit.AppendActionItems(pntActns, self)
+        self.mEdit.AppendSeparator()
+
+        write_bam = ActionItem('Write Bam File', '', self.OnSingleCommand, ID_EDIT_WRITE_BAM_FILE)
+        self.mEdit.AppendActionItem(write_bam, self)
         
         # Create edit toolbar
         self.tbEdit = CustomAuiToolBar(self, -1)
