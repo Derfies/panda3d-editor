@@ -41,13 +41,14 @@ class ConnectionTargets(MutableSequence):
 
 class Base(metaclass=BaseMetaClass):
     
-    def __init__(self, type_, **kwargs):
+    def __init__(self, type_, get_fn=None, set_fn=None, **kwargs):
         self.type = type_
+        self.get_fn = get_fn
+        self.set_fn = set_fn
         self.init_arg = kwargs.get('init_arg')
         self.init_arg_name = kwargs.get('init_arg_name')
         self.serialise = kwargs.get('serialise', True)
         self.node_data = kwargs.get('node_data', False)
-        self.read_only = kwargs.get('read_only', False)
 
     def _get_data(self, instance):
         return instance.data if not self.node_data else instance.data.node()
@@ -58,35 +59,12 @@ class Base(metaclass=BaseMetaClass):
     def __set__(self, instance, value):
         self.set_fn(self._get_data(instance), value)
 
-
-class NodeMixin:
-
-    def _get_data(self, instance):
-        return super()._get_data(instance).node()
+    @property
+    def read_only(self):
+        return self.set_fn is None
 
 
-class ReadOnlyAttribute(Base, metaclass=BaseMetaClass):
-
-    def __init__(self, type_, get_fn, **kwargs):
-        super().__init__(type_, **kwargs)
-
-        self.get_fn = get_fn
-
-
-class Attribute(ReadOnlyAttribute, metaclass=BaseMetaClass):
-
-    def __init__(self, type_, get_fn, set_fn, **kwargs):
-        super().__init__(type_, get_fn, **kwargs)
-
-        self.set_fn = set_fn
-
-
-# class NodeAttribute(NodeMixin, Attribute, metaclass=BaseMetaClass):
-#
-#     pass
-
-
-class ReadOnlyNodeAttribute(NodeMixin, ReadOnlyAttribute, metaclass=BaseMetaClass):
+class Attribute(Base, metaclass=BaseMetaClass):
 
     pass
 
@@ -96,10 +74,8 @@ class Connection(Base, metaclass=BaseMetaClass):
     many = False
 
     def __init__(self, type_, get_fn, set_fn, clear_fn, **kwargs):
-        super().__init__(type_, **kwargs)
+        super().__init__(type_, get_fn, set_fn, **kwargs)
 
-        self.get_fn = get_fn
-        self.set_fn = set_fn
         self.clear_fn = clear_fn
         self.node_target = kwargs.get('node_target', False)
 
@@ -113,7 +89,6 @@ class Connection(Base, metaclass=BaseMetaClass):
         return get_base().node_manager.wrap(obj) if obj is not None else None
 
     def __set__(self, instance, value):
-        #if not value is None:
         if not value:
             self.clear_fn(self._get_data(instance))
         else:
@@ -123,11 +98,6 @@ class Connection(Base, metaclass=BaseMetaClass):
 class Connections(Connection):
 
     many = True
-
-    # def __init__(self, type_, get_fn, set_fn, clear_fn, **kwargs):
-    #     super().__init__(type_, get_fn, set_fn, clear_fn, **kwargs)
-
-        # self.clear_fn = clear_fn
 
     def __get__(self, instance, owner):
 
@@ -142,56 +112,8 @@ class Connections(Connection):
             [get_base().node_manager.wrap(obj) for obj in objs]
         )
 
-    # def __set__(self, instance, values):
-    #     for value in values:
-    #         super().__set__(instance, self._get_target(value))
-
     def clear(self, instance):
         return self.clear_fn(self._get_data(instance))
-
-
-# class NodeConnection(NodeMixin, Connection):
-#
-#     pass
-
-
-# class NodeConnections(Connections, NodeConnection):
-#
-#     pass
-
-
-# class ToNodeConnection(Connection):
-#
-#     def _get_target(self, obj):
-#         return None if obj is None else obj.data.node()
-
-
-# class ToNodesConnection(Connections, ToNodeConnection):
-#
-#     pass
-
-
-# class NodeToNodeConnection(NodeConnection, ToNodeConnection):
-#
-#     pass
-
-
-# class NodeToNodesConnection(Connections, NodeToNodeConnection):
-#
-#     pass
-
-
-# class TagAttribute(Attribute):
-#
-#     def __init__(self, *args, **kwargs):
-#         self.tag_name = kwargs.pop('tag_name')
-#         super().__init__(*args, **kwargs)
-#
-#     def get(self):
-#         return self.data.get_tag(self.tag_name)
-#
-#     def set(self, value):
-#         return self.data.set_tag(self.tag_name, value)
 
 
 class PyTagAttribute(Attribute):
@@ -207,7 +129,7 @@ class PyTagAttribute(Attribute):
         instance.data.set_python_tag(self.pytag_name, value)
 
 
-class ProjectAssetMixin:
+class ProjectAssetAttribute(Attribute):
 
     def __init__(self, *args, **kwargs):
         self.directory = kwargs.pop('directory', None)
@@ -220,15 +142,6 @@ class ProjectAssetMixin:
         )
 
 
-class ReadOnlyNodeProjectAssetAttribute(ProjectAssetMixin, ReadOnlyNodeAttribute):
-    pass
-
-
-# class NodeProjectAssetAttribute(ProjectAssetMixin, NodeAttribute):
-#
-#     pass
-
-
-class PyTagProjectAssetAttribute(ProjectAssetMixin, PyTagAttribute):
+class PyTagProjectAssetAttribute(ProjectAssetAttribute, PyTagAttribute):
 
     pass

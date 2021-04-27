@@ -1,10 +1,6 @@
 import panda3d.core as pc
 
-from game.nodes.attributes import (
-    Base as BaseAttribute,
-    Attribute,
-    Connections,
-)
+from game.nodes.attributes import Attribute, Connections
 from game.nodes.base import Base
 from game.nodes.nodepath import NodePath
 
@@ -30,9 +26,9 @@ class CollisionNode(NodePath):
 class CollisionBox(Base):
     
     type_ = pc.CollisionBox
-    x = BaseAttribute(float, init_arg=0.5)
-    y = BaseAttribute(float, init_arg=0.5)
-    z = BaseAttribute(float, init_arg=0.5)
+    x = Attribute(float, init_arg=0.5)
+    y = Attribute(float, init_arg=0.5)
+    z = Attribute(float, init_arg=0.5)
     center = Attribute(
         pc.Point3,
         pc.CollisionBox.get_center,

@@ -9,7 +9,7 @@ from panda3d.core import Filename
 from direct.showbase.PythonUtil import getBase as get_base
 from wxExtra import wxpg
 from pandaEditor import commands as cmds
-from game.nodes.attributes import Attribute, Connection, Connections, Base, ReadOnlyAttribute
+from game.nodes.attributes import Attribute, Connection, Connections
 from . import customProperties as custProps
 
 
@@ -391,7 +391,7 @@ class PropertiesPanel(wx.Panel):
             elif isinstance(attr, Connection):
                 prop = custProps.ConnectionProperty(attr_label, attr_name, value)
                 prop_type = 'connection'
-            elif isinstance(attr, ReadOnlyAttribute):
+            elif isinstance(attr, Attribute):
                 if attr.type not in self.propMap:
                     logger.info(f'Skipping unknown type prop: {attr_name} {attr.type}')
                     continue
@@ -399,8 +399,8 @@ class PropertiesPanel(wx.Panel):
                 prop_type = 'attribute'
                 prop_cls = self.propMap[attr.type]
                 prop = prop_cls(attr_label, attr_name, value)  # TODO: Do common value.
-                # if attr.set_fn is None:
-                #     prop.Enable(False)
+                if attr.read_only:
+                    prop.Enable(False)
 
             if attr.category not in self.propAttrMap:
                 parent_prop = wxpg.PropertyCategory(attr.category)

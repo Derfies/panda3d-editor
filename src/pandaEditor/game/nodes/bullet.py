@@ -2,13 +2,7 @@ import panda3d.core as pm
 import panda3d.bullet as pb
 from direct.showbase.PythonUtil import getBase as get_base
 
-from game.nodes.attributes import (
-    Base as BaseAttribute,
-    Attribute,
-    ReadOnlyAttribute,
-    Connection,
-    Connections,
-)
+from game.nodes.attributes import Attribute, Connection, Connections
 from game.nodes.base import Base
 from game.nodes.nodepath import NodePath
 
@@ -16,7 +10,7 @@ from game.nodes.nodepath import NodePath
 class BulletSphereShape(Base):
 
     type_ = pb.BulletSphereShape
-    radius = ReadOnlyAttribute(
+    radius = Attribute(
         float,
         pb.BulletSphereShape.get_radius,
         init_arg=0.5,
@@ -26,7 +20,7 @@ class BulletSphereShape(Base):
 class BulletBoxShape(Base):
 
     type_ = pb.BulletBoxShape
-    half_extents = ReadOnlyAttribute(
+    half_extents = Attribute(
         pm.Vec3,
         pb.BulletBoxShape.get_half_extents_with_margin,
         init_arg=pm.Vec3(0.5, 0.5, 0.5),
@@ -37,19 +31,19 @@ class BulletBoxShape(Base):
 class BulletCapsuleShape(Base):
 
     type_ = pb.BulletCapsuleShape
-    radius = ReadOnlyAttribute(float, pb.BulletCapsuleShape.get_radius, init_arg=0.5)
-    height = ReadOnlyAttribute(float, pb.BulletCapsuleShape.get_half_height, init_arg=1)
-    up = BaseAttribute(int, init_arg=pb.ZUp)
+    radius = Attribute(float, pb.BulletCapsuleShape.get_radius, init_arg=0.5)
+    height = Attribute(float, pb.BulletCapsuleShape.get_half_height, init_arg=1)
+    up = Attribute(int, init_arg=pb.ZUp)
 
 
 class BulletCharacterControllerNode(NodePath):
 
     type_ = pb.BulletCharacterControllerNode
-    shape = BaseAttribute(
+    shape = Attribute(
         pb.BulletCapsuleShape,
         init_arg=pb.BulletCapsuleShape(0.4, 1.75 - 2 * 0.4, pb.ZUp)
     )
-    step_height = BaseAttribute(float, init_arg=0.4)
+    step_height = Attribute(float, init_arg=0.4)
 
 
 class BulletDebugNode(NodePath):
@@ -67,8 +61,8 @@ class BulletDebugNode(NodePath):
 class BulletPlaneShape(Base):
 
     type_ = pb.BulletPlaneShape
-    normal = BaseAttribute(pm.Vec3, init_arg=pm.Vec3(0, 0, 1))
-    constant = BaseAttribute(int, init_arg=0)
+    normal = Attribute(pm.Vec3, init_arg=pm.Vec3(0, 0, 1))
+    constant = Attribute(int, init_arg=0)
 
 
 def clear_shapes(obj):
@@ -109,7 +103,12 @@ class BulletRigidBodyNode(NodePath):
 
 def clear_rigid_bodies(obj):
     for i in range(obj.get_num_rigid_bodies()):
-        obj.remove_rigid_body(obj.get_rigid_body(0))
+        obj.remove(obj.get_rigid_body(0))
+
+
+def clear_characters(obj):
+    for i in range(obj.get_num_characters()):
+        obj.remove(obj.get_character(0))
 
 
 class BulletWorld(Base):
@@ -134,24 +133,22 @@ class BulletWorld(Base):
         clear_rigid_bodies,
         node_target=True,
     )
+    characters = Connections(
+        pb.BulletRigidBodyNode,
+        pb.BulletWorld.get_characters,
+        pb.BulletWorld.attach,
+        clear_characters,
+        node_target=True,
+    )
 
     def destroy(self):
         if (
             get_base().scene.physics_world is self.data and
             get_base().scene.physics_task in taskMgr.getAllTasks()
         ):
-            self.DisablePhysics()
+            self.disable_physics()
 
-    def ClearCharacters(self, comp):
-        for i in range(comp.getNumCharacters()):
-            comp.removeCharacter(comp.getCharacter(0))
-
-    def GetDebugNode(self, args):
-        pass
-
-    def EnablePhysics(self):
-
-        #world =
+    def enable_physics(self):
 
         def update(task):
             dt = globalClock.getDt()
@@ -160,5 +157,5 @@ class BulletWorld(Base):
 
         get_base().scene.physics_task = get_base().task_mgr.add(update, 'update')
 
-    def DisablePhysics(self):
+    def disable_physics(self):
         get_base().task_mgr.remove(get_base().scene.physics_task)

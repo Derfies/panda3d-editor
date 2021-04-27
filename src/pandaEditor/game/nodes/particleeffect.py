@@ -12,7 +12,11 @@ from game.nodes.nodepath import NodePath
 class ParticleEffect(NodePath):
 
     type_ = DirectParticleEffect
-#    config_path = PyTagAttribute(str, init_arg='', pytag_name='particle_effect_config_path')
+    config_path = PyTagAttribute(
+        str,
+        init_arg='',
+        pytag_name='particle_effect_config_path'
+    )
 
     @classmethod
     def create(cls, *args, **kwargs):

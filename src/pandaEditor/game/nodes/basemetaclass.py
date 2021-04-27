@@ -31,10 +31,10 @@ class BaseMetaClass(type):
     def get_mro(metacls, cls, mro):
         class_name = cls.__name__
         path = cls.__module__.split('.')
-        if path[0] != 'game':
 
-            # STILL ATTEMPTING TO WRAP HERE AFTER THE FACT
-            print('skip:', class_name, '->', path, getattr(cls, 'change_mro', False))
+        # Don't attempt to mix in anything but game classes.
+        if path[0] != 'game':
+            logger.info(f'Ignoring mixin for class: {".".join(path)}.{class_name}')
             return mro
         path[0] = 'pandaEditor'
         search_path = '.'.join(path)
@@ -47,18 +47,18 @@ class BaseMetaClass(type):
             # load a module that's not there.
             print(e)
             return mro
+
         editor_cls = next(iter([
             value
             for name, value in inspect.getmembers(module, inspect.isclass)
             if name == class_name
         ]), None)
         if editor_cls is None:
+            logger.info(f'Could not find editor class: {class_name}')
             return mro
 
         # Ignore the last mro "object" as it's common to both.
         mro = editor_cls.mro()[0:-1] + mro
         names = ', '.join([c.__name__ for c in mro])
         logger.info(f'Component: {cls.__name__} mro: {names}')
-
         return mro
-

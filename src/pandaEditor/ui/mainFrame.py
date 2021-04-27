@@ -325,9 +325,9 @@ class MainFrame(wx.Frame):
     def OnEngagePhysics(self, evt):
         comp = get_base().node_manager.wrap(get_base().scene.physics_world)
         if get_base().scene.physics_task not in get_base().taskMgr.getAllTasks():
-            comp.EnablePhysics()
+            comp.enable_physics()
         else:
-            comp.DisablePhysics()
+            comp.disable_physics()
 
     def OnViewGrid(self, evt):
         """

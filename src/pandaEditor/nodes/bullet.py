@@ -2,15 +2,8 @@ from direct.showbase.PythonUtil import getBase as get_base
 from panda3d import bullet
 
 import panda3d.bullet as pb
-from panda3d.bullet import BulletWorld as BW
 
-
-from game.nodes.attributes import (
-    Attribute,
-    Connection,
-    ReadOnlyAttribute,
-    ReadOnlyNodeAttribute
-)
+from game.nodes.attributes import Attribute
 
 
 TAG_BULLET_DEBUG_WIREFRAME = 'P3D_BulletDebugWireframe'
@@ -18,10 +11,10 @@ TAG_BULLET_DEBUG_WIREFRAME = 'P3D_BulletDebugWireframe'
 
 class BulletWorld:
 
-    num_rigid_bodies = ReadOnlyAttribute(
+    num_rigid_bodies = Attribute(
         int,
         bullet.BulletWorld.get_num_rigid_bodies,
-        serialise=False
+        serialise=False,
     )
 
     def set_default_values(self):
@@ -62,12 +55,11 @@ class BulletCharacterControllerNode:
     def set_default_values(self):
         super().set_default_values()
 
-        # Attempt to connect this node to the physics world if here is one.
-        if base.scene.physics_world is not None:
-            cnnctn = NodePathTargetConnectionList('Character', None, None, BW.attachCharacter,
-                                                  None, BW.removeCharacter,
-                                                  base.scene.physics_world)
-            cnnctn.connect(self.data)
+        # Connect this node to the physics world if there is one.
+        world = get_base().scene.physics_world
+        if world is not None:
+            world_comp = get_base().node_manager.wrap(world)
+            world_comp.characters.append(self)
 
 
 class BulletRigidBodyNode:
@@ -79,7 +71,7 @@ class BulletRigidBodyNode:
         node_data=True,
         serialise=False,
     )
-    num_shapes = ReadOnlyNodeAttribute(
+    num_shapes = Attribute(
         int,
         pb.BulletRigidBodyNode.get_num_shapes,
         serialise=False

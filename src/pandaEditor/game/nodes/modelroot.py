@@ -1,7 +1,7 @@
 import panda3d.core as pc
 from direct.showbase.PythonUtil import getBase as get_base
 
-from game.nodes.attributes import ReadOnlyNodeAttribute
+from game.nodes.attributes import Attribute
 from game.nodes.constants import (
     TAG_MODEL_ROOT_CHILD, TAG_NODE_TYPE
 )
@@ -11,10 +11,11 @@ from game.nodes.nodepath import NodePath
 class ModelRoot(NodePath):
     
     type_ = pc.ModelRoot
-    model_path = ReadOnlyNodeAttribute(
+    model_path = Attribute(
         pc.Filename,
         pc.ModelRoot.get_fullpath,
-        init_arg=''
+        init_arg='',
+        node_data=True,
     )
 
     @classmethod
