@@ -95,42 +95,40 @@ class Selection(Object):
                 comps.append(comp.data)
         return comps
 
-    def SelectPrev(self):
+    def select_prev(self):
         """
         For each component in the selection, return the component that appears
         one before in the parent's list of children.
         """
         comps = []
-        for wrpr in self.wrprs:
-            pWrpr = wrpr.parent
-            cComps = [cWrpr.data for cWrpr in pWrpr.children]
+        for comp in self.comps:
+            children = comp.parent.children
 
             # Get the index of the child before this one - wrap around if the
             # index has gone below zero.
-            index = cComps.index(wrpr.data) - 1
+            index = children.index(comp) - 1
             if index < 0:
-                index = len(cComps) - 1
+                index = len(children) - 1
 
-            comps.append(cComps[index])
+            comps.append(children[index])
         return comps
 
-    def SelectNext(self):
+    def select_next(self):
         """
         For each component in the selection, return the component that appears
         one after in the parent's list of children.
         """
         comps = []
-        for wrpr in self.wrprs:
-            pWrpr = wrpr.parent
-            cComps = [cWrpr.data for cWrpr in pWrpr.children]
+        for comp in self.comps:
+            children = comp.parent.children
 
             # Get the index of the child after this one - wrap around if the
             # index has gone over the number of children.
-            index = cComps.index(wrpr.data) + 1
-            if index > len(cComps) - 1:
+            index = children.index(comp) + 1
+            if index > len(children) - 1:
                 index = 0
 
-            comps.append(cComps[index])
+            comps.append(children[index])
         return comps
 
     def StartDragSelect(self, append=False):

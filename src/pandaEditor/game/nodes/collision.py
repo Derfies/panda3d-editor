@@ -26,14 +26,15 @@ class CollisionNode(NodePath):
 class CollisionBox(Base):
     
     type_ = pc.CollisionBox
-    x = Attribute(float, init_arg=0.5)
-    y = Attribute(float, init_arg=0.5)
-    z = Attribute(float, init_arg=0.5)
-    center = Attribute(
+    min = Attribute(
         pc.Point3,
-        pc.CollisionBox.get_center,
-        pc.CollisionBox.set_center,
-        init_arg=pc.Point3(0),
+        pc.CollisionBox.get_min,
+        init_arg=pc.Point3(-0.5, -0.5, -0.5),
+    )
+    max = Attribute(
+        pc.Point3,
+        pc.CollisionBox.get_max,
+        init_arg=pc.Point3(0.5, 0.5, 0.5),
     )
 
 

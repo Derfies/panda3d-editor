@@ -74,6 +74,7 @@ class BulletRigidBodyNode:
     num_shapes = Attribute(
         int,
         pb.BulletRigidBodyNode.get_num_shapes,
+        node_data=True,
         serialise=False
     )
 

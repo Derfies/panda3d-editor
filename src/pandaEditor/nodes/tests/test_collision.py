@@ -8,6 +8,7 @@ from game.nodes.collision import (
 from pandaEditor.nodes.tests.test_nodepath import (
     TestNodePathMixin,
 )
+from pandaEditor.nodes.tests.testbasemixin import TestBaseMixin
 
 
 class TestCollisionNode(TestNodePathMixin, unittest.TestCase):
@@ -30,14 +31,15 @@ class TestCollisionNode(TestNodePathMixin, unittest.TestCase):
         self.assertEqual(0, len(collision.node().get_solids()))
 
 
-# class TestCollisionBox(TestBaseMixin, unittest.TestCase):
-#
-#     component = CollisionBox
-#
-#     def test_create(self):
-#         node = super().test_create()
-#
-#
+class TestCollisionBox(TestBaseMixin, unittest.TestCase):
+
+    component = CollisionBox
+    create_kwargs = {
+        'min': pc.Point3(-0.5, -0.5, -0.5),
+        'max': pc.Point3(0.5, 0.5, 0.5),
+    }
+
+
 # class TestCollisionRay(TestBaseMixin, unittest.TestCase):
 #
 #     component = CollisionRay

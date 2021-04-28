@@ -1,6 +1,6 @@
 import panda3d.core as pc
 
-from pandaEditor.nodes.tests.basecomponenttestcase import (
+from pandaEditor.nodes.tests.testbasemixin import (
     TestBaseMixin,
 )
 from game.nodes.fog import Fog

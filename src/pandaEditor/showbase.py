@@ -130,9 +130,9 @@ class ShowBase(GameShowBase):
         self.accept('arrow_down', lambda fn: commands.select(fn()),
                     [self.selection.select_child])
         self.accept('arrow_left', lambda fn: commands.select(fn()),
-                    [self.selection.SelectPrev])
+                    [self.selection.select_prev])
         self.accept('arrow_right', lambda fn: commands.select(fn()),
-                    [self.selection.SelectNext])
+                    [self.selection.select_next])
         self.accept('projectFilesModified', self.OnProjectFilesModified)
 
         # Create a "game"

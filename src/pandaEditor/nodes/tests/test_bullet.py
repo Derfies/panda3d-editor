@@ -3,7 +3,7 @@ import unittest
 import panda3d.bullet as pb
 import panda3d.core as pc
 from direct.showbase.PythonUtil import getBase as get_base
-from pandaEditor.nodes.tests.basecomponenttestcase import (
+from pandaEditor.nodes.tests.testbasemixin import (
     TestBaseMixin,
 )
 from game.nodes.bullet import (
