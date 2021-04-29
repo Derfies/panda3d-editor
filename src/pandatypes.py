@@ -560,7 +560,7 @@ class LargeImageEditor(wxpg.PGEditor):
             if propgrid.IsEditorsValueModified():
                 return True
         elif evtType == wx.wxEVT_COMMAND_TEXT_UPDATED:
-            #
+
             # Pass this event outside wxPropertyGrid so that,
             # if necessary, program can tell when user is editing
             # a textctrl.

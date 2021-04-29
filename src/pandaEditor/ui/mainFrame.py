@@ -347,7 +347,7 @@ class MainFrame(wx.Frame):
         base.edCamera.Orbit(delta)
 
     def on_create(self, evt, type_):
-        self.base.AddComponent(type_)
+        self.base.add_component(type_)
 
     def OnCreateActor(self, evt):
         """

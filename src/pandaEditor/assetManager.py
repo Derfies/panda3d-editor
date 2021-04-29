@@ -2,6 +2,7 @@ import logging
 import os
 
 import panda3d.core as pm
+from direct.showbase.PythonUtil import getBase as get_base
 
 
 logger = logging.getLogger(__name__)
@@ -9,8 +10,7 @@ logger = logging.getLogger(__name__)
 
 class AssetManager:
     
-    def __init__(self, base, *args, **kwargs):
-        self.base = base
+    def __init__(self, *args, **kwargs):
         self.assets = {}
         
     def RegisterAsset(self, assetPath, asset):
@@ -57,11 +57,11 @@ class AssetManager:
         # Find all instances of this model in the scene graph.
         nps = [
             np 
-            for np in self.base.scene.rootNp.findAllMatches('**/+ModelRoot')
+            for np in get_base().scene.rootNp.findAllMatches('**/+ModelRoot')
             if np.node().getFullpath() == pandaPath
         ]
         
-        wrprCls = self.base.node_manager.get_component_by_name('ModelRoot')
+        wrprCls = get_base().node_manager.get_component_by_name('ModelRoot')
         filePath = pm.Filename.toOsSpecific(pandaPath)
         wrpr = wrprCls.create(model_path=filePath)
         
@@ -75,15 +75,15 @@ class AssetManager:
             inCnnctns = {}
             outCnnctns = {}
             for childNp in np.findAllMatches('**/*'):
-                cWrpr = self.base.node_manager.wrap(childNp)
+                cWrpr = get_base().node_manager.wrap(childNp)
                 path = cWrpr.get_path()
                 oldIds[path] = cWrpr.id
-                for cnnctn in self.base.scene.get_incoming_connections(cWrpr):
+                for cnnctn in get_base().scene.get_incoming_connections(cWrpr):
                     # Need to break connection here?
                     inCnnctns.setdefault(path, [])
                     inCnnctns[path].append(cnnctn)
                     
-                for cnnctn in self.base.scene.get_outgoing_connections(cWrpr):
+                for cnnctn in get_base().scene.get_outgoing_connections(cWrpr):
                     cnnctn.clear(cWrpr.data)
                     outCnnctns.setdefault(path, [])
                     outCnnctns[path].append(cnnctn)
@@ -95,13 +95,13 @@ class AssetManager:
             # Copy the new updated children under the old ModelRoot NodePath
             # so we retain its properties.
             for childNp in wrpr.data.getChildren():
-                cWrpr = self.base.node_manager.wrap(childNp)
+                cWrpr = get_base().node_manager.wrap(childNp)
                 dupeNp = cWrpr.duplicate(unique_name=False)
                 dupeNp.reparentTo(np)
                 
             # Replace connections.
             for childNp in np.findAllMatches('**/*'):
-                cWrpr = self.base.node_manager.wrap(childNp)
+                cWrpr = get_base().node_manager.wrap(childNp)
                 path = cWrpr.get_path()
                 
                 if path in outCnnctns:

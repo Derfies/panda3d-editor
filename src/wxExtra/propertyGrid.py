@@ -85,8 +85,8 @@ class FloatValidator(wx.Validator):
 
 class PropertyGridEvent(wx.PyCommandEvent):
     
-    def __init__(self, evtType):
-        super().__init__(evtType)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         
         self._prop = None
         

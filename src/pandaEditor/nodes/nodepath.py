@@ -2,7 +2,6 @@ import copy
 
 import panda3d.core as pc
 from direct.showbase.PythonUtil import getBase as get_base
-from panda3d.core import NodePath as NP
 from direct.directtools.DirectSelection import DirectBoundingBox
 
 from pandaEditor import commands
@@ -18,61 +17,24 @@ class NodePath:
     geo = None
     pickable = True
     serialise_descendants = True
-
     position = Attribute(
         pc.Vec3,
         pc.NodePath.get_pos,
         pc.NodePath.set_pos,
         serialise=False
     )
-
     rotation = Attribute(
         pc.Vec3,
         pc.NodePath.get_hpr,
         pc.NodePath.set_hpr,
         serialise=False
     )
-
     scale = Attribute(
         pc.Vec3,
         pc.NodePath.get_scale,
         pc.NodePath.set_scale,
         serialise=False
     )
-    
-    # def __init__(self, *args, **kwargs):
-    #     super().__init__(*args, **kwargs)
-    #
-    #     # Find the index of the 'name' property so we can add position,
-    #     # rotation and scale properties immediately after it.
-    #     i = self.attributes.index(self.FindProperty('name'))
-    #
-    #     # Add attributes for position, rotation and scale. These are
-    #     # implemented editor side only as we only need a matrix to xform the
-    #     # NodePath; they are for the user's benefit only.
-    #     self.AddAttributes(NodePathAttribute('Position', pm.Vec3, NP.getPos, NP.setPos, w=False), index=i + 1)
-    #     self.AddAttributes(
-    #         NodePathAttribute('X', float, NP.getX, NP.setX, w=False),
-    #         NodePathAttribute('Y', float, NP.getY, NP.setY, w=False),
-    #         NodePathAttribute('Z', float, NP.getZ, NP.setZ, w=False),
-    #         parent='Position'
-    #   )
-    #
-    #     self.AddAttributes(NodePathAttribute('Rotation', pm.Vec3, NP.getHpr, NP.setHpr, w=False), index=i + 2)
-    #     self.AddAttributes(
-    #         NodePathAttribute('H', float, NP.getH, NP.setH, w=False),
-    #         NodePathAttribute('P', float, NP.getP, NP.setP, w=False),
-    #         NodePathAttribute('R', float, NP.getR, NP.setR, w=False),
-    #         parent='Rotation'
-    #   )
-    #
-    #     self.AddAttributes(NodePathAttribute('Scale', pm.Vec3, NP.getScale, NP.setScale, w=False), index=i + 3)
-    #     self.AddAttributes(
-    #         NodePathAttribute('Sx', float, NP.getSx, NP.setSx, w=False),
-    #         NodePathAttribute('Sy', float, NP.getSy, NP.setSy, w=False),
-    #         NodePathAttribute('Sz', float, NP.getSz, NP.setSz, w=False),
-    #         parent='Scale'
-    #   )
 
     @classmethod
     def create(cls, *args, **kwargs):
