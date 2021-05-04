@@ -1,16 +1,20 @@
-import copy
+import collections
+import logging
 
 import panda3d.core as pc
 from direct.showbase.PythonUtil import getBase as get_base
-from panda3d.core import NodePath as NP
 from direct.directtools.DirectSelection import DirectBoundingBox
 
 from pandaEditor import commands
 from game.nodes.attributes import Attribute
 from game.nodes.constants import TAG_MODEL_ROOT_CHILD
+from game.utils import get_lower_camel_case, get_unique_name
 from pandaEditor.nodes.constants import (
     TAG_BBOX, TAG_IGNORE, TAG_MODIFIED, TAG_PICKABLE
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class NodePath:
@@ -75,6 +79,16 @@ class NodePath:
     #   )
 
     @classmethod
+    def get_default_values(cls):
+        return {
+            'name': get_lower_camel_case(cls.__name__)
+        }
+
+    @classmethod
+    def get_foo(cls):
+        return []
+
+    @classmethod
     def create(cls, *args, **kwargs):
         comp = super().create(*args, **kwargs)
 
@@ -126,14 +140,14 @@ class NodePath:
         geo.node().adjustDrawMask(*base.GetEditorRenderMasks())
         cls.geo = geo
         
-    def set_up_node_path(self):
-        super().set_up_node_path()
-        
-        if self.geo is not None:
-            self.geo.copy_to(self.data)
-            
-        if self.pickable:
-            self.data.set_python_tag(TAG_PICKABLE, self.pickable)
+    # def set_up_node_path(self):
+    #     super().set_up_node_path()
+    #
+    #     if self.geo is not None:
+    #         self.geo.copy_to(self.data)
+    #
+    #     if self.pickable:
+    #         self.data.set_python_tag(TAG_PICKABLE, self.pickable)
             
     def on_select(self):
         """Add a bounding box to the indicated node."""
@@ -209,7 +223,12 @@ class NodePath:
         return self.data.node().is_of_type(cType)
             
     def set_default_values(self):
-        pass
+
+        if self.geo is not None:
+            self.geo.copy_to(self.data)
+
+        if self.pickable:
+            self.data.set_python_tag(TAG_PICKABLE, self.pickable)
         
     @classmethod
     def find_child(cls, *args, **kwargs):
@@ -223,15 +242,33 @@ class NodePath:
     @property
     def default_parent(self):
         return get_base().node_manager.wrap(get_base().render)
-    
-    def on_duplicate(self, orig, dupe):
-        super().on_duplicate(orig, dupe)
-        
-        #wrpr = get_base().node_manager.wrap(orig)
-        cnnctns = get_base().scene.get_outgoing_connections(orig)
-        print('cnnctns:', cnnctns)
-        for cnnctn in cnnctns:
-            newCnnctn = copy.copy(cnnctn)
-            newCnnctn.connect(self)
-        
-        self.data.set_python_tag(TAG_MODIFIED, orig.get_python_tag(TAG_MODIFIED))
+
+    def duplicate(self, make_unique=True):
+        dupe_np = self.data.copy_to(self.data.get_parent())
+
+        # Make sure the duplicated NodePath has a unique name to all its
+        # siblings.
+        if make_unique:
+            sibling_names = [
+                sib.data.get_name()
+                for sib in self.parent.children
+            ]
+            unique_name = get_unique_name(self.data.get_name(), sibling_names)
+            dupe_np.set_name(unique_name)
+        dupe = get_base().node_manager.wrap(dupe_np)
+        self.fix_up_duplicate_hierarchy(self, dupe)
+
+        return get_base().node_manager.wrap(dupe_np)
+
+    def fix_up_duplicate_hierarchy(self, orig, dupe):
+
+        # Connect the duplicated node in a similar fashion to the original node.
+        conns = get_base().scene.get_outgoing_connections(orig)
+        for target, conn_name in conns:
+            value = getattr(target, conn_name)
+            if isinstance(value, collections.MutableSequence):
+                value.append(dupe)
+            else:
+                raise NotImplementedError('cant do that yet')
+
+        super().fix_up_duplicate_hierarchy(orig, dupe)

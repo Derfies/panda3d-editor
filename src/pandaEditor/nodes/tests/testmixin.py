@@ -6,14 +6,6 @@ from pandaEditor.scene import Scene
 from pandaEditor.game.showbase import ShowBase
 
 
-# class TestShowBase(ShowBase):
-#
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#
-#         self.scene = Scene()
-
-
 class TestMixin:
 
     def setUp(self):

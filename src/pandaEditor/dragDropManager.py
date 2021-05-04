@@ -92,7 +92,6 @@ class DragDropManager:
             wrpr.on_drag_drop(dragComps, wrpr.data)
         else:
             menu = wx.Menu()
-            print('dragComps:', dragComps)
             for cnnctn in wrpr.get_possible_connections(dragComps):
                 mItem = wx.MenuItem(menu, wx.NewId(), cnnctn.label)
                 menu.AppendItem(mItem)

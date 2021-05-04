@@ -3,12 +3,36 @@ import unittest
 import panda3d.core as pc
 from game.nodes.collision import (
     CollisionBox,
+    CollisionCapsule,
+    CollisionInvSphere,
     CollisionNode,
+    CollisionRay,
+    CollisionSphere,
 )
+from game.nodes.nongraphobject import Metaobject
 from pandaEditor.nodes.tests.test_nodepath import (
     TestNodePathMixin,
 )
 from pandaEditor.nodes.tests.testbasemixin import TestBaseMixin
+
+
+class TestCollisionBox(TestBaseMixin, unittest.TestCase):
+
+    component = CollisionBox
+    create_kwargs = {
+        'min': pc.Point3(-0.5, -0.5, -0.5),
+        'max': pc.Point3(0.5, 0.5, 0.5),
+    }
+
+
+class TestCollisionCapsule(TestBaseMixin, unittest.TestCase):
+
+    component = CollisionCapsule
+    create_kwargs = {
+        'a': pc.Point3(0),
+        'db': pc.Point3(0, 0, 1),
+        'radius': 0.5,
+    }
 
 
 class TestCollisionNode(TestNodePathMixin, unittest.TestCase):
@@ -19,6 +43,7 @@ class TestCollisionNode(TestNodePathMixin, unittest.TestCase):
         collision = pc.NodePath(pc.CollisionNode('collision_node'))
         solid = pc.CollisionBox(pc.Point3(0, 0, 0), 1, 1, 1)
         node_comp, solid_comp = CollisionNode(collision), CollisionBox(solid)
+        self.base.scene.objects[solid_comp.data] = Metaobject()
         node_comp.solids.append(solid_comp)
         self.assertEqual(solid, collision.node().get_solids()[0])
 
@@ -31,42 +56,28 @@ class TestCollisionNode(TestNodePathMixin, unittest.TestCase):
         self.assertEqual(0, len(collision.node().get_solids()))
 
 
-class TestCollisionBox(TestBaseMixin, unittest.TestCase):
+class TestCollisionRay(TestBaseMixin, unittest.TestCase):
 
-    component = CollisionBox
+    component = CollisionRay
     create_kwargs = {
-        'min': pc.Point3(-0.5, -0.5, -0.5),
-        'max': pc.Point3(0.5, 0.5, 0.5),
+        'origin': pc.Point3(0),
+        'direction': pc.Vec3(0, 0, 1),
     }
 
 
-# class TestCollisionRay(TestBaseMixin, unittest.TestCase):
-#
-#     component = CollisionRay
-#
-#     def test_create(self):
-#         node = super().test_create()
-#
-#
-# class TestCollisionSphere(TestBaseMixin, unittest.TestCase):
-#
-#     component = CollisionSphere
-#
-#     def test_create(self):
-#         node = super().test_create()
-#
-#
-# class TestCollisionInvSphere(TestBaseMixin, unittest.TestCase):
-#
-#     component = CollisionInvSphere
-#
-#     def test_create(self):
-#         node = super().test_create()
-#
-#
-# class TestCollisionCapsule(TestBaseMixin, unittest.TestCase):
-#
-#     component = CollisionCapsule
-#
-#     def test_create(self):
-#         node = super().test_create()
+class TestCollisionSphere(TestBaseMixin, unittest.TestCase):
+
+    component = CollisionSphere
+    create_kwargs = {
+        'center': pc.Point3(0),
+        'radius': 0.5,
+    }
+
+
+class TestCollisionInvSphere(TestCollisionSphere):
+
+    component = CollisionInvSphere
+    create_kwargs = {
+        'center': pc.Point3(0),
+        'radius': 0.5,
+    }

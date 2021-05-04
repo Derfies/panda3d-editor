@@ -7,6 +7,9 @@ class SceneRoot:
     @property
     def children(self):
         return [
-            get_base().node_manager.wrap(get_base().render2d),
-            get_base().node_manager.wrap(get_base().render),
-        ] + list(get_base().scene.comps.keys())
+            get_base().node_manager.wrap(data)
+            for data in [
+                get_base().render2d,
+                get_base().render,
+            ] + list(get_base().scene.objects.keys())
+        ]

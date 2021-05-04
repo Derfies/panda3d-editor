@@ -100,7 +100,7 @@ class AddRemoveBase(Base):
     def __init__(self, comp):
         self.comp = comp
         self.pcomp = None
-        self.id = None
+        self.metaobject = None
         self.connections = []
 
     def _add_component(self):
@@ -108,8 +108,6 @@ class AddRemoveBase(Base):
         # Attach the component back to its old parent and set its id back.
         if self.pcomp is not None:
             self.pcomp.add_child(self.comp)
-        if self.id is not None:
-            self.comp.id = self.id
 
         # Reestablish the connections the component has with the other
         # components in the scene.
@@ -142,8 +140,10 @@ class AddRemoveBase(Base):
             self.connections.append(connection)
 
         # Store the parent and id, then detach the component from the scene.
+        # TODO: Maybe wrap this in function.
         self.pcomp = self.comp.parent
-        self.id = self.comp.id
+        if self.comp.data in get_base().scene.objects:
+            self.comp._metaobject = get_base().scene.objects[self.comp.data]
         self.comp.detach()
 
 
@@ -228,6 +228,7 @@ class Manager:
             action = self.undos.pop()
             self.redos.append(action)
             action.undo()
+            get_base().doc.on_modified()
 
     def redo(self):
         if not self.redos:
@@ -236,6 +237,7 @@ class Manager:
             action = self.redos.pop()
             self.undos.append(action)
             action.redo()
+            get_base().doc.on_modified()
 
     def reset_undo(self):
         while self.undos:

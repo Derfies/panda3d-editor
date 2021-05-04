@@ -1,3 +1,5 @@
+import uuid
+
 from direct.showbase.PythonUtil import getBase as get_base
 
 from pandaEditor.game.scene import Scene
@@ -27,8 +29,10 @@ class Scene(Scene):
             'Cam2d'
         ]
         for cType in defaultCompTypes:
-            wrpr = get_base().node_manager.create(cType)
-            wrpr.data.set_tag(TAG_NODE_TYPE, cType)
+            comp = get_base().node_manager.create(cType)
+            comp.data.set_tag(TAG_NODE_TYPE, cType)
+            comp.id = str(uuid.uuid4())
+            comp.set_default_values()
         
     def load(self, file_path):
         """Recreate a scene graph from file."""

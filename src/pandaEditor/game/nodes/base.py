@@ -1,9 +1,14 @@
+import abc
 import copy
+import logging
+import uuid
 
 from direct.showbase.PythonUtil import getBase as get_base
 
-from game.nodes.attributes import Connection
 from game.nodes.componentmetaclass import ComponentMetaClass
+
+
+logger = logging.getLogger(__name__)
 
 
 class Base(metaclass=ComponentMetaClass):
@@ -16,12 +21,9 @@ class Base(metaclass=ComponentMetaClass):
     def create(cls, *args, **kwargs):
         data = kwargs.pop('data', None)
         if data is None:
-            try:
-                data = cls.type_(**kwargs)
-            except TypeError as e:
-                print(cls, args, kwargs, e)
-                raise
-        return cls(data)
+            data = cls.type_(**kwargs)
+        comp = cls(data)
+        return comp
 
     def __hash__(self):
         return hash(self.data)
@@ -31,11 +33,11 @@ class Base(metaclass=ComponentMetaClass):
 
     @property
     def id(self):
-        return get_base().scene.comps.get(self)
+        return self.metaobject.id
 
     @id.setter
     def id(self, value):
-        get_base().scene.comps[self] = value
+        self.metaobject.id = value
 
     @property
     def type(self):
@@ -46,7 +48,7 @@ class Base(metaclass=ComponentMetaClass):
 
         # Return None if the component isn't registered - it may have been
         # detached.
-        if self not in get_base().scene.comps:
+        if self.data not in get_base().scene.objects:
             return None
         return get_base().node_manager.wrap(get_base().scene)
 
@@ -57,35 +59,21 @@ class Base(metaclass=ComponentMetaClass):
     @property
     def children(self):
         return self._children
-    
+
+    def get_tag(self, name):
+        return self.metaobject.tags.get(name)
+
+    def set_tag(self, name, value):
+        self.metaobject.tags[name] = value
+
+    @abc.abstractmethod
     def detach(self):
-        get_base().scene.deregister_component(self.data)
-    
+        """"""
+
+    @abc.abstractmethod
     def destroy(self):
-        pass
-    
-    def duplicate(self):
-        dupe = copy.copy(self.data)
-        self.fix_up_duplicate_children(self.data, dupe)
-        get_base().scene.register_component(dupe)
-        return dupe
+        """"""
 
-    # @property
-    # def connections(self):
-    #     return []#filter(lambda a: isinstance(a, Connection), self.attributes.values())
-    
-    def add_child(self, comp):
-        raise NotImplementedError
-            
-    def fix_up_duplicate_children(self, origComp, dupeComp):
-        dupeWrpr = get_base().node_manager.wrap(dupeComp)
-        dupeWrpr.on_duplicate(origComp, dupeComp)
-        
-        cDupeWrprs = dupeWrpr.children
-        origWrpr = get_base().node_manager.wrap(origComp)
-        cOrigWrprs = origWrpr.children
-        for i in range(len(cDupeWrprs)):
-            self.fix_up_duplicate_children(cOrigWrprs[i].data, cDupeWrprs[i].data)
-
-    def on_duplicate(self, orig, dupe):
-        raise NotImplementedError
+    @abc.abstractmethod
+    def add_child(self, child):
+        """"""

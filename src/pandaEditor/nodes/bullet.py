@@ -2,6 +2,7 @@ from direct.showbase.PythonUtil import getBase as get_base
 from panda3d import bullet
 
 import panda3d.bullet as pb
+import panda3d.core as pc
 
 from game.nodes.attributes import Attribute
 
@@ -9,22 +10,26 @@ from game.nodes.attributes import Attribute
 TAG_BULLET_DEBUG_WIREFRAME = 'P3D_BulletDebugWireframe'
 
 
-class BulletWorld:
+class BulletBoxShape:
 
-    num_rigid_bodies = Attribute(
-        int,
-        bullet.BulletWorld.get_num_rigid_bodies,
-        serialise=False,
-    )
+    default_values = {
+        'halfExtents': pc.Vec3(0.5, 0.5, 0.5),
+    }
 
-    def set_default_values(self):
-        super().set_default_values()
 
-        # Set this world as the physics world if there isn't already one.
-        world = get_base().scene.physics_world
-        if world is None:
-            scene = get_base().node_manager.wrap(get_base().scene)
-            scene.physics_world = self
+class BulletCapsuleShape:
+
+    default_values = {
+        'radius': 0.5,
+        'height': 1,
+        'up': pb.ZUp,
+    }
+
+    @classmethod
+    def create(cls, *args, **kwargs):
+        comp = super().create(cls, *args, **kwargs)
+        comp.up = kwargs['up']
+        return comp
 
 
 def get_wireframe(obj):
@@ -43,6 +48,10 @@ class BulletDebugNode:
     def set_default_values(self):
         super().set_default_values()
 
+        # Show debug wireframe by default.
+        self.show_wireframe = True
+        self.data.show()    # This appears to be necessary??
+
         # Connect this node to the physics world if there is one.
         world = get_base().scene.physics_world
         if world is not None:
@@ -50,16 +59,19 @@ class BulletDebugNode:
             world_comp.debug_node = self
 
 
-class BulletCharacterControllerNode:
+class BulletPlaneShape:
 
-    def set_default_values(self):
-        super().set_default_values()
+    default_values = {
+        'normal': pc.Vec3(0, 0, 1),
+        'point': pc.Vec3(0, 0, 0),
+    }
 
-        # Connect this node to the physics world if there is one.
-        world = get_base().scene.physics_world
-        if world is not None:
-            world_comp = get_base().node_manager.wrap(world)
-            world_comp.characters.append(self)
+    @classmethod
+    def create(cls, *args, **kwargs):
+        comp = super().create(cls, *args, **kwargs)
+        comp.normal = kwargs['normal']
+        comp.point = kwargs['point']
+        return comp
 
 
 class BulletRigidBodyNode:
@@ -86,3 +98,31 @@ class BulletRigidBodyNode:
         if world is not None:
             world_comp = get_base().node_manager.wrap(world)
             world_comp.rigid_bodies.append(self)
+
+
+class BulletSphereShape:
+
+    default_values = {
+        'radius': 0.5,
+    }
+
+
+class BulletWorld:
+
+    num_rigid_bodies = Attribute(
+        int,
+        bullet.BulletWorld.get_num_rigid_bodies,
+        serialise=False,
+    )
+
+    def set_default_values(self):
+        super().set_default_values()
+
+        # Use realistic gravity value as a default.
+        self.gravity = pc.Vec3(0, 0, -9.81)
+
+        # Set this world as the physics world if there isn't already one.
+        world = get_base().scene.physics_world
+        if world is None:
+            scene = get_base().node_manager.wrap(get_base().scene)
+            scene.physics_world = self

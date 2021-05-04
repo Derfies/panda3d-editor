@@ -165,10 +165,7 @@ def group(comps):
     for np in nps:
         common_np = common_np.get_common_ancestor(np)
     common_comp = get_base().node_manager.wrap(common_np)
-    
-    # group_np = pm.NodePath('group')
-    # group_np.reparent_to(common_np)
-    # group_comp = get_base().node_manager.wrap(group_np)
+
     group_comp = PandaNode.create(name='group')
     group_comp.parent = common_comp
     group_comp.set_default_values()
@@ -184,29 +181,32 @@ def group(comps):
     get_base().doc.on_modified(None)    # Complex scene change - full refresh required.
     
 
-def ungroup(nps):
+def ungroup(comps):
     """
     Create the ungroup action, execute it and push it onto the undo queue.
 
     """
-    pNps = []
-    cNpSets = []
-    for np in nps:
-        wrpr = get_base().node_manager.wrap(np)
-        pNps.append(wrpr.parent.data)
-        cNpSets.append([cWrpr.data for cWrpr in wrpr.children])
+    pcomps = []
+    ccomp_sets = []
+    for comp in comps:
+        pcomps.append(comp.parent)
+        ccomp_sets.append(comp.children)
         
     # Remove those nodes which were empty NodePaths.
-    rmvNps = [np for np in nps if np.node().isExactType(pm.PandaNode)]
+    remove_comps = [
+        comp
+        for comp in comps
+        if comp.data.node().isExactType(pm.PandaNode)
+    ]
     
-    actns = []
-    actns.append(actions.Deselect(nps))
-    for i, cNps in enumerate(cNpSets):
-        actns.extend([actions.Parent(cNp, pNps[i]) for cNp in cNps])
-    actns.extend([actions.Remove(np) for np in rmvNps])
-    actns.append(actions.Select([cNp for cNps in cNpSets for cNp in cNps]))
+    actions = []
+    actions.append(Deselect(comps))
+    for i, ccomps in enumerate(ccomp_sets):
+        actions.extend([Parent(ccomp, pcomps[i]) for ccomp in ccomps])
+    actions.extend([Remove(comp) for comp in remove_comps])
+    actions.append(Select([ccomp for ccomps in ccomp_sets for ccomp in ccomps]))
     
-    actn = actions.Composite(actns)
-    get_base().action_manager.push(actn)
-    actn()
-    get_base().doc.on_modified(nps.append(rmvNps))
+    action = Composite(actions)
+    get_base().action_manager.push(action)
+    action()
+    get_base().doc.on_modified(None)    # Complex scene change - full refresh required.

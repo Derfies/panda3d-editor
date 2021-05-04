@@ -10,9 +10,7 @@ class Render(NodePath, metaclass=ComponentMetaClass):
     
     @classmethod
     def create(cls, *args, **kwargs):
-        comp = cls(get_base().render)
-        comp.set_up_node_path()
-        return comp
+        return cls(get_base().render)
 
     @property
     def parent(self):
@@ -27,27 +25,21 @@ class BaseCamera(ModelNode, metaclass=ComponentMetaClass):
 
     @classmethod
     def create(cls, *args, **kwargs):
-        comp = cls(get_base().camera)
-        comp.set_up_node_path()
-        return comp
+        return cls(get_base().camera)
 
 
 class BaseCam(Camera, metaclass=ComponentMetaClass):
 
     @classmethod
     def create(cls, *args, **kwargs):
-        comp = cls(get_base().cam)
-        comp.set_up_node_path()
-        return comp
+        return cls(get_base().cam)
 
 
 class Render2d(NodePath, metaclass=ComponentMetaClass):
 
     @classmethod
     def create(cls, *args, **kwargs):
-        comp = cls(get_base().render2d)
-        comp.set_up_node_path()
-        return comp
+        return cls(get_base().render2d)
 
     @property
     def parent(self):
@@ -62,33 +54,25 @@ class Aspect2d(NodePath, metaclass=ComponentMetaClass):
     
     @classmethod
     def create(cls, *args, **kwargs):
-        comp = cls(get_base().aspect2d)
-        comp.set_up_node_path()
-        return comp
+        return cls(get_base().aspect2d)
     
 
 class Pixel2d(NodePath, metaclass=ComponentMetaClass):
     
     @classmethod
     def create(cls, *args, **kwargs):
-        comp = cls(get_base().pixel2d)
-        comp.set_up_node_path()
-        return comp
+        return cls(get_base().pixel2d)
     
 
 class Camera2d(NodePath, metaclass=ComponentMetaClass):
     
     @classmethod
     def create(cls, *args, **kwargs):
-        comp = cls(get_base().camera2d)
-        comp.set_up_node_path()
-        return comp
+        return cls(get_base().camera2d)
     
 
 class Cam2d(NodePath, metaclass=ComponentMetaClass):
     
     @classmethod
     def create(cls, *args, **kwargs):
-        comp = cls(get_base().cam2d)
-        comp.set_up_node_path()
-        return comp
+        return cls(get_base().cam2d)

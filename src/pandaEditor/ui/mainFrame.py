@@ -3,21 +3,23 @@ import sys
 
 import wx
 import wx.aui
+import wx.propgrid as wxpg
 from pubsub import pub
 import panda3d.core as pm
 
 import p3d
 from direct.showbase.PythonUtil import getBase as get_base
-from pandaEditor import commands as cmds
 from wxExtra import utils as wxUtils, ActionItem
 from wxExtra.logpanel import LogPanel
 from wxExtra import AuiManagerConfig, CustomAuiToolBar, CustomMenu
+from pandaEditor import commands as cmds
 from pandaEditor.constants import MODEL_EXTENSIONS
 from pandaEditor.ui.viewport import Viewport
 from pandaEditor.ui.resourcesPanel import ResourcesPanel
 from pandaEditor.ui.sceneGraphPanel import SceneGraphPanel
 from pandaEditor.ui.propertiesPanel import PropertiesPanel
 from pandaEditor.ui.preferenceseditor import PreferencesEditor
+from pandaEditor.ui.createdialog import CreateDialog
 
 
 FRAME_TITLE = 'Panda Editor 0.1'
@@ -42,6 +44,7 @@ ID_EDIT_GROUP = wx.NewId()
 ID_EDIT_UNGROUP = wx.NewId()
 ID_EDIT_PARENT = wx.NewId()
 ID_EDIT_UNPARENT = wx.NewId()
+ID_EDIT_DUPLICATE = wx.NewId()
 ID_EDIT_WRITE_BAM_FILE = wx.NewId()
 
 ID_MODIFY_PHYSICS = wx.NewId()
@@ -94,15 +97,6 @@ class MainFrame(wx.Frame):
         self.base = base
         self.preMaxPos = None
         self.preMaxSize = None
-        self.actns = {
-            ID_EDIT_UNDO: self.base.undo,
-            ID_EDIT_REDO: self.base.redo,
-            ID_EDIT_GROUP: self.base.group,
-            ID_EDIT_UNGROUP: self.base.ungroup,
-            ID_EDIT_PARENT: self.base.parent,
-            ID_EDIT_UNPARENT: self.base.unparent,
-            ID_EDIT_WRITE_BAM_FILE: self.base.write_bam_file,
-        }
 
         # Bind frame events
         self.Bind(wx.EVT_CLOSE, self.OnClose)
@@ -317,11 +311,6 @@ class MainFrame(wx.Frame):
 
         self.base.project.Build(filePath)
 
-    def OnSingleCommand(self, evt):
-        id = evt.GetId()
-        fn = self.actns[id]
-        fn()
-
     def OnEngagePhysics(self, evt):
         comp = get_base().node_manager.wrap(get_base().scene.physics_world)
         if get_base().scene.physics_task not in get_base().taskMgr.getAllTasks():
@@ -343,11 +332,35 @@ class MainFrame(wx.Frame):
         Orbit camera top or bottom by manipulating delta values
         See p3d.camera.Orbit for more
         """
-        delta = pm.Vec2(-base.edCamera.getH() + yaw_pitch[0], -base.edCamera.getP() + yaw_pitch[1])
-        base.edCamera.Orbit(delta)
+        delta = pm.Vec2(
+            -get_base().edCamera.getH() + yaw_pitch[0],
+            -get_base().edCamera.getP() + yaw_pitch[1]
+        )
+        get_base().edCamera.Orbit(delta)
 
     def on_create(self, evt, type_):
-        self.base.AddComponent(type_)
+        comp_cls = get_base().node_manager.wrappers[type_]
+        values = comp_cls.get_default_values()
+
+        # TODO: Rename from get_foo ;)
+        # Also assert that required args are serviced by either the dialog or
+        # default_values.
+        foo = comp_cls.get_foo()
+        if foo:
+            dialog = CreateDialog(
+                comp_cls.__name__,
+                {
+                    key: values[key]
+                    for key in foo
+                },
+                wx.GetApp().GetTopWindow(),
+                title='Create',
+            )
+            dialog.CenterOnParent()
+            if dialog.ShowModal() != wx.ID_OK:
+                return
+            values = dialog.GetValues()
+        self.base.AddComponent(type_, **values)
 
     def OnCreateActor(self, evt):
         """
@@ -417,11 +430,11 @@ class MainFrame(wx.Frame):
 
     def OnLayout(self, evt):
         if evt.GetId() == ID_LAYOUT_GAME:
-            base.LayoutGameView()
+            get_base().LayoutGameView()
         elif evt.GetId() == ID_LAYOUT_EDITOR:
-            base.LayoutEditorView()
+            get_base().LayoutEditorView()
         elif evt.GetId() == ID_LAYOUT_BOTH:
-            base.LayoutBothView()
+            get_base().LayoutBothView()
 
     def OnUpdateWindowMenu(self, evt):
         """
@@ -507,16 +520,20 @@ class MainFrame(wx.Frame):
         self.mEdit.Enable(ID_EDIT_REDO, val)
         self.tbEdit.EnableTool(ID_EDIT_REDO, val)
 
-        self.mEdit.Enable(ID_EDIT_WRITE_BAM_FILE, len(get_base().selection.comps) > 0)
+        comps_selected = len(get_base().selection.comps) > 0
+        self.mEdit.Enable(ID_EDIT_GROUP, comps_selected)
+        self.mEdit.Enable(ID_EDIT_UNGROUP, comps_selected)
+        self.mEdit.Enable(ID_EDIT_DUPLICATE, comps_selected)
+        self.mEdit.Enable(ID_EDIT_WRITE_BAM_FILE, comps_selected)
 
         self.tbEdit.Refresh()
 
     def OnUpdateModify(self, msg):
         self.tbModify.EnableTool(ID_MODIFY_PHYSICS, False)
-        if base.scene.physics_world is not None:
+        if get_base().scene.physics_world is not None:
             self.tbModify.EnableTool(ID_MODIFY_PHYSICS, True)
 
-            if base.scene.physics_task not in taskMgr.getAllTasks():
+            if get_base().scene.physics_task not in taskMgr.getAllTasks():
                 self.tbModify.ToggleTool(ID_MODIFY_PHYSICS, False)
             else:
                 self.tbModify.ToggleTool(ID_MODIFY_PHYSICS, True)
@@ -561,16 +578,8 @@ class MainFrame(wx.Frame):
         self.tbXform.Refresh()
 
     def OnShowPreferences(self, evt):
-
         self.prefs = PreferencesEditor()
         self.prefs.Show(self)
-        # try:
-        #     self.frmPrefs.Close()
-        # except:
-        #     pass
-        # #self.frmPrefs = PreferencesFrame(self)
-        # self.frmPrefs.Center()
-        # self.frmPrefs.Show()
 
     def OnMove(self, evt):
         """
@@ -628,35 +637,61 @@ class MainFrame(wx.Frame):
         
     def BuildEditActions(self):
         """Add tools, set long help strings and bind toolbar events."""
-        commonActns = [
-            ActionItem('Undo', os.path.join('data', 'images', 'arrow-curve-flip.png'), self.OnSingleCommand, ID_EDIT_UNDO),
-            ActionItem('Redo', os.path.join('data', 'images', 'arrow-curve.png'), self.OnSingleCommand, ID_EDIT_REDO)
-        ]
-        
-        grpActns = [
-            ActionItem('Group', '', self.OnSingleCommand, ID_EDIT_GROUP),
-            ActionItem('Ungroup', '', self.OnSingleCommand, ID_EDIT_UNGROUP)
-        ]
-        
-        pntActns = [
-            ActionItem('Parent', '', self.OnSingleCommand, ID_EDIT_PARENT),
-            ActionItem('Unparent', '', self.OnSingleCommand, ID_EDIT_UNPARENT)
+
+        common_actns = [
+            ActionItem(
+                'Undo',
+                os.path.join('data', 'images', 'arrow-curve-flip.png'),
+                lambda evt: get_base().action_manager.undo(),
+                ID_EDIT_UNDO
+            ),
+            ActionItem(
+                'Redo',
+                os.path.join('data', 'images', 'arrow-curve.png'),
+                lambda evt: get_base().action_manager.redo(),
+                ID_EDIT_REDO
+            )
         ]
         
         # Create edit menu
         self.mEdit = CustomMenu()
-        self.mEdit.AppendActionItems(commonActns, self)
+        self.mEdit.AppendActionItems(common_actns, self)
         self.mEdit.AppendSeparator()
-        self.mEdit.AppendActionItems(grpActns, self)
+        duplicate = ActionItem(
+            'Duplicate',
+            '',
+            lambda evt: cmds.duplicate(get_base().selection.get()),
+            ID_EDIT_DUPLICATE
+        )
+        self.mEdit.AppendActionItem(duplicate, self)
         self.mEdit.AppendSeparator()
+        self.mEdit.AppendActionItems([
+            ActionItem(
+                'Group',
+                '',
+                lambda evt: cmds.group(get_base().selection.comps),
+                ID_EDIT_GROUP,
+            ),
+            ActionItem(
+                'Ungroup',
+                '',
+                lambda evt: cmds.ungroup(get_base().selection.comps),
+                ID_EDIT_UNGROUP,
+            )
+        ], self)
 
-        write_bam = ActionItem('Write Bam File', '', self.OnSingleCommand, ID_EDIT_WRITE_BAM_FILE)
+        write_bam = ActionItem(
+            'Write Bam File',
+            '',
+            self.base.write_bam_file,
+            ID_EDIT_WRITE_BAM_FILE
+        )
         self.mEdit.AppendActionItem(write_bam, self)
         
         # Create edit toolbar
         self.tbEdit = CustomAuiToolBar(self, -1)
         self.tbEdit.SetToolBitmapSize(TBAR_ICON_SIZE)
-        self.tbEdit.AppendActionItems(commonActns)
+        self.tbEdit.AppendActionItems(common_actns)
         self.tbEdit.Realize()
         
     def BuildModifyActions(self):
@@ -745,11 +780,11 @@ class MainFrame(wx.Frame):
         
         collActns = [
             ActionItem('Node', '', self.on_create, args='CollisionNode'),
-            ActionItem('Box', '', self.on_create, args='CollisionBox', kwargs={'x': 0.5, 'y': 0.5, 'z': 0.5}),
-            ActionItem('Ray', '', self.on_create, args='CollisionRay'),
             ActionItem('Sphere', '', self.on_create, args='CollisionSphere'),
             ActionItem('Inverse Sphere', '', self.on_create, args='CollisionInvSphere'),
-            ActionItem('Capsule', '', self.on_create, args='CollisionCapsule')
+            ActionItem('Box', '', self.on_create, args='CollisionBox'),
+            ActionItem('Capsule', '', self.on_create, args='CollisionCapsule'),
+            ActionItem('Ray', '', self.on_create, args='CollisionRay'),
         ]
         mColl = CustomMenu()
         mColl.AppendActionItems(collActns, self)
@@ -758,11 +793,10 @@ class MainFrame(wx.Frame):
             ActionItem('World', '', self.on_create, args='BulletWorld'),
             ActionItem('Debug Node', '', self.on_create, args='BulletDebugNode'),
             ActionItem('Rigid Body Node', '', self.on_create, args='BulletRigidBodyNode'),
-            ActionItem('Character Controller Node', '', self.on_create, args='BulletCharacterControllerNode'),
-            ActionItem('Box Shape', '', self.on_create, args='BulletBoxShape'),
-            ActionItem('Sphere Shape', '', self.on_create, args='BulletSphereShape'),
             ActionItem('Plane Shape', '', self.on_create, args='BulletPlaneShape'),
-            ActionItem('Capsule Shape', '', self.on_create, args='BulletCapsuleShape')
+            ActionItem('Sphere Shape', '', self.on_create, args='BulletSphereShape'),
+            ActionItem('Box Shape', '', self.on_create, args='BulletBoxShape'),
+            ActionItem('Capsule Shape', '', self.on_create, args='BulletCapsuleShape'),
         ]
         mBlt = CustomMenu()
         mBlt.AppendActionItems(bltActions, self)

@@ -3,21 +3,20 @@ from game.nodes.base import Base
 from game.nodes.bullet import (
     BulletBoxShape,
     BulletCapsuleShape,
-    BulletCharacterControllerNode,
     BulletDebugNode,
     BulletPlaneShape,
-    BulletSphereShape,
     BulletRigidBodyNode,
+    BulletSphereShape,
     BulletWorld,
 )
 from game.nodes.camera import Camera
 from game.nodes.collision import (
     CollisionBox,
+    CollisionCapsule,
     CollisionInvSphere,
     CollisionNode,
     CollisionRay,
     CollisionSphere,
-    CollisionCapsule,
 )
 from game.nodes.constants import TAG_NODE_TYPE
 from game.nodes.fog import Fog
@@ -58,7 +57,6 @@ class Manager:
             'BaseCamera': BaseCamera,
             'BulletBoxShape': BulletBoxShape,
             'BulletCapsuleShape': BulletCapsuleShape,
-            'BulletCharacterControllerNode': BulletCharacterControllerNode,
             'BulletDebugNode': BulletDebugNode,
             'BulletPlaneShape': BulletPlaneShape,
             'BulletSphereShape': BulletSphereShape,
@@ -100,21 +98,21 @@ class Manager:
         a Base wrapper for everything else.
 
         """
-        comp_cls = self.GetWrapper(obj)
+        comp_cls = self.get_wrapper(obj)
         if comp_cls is not None:
             return comp_cls(obj)
         else:
             comp_cls = self.get_default_wrapper(obj)
             return comp_cls(obj)
         
-    def GetWrapper(self, obj):
-        type_ = self.GetTypeString(obj)
+    def get_wrapper(self, obj):
+        type_ = self.get_type_string(obj)
         return self.wrappers.get(type_)
     
     def get_component_by_name(self, c_type):
         return self.wrappers.get(c_type)
         
-    def GetTypeString(self, comp):
+    def get_type_string(self, comp):
         """
         Return the type of the component as a string. Components are 
         identified in the following method (in order):

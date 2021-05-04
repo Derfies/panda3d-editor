@@ -14,7 +14,7 @@ class ParticleEffect(NodePath):
     type_ = DirectParticleEffect
     config_path = PyTagAttribute(
         str,
-        init_arg='',
+        required=True,
         pytag_name='particle_effect_config_path'
     )
 

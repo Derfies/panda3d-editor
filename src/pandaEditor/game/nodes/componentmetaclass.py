@@ -1,8 +1,10 @@
+import abc
+
 from game.nodes.attributes import Base, Attribute, Connection
 from game.nodes.basemetaclass import BaseMetaClass
 
 
-class ComponentMetaClass(BaseMetaClass):
+class ComponentMetaClass(abc.ABCMeta, BaseMetaClass):
 
     def __new__(metacls, name, bases, attrs):
         cls = super().__new__(metacls, name, bases, attrs)
@@ -12,6 +14,9 @@ class ComponentMetaClass(BaseMetaClass):
         return cls
 
     def get_properties(cls):
+
+        # TODO: Probably don't have to do entire mro considering the way
+        # metaclasses work.
         results = {}
         for base in reversed(cls.mro()):
             for key, value in base.__dict__.items():
@@ -45,5 +50,5 @@ class ComponentMetaClass(BaseMetaClass):
         return {
             key: value
             for key, value in cls.attributes.items()
-            if value.init_arg is not None
+            if value.required
         }

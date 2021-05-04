@@ -9,6 +9,6 @@ class ModelRoot:
     model_path = ProjectAssetAttribute(
         pc.Filename,
         pc.ModelRoot.get_fullpath,
-        init_arg='',
+        required=True,
         node_data=True,
     )

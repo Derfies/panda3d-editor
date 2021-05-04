@@ -1,9 +1,19 @@
-from direct.showbase.PythonUtil import getBase as get_base
+import abc
 
 from game.utils import get_lower_camel_case
 
 
 class Base:
+
+    default_values = {}
+
+    @classmethod
+    def get_default_values(cls):
+        return cls.default_values
+
+    @classmethod
+    def get_foo(cls):
+        return list(cls.get_default_values().keys())
 
     @property
     def name_(self):
@@ -22,6 +32,9 @@ class Base:
         Return a dictionary with bare minimum data for a component - its type
         and id.
         """
+
+        # TODO: Is this required? Seems like we shouldn't care where the args
+        # are stored, and this should be in sceneparser anyway.
         attrib = {
             'id': self.id,
             'type': self.type,
@@ -29,38 +42,6 @@ class Base:
         if attrib['id'] is None:
             del attrib['id']
         return attrib
-        
-    # def get_property_data(self):
-    #     """
-    #     Return a dictionary of all properties as key / value pairs. Make sure
-    #     that values have been serialised to string.
-    #     """
-    #     propDict = {}
-    #     for attr in self.attributes.values():
-    #         if attr.serialise and not isinstance(attr, Connection):
-    #             propDict[attr.name] = cUtils.serialise(attr.get())
-    #     return propDict
-    
-    # def get_connection_data(self):
-    #     cnnctnDict = {}
-    #
-    #     # Put this component's connections into key / value pairs.
-    #     for cnnctn in self.connections:
-    #         comps = cnnctn.get()
-    #         if comps is None:
-    #             continue
-    #
-    #         ids = []
-    #         try:
-    #             for comp in comps:
-    #                 wrpr = get_base().node_manager.wrap(comp)
-    #                 ids.append(wrpr.id)
-    #         except TypeError as e:
-    #             wrpr = get_base().node_manager.wrap(comps)
-    #             ids.append(wrpr.id)
-    #         cnnctnDict[cnnctn.name] = ids
-    #
-    #     return cnnctnDict
 
     @property
     def modified(self):
@@ -73,11 +54,6 @@ class Base:
     @property
     def savable(self):
         return True
-    
-    # def connect(self, comps, mode):
-    #     if mode in cnnctnMap:
-    #         cnnctn = cnnctnMap[mode](self.data, comps)
-    #         cnnctn.connect()
     
     def is_of_type(self, type_):
         return type_ in self.data.__class__.mro()
@@ -97,19 +73,9 @@ class Base:
         pass
 
     @property
+    @abc.abstractmethod
     def default_parent(self):
-        return get_base().node_manager.wrap(get_base().scene)
-
-    def set_default_parent(self):
-        self.parent = self.default_parent
-    
-    # @classmethod
-    # def get_default_property_data(cls):
-    #     try:
-    #         defPropDict = cls.create().get_property_data()
-    #     except:
-    #         defPropDict = {}
-    #     return defPropDict
+        """"""
     
     def get_sibling_index(self):
         """
@@ -117,9 +83,7 @@ class Base:
         components.
         """
         parent = self.parent
-        if parent is None:
-            return None
-        return parent.children.index(self)
+        return parent.children.index(self) if parent is not None else None
 
     def on_select(self):
         pass
@@ -129,3 +93,16 @@ class Base:
 
     def on_drag_drop(self, dragComp, dropComp):
         pass
+
+    @abc.abstractmethod
+    def duplicate(self):
+        """"""
+
+    def fix_up_duplicate_hierarchy(self, orig, dupe):
+        orig_children = orig.children
+        dupe_children = dupe.children
+        for i in range(len(orig_children)):
+            self.fix_up_duplicate_hierarchy(
+                orig_children[i],
+                dupe_children[i]
+            )

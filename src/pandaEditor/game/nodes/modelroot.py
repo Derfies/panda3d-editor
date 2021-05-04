@@ -14,7 +14,7 @@ class ModelRoot(NodePath):
     model_path = Attribute(
         pc.Filename,
         pc.ModelRoot.get_fullpath,
-        init_arg='',
+        required=True,
         node_data=True,
     )
 

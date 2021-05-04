@@ -1,3 +1,5 @@
+import uuid
+from functools import partial
 from collections import MutableSequence
 
 import panda3d.core as pc
@@ -41,14 +43,23 @@ class ConnectionTargets(MutableSequence):
 
 class Base(metaclass=BaseMetaClass):
     
-    def __init__(self, type_, get_fn=None, set_fn=None, **kwargs):
+    def __init__(
+        self,
+        type_,
+        get_fn=None,
+        set_fn=None,
+        serialise=True,
+        node_data=False,
+        read_only=False,
+        required=False,
+    ):
         self.type = type_
         self.get_fn = get_fn
         self.set_fn = set_fn
-        self.init_arg = kwargs.get('init_arg')
-        self.init_arg_name = kwargs.get('init_arg_name')
-        self.serialise = kwargs.get('serialise', True)
-        self.node_data = kwargs.get('node_data', False)
+        self.serialise = serialise
+        self.node_data = node_data
+        self._read_only = read_only
+        self.required = required
 
     def _get_data(self, instance):
         return instance.data if not self.node_data else instance.data.node()
@@ -61,7 +72,7 @@ class Base(metaclass=BaseMetaClass):
 
     @property
     def read_only(self):
-        return self.set_fn is None
+        return self.set_fn is None or self._read_only
 
 
 class Attribute(Base, metaclass=BaseMetaClass):
@@ -74,10 +85,10 @@ class Connection(Base, metaclass=BaseMetaClass):
     many = False
 
     def __init__(self, type_, get_fn, set_fn, clear_fn, **kwargs):
+        self.node_target = kwargs.pop('node_target', False)
         super().__init__(type_, get_fn, set_fn, **kwargs)
 
         self.clear_fn = clear_fn
-        self.node_target = kwargs.get('node_target', False)
 
     def _get_target(self, value):
         if value is None:
@@ -90,7 +101,11 @@ class Connection(Base, metaclass=BaseMetaClass):
 
     def __set__(self, instance, value):
         if not value:
-            self.clear_fn(self._get_data(instance))
+            try:
+                self.clear_fn(self._get_data(instance))
+            except:
+                print(self, instance, value)
+                raise
         else:
             super().__set__(instance, self._get_target(value))
 
@@ -114,6 +129,27 @@ class Connections(Connection):
 
     def clear(self, instance):
         return self.clear_fn(self._get_data(instance))
+
+
+def get_tag(name, data):
+    return data.get_tag(name)
+
+
+def set_tag(name, data, value):
+    data.set_tag(name, value)
+
+
+class TagAttribute(Attribute):
+
+    def __init__(self, type_, read_only=False, required=False):
+        self.tag_name = str(uuid.uuid4())
+
+        get_fn = partial(get_tag, self.tag_name)
+        set_fn = partial(set_tag, self.tag_name)
+        super().__init__(type_, get_fn, set_fn, read_only=read_only, required=required)
+
+    def _get_data(self, instance):
+        return instance
 
 
 class PyTagAttribute(Attribute):

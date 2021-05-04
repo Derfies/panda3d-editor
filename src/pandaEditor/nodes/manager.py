@@ -1,6 +1,5 @@
 import logging
 
-from game.nodes.attributes import Attribute
 from game.nodes.manager import Manager as GameManager
 
 
@@ -31,7 +30,7 @@ class Manager(GameManager):
         # components.
         mros = []
         for comp in comps:
-            comp_cls = self.GetWrapper(comp)
+            comp_cls = self.get_wrapper(comp)
             if comp_cls is not None:
                 mros.append(comp_cls.mro())
         if not mros:

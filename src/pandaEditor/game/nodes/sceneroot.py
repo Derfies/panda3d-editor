@@ -2,7 +2,7 @@ import panda3d.bullet as pb
 from direct.showbase.PythonUtil import getBase as get_base
 
 from game.nodes.attributes import Connection
-from game.nodes.base import Base
+from game.nodes.nongraphobject import NonGraphObject
 from game.nodes.componentmetaclass import ComponentMetaClass
 
 
@@ -14,7 +14,7 @@ def set_physics_world(scene, world):
     scene.physics_world = world
 
 
-class SceneRoot(Base, metaclass=ComponentMetaClass):
+class SceneRoot(NonGraphObject, metaclass=ComponentMetaClass):
 
     physics_world = Connection(
         pb.BulletWorld,
@@ -43,5 +43,5 @@ class SceneRoot(Base, metaclass=ComponentMetaClass):
     def parent(self, value):
         pass
 
-    def add_child(self, comp):
-        self.data.register_component(comp)
+    def add_child(self, child):
+        self.data.register_component(child)

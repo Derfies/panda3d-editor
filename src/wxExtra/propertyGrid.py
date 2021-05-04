@@ -46,7 +46,7 @@ class FloatValidator(wx.Validator):
         val = tc.GetValue()
         
         for x in val:
-            if x not in string.digits:
+            if x not in string.digits + '.' + '-':
                 return False
 
         return True

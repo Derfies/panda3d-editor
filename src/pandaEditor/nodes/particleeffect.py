@@ -6,6 +6,6 @@ class ParticleEffect:
     serialise_descendants = False
     config_path = PyTagProjectAssetAttribute(
         str,
-        init_arg='',
+        required=True,
         pytag_name='particle_effect_config_path',
     )

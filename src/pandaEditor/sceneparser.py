@@ -70,11 +70,10 @@ class SceneParser(GameSceneParser):
                 continue
 
             # Always treat connections as lists.
+            # TODO: Use "many" flag.
             if not isinstance(targets, collections.MutableSequence):
                 targets = [targets]
-            #print('targets:', targets)
             for target in targets:
-                print(cnn_name, target, target.id)
                 cnctnDict.setdefault(cnn_name, []).append(target.id)
         
         cnctnsElem = et.Element('Connections')

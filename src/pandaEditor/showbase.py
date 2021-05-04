@@ -1,5 +1,6 @@
-import os
 import logging
+import os
+import uuid
 
 import panda3d.core as pc
 from direct.directtools.DirectGrid import DirectGrid
@@ -44,6 +45,11 @@ class ShowBase(GameShowBase):
             return
 
         self.forcedAspectWins = []
+
+        # Create our managers.
+        self.asset_manager = AssetManager(self)
+        self.drag_drop_manager = DragDropManager(self)
+        self.action_manager = actions.Manager()
 
         self.startWx()
         self.frame = MainFrame(self, None, size=(800, 600))
@@ -107,14 +113,9 @@ class ShowBase(GameShowBase):
             mouseWatcherNode=self.edMouseWatcherNode
         )
 
-        # Create our managers.
-        self.asset_manager = AssetManager(self)
-        self.drag_drop_manager = DragDropManager(self)
-        self.action_manager = actions.Manager()
-
         # Bind events
-        self.accept('z', self.undo)
-        self.accept('shift-z', self.redo)
+        self.accept('z', self.action_manager.undo)
+        self.accept('shift-z', self.action_manager.redo)
         self.accept('f', self.FrameSelection)
         self.accept('del', lambda fn: commands.remove(fn()),
                     [self.selection.get])
@@ -566,31 +567,11 @@ class ShowBase(GameShowBase):
 
     def AddComponent(self, type_str, *args, **kwargs):
         comp_cls = self.node_manager.get_component_by_name(type_str)
-
-        # Add any kwargs that are not part of the incoming dictionary.
-        # TODO: This feels pretty awkward.
-        for attr_name, attr in comp_cls.create_attributes.items():
-            name = attr.init_arg_name or attr_name#attr.init_arg_name
-            if name in kwargs:
-                continue
-            value = attr.init_arg
-            if name == 'name':
-                value = comp_cls.__name__[0].lower() + comp_cls.__name__[1:]
-            kwargs[name] = value
-
         comp = comp_cls.create(*args, **kwargs)
-        comp.set_default_parent()
+        comp.parent = comp.default_parent
+        comp.id = str(uuid.uuid4())
         comp.set_default_values()
-
-        # Bit of a hack. Sometimes a wrapper can create multiple components
-        # when Create is called. Make sure to set default values on all the
-        # components that were created.
-        if hasattr(comp, 'extraNps'):
-            for np in comp.extraNps:
-                eWrpr = self.node_manager.wrap(np)
-                eWrpr.set_default_values()
         commands.add([comp])
-
         return comp
 
     def add_prefab(self, file_path):
@@ -603,28 +584,6 @@ class ShowBase(GameShowBase):
     def OnProjectFilesModified(self, filePaths):
         self.asset_manager.OnAssetModified(filePaths)
         self.plugin_manager.on_project_modified(filePaths)
-
-    def undo(self):
-        self.action_manager.undo()
-        self.doc.on_modified()
-
-    def redo(self):
-        self.action_manager.redo()
-        self.doc.on_modified()
-
-    def group(self):
-        if self.selection.comps:
-            commands.group(self.selection.comps)
-
-    def ungroup(self):
-        if self.selection.comps:
-            commands.ungroup(self.selection.comps)
-
-    def parent(self):
-        pass
-
-    def unparent(self):
-        pass
 
     def write_bam_file(self):
         sel_comps = self.selection.comps

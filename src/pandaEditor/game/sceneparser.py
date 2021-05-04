@@ -37,7 +37,6 @@ class SceneParser:
         comp_type = elem.get('type')
         logger.info(f'Load component: {comp_type}')
         comp_cls = get_base().node_manager.get_component_by_name(comp_type)
-        #if comp_cls is not None:
 
         # Collect attribute keys and values.
         attrs = self.get_attributes(elem, comp_cls)
@@ -85,4 +84,3 @@ class SceneParser:
             for name, comp_ids in connections.items():
                 for comp_id in comp_ids:
                     setattr(comp, name, self.nodes[comp_id])
-                    #comp.attributes[name].connect(self.nodes[comp_id])
