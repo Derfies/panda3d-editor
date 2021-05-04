@@ -14,7 +14,6 @@ class DragDropManager:
 
         self.data = data
         do = wx.CustomDataObject('data')
-        do.SetData(pickle.dumps(data))
         ds = wx.DropSource(ctrl)
         ds.SetData(do)
         ds.DoDragDrop(True)

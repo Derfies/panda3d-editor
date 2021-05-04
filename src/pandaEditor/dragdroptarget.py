@@ -20,9 +20,8 @@ class DragDropTarget(wx.DropTarget):
         return d if self.validate_fn(x, y, data) else wx.DragNone
 
     def OnData(self, x, y, d):
-        if not self.GetData():
+        data = get_base().drag_drop_manager.data
+        if not data:
             return
-        data_obj = self.GetDataObject()
-        data = data_obj.GetData()
-        self.drop_fn(x, y, pickle.loads(data))
+        self.drop_fn(x, y, data)
         return d

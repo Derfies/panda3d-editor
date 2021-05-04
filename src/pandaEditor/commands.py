@@ -147,10 +147,6 @@ def parent(comps, pcomp):
     get_base().doc.on_modified(comps)
     
 
-def unparent():
-    pass
-    
-
 def group(comps):
     """
     Create the group action, execute it and push it onto the undo queue.

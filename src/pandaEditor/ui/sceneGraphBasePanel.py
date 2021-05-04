@@ -58,10 +58,6 @@ class SceneGraphBasePanel(wx.Panel):
         self.tc.Bind(wx.EVT_LEFT_UP, p3d.wxPanda.OnLeftUp)
         self.tc.Bind(wx.EVT_MIDDLE_DOWN, self.OnMiddleDown)
 
-        # Build tree control drop target
-        # self.dt = CustomDropTarget(get_base(), self, ['filePath', 'nodePath'])
-        # self.tc.SetDropTarget(self.dt)
-
         # Bind publisher events
         pub.subscribe(self.OnUpdate, 'Update')
 
@@ -120,9 +116,9 @@ class SceneGraphBasePanel(wx.Panel):
         # If the item under the middle mouse click is part of the selection
         # then use the whole selection, otherwise just use the item.
         if item.GetData() in get_base().selection.comps:
-            comps = get_base().selection.node_paths
+            comps = get_base().selection.comps
         else:
-            comps = [item.GetData().data]
+            comps = [item.GetData()]
         get_base().drag_drop_manager.start(self, comps)
         
     def GetDroppedObject(self, x, y):

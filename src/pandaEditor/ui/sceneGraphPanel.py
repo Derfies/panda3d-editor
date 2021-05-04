@@ -1,6 +1,9 @@
 import wx
 
 from direct.showbase.PythonUtil import getBase as get_base
+
+from dragdroptarget import DragDropTarget
+from game.nodes.nodepath import NodePath
 from pandaEditor import commands as cmds
 from pandaEditor.ui.sceneGraphBasePanel import SceneGraphBasePanel
 
@@ -11,6 +14,24 @@ class SceneGraphPanel(SceneGraphBasePanel):
         super().__init__(*args, **kwargs)
 
         self.tc.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnTreeSelChanged)
+
+        # Build tree control drop target.
+        dt = DragDropTarget(
+            self.drag_drop_validate,
+            self.on_drop
+        )
+        self.tc.SetDropTarget(dt)
+
+    def drag_drop_validate(self, x, y, data):
+        item = self.tc.HitTest(wx.Point(x, y))[0]
+        drop_ok = item is None or isinstance(item.GetData(), NodePath)
+        drag_ok = all([isinstance(elem, NodePath) for elem in data])
+        return drop_ok and drag_ok
+
+    def on_drop(self, x, y, data):
+        item = self.tc.HitTest(wx.Point(x, y))[0]
+        parent = item.GetData() if item is not None else None
+        cmds.parent(data, parent)
         
     def OnTreeSelChanged(self, evt):
         """

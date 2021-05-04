@@ -20,8 +20,9 @@ class Viewport(WxViewport):
         self.SetDropTarget(dt)
 
         self.asset_handlers = {
-            '.egg': self.add_model,
             '.bam': self.add_model,
+            '.egg': self.add_model,
+            '.obj': self.add_model,
             '.pz': self.add_model,
             '.ptf': self.add_particles,
             '.xml': self.add_prefab,    # Conflicts with scene xml extn.
@@ -37,15 +38,17 @@ class Viewport(WxViewport):
         return self.base.selection.GetNodePathAtPosition(x, y)
 
     def drag_drop_validate(self, x, y, data):
-        return any([isinstance(elem, str) for elem in data])
+        drags = []
+        for elem in data:
+            drags.append((
+                isinstance(elem, str) and
+                os.path.splitext(elem)[1] in self.asset_handlers
+            ))
+        return all([isinstance(elem, str) for elem in data])
 
     def on_drop(self, x, y, data):
         for file_path in data:
-            if not isinstance(file_path, str):
-                continue
             ext = os.path.splitext(file_path)[1]
-            if ext not in self.asset_handlers:
-                continue
             handler = self.asset_handlers[ext]
             handler(file_path)
 

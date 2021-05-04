@@ -33,6 +33,7 @@ class PropertyGrid(wxpg.PropertyGrid):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.RegisterEditor(custProps.ConnectionPropertyEditor)
         self.RegisterEditor(custProps.ConnectionsPropertyEditor)
         #
         # self._propsByName = {}
@@ -443,6 +444,7 @@ class PropertiesPanel(wx.Panel):
                     self.pg.SetPropertyEditor(prop, 'ConnectionsPropertyEditor')
                 elif isinstance(attr, Connection):
                     prop = custProps.ConnectionProperty(attr_label, attr_name, value)
+                    self.pg.SetPropertyEditor(prop, 'ConnectionPropertyEditor')
                     prop_type = 'connection'
                 elif isinstance(attr, Attribute):
                     if attr.type not in self.propMap:
@@ -475,7 +477,6 @@ class PropertiesPanel(wx.Panel):
         Set the node path or node's property using the value the user entered
         into the grid.
         """
-        print('changed')
         # Should probably never get here...
         comps = get_base().selection.comps
         if not comps:
@@ -485,19 +486,19 @@ class PropertiesPanel(wx.Panel):
         
         # Get the node property from the property and set it.
         prop = evt.GetProperty()
-        try:
-            name, value = prop.GetName(), prop.GetValue()
-        except:
-            print(prop, prop.value_type, prop.components, prop.m_value)
-
-            raise
+        name, value = prop.GetName(), prop.GetValue()
+        # print('old:', getattr(comps[0], name)[:])
+        # print('OnPgChanged:', name, value, type(value), value[:])
+        # except:
+        #     print(prop, prop.value_type, prop.components, prop.m_value)
+        #     raise
 
         # TODO: Figure out if we need "connect" at all.
         type_ = prop.GetAttribute('prop_type')
         if type_ == 'connections':
             cmds.set_connections(comps, name, value)
-        elif type_ == 'connection':
-            cmds.set_attribute(comps, name, value)
+        # elif type_ == 'connection':
+        #     cmds.set_attribute(comps, name, value)
         else:
             cmds.set_attribute(comps, name, value)
 
@@ -555,11 +556,11 @@ class PropertiesPanel(wx.Panel):
         if selection is not None:
             prop = self.pg.GetProperty(selection)
             if prop is None:
-                print('ouled up selection')
+                print('fouled up selection')
             else:
                 self.pg.SelectProperty(prop, True)
                 ctrl = self.pg.GetEditorTextCtrl()
-                print(ctrl)
+                # print(ctrl)
             #ctrl.SetFocus()
 
         
