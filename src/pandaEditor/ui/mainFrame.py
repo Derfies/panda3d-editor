@@ -803,7 +803,7 @@ class MainFrame(wx.Frame):
         
         self.mCreate = CustomMenu()
         self.mCreate.AppendActionItem(ActionItem('Panda Node', '', self.on_create, args='PandaNode'), self)
-        self.mCreate.AppendActionItem(ActionItem('Actor', '', self.OnCreateActor), self)
+        # self.mCreate.AppendActionItem(ActionItem('Actor', '', self.OnCreateActor), self)
         self.mCreate.AppendActionItem(ActionItem('Fog', '', self.on_create, args='Fog'), self)
         self.mCreate.AppendSubMenu(mColl, '&Collision')
         self.mCreate.AppendSubMenu(mLights, '&Lights')

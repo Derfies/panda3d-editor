@@ -29,14 +29,12 @@ class NodePath:
         pc.NodePath.set_pos,
         serialise=False
     )
-
     rotation = Attribute(
         pc.Vec3,
         pc.NodePath.get_hpr,
         pc.NodePath.set_hpr,
         serialise=False
     )
-
     scale = Attribute(
         pc.Vec3,
         pc.NodePath.get_scale,
@@ -97,6 +95,14 @@ class NodePath:
             for child in comp.data.find_all_matches('**/*'):
                 child.set_python_tag(TAG_MODEL_ROOT_CHILD, True)
 
+        # Copy any helper geo to the new instance.
+        if comp.geo is not None:
+            comp.geo.copy_to(comp.data)
+
+        # Mark as pickable.
+        if comp.pickable:
+            comp.data.set_python_tag(TAG_PICKABLE, comp.pickable)
+
         return comp
 
     @property
@@ -133,21 +139,13 @@ class NodePath:
         Set the indicated geometry to be used as a proxy for the NodePath. 
         Tag all descendant NodePaths with the ignore tag so they don't show up
         in the scene graph and cannot be selected.
+
         """
-        for childNp in geo.findAllMatches('**'):
-            childNp.setPythonTag(TAG_IGNORE, True)
-        geo.setLightOff()
-        geo.node().adjustDrawMask(*base.GetEditorRenderMasks())
+        for child in geo.find_all_matches('**'):
+            child.set_python_tag(TAG_IGNORE, True)
+        geo.set_light_off()
+        geo.node().adjust_draw_mask(*get_base().GetEditorRenderMasks())
         cls.geo = geo
-        
-    # def set_up_node_path(self):
-    #     super().set_up_node_path()
-    #
-    #     if self.geo is not None:
-    #         self.geo.copy_to(self.data)
-    #
-    #     if self.pickable:
-    #         self.data.set_python_tag(TAG_PICKABLE, self.pickable)
             
     def on_select(self):
         """Add a bounding box to the indicated node."""
@@ -221,14 +219,6 @@ class NodePath:
             
     def is_of_type(self, cType):
         return self.data.node().is_of_type(cType)
-            
-    def set_default_values(self):
-
-        if self.geo is not None:
-            self.geo.copy_to(self.data)
-
-        if self.pickable:
-            self.data.set_python_tag(TAG_PICKABLE, self.pickable)
         
     @classmethod
     def find_child(cls, *args, **kwargs):

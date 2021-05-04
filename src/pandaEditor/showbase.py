@@ -285,8 +285,6 @@ class ShowBase(GameShowBase):
         render.node().adjustDrawMask(showMask, hideMask, clearMask)
 
     def reset(self):
-
-
         """Remove all default nodes and recreate them."""
         # Remove all default nodes and set them to None so they are recreated
         # properly.

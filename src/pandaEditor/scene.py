@@ -29,10 +29,10 @@ class Scene(Scene):
             'Cam2d'
         ]
         for cType in defaultCompTypes:
-            comp = get_base().node_manager.create(cType)
+            comp_cls = get_base().node_manager.wrappers[cType]
+            comp = comp_cls.create()
             comp.data.set_tag(TAG_NODE_TYPE, cType)
             comp.id = str(uuid.uuid4())
-            comp.set_default_values()
         
     def load(self, file_path):
         """Recreate a scene graph from file."""
