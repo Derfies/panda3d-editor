@@ -2,7 +2,7 @@ import logging
 
 import wx
 from pubsub import pub
-import panda3d.core as pm
+import panda3d.core as pc
 
 from direct.showbase.PythonUtil import getBase as get_base
 from pandaEditor.dragdroptarget import DragDropTarget
@@ -228,19 +228,19 @@ class PropertiesPanel(wx.Panel):
         # Define how each type of value should be edited
         self.propMap = {
             # None: wxpg.PropertyCategory,
-            pm.LVector2f: custProps.Vec2Property,
-            pm.LVector3f: custProps.Vec3Property,
-            pm.LVector4f: custProps.Vec4Property,
-            pm.LPoint2f: custProps.Point2Property,
-            pm.LPoint3f: custProps.Point3Property,
-            pm.LPoint4f: custProps.Point4Property,
+            pc.LVector2f: custProps.Vec2Property,
+            pc.LVector3f: custProps.Vec3Property,
+            pc.LVector4f: custProps.Vec4Property,
+            pc.LPoint2f: custProps.Point2Property,
+            pc.LPoint3f: custProps.Point3Property,
+            pc.LPoint4f: custProps.Point4Property,
             # pm.NodePath: custProps.NodePathProperty,
             # pm.LColor: custProps.Point4Property,
             int: wxpg.IntProperty,
             str: wxpg.StringProperty,
             bool: wxpg.BoolProperty,
             float: wxpg.FloatProperty,
-            # Filename: custProps.FilePathProperty,
+            pc.Filename: custProps.FilenameProperty,
             # dict: custProps.DictProperty
         }
 

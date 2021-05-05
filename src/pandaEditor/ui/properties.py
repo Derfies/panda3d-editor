@@ -8,6 +8,14 @@ from game.nodes.base import Base
 from wxExtra.propertyGrid import PropertyGridEvent
 
 
+# TODO: Casting elsewhere would remove the need for this...
+class FilenameProperty(wxpg.StringProperty):
+
+    def __init__(self, label, name, value):
+        super().__init__(label, name)
+        self.SetValue(str(value))
+
+
 class DataWrapper:
 
     def __init__(self, data):

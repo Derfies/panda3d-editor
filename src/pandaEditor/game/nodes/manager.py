@@ -43,6 +43,7 @@ from game.nodes.showbasedefaults import (
     Render,
     Render2d,
 )
+from game.nodes.texture import Texture
 
 
 class Manager:
@@ -85,6 +86,7 @@ class Manager:
             'Render2d': Render2d,
             'SceneRoot': SceneRoot,
             'Spotlight': Spotlight,
+            'Texture': Texture,
         }
     
     def wrap(self, obj):

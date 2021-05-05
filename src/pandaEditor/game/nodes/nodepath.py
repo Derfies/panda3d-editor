@@ -30,6 +30,12 @@ class NodePath(Base, metaclass=ComponentMetaClass):
         pc.NodePath.set_color_scale
     )
     matrix = Attribute(pc.Mat4, pc.NodePath.get_mat, pc.NodePath.set_mat)
+    texture = Connection(
+        pc.Texture,
+        pc.NodePath.get_texture,
+        pc.NodePath.set_texture,
+        pc.NodePath.clear_texture,
+    )
     lights = Connections(
         pc.Light,
         get_lights,
