@@ -21,11 +21,9 @@ from scene import Scene
 from pandaEditor.project import Project
 from pandaEditor.selection import Selection
 from pandaEditor.ui.document import Document
-from pandaEditor.game.plugins.base import Base as GamePluginBase
 from pandaEditor.game.showbase import ShowBase as GameShowBase
 from pandaEditor.nodes.manager import Manager as NodeManager
 from pandaEditor.plugins.manager import Manager as PluginManager
-from pandaEditor.plugins.base import Base as EditorPluginBase
 from pandaEditor.sceneparser import SceneParser
 
 
@@ -116,24 +114,48 @@ class ShowBase(GameShowBase):
         # Bind events
         self.accept('z', self.action_manager.undo)
         self.accept('shift-z', self.action_manager.redo)
-        self.accept('f', self.FrameSelection)
-        self.accept('del', lambda fn: commands.remove(fn()),
-                    [self.selection.get])
-        self.accept('backspace', lambda fn: commands.remove(fn()),
-                    [self.selection.get])
-        self.accept('control-d', lambda fn: commands.duplicate(fn()),
-                    [self.selection.get])
-        self.accept('control-g', lambda fn: commands.group(fn()),
-                    [self.selection.get])
+        self.accept('f', self.frame_selection)
+        self.accept(
+            'del',
+            lambda fn: commands.remove(fn()),
+            [self.selection.get]
+        )
+        self.accept(
+            'backspace',
+            lambda fn: commands.remove(fn()),
+            [self.selection.get]
+        )
+        self.accept(
+            'control-d',
+            lambda fn: commands.duplicate(fn()),
+            [self.selection.get]
+        )
+        self.accept(
+            'control-g',
+            lambda fn: commands.group(fn()),
+            [self.selection.get]
+        )
         self.accept('control-s', self.frame.OnFileSave, [None])
-        self.accept('arrow_up', lambda fn: commands.select(fn()),
-                    [self.selection.select_parent])
-        self.accept('arrow_down', lambda fn: commands.select(fn()),
-                    [self.selection.select_child])
-        self.accept('arrow_left', lambda fn: commands.select(fn()),
-                    [self.selection.select_prev])
-        self.accept('arrow_right', lambda fn: commands.select(fn()),
-                    [self.selection.select_next])
+        self.accept(
+            'arrow_up',
+            lambda fn: commands.select(fn()),
+            [self.selection.select_parent]
+        )
+        self.accept(
+            'arrow_down',
+            lambda fn: commands.select(fn()),
+            [self.selection.select_child]
+        )
+        self.accept(
+            'arrow_left',
+            lambda fn: commands.select(fn()),
+            [self.selection.select_prev]
+        )
+        self.accept(
+            'arrow_right',
+            lambda fn: commands.select(fn()),
+            [self.selection.select_next]
+        )
         self.accept('projectFilesModified', self.OnProjectFilesModified)
 
         # Create a "game"
@@ -147,13 +169,6 @@ class ShowBase(GameShowBase):
         self.doc.on_refresh()
 
         self.windowEvent(None)
-
-    def load_plugins(self):
-        # self.plugin_manager.setCategoriesFilter({
-        #     'editor': EditorPluginBase,
-        #     'game': GamePluginBase,
-        # })
-        super().load_plugins()
 
     def SetupEdRender(self):
         """
@@ -515,7 +530,7 @@ class ShowBase(GameShowBase):
             [comps]
         )
 
-    def FrameSelection(self):
+    def frame_selection(self):
         """
         Call frame selection on the camera if there are some node paths in the
         selection.

@@ -2,9 +2,10 @@ import logging
 import os
 
 import panda3d.core as pc
+from direct.showbase.PythonUtil import getBase as get_base
 from panda3d.core import Shader
 
-from game.plugins import base
+from pandaEditor.plugins import base
 
 
 logger = logging.getLogger(__name__)
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class HelpersPlugin(base.Base):
 
-    def on_init(self, base):
+    def on_init(self):
 
         # Load vertex colour shader.
         vtx_shader = Shader.load(self.get_model_path('vertex_colours.sha'))
@@ -26,10 +27,10 @@ class HelpersPlugin(base.Base):
             'directional_light.egg': 'DirectionalLight'
         }
         for model_name, wrpr_name in model_to_wrapper.items():
-            model = base.loader.load_model(self.get_model_path(model_name))
+            model = get_base().loader.load_model(self.get_model_path(model_name))
             model.set_shader(vtx_shader)
             try:
-                base.node_manager.wrappers[wrpr_name].set_editor_geometry(model)
+                get_base().node_manager.wrappers[wrpr_name].set_editor_geometry(model)
             except KeyError:
                 logger.error(
                     f'Could not set geometry on wrapper: {wrpr_name}. Perhaps '

@@ -1,0 +1,3 @@
+[Core]
+Name = ExampleGamePlugin
+Module = plugin

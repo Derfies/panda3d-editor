@@ -16,7 +16,7 @@ class ShowBase(DirectShowBase):
         super().__init__(*args, **kwargs)
 
         self.node_manager = self.node_manager_cls()
-        self.plugin_manager = self.plug_manager_cls(self)
+        self.plugin_manager = self.plug_manager_cls()
         self.scene_parser = self.scene_parser_cls()
 
     def load_plugins(self):
@@ -25,5 +25,5 @@ class ShowBase(DirectShowBase):
         self.plugin_manager.on_init()
 
     def load_scene(self, file_path):
-        self.scene = Scene(self, filePath=file_path, camera=None)
+        self.scene = Scene(self, camera=None)
         self.scene.load(file_path)

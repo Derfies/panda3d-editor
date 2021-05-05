@@ -86,10 +86,6 @@ class Manager:
             'SceneRoot': SceneRoot,
             'Spotlight': Spotlight,
         }
-        
-    def create(self, nTypeStr, *args):
-        wrprCls = self.wrappers[nTypeStr]
-        return wrprCls.create(*args)
     
     def wrap(self, obj):
         """
@@ -127,10 +123,9 @@ class Manager:
         if hasattr(comp.__class__, 'cType'):
             return comp.cType
         
-        typeStr = type(comp).__name__
-        if typeStr == 'NodePath':
-            typeStr = comp.node().get_tag(TAG_NODE_TYPE)
-            if not typeStr:
-                typeStr = type(comp.node()).__name__
-                
-        return typeStr
+        type_str = type(comp).__name__
+        if type_str == 'NodePath':
+            type_str = comp.node().get_tag(TAG_NODE_TYPE)
+            if not type_str:
+                type_str = type(comp.node()).__name__
+        return type_str

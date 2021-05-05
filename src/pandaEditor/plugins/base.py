@@ -1,13 +1,16 @@
-from game.plugins.base import Base as GameBase
+from game.plugins.ibase import IBase
 
 
-class Base(GameBase):
+class Base(IBase):
 
-    def on_update(self, base, comps):
+    def on_update(self, comps):
         pass
 
-    def on_scene_close(self, base):
+    def on_scene_close(self):
         pass
 
-    def on_project_modified(self, base, file_paths):
+    def on_project_modified(self, file_paths):
+        pass
+
+    def on_build_ui(self):
         pass
