@@ -21,7 +21,9 @@ class Viewport(WxViewport):
 
         self.asset_handlers = {
             '.bam': self.add_model,
+            '.dae': self.add_model,
             '.egg': self.add_model,
+            '.gltf': self.add_model,
             '.obj': self.add_model,
             '.pz': self.add_model,
             '.ptf': self.add_particles,
@@ -44,7 +46,7 @@ class Viewport(WxViewport):
                 isinstance(elem, str) and
                 os.path.splitext(elem)[1] in self.asset_handlers
             ))
-        return all([isinstance(elem, str) for elem in data])
+        return all(drags)
 
     def on_drop(self, x, y, data):
         for file_path in data:
