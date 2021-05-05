@@ -101,9 +101,8 @@ class ResourcesPanel(wx.Panel):
         self.dtc.SelectItem(item_id)
         get_base().drag_drop_manager.start(
             self,
-            [self.dtc.GetItemPath(item_id)],
-            self.dtc.GetItemPath(item_id)
-       )
+            [self.dtc.GetItemPath(item_id)]
+        )
 
     def OnLeftDClick(self, evt):
 

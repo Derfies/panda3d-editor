@@ -1,9 +1,13 @@
 import uuid
+import logging
 
 from direct.showbase.PythonUtil import getBase as get_base
 
 from pandaEditor.game.scene import Scene
 from pandaEditor.game.nodes.constants import TAG_NODE_TYPE
+
+
+logger = logging.getLogger(__name__)
 
 
 class Scene(Scene):
@@ -82,6 +86,7 @@ class Scene(Scene):
         a connection and break it when a component is deleted.
 
         """
+        logger.info(f'Registered {name} connection: {source} -> {target}')
         self.connections.setdefault(target.id, set()).add((source, name))
     
     def deregister_connection(self, connection):

@@ -16,7 +16,7 @@ from p3d.mouse import MOUSE_ALT
 from pandaEditor.ui.mainFrame import MainFrame
 from pandaEditor import actions, commands, gizmos
 from pandaEditor.assetManager import AssetManager
-from pandaEditor.dragDropManager import DragDropManager
+from pandaEditor.dragdropmanager import DragDropManager
 from scene import Scene
 from pandaEditor.project import Project
 from pandaEditor.selection import Selection
@@ -45,8 +45,8 @@ class ShowBase(GameShowBase):
         self.forcedAspectWins = []
 
         # Create our managers.
-        self.asset_manager = AssetManager(self)
-        self.drag_drop_manager = DragDropManager(self)
+        self.asset_manager = AssetManager()
+        self.drag_drop_manager = DragDropManager()
         self.action_manager = actions.Manager()
 
         self.startWx()
@@ -578,7 +578,7 @@ class ShowBase(GameShowBase):
         if newDoc:
             self.doc = Document(filePath, self.scene)
 
-    def AddComponent(self, type_str, *args, **kwargs):
+    def add_component(self, type_str, *args, **kwargs):
         comp_cls = self.node_manager.get_component_by_name(type_str)
         comp = comp_cls.create(*args, **kwargs)
         comp.parent = comp.default_parent

@@ -84,8 +84,7 @@ class Parent(Base):
 
     def __init__(self, comp, pcomp):
         self.comp = comp
-        self.pcomp = pcomp
-
+        self.pcomp = pcomp or get_base().node_manager.wrap(get_base().render)
         self.old_pcomp = self.comp.parent
 
     def undo(self):

@@ -97,6 +97,11 @@ class Connection(Base, metaclass=BaseMetaClass):
 
     def __get__(self, instance, owner):
         obj = self.get_fn(self._get_data(instance))
+
+        # This sucks. Some functions return nodes however our architecture
+        # expects these to be node paths.
+        if obj is not None and self.node_target:
+            obj = pc.NodePath(obj)
         return get_base().node_manager.wrap(obj) if obj is not None else None
 
     def __set__(self, instance, value):

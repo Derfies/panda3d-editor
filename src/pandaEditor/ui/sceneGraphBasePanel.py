@@ -8,7 +8,6 @@ from pubsub import pub
 
 import p3d
 from pandaEditor import commands as cmds
-from .customDropTarget import CustomDropTarget
 from wxExtra import utils as wxUtils
 from wxExtra import CustomTreeCtrl
 
@@ -58,10 +57,6 @@ class SceneGraphBasePanel(wx.Panel):
         self.tc.Bind(wx.EVT_KEY_DOWN, p3d.wxPanda.OnKeyDown)
         self.tc.Bind(wx.EVT_LEFT_UP, p3d.wxPanda.OnLeftUp)
         self.tc.Bind(wx.EVT_MIDDLE_DOWN, self.OnMiddleDown)
-
-        # Build tree control drop target
-        self.dt = CustomDropTarget(get_base(), self, ['filePath', 'nodePath'])
-        self.tc.SetDropTarget(self.dt)
 
         # Bind publisher events
         pub.subscribe(self.OnUpdate, 'Update')
@@ -121,11 +116,10 @@ class SceneGraphBasePanel(wx.Panel):
         # If the item under the middle mouse click is part of the selection
         # then use the whole selection, otherwise just use the item.
         if item.GetData() in get_base().selection.comps:
-            drag_comps = get_base().selection.comps
+            comps = get_base().selection.comps
         else:
-            drag_comps = [item.GetData()]
-        self.drag_comps = drag_comps
-        get_base().drag_drop_manager.start(self, drag_comps, item.GetData().data)
+            comps = [item.GetData()]
+        get_base().drag_drop_manager.start(self, comps)
         
     def GetDroppedObject(self, x, y):
         dropItem = self.tc.HitTest(wx.Point(x, y))[0]
