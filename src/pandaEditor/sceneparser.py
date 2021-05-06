@@ -50,6 +50,9 @@ class SceneParser(GameSceneParser):
         Get a dictionary representing all the properties for the component
         then serialise it.
         """
+
+        # TODO: Move to attributes property on comp class like connections,
+        # below.
         for attr_name, attr in comp.__class__.attributes.items():
             if not attr.serialise:
                 continue
@@ -62,27 +65,14 @@ class SceneParser(GameSceneParser):
             item_elem.set('value', serialise(value))
                 
     def save_connections(self, comp, elem):
-        cnctnDict = {}
-        for cnn_name, cnn in comp.__class__.connections.items():
-            targets = getattr(comp, cnn_name)
-            if targets is None:
-                logger.warning(f'Skipped serialising None value: {cnn_name}')
-                continue
 
-            # Always treat connections as lists.
-            # TODO: Use "many" flag.
-            if not isinstance(targets, collections.MutableSequence):
-                targets = [targets]
-            for target in targets:
-                cnctnDict.setdefault(cnn_name, []).append(target.id)
-        
-        cnctnsElem = et.Element('Connections')
-        for key, vals in cnctnDict.items():
-            for val in vals:
-                cnctnElem = et.SubElement(cnctnsElem, 'Connection')
-                cnctnElem.set('type', key)
-                cnctnElem.set('value', val)
+        conns_elem = et.Element('Connections')
+        for name, values in comp.connections.items():
+            for value in values:
+                conn_elem = et.SubElement(conns_elem, 'Connection')
+                conn_elem.set('type', name)
+                conn_elem.set('value', value.id)
                 
         # Append the connections element only if it isn't empty.
-        if list(cnctnsElem):
-            elem.append(cnctnsElem)
+        if list(conns_elem):
+            elem.append(conns_elem)

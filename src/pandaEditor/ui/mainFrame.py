@@ -387,7 +387,7 @@ class MainFrame(wx.Frame):
         np = self.base.selection.node_paths[0]
         np_name = np.get_name()
         dir_path = self.base.project.prefabs_directory
-        asset_name = self.base.project.GetUniqueAssetName(f'{np_name}.xml', dir_path)
+        asset_name = self.base.project.get_unique_asset_name(f'{np_name}.xml', dir_path)
         asset_path = os.path.join(dir_path, asset_name)
         get_base().scene_parser.save(np, asset_path)
 

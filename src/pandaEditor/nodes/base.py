@@ -106,3 +106,15 @@ class Base:
                 orig_children[i],
                 dupe_children[i]
             )
+
+    @property
+    def connections(self):
+        conns = {}
+        for name, prop in self.__class__.connections.items():
+            targets = getattr(self, name)
+            if targets is None:
+                continue
+            if not prop.many:
+                targets = [targets]
+            conns[name] = targets
+        return conns

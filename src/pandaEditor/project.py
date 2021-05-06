@@ -27,6 +27,7 @@ MODELS = 'models'
 SCRIPTS = 'scripts'
 PREFABS = 'prefabs'
 SHADERS = 'shaders'
+TEXTURES = 'textures'
 PARTICLES = 'particles'
 
 
@@ -75,7 +76,8 @@ base.run()"""
             MODELS: kwargs.pop('models', 'models'),
             # SCRIPTS: kwargs.pop('scripts', 'scripts'),
             PREFABS: kwargs.pop('prefabs', 'prefabs'),
-            PARTICLES: kwargs.pop('particles', 'shaders'),
+            PARTICLES: kwargs.pop('particles', 'particles'),
+            TEXTURES: kwargs.pop('textures', 'textures'),
             # SHADERS: kwargs.pop('shaders', 'shaders')
         }
 
@@ -210,7 +212,7 @@ base.run()"""
         else:
             logger.info('Unsupported file extension:', original_ext)
     
-    def GetUniqueAssetName(self, startName, dirPath):
+    def get_unique_asset_name(self, startName, dirPath):
         """Return a unique asset name."""
         newAssetName = startName
         assetNames = os.listdir(dirPath)
@@ -237,7 +239,7 @@ base.run()"""
     def CreateCgShader(self):
         """Create a new cg shader in the shaders directory."""
         dirPath = self.GetShadersDirectory()
-        shaderPath = self.GetUniqueAssetName(SHADER_FILE_NAME, dirPath)
+        shaderPath = self.get_unique_asset_name(SHADER_FILE_NAME, dirPath)
         shader = ''
         self.CreateAsset(shaderPath, shader)
         

@@ -20,11 +20,14 @@ class ModelRoot(NodePath):
 
     @classmethod
     def create(cls, *args, **kwargs):
-        model_path = kwargs.pop('model_path', '')
-        if not model_path:
-            np = pc.NodePath(pc.ModelRoot(''))
+        model_path = kwargs.pop('model_path', None)
+        if model_path is None:
+            np = pc.NodePath(pc.ModelRoot(''))  # TODO: Enforce name here?
         else:
             filePath = pc.Filename.fromOsSpecific(model_path)
+
+            # TODO: Figure out a better way to deal with extensions. All this
+            # might be redundant anyway if we serialise extensions.
             try:
                 np = get_base().loader.loadModel(filePath)
             except:

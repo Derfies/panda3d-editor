@@ -20,6 +20,10 @@ def get_lights(data):
     return attrib.get_on_lights() if attrib is not None else []
 
 
+def set_texture(data, value):
+    pc.NodePath.set_texture(data, value, 1)
+
+
 class NodePath(Base, metaclass=ComponentMetaClass):
     
     type_ = pc.NodePath
@@ -33,7 +37,7 @@ class NodePath(Base, metaclass=ComponentMetaClass):
     texture = Connection(
         pc.Texture,
         pc.NodePath.get_texture,
-        pc.NodePath.set_texture,
+        set_texture,
         pc.NodePath.clear_texture,
     )
     lights = Connections(

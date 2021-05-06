@@ -172,6 +172,8 @@ class PyTagAttribute(Attribute):
 
 class ProjectAssetAttribute(Attribute):
 
+    # TODO: Still breaking when we use 'set' from a relative path...
+
     def __init__(self, *args, **kwargs):
         self.directory = kwargs.pop('directory', None)
         super().__init__(*args, **kwargs)

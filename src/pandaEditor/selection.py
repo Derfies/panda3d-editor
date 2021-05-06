@@ -190,7 +190,7 @@ class Selection(Object):
         else:
             return None
 
-    def GetNodePathAtPosition(self, x, y):
+    def get_node_path_at_position(self, x, y):
         self.picker.OnUpdate(None, x, y)
         pickedNp = self.picker.GetFirstNodePath()
         if pickedNp is not None:

@@ -14,7 +14,8 @@ class Scene(Scene):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
+        # TODO: Move this to component metaobject?
         self.connections = {}
         
         # 'Create' the default NodePaths that come from showbase. Calling the
@@ -22,6 +23,8 @@ class Scene(Scene):
         # will simply return those the default showbase creates when it starts
         # up. Tag them so their type is overriden and the component manager
         # wraps them appropriately.
+        # TODO: Move this to init_empty_scene so it won't run twice on scene
+        # load.
         defaultCompTypes = [
             'Render',
             'BaseCamera',

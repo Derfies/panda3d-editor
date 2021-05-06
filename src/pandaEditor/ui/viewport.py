@@ -1,6 +1,8 @@
 import logging
 import os
 
+from direct.showbase.PythonUtil import getBase as get_base
+
 from p3d.wxPanda import Viewport as WxViewport
 from dragdroptarget import DragDropTarget
 
@@ -25,8 +27,9 @@ class Viewport(WxViewport):
             '.egg': self.add_model,
             '.gltf': self.add_model,
             '.obj': self.add_model,
-            '.pz': self.add_model,
+            '.png': self.add_texture,
             '.ptf': self.add_particles,
+            '.pz': self.add_model,
             '.xml': self.add_prefab,    # Conflicts with scene xml extn.
         }
         
@@ -37,7 +40,8 @@ class Viewport(WxViewport):
         
     def get_dropped_object(self, x, y):
         x, y = self.screen_to_viewport(x, y)
-        return self.base.selection.GetNodePathAtPosition(x, y)
+        np = self.base.selection.get_node_path_at_position(x, y)
+        return get_base().node_manager.wrap(np)
 
     def drag_drop_validate(self, x, y, data):
         drags = []
@@ -52,16 +56,24 @@ class Viewport(WxViewport):
         for file_path in data:
             ext = os.path.splitext(file_path)[1]
             handler = self.asset_handlers[ext]
-            handler(file_path)
+            handler(file_path, x, y)
 
-    def add_model(self, file_path):
+    def add_model(self, file_path, x, y):
         logging.info(f'Adding model: {file_path}')
         self.base.add_component('ModelRoot', model_path=file_path)
 
-    def add_particles(self, file_path):
+    def add_particles(self, file_path, x, y):
         logging.info(f'Adding particle: {file_path}')
         self.base.add_component('ParticleEffect', config_path=file_path)
 
-    def add_prefab(self, file_path):
+    def add_prefab(self, file_path, x, y):
         logging.info(f'Adding prefab: {file_path}')
         self.base.add_prefab(file_path)
+
+    def add_texture(self, file_path, x, y):
+        logging.info(f'Adding texture: {file_path}')
+        tex_comp = self.base.add_component('Texture', filename=file_path)
+        drop_comp = self.get_dropped_object(x, y)
+
+        # TODO: Need to wrap this with a command so it can be undone.
+        drop_comp.texture = tex_comp
