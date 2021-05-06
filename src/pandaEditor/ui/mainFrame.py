@@ -808,8 +808,8 @@ class MainFrame(wx.Frame):
         self.mCreate.AppendSubMenu(mColl, '&Collision')
         self.mCreate.AppendSubMenu(mLights, '&Lights')
         self.mCreate.AppendSubMenu(mBlt, '&Bullet')
-        self.mCreate.AppendSeparator()
-        self.mCreate.AppendActionItem(ActionItem('Texture', '', self.on_create, args='Texture'), self)
+        # self.mCreate.AppendSeparator()
+        # self.mCreate.AppendActionItem(ActionItem('Texture', '', self.on_create, args='Texture'), self)
         self.mCreate.AppendSeparator()
         self.mCreate.AppendActionItem(ActionItem('Prefab', '', self.on_create_prefab, ID_CREATE_PREFAB), self)
         
