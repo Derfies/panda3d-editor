@@ -359,7 +359,7 @@ class MainFrame(wx.Frame):
             dialog.CenterOnParent()
             if dialog.ShowModal() != wx.ID_OK:
                 return
-            values = dialog.GetValues()
+            values.update(dialog.GetValues())
         self.base.add_component(type_, **values)
 
     def OnCreateActor(self, evt):

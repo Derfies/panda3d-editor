@@ -44,3 +44,7 @@ class Manager(GameManager):
     def on_build_ui(self):
         for plugin in self.getPluginsOfCategory('editor'):
             plugin.plugin_object.on_build_ui()
+
+    def on_register_component(self):
+        for plugin in self.getPluginsOfCategory('game'):
+            plugin.plugin_object.on_register_component()

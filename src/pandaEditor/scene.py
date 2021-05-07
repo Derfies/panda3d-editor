@@ -38,6 +38,8 @@ class Scene(Scene):
         for cType in defaultCompTypes:
             comp_cls = get_base().node_manager.wrappers[cType]
             comp = comp_cls.create()
+
+            # TODO: Move the tag setting into the actual component.
             comp.data.set_tag(TAG_NODE_TYPE, cType)
             comp.id = str(uuid.uuid4())
         

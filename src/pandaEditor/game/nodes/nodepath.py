@@ -103,12 +103,6 @@ class NodePath(Base, metaclass=ComponentMetaClass):
             get_base().node_manager.wrap(child)
             for child in self.data.get_children()
         ]
-
-    def get_tag(self, name):
-        return self.data.get_tag(name)
-
-    def set_tag(self, name, value):
-        self.data.set_tag(name, value)
     
     def detach(self):
         self.data.detach_node()

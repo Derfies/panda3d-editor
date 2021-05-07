@@ -60,12 +60,6 @@ class Base(metaclass=ComponentMetaClass):
     def children(self):
         return self._children
 
-    def get_tag(self, name):
-        return self.metaobject.tags.get(name)
-
-    def set_tag(self, name, value):
-        self.metaobject.tags[name] = value
-
     @abc.abstractmethod
     def detach(self):
         """"""

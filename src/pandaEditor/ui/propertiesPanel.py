@@ -1,15 +1,16 @@
 import logging
 
 import wx
+import wx.propgrid as wxpg
 from pubsub import pub
 import panda3d.core as pc
 
 from direct.showbase.PythonUtil import getBase as get_base
 from pandaEditor.dragdroptarget import DragDropTarget
-import wx.propgrid as wxpg
 from pandaEditor import commands as cmds
 from game.nodes.attributes import Attribute, Connection, Connections
 from pandaEditor.ui import properties as custProps
+from pandaEditor.utils import camel_case_to_label
 
 
 logger = logging.getLogger(__name__)
@@ -424,12 +425,7 @@ class PropertiesPanel(wx.Panel):
 # =======
         for category, attrs in categories.items():
             for attr_name, attr in attrs.items():
-
-                attr_label = ' '.join(word.title() for word in attr_name.split('_'))
-
-                # if attr.get_fn is None:
-                #     print('skipping no get fn prop:', attr_name, attr.type)
-                #     continue
+                attr_label = camel_case_to_label(attr_name)
                 try:
                     value = getattr(comps[0], attr_name)#attr.get()
                 except (TypeError, AttributeError) as e:
@@ -453,7 +449,14 @@ class PropertiesPanel(wx.Panel):
 
                     prop_type = 'attribute'
                     prop_cls = self.propMap[attr.type]
-                    prop = prop_cls(attr_label, attr_name, value)  # TODO: Do common value.
+                    prop_kwargs = {}
+                    if value is not None:
+                        prop_kwargs = {'value': value}
+                    try:
+                        prop = prop_cls(attr_label, attr_name, **prop_kwargs)  # TODO: Do common value.
+                    except Exception as e:
+                        print(attr_label, attr_name, value)
+                        raise
                     if attr.read_only:
                         prop.Enable(False)
 

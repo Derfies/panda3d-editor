@@ -9,7 +9,7 @@ class Base:
 
     @classmethod
     def get_default_values(cls):
-        return cls.default_values
+        return cls.default_values.copy()
 
     @classmethod
     def get_foo(cls):

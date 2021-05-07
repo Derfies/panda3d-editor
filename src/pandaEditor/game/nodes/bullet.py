@@ -6,7 +6,9 @@ from game.nodes.attributes import (
     Attribute,
     Connection,
     Connections,
-    TagAttribute
+    PythonTagAttribute,
+    TagAttribute,
+    MetaobjectTagAttribute,
 )
 from game.nodes.nodepath import NodePath
 from game.nodes.nongraphobject import NonGraphObject
@@ -27,7 +29,7 @@ class BulletCapsuleShape(NonGraphObject):
     type_ = pb.BulletCapsuleShape
     radius = Attribute(float, pb.BulletCapsuleShape.get_radius, required=True)
     height = Attribute(float, pb.BulletCapsuleShape.get_half_height, required=True)
-    up = TagAttribute(int, read_only=True, required=True)
+    up = MetaobjectTagAttribute(int, read_only=True, required=True)
 
 
 class BulletDebugNode(NodePath):
@@ -38,8 +40,8 @@ class BulletDebugNode(NodePath):
 class BulletPlaneShape(NonGraphObject):
 
     type_ = pb.BulletPlaneShape
-    normal = TagAttribute(pc.Vec3, read_only=True, required=True)
-    point = TagAttribute(pc.Vec3, read_only=True, required=True)
+    normal = MetaobjectTagAttribute(pc.Vec3, read_only=True, required=True)
+    point = MetaobjectTagAttribute(pc.Vec3, read_only=True, required=True)
 
     @classmethod
     def create(cls, *args, **kwargs):

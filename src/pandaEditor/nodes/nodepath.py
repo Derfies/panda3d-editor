@@ -43,13 +43,17 @@ class NodePath:
 
     @classmethod
     def get_default_values(cls):
-        return {
+        default_values = super().get_default_values()
+        default_values.update({
             'name': get_lower_camel_case(cls.__name__)
-        }
+        })
+        return default_values
 
     @classmethod
     def get_foo(cls):
-        return []
+        foo = super().get_foo()
+        foo.remove('name')
+        return foo
 
     @classmethod
     def create(cls, *args, **kwargs):

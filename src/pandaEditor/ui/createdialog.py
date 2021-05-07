@@ -3,6 +3,7 @@ import wx
 from wx.lib.agw.floatspin import FloatSpin
 from wx.lib.intctrl import IntCtrl
 
+from pandaEditor.utils import camel_case_to_label
 from wxExtra.propertyGrid import FloatValidator
 
 
@@ -73,7 +74,8 @@ class CreateDialog(wx.Dialog):
         for name, value in default_values.items():
             value_type = type(value)
             hsizer = wx.BoxSizer(wx.HORIZONTAL)
-            hsizer.Add(wx.StaticText(self, -1, name), 1)
+            label = camel_case_to_label(name)
+            hsizer.Add(wx.StaticText(self, -1, label), 1)
             ctrl_cls = PROPERTY_MAP[value_type]
             ctrl = ctrl_cls(self, -1, value=value)
             self.ctrls[name] = ctrl

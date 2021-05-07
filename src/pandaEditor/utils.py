@@ -58,3 +58,7 @@ def popen_and_call(OnExit, printStdout, *popenArgs, **popenKWArgs):
     
     # Return immediately after the thread starts.
     return thread
+
+
+def camel_case_to_label(name):
+    return ' '.join(word.title() for word in name.split('_'))

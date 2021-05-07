@@ -1,7 +1,6 @@
 import panda3d.core as pm
 from direct.actor.Actor import Actor as P3dActor
 
-#from game.nodes.attributes import PyTagAttribute
 from game.nodes.constants import (
     TAG_ACTOR, TAG_MODEL_PATH, TAG_NODE_TYPE, TAG_NODE_UUID
 )

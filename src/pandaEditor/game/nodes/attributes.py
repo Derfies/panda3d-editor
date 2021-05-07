@@ -136,38 +136,71 @@ class Connections(Connection):
         return self.clear_fn(self._get_data(instance))
 
 
-def get_tag(name, data):
-    return data.get_tag(name)
+class TagAttributeBase(Attribute):
+    pass
 
 
-def set_tag(name, data, value):
-    data.set_tag(name, value)
+def get_metaobject_tag(attr, data):
+    return data.metaobject.tags[attr.name]
 
 
-class TagAttribute(Attribute):
+def set_metaobject_tag(attr, data, value):
+    data.metaobject.tags[attr.name] = value
+
+
+class MetaobjectTagAttribute(TagAttributeBase):
 
     def __init__(self, type_, read_only=False, required=False):
-        self.tag_name = str(uuid.uuid4())
-
-        get_fn = partial(get_tag, self.tag_name)
-        set_fn = partial(set_tag, self.tag_name)
-        super().__init__(type_, get_fn, set_fn, read_only=read_only, required=required)
+        super().__init__(
+            type_,
+            partial(get_metaobject_tag, self),
+            partial(set_metaobject_tag, self),
+            read_only=read_only,
+            required=required,
+        )
 
     def _get_data(self, instance):
         return instance
 
 
-class PyTagAttribute(Attribute):
+def get_tag(attr, data):
+    return data.get_tag(attr.name)
 
-    def __init__(self, *args, **kwargs):
-        self.pytag_name = kwargs.pop('pytag_name')
-        super().__init__(*args, **kwargs)
 
-    def __get__(self, instance, owner):
-        return instance.data.get_python_tag(self.pytag_name)
+def set_tag(attr, data, value):
+    data.set_tag(attr.name, value)
 
-    def __set__(self, instance, value):
-        instance.data.set_python_tag(self.pytag_name, value)
+
+class TagAttribute(TagAttributeBase):
+
+    def __init__(self, read_only=False, required=False):
+        super().__init__(
+            str,
+            partial(get_tag, self),
+            partial(set_tag, self),
+            read_only=read_only,
+            required=required,
+        )
+
+
+def get_python_tag(attr, data):
+    return data.get_python_tag(attr.name)
+
+
+def set_python_tag(attr, data, value):
+    data.set_python_tag(attr.name, value)
+
+
+class PythonTagAttribute(TagAttributeBase):
+
+    def __init__(self, type_, read_only=False, required=False):
+        super().__init__(
+            type_,
+            partial(get_python_tag, self),
+            partial(set_python_tag, self),
+            read_only=read_only,
+            required=required,
+        )
 
 
 class ProjectAssetAttribute(Attribute):
@@ -185,6 +218,6 @@ class ProjectAssetAttribute(Attribute):
         )
 
 
-class PyTagProjectAssetAttribute(ProjectAssetAttribute, PyTagAttribute):
+class PyTagProjectAssetAttribute(ProjectAssetAttribute, TagAttribute):
 
     pass
