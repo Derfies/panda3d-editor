@@ -339,7 +339,6 @@ class PropertiesPanel(wx.Panel):
         comp_cls = get_base().node_manager.get_common_wrapper(comps)
         comps = [comp_cls(comp.data) for comp in comps]
 
-        #print('comp_cls:', comp_cls, comp_cls.mro())
         #
         # #fw
         # #print(comp_cls.__dict__)

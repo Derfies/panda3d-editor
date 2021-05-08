@@ -11,6 +11,9 @@ logger = logging.getLogger(__name__)
 class BaseMetaClass(type):
 
     def __new__(metacls, name, bases, attrs):
+
+        # Run once per class only. Will run for every new component selection
+        # because the scene graph is dynamically creating types.
         cls = super().__new__(metacls, name, bases, attrs)
         if not hasattr(cls, 'change_mro'):
             cls.change_mro = True
@@ -18,7 +21,12 @@ class BaseMetaClass(type):
         return cls
 
     def mro(cls):
-        change_mro = (
+        """
+        Called every time class.mro() is called - NOT once during class
+        creation. Don't call mro() in your own code, use __mro__ instead.
+
+        """
+        change_mro = bool(
             getattr(cls, 'change_mro', False) and
             ConfigVariableBool('editor_mode', False)
         )
@@ -48,7 +56,7 @@ class BaseMetaClass(type):
 
             # TODO: Set a flag here so we're not continually trying to
             # load a module that's not there.
-            print(e)
+            logger.warning(f'Editor module not found: {search_path}')
             return mro
 
         editor_cls = next(iter([
@@ -61,7 +69,7 @@ class BaseMetaClass(type):
             return mro
 
         # Ignore the last mro "object" as it's common to both.
-        mro = editor_cls.mro()[0:-1] + mro
+        mro = list(editor_cls.__mro__[0:-1]) + mro
         names = ', '.join([c.__name__ for c in mro])
         logger.info(f'Component: {cls.__name__} mro: {names}')
         return mro

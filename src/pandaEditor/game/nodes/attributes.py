@@ -218,6 +218,6 @@ class ProjectAssetAttribute(Attribute):
         )
 
 
-class PyTagProjectAssetAttribute(ProjectAssetAttribute, TagAttribute):
+class ProjectAssetPythonTagAttribute(ProjectAssetAttribute, PythonTagAttribute):
 
     pass

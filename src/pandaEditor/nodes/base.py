@@ -56,7 +56,7 @@ class Base:
         return True
     
     def is_of_type(self, type_):
-        return type_ in self.data.__class__.mro()
+        return type_ in self.data.__class__.__mro__
     
     def get_possible_connections(self, comps):
         """

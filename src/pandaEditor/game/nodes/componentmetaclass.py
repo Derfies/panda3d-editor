@@ -8,7 +8,6 @@ class ComponentMetaClass(abc.ABCMeta, BaseMetaClass):
 
     def __new__(metacls, name, bases, attrs):
         cls = super().__new__(metacls, name, bases, attrs)
-
         cls.properties = metacls.get_properties(cls)
 
         return cls
@@ -18,7 +17,7 @@ class ComponentMetaClass(abc.ABCMeta, BaseMetaClass):
         # TODO: Probably don't have to do entire mro considering the way
         # metaclasses work.
         results = {}
-        for base in reversed(cls.mro()):
+        for base in reversed(cls.__mro__):
             for key, value in base.__dict__.items():
                 if not isinstance(value, Base):
                     continue
