@@ -216,7 +216,9 @@ class ShowBase(GameShowBase):
         self.edCamera = EditorCamera(
             'camera',
             style=p3d.camera.CAM_VIEWPORT_AXES,
-            speed=0.5,
+            orbit_sensitivity=1.5,
+            dolly_sensitivity=1.5,
+            zoom_sensitivity=2.0,
             pos=(56, 56, 42),
             rootNp=self.edRender,
             rootP2d=self.edPixel2d,
@@ -452,7 +454,7 @@ class ShowBase(GameShowBase):
         """
         if (
             not self.gizmoMgr.IsDragging() and
-            MOUSE_ALT not in self.edCamera.mouse.modifiers
+            MOUSE_ALT not in self.edCamera.modifiers
         ):
             self.selection.StartDragSelect(shift)
         elif self.gizmoMgr.IsDragging():

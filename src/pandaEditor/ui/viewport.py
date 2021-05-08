@@ -59,8 +59,9 @@ class Viewport(WxViewport):
             handler(file_path, x, y)
 
     def add_model(self, file_path, x, y):
-        logging.info(f'Adding model: {file_path}')
-        self.base.add_component('ModelRoot', model_path=file_path)
+        rel_path = get_base().project.get_project_relative_path(file_path)
+        logging.info(f'Adding model: {rel_path}')
+        self.base.add_component('ModelRoot', model_path=rel_path)
 
     def add_particles(self, file_path, x, y):
         logging.info(f'Adding particle: {file_path}')

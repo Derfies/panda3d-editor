@@ -39,14 +39,14 @@ class SceneGraphBasePanel(wx.Panel):
         self.Bind(fm.EVT_FLAT_MENU_SELECTED, self.OnFlatMenuSelected, id=DISPLAY_NODEPATHS)
 
         # Build tree control
-        self.tc = CustomTreeCtrl(self, -1, agwStyle=
-                                  ct.TR_EDIT_LABELS |
-                                  ct.TR_HIDE_ROOT |
-                                  ct.TR_FULL_ROW_HIGHLIGHT |
-                                  ct.TR_NO_LINES |
-                                  ct.TR_HAS_BUTTONS |
-                                  ct.TR_TWIST_BUTTONS |
-                                  ct.TR_MULTIPLE)
+        style = (
+            ct.TR_EDIT_LABELS |
+            ct.TR_HIDE_ROOT |
+            ct.TR_FULL_ROW_HIGHLIGHT |
+            ct.TR_HAS_BUTTONS |
+            ct.TR_MULTIPLE
+        )
+        self.tc = CustomTreeCtrl(self, -1, agwStyle=style)
         self.tc.AddRoot('root')
 
         # Bind tree control events
@@ -78,16 +78,9 @@ class SceneGraphBasePanel(wx.Panel):
         get_base().doc.on_refresh()
 
     def OnTreeBeginLabelEdit(self, evt):
-        """
-        Highlight the text of the tree item label as soon as the edit process
-        has started. This must be done with CallAfter otherwise GetEditControl
-        will return None.
-        """
-        def HighlightText(tc):
-            ctrl = tc.GetEditControl()
-            ctrl.SetSelection(-1, -1)
 
-        wx.CallAfter(HighlightText, self.tc)
+        # TODO: Highlight the tree label.
+        pass
 
     def OnTreeEndLabelEdit(self, evt):
         """Change the component's name to that of the new item's name."""

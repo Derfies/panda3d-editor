@@ -204,7 +204,7 @@ class Selection(Object):
         # return None if np.isEmpty() else np
         if np.getPythonTag(TAG_IGNORE):
             return np.findNetPythonTag(TAG_PICKABLE)
-        elif MOUSE_CTRL in get_base().edCamera.mouse.modifiers:
+        elif MOUSE_CTRL in get_base().edCamera.modifiers:
            return np
         else:
             return np.findNetPythonTag(TAG_PICKABLE)

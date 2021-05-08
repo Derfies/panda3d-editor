@@ -1,9 +1,9 @@
 import os
 
 import wx
+import wx.lib.agw.customtreectrl as ct
 from pubsub import pub
 
-from p3d import wxPanda
 from wxExtra import DirTreeCtrl, utils as wxUtils
 from direct.showbase.PythonUtil import getBase as get_base
 
@@ -28,19 +28,17 @@ class ResourcesPanel(wx.Panel):
         if projDirPath is not None and os.path.isdir(projDirPath):
 
             # Build tree control and add it to the sizer
-            self.dtc = DirTreeCtrl(self, -1, style=
-                                    wx.NO_BORDER |
-                                    wx.TR_DEFAULT_STYLE |
-                                    wx.TR_EDIT_LABELS)
+            style = (
+                ct.TR_EDIT_LABELS |
+                ct.TR_FULL_ROW_HIGHLIGHT |
+                ct.TR_HAS_BUTTONS |
+                ct.TR_MULTIPLE
+            )
+            self.dtc = DirTreeCtrl(self, -1, agwStyle=style)
             self.dtc.SetRootDir(projDirPath)
             self.dtc.Expand(self.dtc.GetRootItem())
             self.bs1.Add(self.dtc, 1, wx.EXPAND)
 
-            # Bind tree control events
-            self.dtc.Bind(wx.EVT_KEY_UP, wxPanda.OnKeyUp)
-            self.dtc.Bind(wx.EVT_KEY_DOWN, wxPanda.OnKeyDown)
-            self.dtc.Bind(wx.EVT_LEFT_UP, wxPanda.OnLeftUp)
-            self.dtc.Bind(wx.EVT_RIGHT_DOWN, self.OnRightDown)
             self.dtc.Bind(wx.EVT_RIGHT_UP, self.OnRightUp)
             self.dtc.Bind(wx.EVT_MIDDLE_DOWN, self.OnMiddleDown)
             self.dtc.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDClick)

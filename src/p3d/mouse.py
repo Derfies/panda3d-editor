@@ -41,6 +41,7 @@ class Mouse(SingleTask):
         self.accept('mouse3-up', self.SetButton, [2, False])
             
     def OnUpdate(self, task):
+        super().OnUpdate(task)
         
         # Get pointer from screen, calculate delta
         mp = self.win.getPointer(0)

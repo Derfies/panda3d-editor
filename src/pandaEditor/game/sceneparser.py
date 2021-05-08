@@ -14,7 +14,13 @@ class SceneParser:
     
     def load(self, file_path, pcomp=None):
         """Load the scene from an xml file."""
+
+        # Include connections that exist already in the scene.
         self.nodes = {}
+        for obj in get_base().scene.objects:
+            comp = get_base().node_manager.wrap(obj)
+            self.nodes[comp.id] = comp
+            
         self.connections = {}
         
         tree = et.parse(file_path)

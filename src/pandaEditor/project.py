@@ -370,7 +370,7 @@ class """ + fileName + """(p3d):
         
         return modelPath
 
-    def get_project_relative_path(self, file_path, directory):
+    def get_project_relative_path(self, file_path, directory=None):
         start_path = self.path
         if directory is not None:
             start_path = self.get_directory(directory)

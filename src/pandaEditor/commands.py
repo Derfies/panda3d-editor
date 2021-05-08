@@ -1,3 +1,5 @@
+import uuid
+
 import panda3d.core as pm
 from direct.showbase.PythonUtil import getBase as get_base
 
@@ -163,6 +165,7 @@ def group(comps):
     common_comp = get_base().node_manager.wrap(common_np)
 
     group_comp = PandaNode.create(name='group')
+    group_comp.id = str(uuid.uuid4())
     group_comp.parent = common_comp
     group_comp.set_default_values()
     

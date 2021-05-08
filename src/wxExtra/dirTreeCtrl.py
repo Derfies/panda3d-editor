@@ -31,6 +31,8 @@ import os
 
 import wx
 
+from wxExtra.customTreeCtrl import CustomTreeCtrl
+
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +49,7 @@ class Directory:
         self.directory = directory
     
 
-class DirTreeCtrl(wx.TreeCtrl):
+class DirTreeCtrl(CustomTreeCtrl):
     
     """
     A wx.TreeCtrl that is used for displaying directory structures. Virtually
@@ -59,7 +61,7 @@ class DirTreeCtrl(wx.TreeCtrl):
         Initializes the tree and binds some events we need for making this
         dynamically load its data.
         """
-        wx.TreeCtrl.__init__(self, parent, *args, **kwds)
+        super().__init__(parent, *args, **kwds)
 
         # Bind events
         self.Bind(wx.EVT_TREE_ITEM_EXPANDING, self.TreeItemExpanding)

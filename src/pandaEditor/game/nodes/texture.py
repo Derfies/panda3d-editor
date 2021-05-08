@@ -1,17 +1,16 @@
 import panda3d.core as pc
 from direct.showbase.PythonUtil import getBase as get_base
 
-from game.nodes.attributes import ProjectAssetAttribute
+from game.nodes.attributes import Attribute
 from game.nodes.nongraphobject import NonGraphObject
 
 
 class Texture(NonGraphObject):
 
     type_ = pc.Texture
-    filename = ProjectAssetAttribute(
+    filename = Attribute(
         pc.Filename,
         pc.Texture.get_filename,
-        pc.Texture.set_filename,
         required=True,
     )
 
