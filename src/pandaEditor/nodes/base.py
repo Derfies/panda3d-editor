@@ -58,9 +58,10 @@ class Base:
         components.
 
         """
-        conns = self.__class__.connections
-        for comp in comps:
-            conns.update(comp.__class__.connections)
+        conns = {}
+        for conn_name, conn in self.__class__.connections.items():
+            if any([comp.is_of_type(conn.type) for comp in comps]):
+                conns[conn_name] = conn
         return conns
     
     def set_default_values(self):
@@ -83,9 +84,6 @@ class Base:
         pass
 
     def on_deselect(self):
-        pass
-
-    def on_drag_drop(self, dragComp, dropComp):
         pass
 
     @abc.abstractmethod

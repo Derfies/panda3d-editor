@@ -88,10 +88,6 @@ def ImgToBmp(filePath, size):
     bmp = wx.Bitmap(img)
     return bmp
     
-
-def BetterBind(self, event, instance, handler, *args, **kwargs):
-    self.Bind(event, lambda event: handler(event, *args, **kwargs), instance)
-    
     
 def IdBind(self, event, id, handler, *args, **kwargs):
     self.Bind(event, lambda event: handler(event, *args, **kwargs), id=id)

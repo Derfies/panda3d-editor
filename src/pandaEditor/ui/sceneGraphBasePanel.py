@@ -79,8 +79,11 @@ class SceneGraphBasePanel(wx.Panel):
 
     def OnTreeBeginLabelEdit(self, evt):
 
-        # TODO: Highlight the tree label.
-        pass
+        def HighlightText(tc):
+            ctrl = tc.GetEditControl()
+            ctrl.SetSelection(-1, -1)
+
+        wx.CallAfter(HighlightText, self.tc)
 
     def OnTreeEndLabelEdit(self, evt):
         """Change the component's name to that of the new item's name."""

@@ -184,11 +184,6 @@ class NodePath:
         
         # Drop target item is ok, continue
         return True
-    
-    def on_drag_drop(self, dragComps, dropNp):
-        dragNps = [dragComp for dragComp in dragComps if type(dragComp) == pc.NodePath]
-        if dragNps:
-            commands.Parent(dragNps, dropNp)
             
     def is_of_type(self, cType):
         return self.data.node().is_of_type(cType)
