@@ -20,7 +20,10 @@ class ShowBase(DirectShowBase):
         self.scene_parser = self.scene_parser_cls()
 
     def load_plugins(self):
-        self.plugin_manager.setPluginPlaces([r"C:\Users\Jamie Davies\Documents\git\panda3d-editor\src\plugins"])
+        self.plugin_manager.setPluginPlaces([
+            r'C:\Users\Jamie Davies\Documents\git\panda3d-editor\src\plugins',
+            r'C:\Users\Jamie Davies\Documents\git\reactor\plugins',
+        ])
         self.plugin_manager.collectPlugins()
         self.plugin_manager.on_init()
 

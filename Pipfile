@@ -10,10 +10,6 @@ panda3d = "==1.10.9"
 wxpython = "==4.1.1"
 pypubsub = "==4.0.3"
 yapsy = "==1.12.2"
-matplotlib = "==3.3.2"
-networkx = "==2.5"
-simple-settings = "==1.0.0"
-colorama = "==0.4.4"
 
 [requires]
 python_version = "3.6"

@@ -43,6 +43,7 @@ class SceneParser:
         comp_type = elem.get('type')
         logger.info(f'Load component: {comp_type}')
         comp_cls = get_base().node_manager.get_component_by_name(comp_type)
+        assert comp_cls is not None, f'Unknown component class: {comp_type}'
 
         # Collect attribute keys and values.
         attrs = self.get_attributes(elem, comp_cls)
