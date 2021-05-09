@@ -1,7 +1,5 @@
 import abc
 
-from game.utils import get_lower_camel_case
-
 
 class Base:
 
@@ -16,13 +14,9 @@ class Base:
         return list(cls.get_default_values().keys())
 
     @property
-    def name_(self):
-
-        # TODO: Rename to "display_name" or similar.
-        try:
-            return getattr(self, 'name')
-        except Exception as e:
-            return get_lower_camel_case(self.data.__class__.__name__)
+    @abc.abstractmethod
+    def label(self):
+        """"""
 
     def validate_drag_drop(self, dragComp, dropComp):
         return False

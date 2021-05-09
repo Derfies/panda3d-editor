@@ -41,6 +41,10 @@ class NodePath:
         serialise=False
     )
 
+    @property
+    def label(self):
+        return self.name
+
     @classmethod
     def get_default_values(cls):
         default_values = super().get_default_values()

@@ -112,7 +112,7 @@ class ConnectionProperty(DropItemMixin, wxpg.StringProperty):
         self.SetValue(DataWrapper(value))
 
     def ValueToString(self, value, argFlags=0):
-        return value.data.name_ if value.data is not None else ''
+        return value.data.label if value.data is not None else ''
 
     def drag_drop_validate(self, x, y, data):
         if not len(data) == 1:
@@ -138,7 +138,7 @@ class ConnectionsProperty(DropItemMixin, wxpg.StringProperty):
         self.SetValue(DataWrapper(value))
 
     def ValueToString(self, value, argFlags=0):
-        return ', '.join([comp.name_ for comp in value.data])
+        return ', '.join([comp.label for comp in value.data])
 
     def drag_drop_validate(self, x, y, data):
         prop_type = self.GetAttribute('prop_value_type')
@@ -169,7 +169,7 @@ class ConnectionPropertyEditor(wxpg.PGEditor):
         )
         value = property.GetValue()
         if value is not None:
-            ctrl.Append(value.name_)
+            ctrl.Append(value.label)
         ctrl.Layout()
         return wxpg.PGWindowList(ctrl)
 
@@ -199,7 +199,7 @@ class ConnectionsPropertyEditor(wxpg.PGEditor):
             style=wx.BORDER_NONE | wx.LB_MULTIPLE
         )
         for comp in property.GetValue():
-            ctrl.Append(comp.name_)
+            ctrl.Append(comp.label)
         ctrl.Layout()
         return wxpg.PGWindowList(ctrl)
 

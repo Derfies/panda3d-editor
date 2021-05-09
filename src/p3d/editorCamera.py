@@ -51,8 +51,10 @@ class EditorCamera(Mouse, Camera):
 
         #print(task.dt)
 
-        dx *= task.dt * 1000.0
-        dy *= task.dt * 1000.0
+        #dx *= task.dt * 1000.0
+        #dy *= task.dt * 1000.0
+        dx *= 0.1
+        dy *= 0.1
 
 
         corrected_dx = dx * 1.0 / win_size.x * win_size.x

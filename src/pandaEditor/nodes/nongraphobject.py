@@ -2,8 +2,14 @@ import copy
 
 from direct.showbase.PythonUtil import getBase as get_base
 
+from game.utils import get_lower_camel_case
+
 
 class NonGraphObject:
+
+    @property
+    def label(self):
+        return get_lower_camel_case(self.data.__class__.__name__)
 
     @property
     def default_parent(self):

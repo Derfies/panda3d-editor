@@ -1,10 +1,12 @@
 import logging
 import os
 
+import wx
 from direct.showbase.PythonUtil import getBase as get_base
 
 from p3d.wxPanda import Viewport as WxViewport
 from dragdroptarget import DragDropTarget
+from p3d import wxPanda
 
 
 logger = logging.getLogger(__name__)
@@ -72,8 +74,9 @@ class Viewport(WxViewport):
         self.base.add_prefab(file_path)
 
     def add_texture(self, file_path, x, y):
-        logging.info(f'Adding texture: {file_path}')
-        tex_comp = self.base.add_component('Texture', filename=file_path)
+        rel_path = get_base().project.get_project_relative_path(file_path)
+        logging.info(f'Adding texture: {rel_path}')
+        tex_comp = self.base.add_component('Texture', filename=rel_path)
         drop_comp = self.get_dropped_object(x, y)
 
         # TODO: Need to wrap this with a command so it can be undone.

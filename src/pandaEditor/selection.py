@@ -77,9 +77,9 @@ class Selection(Object):
         for comp in self.comps:
             pcomp = comp.parent
             if pcomp.data != get_base().scene:
-                comps.append(pcomp.data)
+                comps.append(pcomp)
             else:
-                comps.append(comp.data)
+                comps.append(comp)
         return comps
 
     def select_child(self):
@@ -90,9 +90,9 @@ class Selection(Object):
         comps = []
         for comp in self.comps:
             if comp.children:
-                comps.append(comp.children[0].data)
+                comps.append(comp.children[0])
             else:
-                comps.append(comp.data)
+                comps.append(comp)
         return comps
 
     def select_prev(self):

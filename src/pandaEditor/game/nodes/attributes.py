@@ -211,11 +211,11 @@ class ProjectAssetAttribute(Attribute):
         self.directory = kwargs.pop('directory', None)
         super().__init__(*args, **kwargs)
 
-    # def __get__(self, *args, **kwargs):
-    #     return get_base().project.get_project_relative_path(
-    #         super().__get__(*args, **kwargs),
-    #         self.directory,
-    #     )
+    def __get__(self, *args, **kwargs):
+        return get_base().project.get_project_relative_path(
+            super().__get__(*args, **kwargs),
+            self.directory,
+        )
 
 
 class ProjectAssetPythonTagAttribute(ProjectAssetAttribute, PythonTagAttribute):

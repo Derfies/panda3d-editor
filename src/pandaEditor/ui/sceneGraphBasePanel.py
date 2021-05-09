@@ -131,7 +131,7 @@ class SceneGraphBasePanel(wx.Panel):
         if self.filter is not None and not comp.is_of_type(self.filter):
             return
 
-        item = self.tc.AppendItem(parent_item, comp.name_, data=comp)
+        item = self.tc.AppendItem(parent_item, comp.label, data=comp)
         self._comps[comp] = item
         for child in comp.children:
             self.AddItem(child, item)
@@ -156,7 +156,7 @@ class SceneGraphBasePanel(wx.Panel):
                 self._comps[parent],
                 comp.get_sibling_index()
             )
-            self.tc.SetItemText(new_item, comp.name_)
+            self.tc.SetItemText(new_item, comp.label)
             self.UpdateItemData(new_item)
             
     def UpdateItemData(self, item):

@@ -216,9 +216,9 @@ class ShowBase(GameShowBase):
         self.edCamera = EditorCamera(
             'camera',
             style=p3d.camera.CAM_VIEWPORT_AXES,
-            orbit_sensitivity=1.5,
-            dolly_sensitivity=1.5,
-            zoom_sensitivity=2.0,
+            orbit_sensitivity=2,
+            dolly_sensitivity=2,
+            zoom_sensitivity=3,
             pos=(56, 56, 42),
             rootNp=self.edRender,
             rootP2d=self.edPixel2d,
