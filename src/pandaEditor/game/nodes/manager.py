@@ -30,6 +30,7 @@ from game.nodes.lights import (
 from game.nodes.modelnode import ModelNode
 from game.nodes.modelroot import ModelRoot
 from game.nodes.nodepath import NodePath
+from game.nodes.nongraphobject import NonGraphObject
 from game.nodes.pandanode import PandaNode
 from game.nodes.particleeffect import ParticleEffect
 from game.nodes.sceneroot import SceneRoot
@@ -78,6 +79,7 @@ class Manager:
             'ModelNode': ModelNode,
             'ModelRoot': ModelRoot,
             'NodePath': NodePath,
+            'NonGraphObject': NonGraphObject,
             'PandaNode': PandaNode,
             'ParticleEffect': ParticleEffect,
             'Pixel2d': Pixel2d,

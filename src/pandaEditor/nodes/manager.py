@@ -1,5 +1,7 @@
 import logging
 
+import panda3d.core as pc
+
 from game.nodes.manager import Manager as GameManager
 
 
@@ -8,11 +10,11 @@ logger = logging.getLogger(__name__)
 
 class Manager(GameManager):
 
-    def get_default_wrapper(self, comp):
-        if hasattr(comp, 'getPythonTag'):
+    def get_default_wrapper(self, obj):
+        if isinstance(obj, pc.NodePath):
             return self.wrappers['NodePath']
         else:
-            return self.wrappers['Base']
+            return self.wrappers['NonGraphObject']
 
     def get_common_wrapper(self, comps):
 
@@ -20,11 +22,11 @@ class Manager(GameManager):
         # components.
         mros = []
         for comp in comps:
-            comp_cls = self.get_wrapper(comp)
+            comp_cls = self.get_wrapper(comp.data)
             if comp_cls is not None:
                 mros.append(comp_cls.__mro__)
         if not mros:
-            return self.get_default_wrapper(comps[0])
+            return self.get_default_wrapper(comps[0].data)
 
         # Intersect the mros to get the common classes.
         first_mro = mros[0]
