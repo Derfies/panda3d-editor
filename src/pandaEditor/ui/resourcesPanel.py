@@ -2,6 +2,7 @@ import os
 
 import wx
 import wx.lib.agw.customtreectrl as ct
+from p3d import wxPanda
 from pubsub import pub
 
 from wxExtra import DirTreeCtrl, utils as wxUtils
@@ -39,6 +40,9 @@ class ResourcesPanel(wx.Panel):
             self.dtc.Expand(self.dtc.GetRootItem())
             self.bs1.Add(self.dtc, 1, wx.EXPAND)
 
+            self.dtc.Bind(wx.EVT_KEY_UP, wxPanda.OnKeyUp)
+            self.dtc.Bind(wx.EVT_KEY_DOWN, wxPanda.OnKeyDown)
+            self.dtc.Bind(wx.EVT_LEFT_UP, wxPanda.OnLeftUp)
             self.dtc.Bind(wx.EVT_RIGHT_UP, self.OnRightUp)
             self.dtc.Bind(wx.EVT_MIDDLE_DOWN, self.OnMiddleDown)
             self.dtc.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDClick)
