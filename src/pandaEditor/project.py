@@ -371,7 +371,10 @@ class """ + fileName + """(p3d):
         return modelPath
 
     def get_project_relative_path(self, file_path, directory=None):
-        start_path = self.path
-        if directory is not None:
-            start_path = self.get_directory(directory)
-        return os.path.relpath(file_path, start_path)
+        rel_path = file_path
+        if os.path.isabs(rel_path):
+            start_path = self.path
+            if directory is not None:
+                start_path = self.get_directory(directory)
+            rel_path = os.path.relpath(rel_path, start_path)
+        return rel_path

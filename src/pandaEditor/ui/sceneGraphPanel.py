@@ -6,6 +6,7 @@ from dragdroptarget import DragDropTarget
 from game.nodes.nodepath import NodePath
 from pandaEditor import commands as cmds
 from pandaEditor.ui.sceneGraphBasePanel import SceneGraphBasePanel
+from wxExtra import utils as wxutils
 
 
 class SceneGraphPanel(SceneGraphBasePanel):
@@ -14,6 +15,7 @@ class SceneGraphPanel(SceneGraphBasePanel):
         super().__init__(*args, **kwargs)
 
         self.tc.Bind(wx.EVT_TREE_SEL_CHANGED, self.OnTreeSelChanged)
+        self.tc.Bind(wx.EVT_RIGHT_UP, self.on_right_up)
 
         # Build tree control drop target.
         dt = DragDropTarget(
@@ -21,6 +23,37 @@ class SceneGraphPanel(SceneGraphBasePanel):
             self.on_drop
         )
         self.tc.SetDropTarget(dt)
+
+    def on_right_up(self, evt):
+
+        # Get the item under the mouse - bail if the item is not ok
+        item = wxutils.GetClickedItem(self.tc, evt)
+        if item is None or not item.IsOk():
+            return
+
+        menu = wx.Menu()
+        m_item = wx.MenuItem(menu, wx.NewId(), 'Sort Children')
+        menu.Append(m_item)
+        wxutils.IdBind(
+            menu,
+            wx.EVT_MENU,
+            m_item.GetId(),
+            self.on_sort_children,
+            item
+        )
+        self.PopupMenu(menu)
+        menu.Destroy()
+
+    def on_sort_children(self, evt, item):
+
+        # TODO: Make undoable.
+        comp = item.GetData()
+        children = comp.children
+        for child in children:
+            child.detach()
+        for child in sorted(children, key=lambda c: c.label):
+            comp.add_child(child)
+        get_base().doc.on_modified()
 
     def drag_drop_validate(self, x, y, data):
         item = self.tc.HitTest(wx.Point(x, y))[0]
