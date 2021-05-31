@@ -1,28 +1,22 @@
 import panda3d.core as pc
-from pandac.PandaModules import Texture as T
+from direct.showbase.PythonUtil import getBase as get_base
 
-from base import Base
-from attributes import Attribute as Attr
+from game.nodes.attributes import Attribute
+from game.nodes.nongraphobject import NonGraphObject
 
 
-class Texture( Base ):
-    
-    type_ = T
-    
-    def __init__( self, *args, **kwargs ):
-        Base.__init__( self, *args, **kwargs )
-        
-        self.AddAttributes(
-            Attr( 'Name', str, T.getName, T.setName, initDefault='' ),
-            Attr( 'Full Path', pc.Filename, T.getFullpath, self.SetTex ),
-            parent='Texture'
-        )
-        
-    def SetTex( self, data, filePath ):
-        try:
-            pandaPath = pc.Filename.fromOsSpecific( filePath )
-        except TypeError:
-            pandaPath = filePath
-        data.setFullpath( pandaPath )
-        data.setup2dTexture()
-        data.read( pandaPath ) 
+class Texture(NonGraphObject):
+
+    type_ = pc.Texture
+    filename = Attribute(
+        pc.Filename,
+        pc.Texture.get_filename,
+        required=True,
+    )
+
+    @classmethod
+    def create(cls, *args, **kwargs):
+        filename = kwargs.pop('filename', None)
+        panda_filename = pc.Filename.from_os_specific(filename)
+        texture = get_base().loader.load_texture(panda_filename)
+        return super().create(data=texture)

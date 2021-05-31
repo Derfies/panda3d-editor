@@ -1,31 +1,35 @@
-from singleTask import SingleTask
-from pandaManager import PandaManager as pMgr
+import logging
+
+from p3d.singleTask import SingleTask
+from p3d.pandaManager import PandaManager as pMgr
 
 
-class PandaBehaviour( SingleTask ):
+logger = logging.getLogger(__name__)
+
+
+class PandaBehaviour(SingleTask):
     
     cType = 'Script'
     
-    def __init__( self, *args, **kwargs ):
-        SingleTask.__init__( self, *args, **kwargs )
+    def __init__(self, *args, **kwargs):
+        SingleTask.__init__(self, *args, **kwargs)
         
-        self.accept( pMgr.PANDA_BEHAVIOUR_INIT, self.Init )
-        self.accept( pMgr.PANDA_BEHAVIOUR_START, self.Start )
-        self.accept( pMgr.PANDA_BEHAVIOUR_STOP, self.Stop )
-        self.accept( pMgr.PANDA_BEHAVIOUR_DEL, self.Del )
+        self.accept(pMgr.PANDA_BEHAVIOUR_INIT, self.Init)
+        self.accept(pMgr.PANDA_BEHAVIOUR_START, self.Start)
+        self.accept(pMgr.PANDA_BEHAVIOUR_STOP, self.Stop)
+        self.accept(pMgr.PANDA_BEHAVIOUR_DEL, self.Del)
         
-    def __del__( self ):
-        print '  PandaBehaviour: ', self.name, ' DELETED'
+    def __del__(self):
+        logger.info('  PandaBehaviour: ', self.name, ' DELETED')
         
-    def OnInit( self ):
+    def OnInit(self):
         pass
         
-    def Init( self ):
+    def Init(self):
         self.OnInit()
         
-    def OnDel( self ):
+    def OnDel(self):
         pass
         
-    def Del( self ):
+    def Del(self):
         self.OnDel()
-        

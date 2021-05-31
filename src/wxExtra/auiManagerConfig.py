@@ -1,15 +1,15 @@
 import wx
 
 
-class AuiManagerConfig( wx.Config ):
+class AuiManagerConfig(wx.Config):
     
     """
     Custom wxConfig class to handle the main frame size and position, plus all
     the the panes of the aui.
     """
     
-    def __init__( self, auiMgr, *args, **kwargs ):
-        wx.Config.__init__( self, *args, **kwargs )
+    def __init__(self, auiMgr, *args, **kwargs):
+        wx.Config.__init__(self, *args, **kwargs)
         
         self.auiMgr = auiMgr
         self.win = self.auiMgr.GetManagedWindow()
@@ -24,14 +24,14 @@ class AuiManagerConfig( wx.Config ):
             self._keyWinMax = winName + 'Max'
             self._keyPerspDefault = 'perspDefault'
         
-    def Save( self ):
+    def Save(self):
         """Save all panel layouts for the aui manager."""
         # Get old window position and size. We'll use these instead of the
         # maximized window's size and position.
-        winPosX = self.ReadInt( self._keyWinPosX )
-        winPosY = self.ReadInt( self._keyWinPosY )
-        winSizeX = self.ReadInt( self._keyWinSizeX )
-        winSizeY = self.ReadInt( self._keyWinSizeY )
+        winPosX = self.ReadInt(self._keyWinPosX)
+        winPosY = self.ReadInt(self._keyWinPosY)
+        winSizeX = self.ReadInt(self._keyWinSizeX)
+        winSizeY = self.ReadInt(self._keyWinSizeY)
         
         self.DeleteAll()
         
@@ -43,46 +43,46 @@ class AuiManagerConfig( wx.Config ):
                 winSizeX, winSizeY = self.win.GetSize()
             
             # Save the managed window position and size
-            self.SavePosition( winPosX, winPosY )
-            self.SaveSize( winSizeX, winSizeY )
+            self.SavePosition(winPosX, winPosY)
+            self.SaveSize(winSizeX, winSizeY)
             
             # Save the managed window state
             winMax = self.win.IsMaximized()
-            self.WriteBool( self._keyWinMax, winMax )
+            self.WriteBool(self._keyWinMax, winMax)
         
         # Save the current perspective as the default
-        self.Write( self._keyPerspDefault, self.auiMgr.SavePerspective() )
+        self.Write(self._keyPerspDefault, self.auiMgr.SavePerspective())
         
-    def SavePosition( self, x, y ):
+    def SavePosition(self, x, y):
         """Save the managed window's position."""
-        self.WriteInt( self._keyWinPosX, x )
-        self.WriteInt( self._keyWinPosY, y )
+        self.WriteInt(self._keyWinPosX, x)
+        self.WriteInt(self._keyWinPosY, y)
         
-    def SaveSize( self, x, y ):
+    def SaveSize(self, x, y):
         """Save the managed window's size."""
-        self.WriteInt( self._keyWinSizeX, x )
-        self.WriteInt( self._keyWinSizeY, y )
+        self.WriteInt(self._keyWinSizeX, x)
+        self.WriteInt(self._keyWinSizeY, y)
     
-    def Load( self ):
+    def Load(self):
         """Load all panel layouts for the aui manager."""
         if self.win is not None:
             
             # Load the managed window state
-            winMax = self.ReadBool( self._keyWinMax )
-            self.win.Maximize( winMax )
+            winMax = self.ReadBool(self._keyWinMax)
+            self.win.Maximize(winMax)
             
             # Load the managed window size
-            winSizeX = self.ReadInt( self._keyWinSizeX )
-            winSizeY = self.ReadInt( self._keyWinSizeY )
+            winSizeX = self.ReadInt(self._keyWinSizeX)
+            winSizeY = self.ReadInt(self._keyWinSizeY)
             if winSizeX and winSizeY:
-                self.win.SetSize( (winSizeX, winSizeY) )
+                self.win.SetSize((winSizeX, winSizeY))
                 
             # Load the managed window position
-            winPosX = self.ReadInt( self._keyWinPosX )
-            winPosY = self.ReadInt( self._keyWinPosY )
+            winPosX = self.ReadInt(self._keyWinPosX)
+            winPosY = self.ReadInt(self._keyWinPosY)
             if winPosX and winPosY:
-                self.win.SetPosition( (winPosX, winPosY) )
+                self.win.SetPosition((winPosX, winPosY))
             
         # Load the default perspective
-        winPersp = self.Read( self._keyPerspDefault )
-        self.auiMgr.LoadPerspective( winPersp )
+        winPersp = self.Read(self._keyPerspDefault)
+        self.auiMgr.LoadPerspective(winPersp)

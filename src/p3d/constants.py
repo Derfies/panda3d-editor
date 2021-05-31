@@ -1,4 +1,4 @@
-import pandac.PandaModules as pm
+import panda3d.core as pm
 
 
 X_AXIS = pm.Vec3(1, 0, 0)

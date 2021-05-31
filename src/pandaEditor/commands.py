@@ -1,194 +1,211 @@
-import wx
-import pandac.PandaModules as pm
+import uuid
 
-import actions
+import panda3d.core as pm
+from direct.showbase.PythonUtil import getBase as get_base
+
+from pandaEditor.actions import (
+    Add,
+    Composite,
+    Deselect,
+    Parent,
+    Remove,
+    Select,
+    SetAttribute,
+    SetConnections,
+)
 
 
-def Add( comps ):
+def add(comps):
     """
     Create the add composite action, execute it and push it onto the undo 
     queue.
+
     """
-    actns = []
-    actns.append( actions.Deselect( base.selection.comps ) )
-    actns.extend( [actions.Add( comp ) for comp in comps] )
-    actns.append( actions.Select( comps ) )
-    
-    actn = actions.Composite( actns )
-    wx.GetApp().actnMgr.Push( actn )
-    actn()
-    wx.GetApp().doc.OnModified( comps )
+    actions = []
+    actions.append(Deselect(get_base().selection.comps))
+    actions.extend([Add(comp) for comp in comps])
+    actions.append(Select(comps))
+    action = Composite(actions)
+    get_base().action_manager.push(action)
+    action()
+    get_base().doc.on_modified(comps)
     
 
-def Remove( comps ):
+def remove(comps):
     """
     Create the remove composite action, execute it and push it onto the undo 
     queue.
+
     """
-    actns = []
-    actns.append( actions.Deselect( comps ) )
-    actns.extend( [actions.Remove( comp ) for comp in comps] )
-    
-    actn = actions.Composite( actns )
-    wx.GetApp().actnMgr.Push( actn )
-    actn()
-    wx.GetApp().doc.OnModified( comps )
+    actions = []
+    actions.append(Deselect(comps))
+    actions.extend([Remove(comp) for comp in comps])
+    action = Composite(actions)
+    get_base().action_manager.push(action)
+    action()
+    get_base().doc.on_modified(comps)
     
 
-def Duplicate( comps ):
+def duplicate(comps):
     """
     Create the duplicate composite action, execute it and push it onto the 
     undo queue.
+
     """
-    selComps = base.selection.comps
-    base.selection.Clear()
+    sel_comps = get_base().selection.comps
+    get_base().selection.clear()
+    dupe_comps = [comp.duplicate() for comp in comps]
+    actions = []
+    actions.append(Deselect(sel_comps))
+    actions.extend([Add(dupe_comp) for dupe_comp in dupe_comps])
+    actions.append(Select(dupe_comps))
+    action = Composite(actions)
+    get_base().action_manager.push(action)
+    action()
+    get_base().doc.on_modified(dupe_comps)
+
+
+def replace(fromComp, toComp):
+    """
     
-    dupeComps = []
-    for comp in comps:
-        wrpr = base.game.nodeMgr.Wrap( comp )
-        dupeComps.append( wrpr.Duplicate() )
-        
-    actns = []
-    actns.append( actions.Deselect( selComps ) )
-    actns.extend( [actions.Add( dupeComp ) for dupeComp in dupeComps] )
-    actns.append( actions.Select( dupeComps ) )
-    
-    actn = actions.Composite( actns )
-    wx.GetApp().actnMgr.Push( actn )
-    actn()
-    wx.GetApp().doc.OnModified( dupeComps )
+    """
+    action = Composite([
+        Deselect([fromComp]),
+        Remove(fromComp),
+        Add(toComp),
+        Select([toComp])
+    ])
+    get_base().action_manager.push(action)
+    action()
+    get_base().doc.on_modified([fromComp, toComp])
     
 
-def Replace( fromComp, toComp ):
-    """
-    
-    """
-    actns = [
-        actions.Deselect( [fromComp] ),
-        actions.Remove( fromComp ),
-        actions.Add( toComp ),
-        actions.Select( [toComp] )
-    ]
-    
-    actn = actions.Composite( actns )
-    wx.GetApp().actnMgr.Push( actn )
-    actn()
-    wx.GetApp().doc.OnModified( [fromComp, toComp] )
-    
-
-def Select( comps ):
+def select(comps):
     """
     Create the select composite action, execute it and push it onto the
     undo queue.
+
     """
-    actns = [
-        actions.Deselect( base.selection.comps ), 
-        actions.Select( comps )
-    ]
-    
-    actn = actions.Composite( actns )
-    wx.GetApp().actnMgr.Push( actn )
-    actn()
-    wx.GetApp().doc.OnRefresh( comps )
+    action = Composite([
+        Deselect(get_base().selection.comps),
+        Select(comps)
+    ])
+    get_base().action_manager.push(action)
+    action()
+    get_base().doc.on_refresh(comps)
     
 
-def SetAttribute( comps, attrs, val ):
+def set_attribute(comps, name, value):
     """
     Create the set attribute action, execute it and push it onto the undo
     queue.
-    """
-    actns = [actions.SetAttribute( comps[i], attrs[i], val ) for i in range( len( comps ) )]
-    
-    actn = actions.Composite( actns )
-    wx.GetApp().actnMgr.Push( actn )
-    actn()
-    wx.GetApp().doc.OnModified( comps )
-    
 
-def Parent( comps, pComp ):
+    """
+    action = Composite([
+        SetAttribute(comp, name, value)
+        for comp in comps
+    ])
+    get_base().action_manager.push(action)
+    action()
+    get_base().doc.on_modified(comps)
+
+
+# def connect(comps, name, value):
+#     """
+#     Create the connect action, execute it and push it onto the undo queue.
+#
+#     """
+#     action = Composite([
+#         Connect(comp, name, value)
+#         for comp in comps
+#     ])
+#     get_base().action_manager.push(action)
+#     action()
+#     get_base().doc.on_modified()
+
+
+def set_connections(comps, name, value):
+    """
+    Create the connect action, execute it and push it onto the undo queue.
+
+    """
+    action = Composite([
+        SetConnections(comp, name, value)
+        for comp in comps
+    ])
+    get_base().action_manager.push(action)
+    action()
+    get_base().doc.on_modified()
+
+
+def parent(comps, pcomp):
     """
     Create the parent action, execute it and push it onto the undo queue.
+
     """
-    actns = [actions.Parent( comp, pComp ) for comp in comps]
-    
-    actn = actions.Composite( actns )
-    wx.GetApp().actnMgr.Push( actn )
-    actn()
-    wx.GetApp().doc.OnModified( comps )
+    action = Composite([Parent(comp, pcomp) for comp in comps])
+    get_base().action_manager.push(action)
+    action()
+    get_base().doc.on_modified(comps)
     
 
-def Unparent(): pass
-    
-
-def Group( nps ):
+def group(comps):
     """
     Create the group action, execute it and push it onto the undo queue.
+
     """
+    from game.nodes.pandanode import PandaNode
+
     # Find the lowest common ancestor for all NodePaths - this will be the
     # parent for the group NodePath.
-    cmmnNp = nps[0].getParent()
+    common_np = comps[0].data.get_parent()
+    nps = [comp.data for comp in comps]
     for np in nps:
-        cmmnNp = cmmnNp.getCommonAncestor( np )
+        common_np = common_np.get_common_ancestor(np)
+    common_comp = get_base().node_manager.wrap(common_np)
+
+    group_comp = PandaNode.create(name='group')
+    group_comp.id = str(uuid.uuid4())
+    group_comp.parent = common_comp
+    group_comp.set_default_values()
     
-    grpNp = pm.NodePath( 'group' )
-    grpNp.reparentTo( cmmnNp )
-    
-    actns = []
-    actns.append( actions.Add( grpNp ) )
-    actns.extend( [actions.Parent( np, grpNp ) for np in nps] )
-    actns.append( actions.Deselect( nps ) )
-    actns.append( actions.Select( [grpNp] ) )
-    
-    actn = actions.Composite( actns )
-    wx.GetApp().actnMgr.Push( actn )
-    actn()
-    wx.GetApp().doc.OnModified( nps.append( grpNp ) )
+    actions = []
+    actions.append(Add(group_comp))
+    actions.extend([Parent(comp, group_comp) for comp in comps])
+    actions.append(Deselect(comps))
+    actions.append(Select([group_comp]))
+    action = Composite(actions)
+    get_base().action_manager.push(action)
+    action()
+    get_base().doc.on_modified(None)    # Complex scene change - full refresh required.
     
 
-def Ungroup( nps ):
+def ungroup(comps):
     """
     Create the ungroup action, execute it and push it onto the undo queue.
+
     """
-    pNps = []
-    cNpSets = []
-    for np in nps:
-        wrpr = base.game.nodeMgr.Wrap( np )
-        pNps.append( wrpr.GetParent().data )
-        cNpSets.append( [cWrpr.data for cWrpr in wrpr.GetChildren()] )
+    pcomps = []
+    ccomp_sets = []
+    for comp in comps:
+        pcomps.append(comp.parent)
+        ccomp_sets.append(comp.children)
         
     # Remove those nodes which were empty NodePaths.
-    rmvNps = [np for np in nps if np.node().isExactType( pm.PandaNode )]
+    remove_comps = [
+        comp
+        for comp in comps
+        if comp.data.node().isExactType(pm.PandaNode)
+    ]
     
-    actns = []
-    actns.append( actions.Deselect( nps ) )
-    for i, cNps in enumerate( cNpSets ):
-        actns.extend( [actions.Parent( cNp, pNps[i] ) for cNp in cNps] )
-    actns.extend( [actions.Remove( np ) for np in rmvNps] )
-    actns.append( actions.Select( [cNp for cNps in cNpSets for cNp in cNps] ) )
+    actions = []
+    actions.append(Deselect(comps))
+    for i, ccomps in enumerate(ccomp_sets):
+        actions.extend([Parent(ccomp, pcomps[i]) for ccomp in ccomps])
+    actions.extend([Remove(comp) for comp in remove_comps])
+    actions.append(Select([ccomp for ccomps in ccomp_sets for ccomp in ccomps]))
     
-    actn = actions.Composite( actns )
-    wx.GetApp().actnMgr.Push( actn )
-    actn()
-    wx.GetApp().doc.OnModified( nps.append( rmvNps ) )
-    
-
-def Connect( tgtComps, cnnctn, fn ):
-    """
-    Create the connect action, execute it and push it onto the undo queue.
-    """
-    actn = actions.Connect( tgtComps, cnnctn, fn )
-    wx.GetApp().actnMgr.Push( actn )
-    actn()
-    wx.GetApp().doc.OnModified()
-    
-
-def SetConnections( tgtComps, cnnctns ):
-    """
-    Create the connect action, execute it and push it onto the undo queue.
-    """
-    actns = [actions.SetConnections( tgtComps, cnnctn ) for cnnctn in cnnctns]
-    
-    actn = actions.Composite( actns )
-    wx.GetApp().actnMgr.Push( actn )
-    actn()
-    wx.GetApp().doc.OnModified()
+    action = Composite(actions)
+    get_base().action_manager.push(action)
+    action()
+    get_base().doc.on_modified(None)    # Complex scene change - full refresh required.

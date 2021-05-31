@@ -1,166 +1,73 @@
+import abc
 import copy
+import logging
+import uuid
 
-import panda3d.core as pc
-import pandac.PandaModules as pm
+from direct.showbase.PythonUtil import getBase as get_base
 
-import p3d
-import utils
-from p3d import commonUtils as cUtils
+from game.nodes.componentmetaclass import ComponentMetaClass
 
 
-class Base( object ):
+logger = logging.getLogger(__name__)
+
+
+class Base(metaclass=ComponentMetaClass):
     
-    def __init__( self, data ):
+    def __init__(self, data):
         self.data = data
-        
-        self.attributes = []
-        self.cnnctns = []
-        self.children = []
-        self.createArgs = {}
+        self._children = []
     
     @classmethod
-    def Create( cls, *args, **kwargs ):
-        wrpr = cls( None )
-        
-        createKwargs = {}
-        for attr in wrpr.GetCreateAttributes():
-            if attr.name in kwargs:
-                val = cUtils.UnserializeFromString( kwargs[attr.name], attr.type )
-                if val is not None:
-                    createKwargs[attr.name] = val
-            else:
-                createKwargs[attr.initName] = attr.initDefault
-        
-        # Default create args to a string of the class name.
-        if 'name' in createKwargs and not createKwargs['name']:
-            createKwargs['name'] = utils.GetLowerCamelCase( cls.type_.__name__ )
-        
-        wrpr.SetData( cls.type_( **createKwargs ) )
-        
-        return wrpr
-    
-    def Detach( self ):
-        base.scene.DeregisterComponent( self.data )
-    
-    def Destroy( self ):
-        pass
-    
-    def Duplicate( self ):
-        dupeComp = copy.copy( self.data )
-        base.scene.RegisterComponent( dupeComp )
-        self.FixUpDuplicateChildren( self.data, dupeComp )
-        return dupeComp
-    
-    def GetId( self ):
-        if self.data in base.scene.comps:
-            return base.scene.comps[self.data]
-        
-        return None
-    
-    def SetId( self, id ):
-        base.scene.comps[self.data] = id
-        
-    def GetType( self ):
-        return type( self ).__name__
-        
-    def GetParent( self ):
-        return base.game.nodeMgr.Wrap( base.scene )
-    
-    def SetParent( self, pComp ):
-        if pComp is not None:
-            wrpr = base.game.nodeMgr.Wrap( pComp )
-            wrpr.AddChild( self.data )
-    
-    def GetChildren( self ):
-        return [] 
-    
-    def GetAddons( self ):
-        return []
-    
-    def FindProperty( self, name ):
-        for attr in self.GetAttributes():
-            if attr.name == name:
-                return attr
-            
-    def FindConnection( self, name ):
-        for cnnctn in self.GetAllConnections():
-            if cnnctn.name == name:
-                return cnnctn
-    
-    def SetPropertyData( self, propDict ):
-        """
-        Set the wrapper's properties from a dictionary of key / value pairs.
-        Values will be strings so we must ask the property to unserialize 
-        them first.
-        """
-        for pName, pValStr in propDict.items():
-            prop = self.FindProperty( pName )
-            if prop is not None:
-                prop.UnserializeFromString( pValStr )
-                
-    def SetConnectionData( self, cnctnDict ):
-        for key, vals in cnctnDict.items():
-            cnnctn = self.FindConnection( key )
-            if cnnctn is not None:
-                for val in vals:
-                    cnnctn.Connect( val )
-                
-    def GetAttributes( self, addons=False ):
-        """
-        Return a flat list of all the attributes of this component, including
-        all child attributes of attributes.
-        """
-        attrs = self.attributes[:]
-        if addons:
-            for wrpr in self.GetAddons():
-                for attr in wrpr.GetAttributes( addons ):
-                    attrs.append( attr )
-                
-        return attrs
-    
-    def GetAllConnections( self ):
-        cnnctns = []
-        
-        for attr in self.GetAttributes():
-            if hasattr( attr, 'cnnctn' ):
-                cnnctns.append( attr )
-                
-        return cnnctns
-    
-    def AddChild( self, comp ):
-        pass
-    
-    def AddAttributes( self, *attrs, **kwargs ):
-        parent = kwargs.pop( 'parent', None )
-        index = kwargs.pop( 'index', len( self.attributes ) )
-        for i in range( len( attrs ) ):
-            attrs[i].parent = parent
-            attrs[i].srcComp = self.data
-            self.attributes.insert( index + i, attrs[i] )
-            
-    def FixUpDuplicateChildren( self, origComp, dupeComp ):
-        dupeWrpr = base.game.nodeMgr.Wrap( dupeComp )
-        dupeWrpr.OnDuplicate( origComp, dupeComp )
-        
-        cDupeWrprs = dupeWrpr.GetChildren()
-        origWrpr = base.game.nodeMgr.Wrap( origComp )
-        cOrigWrprs = origWrpr.GetChildren()
-        for i in range( len( cDupeWrprs ) ):
-            self.FixUpDuplicateChildren( cOrigWrprs[i].data, cDupeWrprs[i].data )
-            
-    def OnDuplicate( self, origComp, dupeComp ):
-        pass
-    
-    def SetData( self, data ):
-        self.data = data
-        for attr in self.attributes:
-            attr.srcComp = data
-            
-    def GetCreateAttributes( self ):
-        attrs = []
-        
-        for attr in self.GetAttributes():
-            if attr.initDefault is not None:
-                attrs.append( attr )
-                        
-        return attrs
+    def create(cls, *args, **kwargs):
+        data = kwargs.pop('data', None)
+        if data is None:
+            data = cls.type_(**kwargs)
+        comp = cls(data)
+        return comp
+
+    def __hash__(self):
+        return hash(self.data)
+
+    def __eq__(self, other):
+        return hash(self) == hash(other)
+
+    @property
+    def id(self):
+        return self.metaobject.id
+
+    @id.setter
+    def id(self, value):
+        self.metaobject.id = value
+
+    @property
+    def type(self):
+        return type(self).__name__
+
+    @property
+    def parent(self):
+
+        # Return None if the component isn't registered - it may have been
+        # detached.
+        if self.data not in get_base().scene.objects:
+            return None
+        return get_base().node_manager.wrap(get_base().scene)
+
+    @parent.setter
+    def parent(self, value):
+        value.add_child(self)
+
+    @property
+    def children(self):
+        return self._children
+
+    @abc.abstractmethod
+    def detach(self):
+        """"""
+
+    @abc.abstractmethod
+    def destroy(self):
+        """"""
+
+    @abc.abstractmethod
+    def add_child(self, child):
+        """"""

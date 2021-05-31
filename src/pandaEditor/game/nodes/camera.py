@@ -1,11 +1,9 @@
-import pandac.PandaModules as pm
+import panda3d.core as pm
 
-from lensNode import LensNode
+from game.nodes.lensnode import LensNode
+from game.nodes.componentmetaclass import ComponentMetaClass
 
 
-class Camera( LensNode ):
+class Camera(LensNode, metaclass=ComponentMetaClass):
     
     type_ = pm.Camera
-    
-    def __init__( self, *args, **kwargs ):
-        LensNode.__init__( self, *args, **kwargs )

@@ -1,21 +1,33 @@
-import pandac.PandaModules as pm
+import panda3d.core as pc
 
-from nodePath import NodePath
-from attributes import NodeAttribute as Attr
+from game.nodes.attributes import Attribute
+from game.nodes.nodepath import NodePath
 
 
-class Fog( NodePath ):
+class Fog(NodePath):
     
-    type_ = pm.Fog
-    
-    def __init__( self, *args, **kwargs ):
-        NodePath.__init__( self, *args, **kwargs )
-
-        self.AddAttributes(
-            Attr( 'Color', pm.Vec4, pm.Fog.getColor, pm.Fog.setColor ), 
-            Attr( 'Linear Onset Point', pm.Point3, pm.Fog.getLinearOnsetPoint, pm.Fog.setLinearOnsetPoint ), 
-            Attr( 'Linear Opaque Point', pm.Point3, pm.Fog.getLinearOpaquePoint, pm.Fog.setLinearOpaquePoint ), 
-            Attr( 'Exponential Density', float, pm.Fog.getExpDensity, 
-                  pm.Fog.setExpDensity ), 
-            parent='Fog'
-        )
+    type_ = pc.Fog
+    color = Attribute(
+        pc.Vec4,
+        pc.Fog.get_color,
+        pc.Fog.set_color,
+        node_data=True
+    )
+    linear_onset_point = Attribute(
+        pc.Point3,
+        pc.Fog.get_linear_onset_point,
+        pc.Fog.set_linear_onset_point,
+        node_data=True,
+    )
+    linear_opaque_point = Attribute(
+        pc.Point3,
+        pc.Fog.get_linear_opaque_point,
+        pc.Fog.set_linear_opaque_point,
+        node_data=True,
+    )
+    exponential_density = Attribute(
+        float,
+        pc.Fog.get_exp_density,
+        pc.Fog.set_exp_density,
+        node_data=True,
+    )

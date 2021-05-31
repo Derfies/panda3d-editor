@@ -1,209 +1,216 @@
-import pandac.PandaModules as pm
+from direct.showbase.PythonUtil import getBase as get_base
+import panda3d.core as pm
 
-import p3d
-import editor
+from p3d.object import Object
+from p3d.marquee import Marquee
+from p3d.mouse import MOUSE_CTRL
+from p3d.mousePicker import MousePicker
+from nodes.constants import TAG_IGNORE, TAG_PICKABLE
 
 
-class Selection( p3d.Object ):
-    
+class Selection(Object):
+
     BBOX_TAG = 'bbox'
-    
-    def __init__( self, *args, **kwargs ):
-        p3d.Object.__init__( self, *args, **kwargs )
-        
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
         self.comps = []
-        self.wrprs = []
-        
-        # Create a marquee
-        self.marquee = p3d.Marquee( 'marquee', *args, **kwargs )
-        
+
+        # Create a marquee.
+        self.marquee = Marquee('marquee', *args, **kwargs)
+
         # Create node picker - set its collision mask to hit both geom nodes
-        # and collision nodes
+        # and collision nodes.
         bitMask = pm.GeomNode.getDefaultCollideMask() | pm.CollisionNode.getDefaultCollideMask()
-        self.picker = p3d.MousePicker( 'picker', *args, fromCollideMask=bitMask, **kwargs )
-                
-    def Get( self ):
+        self.picker = MousePicker(
+            'picker',
+            *args,
+            fromCollideMask=bitMask, **kwargs
+        )
+
+    def get(self):
         """Return the selected components."""
         return self.comps
-    
-    def GetNodePaths( self ):
-        nps = [
-            wrpr.data 
-            for wrpr in self.wrprs
-            if type( wrpr.data  ) == pm.NodePath
+
+    @property
+    def node_paths(self):
+        return [
+            comp.data
+            for comp in self.comps
+            if isinstance(comp.data, pm.NodePath)
         ]
-        return nps
-    
-    def Clear( self ):
+
+    def clear(self):
         """Clear the selection list and run deselect handlers."""
-        for wrpr in self.wrprs:
-            wrpr.OnDeselect()
+        for comp in self.comps:
+            comp.on_deselect()
         self.comps = []
-        self.wrprs = []
-    
-    def Add( self, comps ):
+
+    def add(self, comps):
         """
         Add the indicated components to the selection and run select handlers.
         """
         for comp in comps:
-            
+
             # Skip components already selected.
             if comp in self.comps:
                 continue
-            
-            wrpr = base.game.nodeMgr.Wrap( comp )
-            wrpr.OnSelect()
-            self.comps.append( comp )
-            self.wrprs.append( wrpr )
-    
-    def Remove( self, comps ):
+            comp.on_select()
+            self.comps.append(comp)
+
+    def remove(self, comps):
         """
         Remove those components that were in the selection and run deselect
         handlers.
         """
-        for wrpr in self.wrprs:
-            wrpr.OnDeselect()
-            
+        for comp in self.comps:
+            comp.on_deselect()
         self.comps = [comp for comp in self.comps if comp not in comps]
-        self.wrprs = [base.game.nodeMgr.Wrap( comp ) for comp in self.comps]
-    
-    def SelectParent( self ):
+
+    def select_parent(self):
         """
         Return a list of parent components from the selection. Include the
         original component if no suitable parent is found.
         """
         comps = []
-        for wrpr in self.wrprs:
-            pWrpr = wrpr.GetParent()
-            if pWrpr.data != base.scene:
-                comps.append( pWrpr.data )
+        for comp in self.comps:
+            pcomp = comp.parent
+            if pcomp.data != get_base().scene:
+                comps.append(pcomp)
             else:
-                comps.append( wrpr.data )
+                comps.append(comp)
         return comps
-        
-    def SelectChild( self ):
+
+    def select_child(self):
         """
         Return a list of child components from the selection. Include the
         original component if no children are found.
         """
         comps = []
-        for wrpr in self.wrprs:
-            cWrprs = wrpr.GetChildren()
-            if cWrprs:
-                comps.append( cWrprs[0].data )
+        for comp in self.comps:
+            if comp.children:
+                comps.append(comp.children[0])
             else:
-                comps.append( wrpr.data )
+                comps.append(comp)
         return comps
-            
-    def SelectPrev( self ):
+
+    def select_prev(self):
         """
         For each component in the selection, return the component that appears
-        one before in the parent's list of children. 
+        one before in the parent's list of children.
         """
         comps = []
-        for wrpr in self.wrprs:
-            pWrpr = wrpr.GetParent()
-            cComps = [cWrpr.data for cWrpr in pWrpr.GetChildren()]
-                
-            # Get the index of the child before this one - wrap around if the 
+        for comp in self.comps:
+            children = comp.parent.children
+
+            # Get the index of the child before this one - wrap around if the
             # index has gone below zero.
-            index = cComps.index( wrpr.data ) - 1
+            index = children.index(comp) - 1
             if index < 0:
-                index = len( cComps ) - 1
-            
-            comps.append( cComps[index] )
+                index = len(children) - 1
+
+            comps.append(children[index])
         return comps
-        
-    def SelectNext( self ):
+
+    def select_next(self):
         """
         For each component in the selection, return the component that appears
-        one after in the parent's list of children. 
+        one after in the parent's list of children.
         """
         comps = []
-        for wrpr in self.wrprs:
-            pWrpr = wrpr.GetParent()
-            cComps = [cWrpr.data for cWrpr in pWrpr.GetChildren()]
-            
-            # Get the index of the child after this one - wrap around if the 
+        for comp in self.comps:
+            children = comp.parent.children
+
+            # Get the index of the child after this one - wrap around if the
             # index has gone over the number of children.
-            index = cComps.index( wrpr.data ) + 1
-            if index > len( cComps ) - 1:
+            index = children.index(comp) + 1
+            if index > len(children) - 1:
                 index = 0
-            
-            comps.append( cComps[index] )
+
+            comps.append(children[index])
         return comps
-    
-    def StartDragSelect( self, append=False ):
+
+    def StartDragSelect(self, append=False):
         """
         Start the marquee and put the tool into append mode if specified.
         """
         if self.marquee.mouseWatcherNode.hasMouse():
             self.append = append
             self.marquee.Start()
-    
-    def StopDragSelect( self ):
+
+    def StopDragSelect(self):
         """
         Stop the marquee and get all the node paths under it with the correct
         tag. Also append any node which was under the mouse at the end of the
         operation.
+
         """
         self.marquee.Stop()
-        
+
         # Find all node paths below the root node which are inside the marquee
         # AND have the TAG_PICKABLE tag.
         nps = []
-        for np in self.rootNp.findAllMatches( '**' ):
-            pickNp = self.GetPickableNodePath( np )
-            if self.marquee.IsNodePathInside( pickNp ) and pickNp not in nps:
-                nps.append( pickNp )
-                    
+        for np in self.rootNp.findAllMatches('**'):
+            pick_np = self.GetPickableNodePath(np)
+            if (
+                pick_np is not None and
+                self.marquee.IsNodePathInside(pick_np) and
+                pick_np not in nps
+            ):
+                nps.append(pick_np)
+
         # Add any node path which was under the mouse to the selection.
         np = self.GetNodePathUnderMouse()
-        if np is not None and np not in nps:
-            nps.append( np )
-        
-        # In append mode add any NodePath which wasn't already in the 
-        # selection and remove any NodePath which was already selected.
+        if np is not None and pick_np not in nps:
+            nps.append(np)
+
+        # In append mode add any NodePath which wasn't already in the selection
+        # and remove any NodePath which was already selected.
+        # TODO: This doesn't run deselect handlers.
+        comps = [get_base().node_manager.wrap(np) for np in nps]
         if self.append:
-            oldComps = self.comps
-            for np in nps:
-                if np in self.comps:
-                    oldComps.remove( np )
+            old_comps = self.comps
+            for comp in comps:
+                if comp in self.comps:
+                    old_comps.remove(comp)
                 else:
-                    oldComps.append( np )
-            nps = oldComps
-            
-        return nps
-        
-    def GetNodePathUnderMouse( self ):
+                    old_comps.append(comp)
+            comps = old_comps
+        return comps
+
+    def GetNodePathUnderMouse(self):
         """
         Returns the closest node under the mouse, or None if there isn't one.
         """
-        self.picker.OnUpdate( None )
+        self.picker.OnUpdate(None)
         pickedNp = self.picker.GetFirstNodePath()
         if pickedNp is not None:
-            return self.GetPickableNodePath( pickedNp )
+            return self.GetPickableNodePath(pickedNp)
         else:
             return None
-        
-    def GetNodePathAtPosition( self, x, y ):
-        self.picker.OnUpdate( None, x, y )
+
+    def get_node_path_at_position(self, x, y):
+        self.picker.OnUpdate(None, x, y)
         pickedNp = self.picker.GetFirstNodePath()
         if pickedNp is not None:
-            return self.GetPickableNodePath( pickedNp )
+            return self.GetPickableNodePath(pickedNp)
         else:
             return None
-        
-    def GetPickableNodePath( self, np ):
-        if np.getPythonTag( editor.nodes.TAG_IGNORE ):
-            return np.findNetPythonTag( editor.nodes.TAG_PICKABLE )
-        elif p3d.MOUSE_CTRL in base.edCamera.mouse.modifiers:
-            return np
+
+    def GetPickableNodePath(self, np):
+        # if MOUSE_CTRL not in get_base().edCamera.mouse.modifiers:
+        #     np = np.findNetPythonTag(TAG_PICKABLE)
+        # return None if np.isEmpty() else np
+        if np.getPythonTag(TAG_IGNORE):
+            return np.findNetPythonTag(TAG_PICKABLE)
+        elif MOUSE_CTRL in get_base().edCamera.modifiers:
+           return np
         else:
-            return np.findNetPythonTag( editor.nodes.TAG_PICKABLE )
-        
-    def Update( self ):
+            return np.findNetPythonTag(TAG_PICKABLE)
+
+    def update(self):
         """Update the selection by running deselect and select handlers."""
-        for wrpr in self.wrprs:
-            wrpr.OnDeselect()
-            wrpr.OnSelect()
+        for comp in self.comps:
+            comp.on_deselect()
+            comp.on_select()

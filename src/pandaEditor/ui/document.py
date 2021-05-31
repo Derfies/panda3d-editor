@@ -1,54 +1,54 @@
 import os
 
-from wx.lib.pubsub import pub
+from direct.showbase.PythonUtil import getBase as get_base
+from pubsub import pub
 
 
-class Document( object ):
+class Document:
 
-    def __init__( self, filePath, contents ):
-        self.filePath = filePath
+    def __init__(self, file_path, contents):
+        self.file_path = file_path
         self.contents = contents
         
         self.dirty = False
-        self.title = self.GetTitle()
-        
-    def GetTitle( self ):
-        if self.filePath is not None:
-            return os.path.basename( self.filePath )
+
+    @property
+    def title(self):
+        if self.file_path is not None:
+            return os.path.basename(self.file_path)
         else:
             return 'untitled'
 
-    def Load( self ):
-        self.contents.Load( self.filePath )
-        self.OnRefresh()
+    def load(self):
+        self.contents.load(self.file_path)
+        self.on_refresh()
 
-    def Save( self, **kwargs ):
-        filePath = kwargs.pop( 'filePath', self.filePath )
-        self.contents.Save( filePath )
-        self.title = self.GetTitle()
+    def save(self, **kwargs):
+        file_path = kwargs.pop('file_path', self.file_path)
+        self.contents.save(file_path)
         self.dirty = False
-        self.OnRefresh()
+        self.on_refresh()
         
-    def OnRefresh( self, comps=None ):
+    def on_refresh(self, comps=None):
         """
         Broadcast the update message without setting the dirty flag. Methods
         subscribed to this message will rebuild ui widgets completely.
         """
-        pub.sendMessage( 'Update', comps=comps )
+        pub.sendMessage('Update', comps=comps)
 
-    def OnModified( self, comps=None ):
+    def on_modified(self, comps=None):
         """
         Broadcast the update message and set the dirty flag. Methods
         subscribed to this message will rebuild ui widgets completely.
         """
         self.dirty = True
-        pub.sendMessage( 'Update', comps=comps )
+        pub.sendMessage('Update', comps=comps)
         
-    def OnSelectionModified( self, task ):
+    def on_selection_modified(self, task):
         """
         Broadcast the update selection message. Methods subscribed to this
         message should be quick and not force full rebuilds of ui widgets
         considering how quickly the selection is likely to change.
         """
-        pub.sendMessage( 'SelectionModified', comps=base.selection.wrprs )
+        pub.sendMessage('SelectionModified', comps=get_base().selection.comps)
         return task.cont
