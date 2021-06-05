@@ -62,12 +62,12 @@ PROPERTY_MAP = {
 
 class CreateDialog(wx.Dialog):
 
-    def __init__(self, cls_name, default_values, *args, **kwargs):
+    def __init__(self, text, default_values, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.ctrls = {}
 
-        static_text = wx.StaticText(self, -1, f'Create {cls_name}')
+        static_text = wx.StaticText(self, -1, text)
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(static_text, 0, wx.TOP | wx.LEFT | wx.RIGHT, 10)
 

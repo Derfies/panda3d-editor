@@ -36,12 +36,12 @@ def GetPointsForBox(x, y, z):
     return points
     
 
-def GetPointsForArc(degrees, numSegs, reverse=False):
+def GetPointsForArc(degrees, num_segs, reverse=False):
     points = []
     
     radians = math.radians(degrees)
-    for i in range(numSegs + 1):
-        a = radians * i / numSegs
+    for i in range(num_segs + 1):
+        a = radians * i / num_segs
         y = math.sin(a)
         x = math.cos(a)
         
@@ -146,8 +146,8 @@ def Square(width=1, height=1, axis=pm.Vec3(1, 0, 0), thickness=1.0, origin=pm.Po
     return ls.create()
         
 
-def Cone(radius=1.0, height=2.0, numSegs=16, degrees=360, 
-          axis=pm.Vec3(0, 0, 1), origin=pm.Point3(0, 0, 0)):
+def cone(radius=1.0, height=2.0, num_segs=16, degrees=360,
+         axis=pm.Vec3(0, 0, 1), origin=pm.Point3(0, 0, 0)):
     """Return a geom node representing a cone."""
     # Create vetex data format
     gvf = pm.GeomVertexFormat.getV3n3()
@@ -161,7 +161,7 @@ def Cone(radius=1.0, height=2.0, numSegs=16, degrees=360,
     axis2 = pm.Vec3(axis)
     axis2.normalize()
     offset = axis2 * height / 2.0
-    points = GetPointsForArc(degrees, numSegs, True)
+    points = GetPointsForArc(degrees, num_segs, True)
     for i in range(len(points) - 1):
         
         # Rotate the points around the desired axis
@@ -199,8 +199,8 @@ def Cone(radius=1.0, height=2.0, numSegs=16, degrees=360,
     return geomNode
     
 
-def Cylinder(radius=1.0, height=2.0, numSegs=16, degrees=360, 
-              axis=pm.Vec3(0, 0, 1), origin=pm.Point3(0, 0, 0)):
+def cylinder(radius=1.0, height=2.0, num_segs=16, degrees=360,
+             axis=pm.Vec3(0, 0, 1), origin=pm.Point3(0, 0, 0)):
     """Return a geom node representing a cylinder."""
     # Create vetex data format
     gvf = pm.GeomVertexFormat.getV3n3()
@@ -215,7 +215,7 @@ def Cylinder(radius=1.0, height=2.0, numSegs=16, degrees=360,
     axis2 = pm.Vec3(axis)
     axis2.normalize()
     offset = axis2 * height / 2.0
-    points = GetPointsForArc(degrees, numSegs, True)
+    points = GetPointsForArc(degrees, num_segs, True)
     for i in range(len(points) - 1):
         
         # Rotate the points around the desired axis
@@ -261,8 +261,8 @@ def Cylinder(radius=1.0, height=2.0, numSegs=16, degrees=360,
     return geomNode
     
 
-def Sphere(radius=1.0, numSegs=16, degrees=360,
-            axis=pm.Vec3(0, 0, 1), origin=pm.Point3(0, 0, 0)):
+def sphere(radius=1.0, num_segs=16, degrees=360,
+           axis=pm.Vec3(0, 0, 1), origin=pm.Point3(0, 0, 0)):
     """Return a geom node representing a cylinder."""
     # Create vetex data format
     gvf = pm.GeomVertexFormat.getV3n3()
@@ -275,8 +275,8 @@ def Sphere(radius=1.0, numSegs=16, degrees=360,
     # Get the points for an arc
     axis = pm.Vec3(axis)
     axis.normalize()
-    points = GetPointsForArc(degrees, numSegs, True)
-    zPoints = GetPointsForArc(180, numSegs / 2, True)
+    points = GetPointsForArc(degrees, num_segs, True)
+    zPoints = GetPointsForArc(180, int(num_segs / 2), True)
     for z in range(1, len(zPoints) - 2):
         rad1 = zPoints[z][1] * radius
         rad2 = zPoints[z+1][1] * radius
@@ -363,7 +363,7 @@ def Sphere(radius=1.0, numSegs=16, degrees=360,
     return geomNode
     
 
-def Box(width=1, depth=1, height=1, origin=pm.Point3(0, 0, 0)):
+def box(width=1, depth=1, height=1, origin=pm.Point3(0, 0, 0)):
     """Return a geom node representing a box."""
     # Create vetex data format
     gvf = pm.GeomVertexFormat.getV3n3()
