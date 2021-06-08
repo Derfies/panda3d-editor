@@ -157,7 +157,7 @@ class SceneGraphBasePanel(wx.Panel):
             new_item = self.tc.SetItemParent(
                 self._comps[comp],
                 self._comps[parent],
-                comp.get_sibling_index()
+                comp.sibling_index,
             )
             self.tc.SetItemText(new_item, comp.label)
             self.UpdateItemData(new_item)

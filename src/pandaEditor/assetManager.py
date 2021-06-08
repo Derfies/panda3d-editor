@@ -1,4 +1,5 @@
 import logging
+import collections
 import os
 
 import panda3d.core as pm
@@ -9,118 +10,70 @@ logger = logging.getLogger(__name__)
 
 
 class AssetManager:
-    
-    def __init__(self):
-        self.assets = {}
         
-    def RegisterAsset(self, assetPath, asset):
-        self.assets.setdefault(assetPath, [])
-        self.assets[assetPath].append(asset)
-        
-    def OnAssetModified(self, filePaths):
+    def on_asset_modified(self, file_paths):
         """
         Reload the indicated file paths as they have been marked as dirty in
         the project directory.
+
         """
-        for filePath in filePaths:
+        for file_path in file_paths:
             
             # Bail if the path is a directory.
-            if os.path.isdir(filePath):
+            if os.path.isdir(file_path):
                 continue
-            pandaPath = pm.Filename.fromOsSpecific(filePath)
+            panda_path = pm.Filename.from_os_specific(file_path)
             
             # Test if the file path represents an asset in one of Panda's
             # asset pools.
-            if pm.TexturePool.hasTexture(pandaPath):
-                logger.info('Reloading texture: ', pandaPath)
-                self.ReloadTexture(pandaPath)
-            elif pm.ModelPool.hasModel(pandaPath):
-                logger.info('Reloading model: ', pandaPath)
-                self.ReloadModel(pandaPath)
-            #elif pm.ShaderPool.hasShader(pandaPath):
-            #    print 'Reloading shader: ', pandaPath
-            #    self.ReloadShader(pandaPath)
+            if pm.TexturePool.hasTexture(panda_path):
+                logger.info(f'Reloading texture: {panda_path}')
+                self.reload_texture(panda_path)
+            elif pm.ModelPool.hasModel(panda_path):
+                logger.info(f'Reloading model: {panda_path}')
+                self.reload_model(panda_path)
         
-    def ReloadTexture(self, pandaPath):
-        for tex in pm.TexturePool.findAllTextures():
-            if tex.getFilename() == pandaPath:
+    def reload_texture(self, panda_path):
+        for tex in pm.TexturePool.find_all_textures():
+            if tex.get_filename() == panda_path:
                 tex.reload()
                 
-    def ReloadShader(self, pandaPath):
-        pm.ShaderPool.releaseShader(pandaPath)
-        loader.loadShader(pandaPath)
-                
-    def ReloadModel(self, pandaPath):
-        pm.ModelPool.releaseModel(pandaPath)
-        pm.ModelPool.loadModel(pandaPath)
-        
+    def reload_model(self, panda_path):
+
+        # Reload the model in the model pool.
+        # pm.ModelPool.release_model(panda_path)
+        # pm.ModelPool.load_model(panda_path)
+
+        comp_cls = get_base().node_manager.get_component_by_name('ModelRoot')
+        # file_path = pm.Filename.to_os_specific(panda_path)
+        # comp = comp_cls.create(model_path=file_path)
+        new_np = get_base().loader.load_model(panda_path, noCache=True)
+        new_comp = comp_cls.create(data=new_np)
+
         # Find all instances of this model in the scene graph.
-        nps = [
-            np 
-            for np in get_base().scene.rootNp.findAllMatches('**/+ModelRoot')
-            if np.node().getFullpath() == pandaPath
+        comps = [
+            get_base().node_manager.wrap(np)
+            for np in get_base().scene.rootNp.find_all_matches('**/+ModelRoot')
+            if np.node().get_fullpath() == panda_path
         ]
-        
-        wrprCls = get_base().node_manager.get_component_by_name('ModelRoot')
-        filePath = pm.Filename.toOsSpecific(pandaPath)
-        wrpr = wrprCls.create(model_path=filePath)
         
         # Now unhook all the NodePaths under the ModelRoot and reparent a new
         # copy to it. This will remove all sub ModelRoot changes at the moment
         # and will need to be fixed in the future.
-        oldIds = {}
-        for np in nps:
-            
-            # Look for connections.
-            inCnnctns = {}
-            outCnnctns = {}
-            for childNp in np.findAllMatches('**/*'):
-                cWrpr = get_base().node_manager.wrap(childNp)
-                path = cWrpr.get_path()
-                oldIds[path] = cWrpr.id
-                for cnnctn in get_base().scene.get_incoming_connections(cWrpr):
-                    # Need to break connection here?
-                    inCnnctns.setdefault(path, [])
-                    inCnnctns[path].append(cnnctn)
-                    
-                for cnnctn in get_base().scene.get_outgoing_connections(cWrpr):
-                    cnnctn.clear(cWrpr.data)
-                    outCnnctns.setdefault(path, [])
-                    outCnnctns[path].append(cnnctn)
-            
-            # Remove the existing children.
-            for childNp in np.getChildren():
-                childNp.removeNode()
-            
-            # Copy the new updated children under the old ModelRoot NodePath
-            # so we retain its properties.
-            for childNp in wrpr.data.getChildren():
-                cWrpr = get_base().node_manager.wrap(childNp)
-                dupeNp = cWrpr.duplicate(unique_name=False)
-                dupeNp.reparentTo(np)
-                
-            # Replace connections.
-            for childNp in np.findAllMatches('**/*'):
-                cWrpr = get_base().node_manager.wrap(childNp)
-                path = cWrpr.get_path()
-                
-                if path in outCnnctns:
-                    for cnnctn in outCnnctns[path]:
-                        cnnctn.connect(cWrpr.data)
-                        #print 'Relinking: ', cnnctn.label, ' to: ', cWrpr.data
-                        
-                if path in inCnnctns:
-                    cWrpr.modified = True
-                    for cnnctn in inCnnctns[path]:
-                        comps = cnnctn.Get()
-                        cnnctn.srcComp = childNp
-                        try:
-                            for comp in comps:
-                                cnnctn.connect(comp)
-                        except TypeError:
-                            cnnctn.connect(comps)
-                          
-                        #print 'Relinking: ', cnnctn.label, ' to: ', cWrpr.data
-                        
-                # Fix up name and ids.
-                cWrpr.set_id(oldIds[path])
+        # old_ids = {}
+        import copy
+        for comp in comps:
+            index = comp.sibling_index
+            print('index:', index)
+            parent_np = comp.parent.data
+            children = list(parent_np.get_children())
+            print('num children:', len(children))
+            for child in children:
+                child.detach_node()
+
+            print('pop:', children.pop(index))
+            children.insert(index, copy.deepcopy(new_np))
+            for child in children:
+                child.reparent_to(parent_np)
+
+        get_base().doc.on_modified()

@@ -597,7 +597,7 @@ class ShowBase(GameShowBase):
         return prefab_comp
 
     def OnProjectFilesModified(self, filePaths):
-        self.asset_manager.OnAssetModified(filePaths)
+        self.asset_manager.on_asset_modified(filePaths)
         self.plugin_manager.on_project_modified(filePaths)
 
     def write_bam_file(self):

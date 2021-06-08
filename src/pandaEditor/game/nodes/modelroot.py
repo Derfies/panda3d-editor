@@ -21,24 +21,14 @@ class ModelRoot(NodePath):
     @classmethod
     def create(cls, *args, **kwargs):
         model_path = kwargs.pop('model_path', None)
-        if model_path is None:
-            np = pc.NodePath(pc.ModelRoot(''))  # TODO: Enforce name here?
-        else:
-            filePath = pc.Filename.fromOsSpecific(model_path)
+        if model_path is not None:
+            file_path = pc.Filename.from_os_specific(model_path)
+            np = get_base().loader.loadModel(file_path)
+            kwargs['data'] = np
 
-            # TODO: Figure out a better way to deal with extensions. All this
-            # might be redundant anyway if we serialise extensions.
-            try:
-                np = get_base().loader.loadModel(filePath)
-            except:
-                try:
-                    np = get_base().loader.loadModel(filePath + '.bam')
-                except IOError:
-                    print('Failed to load: ', filePath)
-                    np = pc.NodePath(pc.ModelRoot(''))
-            np.setName(filePath.getBasenameWoExtension())
-
-        comp = super().create(data=np)
+        comp = super().create(*args, **kwargs)
+        full_path = comp.data.node().get_fullpath()
+        comp.data.set_name(full_path.get_basename_wo_extension())
         
         # Iterate over child nodes
         # TBH I'm not even sure I know what this does.
@@ -54,7 +44,7 @@ class ModelRoot(NodePath):
             for child in node.getChildren():
                 Recurse(child)
                 
-        Recurse(np)
+        Recurse(comp.data)
         
         return comp
     

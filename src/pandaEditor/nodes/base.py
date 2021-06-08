@@ -71,11 +71,13 @@ class Base:
     @abc.abstractmethod
     def default_parent(self):
         """"""
-    
-    def get_sibling_index(self):
+
+    @property
+    def sibling_index(self):
         """
         Return the position of of this wrapper's component amongst its sibling
         components.
+
         """
         parent = self.parent
         return parent.children.index(self) if parent is not None else None

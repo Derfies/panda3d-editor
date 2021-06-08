@@ -140,7 +140,7 @@ class NodePath:
         pass
     
     def get_path(self):
-        model_root = self.data.find_net_python_tag(TAG_PICKABLE)
+        model_root = self.data#.find_net_python_tag(TAG_PICKABLE)
         
         def Rec(tgtNp, np, path):
             if np.compare_to(tgtNp) != 0:
