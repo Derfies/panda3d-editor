@@ -11,7 +11,7 @@ from game.nodes.nodepath import NodePath
 class ModelRoot(NodePath):
     
     type_ = pc.ModelRoot
-    model_path = Attribute(
+    fullpath = Attribute(
         pc.Filename,
         pc.ModelRoot.get_fullpath,
         required=True,
@@ -20,15 +20,15 @@ class ModelRoot(NodePath):
 
     @classmethod
     def create(cls, *args, **kwargs):
-        model_path = kwargs.pop('model_path', None)
-        if model_path is not None:
-            file_path = pc.Filename.from_os_specific(model_path)
-            np = get_base().loader.loadModel(file_path)
+        fullpath = kwargs.pop('fullpath', None)
+        if fullpath is not None:
+            panda_fullpath = pc.Filename.from_os_specific(fullpath)
+            np = get_base().loader.load_model(panda_fullpath)
             kwargs['data'] = np
 
         comp = super().create(*args, **kwargs)
-        full_path = comp.data.node().get_fullpath()
-        comp.data.set_name(full_path.get_basename_wo_extension())
+        fullpath = comp.data.node().get_fullpath()
+        comp.data.set_name(fullpath.get_basename_wo_extension())
         
         # Iterate over child nodes
         # TBH I'm not even sure I know what this does.

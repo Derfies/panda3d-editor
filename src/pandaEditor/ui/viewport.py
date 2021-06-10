@@ -94,7 +94,7 @@ class Viewport(WxViewport):
     def add_model(self, file_path, x, y):
         rel_path = get_base().project.get_project_relative_path(file_path)
         logging.info(f'Adding model: {rel_path}')
-        self.base.add_component('ModelRoot', model_path=rel_path)
+        self.base.add_component('ModelRoot', fullpath=rel_path)
 
     def add_particles(self, file_path, x, y):
         logging.info(f'Adding particle: {file_path}')
@@ -107,7 +107,7 @@ class Viewport(WxViewport):
     def add_texture(self, file_path, x, y):
         rel_path = get_base().project.get_project_relative_path(file_path)
         logging.info(f'Adding texture: {rel_path}')
-        tex_comp = self.base.add_component('Texture', filename=rel_path)
+        tex_comp = self.base.add_component('Texture', fullpath=rel_path)
         drop_comp = self.get_drop_component(x, y)
 
         # TODO: Need to wrap this with a command so it can be undone.

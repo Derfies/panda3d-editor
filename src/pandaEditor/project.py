@@ -127,6 +127,12 @@ base.run()"""
         
         # Set paths
         self.SetDirectories()
+
+        # Add the project root to the model path.
+        pm.get_model_path().clear()
+        panda_path = pm.Filename.from_os_specific(self.path)
+        pm.get_model_path().append_directory(panda_path)
+        logger.info(f'Model path set to: {pm.get_model_path()}')
         
         # Set directory watcher root path and start it
         self.dirWatcher.setDirectory(self.path)

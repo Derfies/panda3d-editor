@@ -1,5 +1,5 @@
+import copy
 import logging
-import collections
 import os
 
 import panda3d.core as pm
@@ -33,20 +33,15 @@ class AssetManager:
                 logger.info(f'Reloading model: {panda_path}')
                 self.reload_model(panda_path)
         
-    def reload_texture(self, panda_path):
+    def reload_texture(self, full_path):
         for tex in pm.TexturePool.find_all_textures():
-            if tex.get_filename() == panda_path:
+            if tex.get_fullpath() == full_path:
                 tex.reload()
                 
     def reload_model(self, panda_path):
 
-        # Reload the model in the model pool.
-        # pm.ModelPool.release_model(panda_path)
-        # pm.ModelPool.load_model(panda_path)
-
+        # Load the new model.
         comp_cls = get_base().node_manager.get_component_by_name('ModelRoot')
-        # file_path = pm.Filename.to_os_specific(panda_path)
-        # comp = comp_cls.create(model_path=file_path)
         new_np = get_base().loader.load_model(panda_path, noCache=True)
         new_comp = comp_cls.create(data=new_np)
 
@@ -56,24 +51,50 @@ class AssetManager:
             for np in get_base().scene.rootNp.find_all_matches('**/+ModelRoot')
             if np.node().get_fullpath() == panda_path
         ]
-        
-        # Now unhook all the NodePaths under the ModelRoot and reparent a new
-        # copy to it. This will remove all sub ModelRoot changes at the moment
-        # and will need to be fixed in the future.
-        # old_ids = {}
-        import copy
+
         for comp in comps:
+
+            # Replace the node in the hierarchy.
+            # TODO: Could move this to editor method insert_child.
             index = comp.sibling_index
-            print('index:', index)
             parent_np = comp.parent.data
             children = list(parent_np.get_children())
-            print('num children:', len(children))
             for child in children:
                 child.detach_node()
-
-            print('pop:', children.pop(index))
-            children.insert(index, copy.deepcopy(new_np))
+            children.pop(index)
+            copy_np = copy.deepcopy(new_np)
+            children.insert(index, copy_np)
             for child in children:
                 child.reparent_to(parent_np)
+
+            copy_comp = get_base().node_manager.wrap(copy_np)
+
+            # Set properties on the new node to match the one it's replacing.
+            for name, value in comp.attributes.items():
+                try:
+                    setattr(copy_comp, name, value)
+                except Exception as e:
+                    logger.error(
+                        f'Failed to set attribute on replaced component: '
+                        f'{copy_np}.{name}',
+                        exc_info=True,
+                    )
+
+            # Set connections on the new node to match the one it's replacing.
+            for name, value in comp.connections.items():
+                try:
+                    if comp.__class__.connections[name].many:
+                        getattr(copy_comp, name)[:] = value
+                    else:
+                        setattr(copy_comp, name, value)
+                except Exception as e:
+                    logger.error(
+                        f'Failed to set connection on replaced component: '
+                        f'{copy_np}.{name}',
+                        exc_info=True,
+                    )
+
+            # Required since we loaded the model with no cache.
+            copy_np.node().fullpath = panda_path
 
         get_base().doc.on_modified()

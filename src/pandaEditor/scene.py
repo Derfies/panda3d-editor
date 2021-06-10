@@ -84,7 +84,6 @@ class Scene(Scene):
         for comp_id, connections in self.connections.items():
             for connection in connections:
                 source, name = connection
-                # print('    connection:', connection)
                 if source == comp.data:
                     in_connections.append(connection)
         return in_connections

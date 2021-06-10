@@ -82,7 +82,7 @@ class ResourcesPanel(wx.Panel):
         self.PopupMenu(menu)
         menu.Destroy()
 
-    def OnOpenFile(self, evt, itemId):
+    def OnOpenFile(self, evt, item):
         systems = {
             'nt': lambda path: subprocess.Popen(f'explorer /select, {path}'),
             'posix': lambda path: os.system('xdg-open "%s"' % path),
