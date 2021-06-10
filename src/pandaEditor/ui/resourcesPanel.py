@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 import wx
 import wx.lib.agw.customtreectrl as ct
@@ -83,14 +84,14 @@ class ResourcesPanel(wx.Panel):
 
     def OnOpenFile(self, evt, itemId):
         systems = {
-            'nt': os.startfile,
-            'posix': lambda foldername: os.system('xdg-open "%s"' % foldername),
-            'os2': lambda foldername: os.system('open "%s"' % foldername)
+            'nt': lambda path: subprocess.Popen(f'explorer /select, {path}'),
+            'posix': lambda path: os.system('xdg-open "%s"' % path),
+            'os2': lambda path: os.system('open "%s"' % path)
         }
 
-        filePath = self.dtc.GetItemPath(itemId)
-        dirPath = os.path.split(filePath)[0]
-        systems.get(os.name, os.startfile)(dirPath)
+        file_path = self.dtc.GetItemPath(item)
+        dir_path = os.path.split(file_path)[0]
+        systems.get(os.name, os.startfile)(file_path)
 
     def OnMiddleDown(self, evt):
 

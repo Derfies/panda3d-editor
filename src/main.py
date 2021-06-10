@@ -14,5 +14,5 @@ loadPrcFileData('startup', 'window-type none')
 
 editor_mode = ConfigVariableBool('editor_mode', False)
 editor_mode.set_value(True)
-from showbase import ShowBase
+from pandaEditor.showbase import ShowBase
 ShowBase().run()
