@@ -32,19 +32,19 @@ class ModelRoot(NodePath):
         
         # Iterate over child nodes
         # TBH I'm not even sure I know what this does.
-        comp.extraNps = []
-        def Recurse(node):
-            nTypeStr = node.getTag(TAG_NODE_TYPE)
-            cWrprCls = get_base().node_manager.get_component_by_name(nTypeStr)
-            if cWrprCls is not None:
-                cWrpr = cWrprCls.create(inputNp=node)
-                comp.extraNps.append(cWrpr.data)
-            
-            # Recurse
-            for child in node.getChildren():
-                Recurse(child)
-                
-        Recurse(comp.data)
+        # comp.extraNps = []
+        # def Recurse(node):
+        #     nTypeStr = node.getTag(TAG_NODE_TYPE)
+        #     cWrprCls = get_base().node_manager.get_component_by_name(nTypeStr)
+        #     if cWrprCls is not None:
+        #         cWrpr = cWrprCls.create(inputNp=node)
+        #         comp.extraNps.append(cWrpr.data)
+        #
+        #     # Recurse
+        #     for child in node.getChildren():
+        #         Recurse(child)
+        #
+        # Recurse(comp.data)
         
         return comp
     
