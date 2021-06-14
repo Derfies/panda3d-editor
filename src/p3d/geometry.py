@@ -80,7 +80,6 @@ def GetGeomTriangle(v1, v2, v3):
     tri.addVertex(v2)
     tri.addVertex(v3)
     tri.closePrimitive()
-    
     return tri
     
 
@@ -363,36 +362,41 @@ def sphere(radius=1.0, num_segs=16, degrees=360,
     return geomNode
     
 
-def box(width=1, depth=1, height=1, origin=pm.Point3(0, 0, 0)):
+def box(width=1, depth=1, height=1, origin=pm.Point3(0, 0, 0), flip_normals=False):
     """Return a geom node representing a box."""
     # Create vetex data format
-    gvf = pm.GeomVertexFormat.getV3n3()
+    gvf = pm.GeomVertexFormat.get_v3n3()
     gvd = pm.GeomVertexData('vertexData', gvf, pm.Geom.UHStatic)
     
-    # Create vetex writers for each type of data we are going to store
-    gvwV = pm.GeomVertexWriter(gvd, 'vertex')
-    gvwN = pm.GeomVertexWriter(gvd, 'normal')
+    # Create vetex writers for each type of data we are going to store.
+    gvw_v = pm.GeomVertexWriter(gvd, 'vertex')
+    gvw_n = pm.GeomVertexWriter(gvd, 'normal')
     
-    # Write out all points
+    # Write out all points.
     for p in GetPointsForBox(width, depth, height):
-        gvwV.addData3f(pm.Point3(p) - origin)
+        gvw_v.add_data3f(pm.Point3(p) - origin)
     
-    # Write out all the normals
+    # Write out all the normals.
     for n in ((-1, 0, 0), (1, 0, 0), (0, -1, 0), (0, 1, 0), (0, 0, -1), (0, 0, 1)):
         for i in range(4):
-            gvwN.addData3f(n)
-    
-    geom = pm.Geom(gvd)
-    for i in range(0, gvwV.getWriteRow(), 4):
-        
-        # Create and add both triangles
-        geom.addPrimitive(GetGeomTriangle(i, i + 1, i + 2))
-        geom.addPrimitive(GetGeomTriangle(i, i + 2, i + 3))
+            normal = pm.LVecBase3f(n)
+            if flip_normals:
+                normal *= -1
+            gvw_n.add_data3f(normal)
 
-    # Return the box GeomNode
-    geomNode = pm.GeomNode('box')
-    geomNode.addGeom(geom)
-    return geomNode
+    # Iterate by each face and create the two triangles required to draw it.
+    # Reverse the winding order if the normals are flipped.
+    geom = pm.Geom(gvd)
+    for i in range(0, gvw_v.get_write_row(), 4):
+        tri1_indices = [i, i + 2, i + 1] if flip_normals else [i, i + 1, i + 2]
+        tri2_indices = [i, i + 3, i + 2] if flip_normals else [i, i + 2, i + 3]
+        geom.add_primitive(GetGeomTriangle(*tri1_indices))
+        geom.add_primitive(GetGeomTriangle(*tri2_indices))
+
+    # Return the box GeomNode.
+    geom_node = pm.GeomNode('box')
+    geom_node.add_geom(geom)
+    return geom_node
     
 
 class Polygon(pm.NodePath):

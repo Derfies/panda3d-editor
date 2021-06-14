@@ -7,6 +7,21 @@ from pandaEditor.utils import camel_case_to_label
 from wxExtra.propertyGrid import FloatValidator
 
 
+class BoolCtrl(wx.CheckBox):
+
+    def __init__(self, *args, **kwargs):
+        value = kwargs.pop('value')
+        super().__init__(*args, **kwargs)
+        if value:
+            self.SetValue(value)
+
+
+class PropFloatSpin(FloatSpin):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, digits=2, **kwargs)
+
+
 class BaseCtrl(wx.Control):
 
     type_ = pc.Vec3
@@ -45,13 +60,8 @@ class Point3Ctrl(BaseCtrl):
     type_ = pc.Point3
 
 
-class PropFloatSpin(FloatSpin):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, digits=2, **kwargs)
-
-
 PROPERTY_MAP = {
+    bool: BoolCtrl,
     int: IntCtrl,
     float: PropFloatSpin,
     str: wx.TextCtrl,

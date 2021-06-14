@@ -76,7 +76,8 @@ class PrimitivesPlugin(base.Base):
             'width': 1,
             'height': 1,
             'depth': 1,
-            'origin': pc.Point3(0, 0, 0)
+            'origin': pc.Point3(0, 0, 0),
+            'flip_normals': False,
         }
         self.on_create('box', props, p3d.geometry.box)
 
