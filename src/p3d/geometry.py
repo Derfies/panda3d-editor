@@ -96,7 +96,7 @@ class GeomBuilder:
         else:
             raise InvalidPrimitive
 
-    def add_box(self, x, y, z, colour=None, origin=None):
+    def add_box(self, x, y, z, colour=None, origin=None, flip_normals=False):
 
         origin = origin or pc.Point3(0, 0, 0)
         x_shift = x / 2.0
@@ -127,13 +127,11 @@ class GeomBuilder:
             [vertices[7], vertices[6], vertices[1], vertices[0]],
         )
 
-        texcoords = ((0, 0), (1, 0), (1, 1), (0, 1))
-        self._commit_polygon(Polygon(faces[0], texcoords, colour))
-        self._commit_polygon(Polygon(faces[1], texcoords, colour))
-        self._commit_polygon(Polygon(faces[2], texcoords, colour))
-        self._commit_polygon(Polygon(faces[3], texcoords, colour))
-        self._commit_polygon(Polygon(faces[4], texcoords, colour))
-        self._commit_polygon(Polygon(faces[5], texcoords, colour))
+
+        for face in faces:
+            if flip_normals:
+                face.reverse()
+            self._commit_polygon(Polygon(face, ((0, 0), (1, 0), (1, 1), (0, 1)), colour))
 
         return self
 
@@ -477,7 +475,7 @@ def sphere(radius=1.0, num_segs=16, degrees=360,
 def box(width=1, depth=1, height=1, origin=pm.Point3(0, 0, 0), flip_normals=False):
     """Return a geom node representing a box."""
     gb = GeomBuilder('box')
-    gb.add_box(width, depth, height, origin=origin)
+    gb.add_box(width, depth, height, origin=origin, flip_normals=flip_normals)
     return gb.get_geom_node()
 
 
@@ -544,48 +542,3 @@ def Axes(thickness=1, length=25):
     ls.drawTo(0.0, 0.0, length)
     
     return ls.create()
-
-
-
-from direct.showbase.ShowBase import ShowBase
-
-
-class MyApp(ShowBase):
-
-    def __init__(self):
-        ShowBase.__init__(self)
-
-        b = box()
-
-        # gb = GeomBuilder('box')
-        # gb.add_block([1,0,1,1], (0,0,0), (1,1,1)) # for a purple unit cube
-        node = pm.NodePath(b)
-        node.reparent_to(render)
-
-
-        path = r'C:\Users\Jamie Davies\Pictures\Screenshots\uv_grid_opengl.jpg'
-        texture = pc.Filename.from_os_specific(path)
-        texture = loader.loadTexture(texture)
-        node.set_texture(texture, 1)
-
-
-        dl = pm.DirectionalLight('foo')
-        dlnp = render.attach_new_node(dl)
-        render.set_light(dlnp)
-        dlnp.set_hpr(35, -35, 30)
-
-        dl2 = pm.DirectionalLight('foo')
-        dlnp2 = render.attach_new_node(dl2)
-        render.set_light(dlnp2)
-        dlnp2.set_hpr(-35, 35, -30)
-        dlnp2.node().set_color((0.25, 0.25, 0.25, 1))
-
-        al = pm.AmbientLight('fda')
-        alnp = render.attach_new_node(al)
-        render.set_light(alnp)
-        alnp.node().set_color((0.5, 0.5, 0.5, 1))
-
-
-
-# app = MyApp()
-# app.run()
