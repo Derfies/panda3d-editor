@@ -7,6 +7,21 @@ from pandaEditor.utils import camel_case_to_label
 from wxExtra.propertyGrid import FloatValidator
 
 
+class BoolCtrl(wx.CheckBox):
+
+    def __init__(self, *args, **kwargs):
+        value = kwargs.pop('value')
+        super().__init__(*args, **kwargs)
+        if value:
+            self.SetValue(value)
+
+
+class PropFloatSpin(FloatSpin):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, digits=2, **kwargs)
+
+
 class BaseCtrl(wx.Control):
 
     type_ = pc.Vec3
@@ -45,13 +60,8 @@ class Point3Ctrl(BaseCtrl):
     type_ = pc.Point3
 
 
-class PropFloatSpin(FloatSpin):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, digits=2, **kwargs)
-
-
 PROPERTY_MAP = {
+    bool: BoolCtrl,
     int: IntCtrl,
     float: PropFloatSpin,
     str: wx.TextCtrl,
@@ -62,12 +72,12 @@ PROPERTY_MAP = {
 
 class CreateDialog(wx.Dialog):
 
-    def __init__(self, cls_name, default_values, *args, **kwargs):
+    def __init__(self, text, default_values, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.ctrls = {}
 
-        static_text = wx.StaticText(self, -1, f'Create {cls_name}')
+        static_text = wx.StaticText(self, -1, text)
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(static_text, 0, wx.TOP | wx.LEFT | wx.RIGHT, 10)
 

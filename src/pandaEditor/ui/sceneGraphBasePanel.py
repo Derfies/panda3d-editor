@@ -98,14 +98,14 @@ class SceneGraphBasePanel(wx.Panel):
         wx.CallAfter(SetComponentName, comp, name)
 
     def OnLeftDClick(self, evt):
-        item = wxUtils.GetClickedItem(self.tc, evt)
+        item = wxUtils.get_clicked_item(self.tc, evt)
         if item is not None:
             self.tc.EditLabel(item)
 
     def OnMiddleDown(self, evt):
 
         # Get the item under the mouse - bail if the item is bad
-        item = wxUtils.GetClickedItem(self.tc, evt)
+        item = wxUtils.get_clicked_item(self.tc, evt)
         if item is None or not item.IsOk():
             return
 

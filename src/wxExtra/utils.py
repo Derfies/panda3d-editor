@@ -91,8 +91,8 @@ def ImgToBmp(filePath, size):
     
 def IdBind(self, event, id, handler, *args, **kwargs):
     self.Bind(event, lambda event: handler(event, *args, **kwargs), id=id)
-    
 
-def GetClickedItem(ctrl, evt):
+
+def get_clicked_item(ctrl, evt):
     """Return the id for the item involved in the mouse event."""
     return ctrl.HitTest(wx.Point(evt.GetX(), evt.GetY()))[0]

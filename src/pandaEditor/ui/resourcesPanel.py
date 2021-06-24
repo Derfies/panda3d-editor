@@ -1,3 +1,4 @@
+import logging
 import os
 import subprocess
 
@@ -6,8 +7,11 @@ import wx.lib.agw.customtreectrl as ct
 from p3d import wxPanda
 from pubsub import pub
 
-from wxExtra import DirTreeCtrl, utils as wxUtils
+from wxExtra import DirTreeCtrl, utils as wxutils
 from direct.showbase.PythonUtil import getBase as get_base
+
+
+logger = logging.getLogger(__name__)
 
 
 class ResourcesPanel(wx.Panel):
@@ -71,14 +75,18 @@ class ResourcesPanel(wx.Panel):
     def OnRightUp(self, evt):
 
         # Get the item under the mouse - bail if the item is not ok
-        itemId = wxUtils.GetClickedItem(self.dtc, evt)
-        if itemId is None or not itemId.IsOk():
+        item = wxutils.get_clicked_item(self.dtc, evt)
+        if item is None or not item.IsOk():
             return
 
         menu = wx.Menu()
-        mItem = wx.MenuItem(menu, wx.NewId(), 'Open in Explorer')
-        menu.Append(mItem)
-        wxUtils.IdBind(menu, wx.EVT_MENU, mItem.GetId(), self.OnOpenFile, itemId)
+        for name, fn in {
+            'Open in Explorer': self.OnOpenFile,
+            'Delete File': self.OnDeleteFile,
+        }.items():
+            m_item = wx.MenuItem(menu, wx.NewId(), name)
+            menu.Append(m_item)
+            wxutils.IdBind(menu, wx.EVT_MENU, m_item.GetId(), fn, item)
         self.PopupMenu(menu)
         menu.Destroy()
 
@@ -90,13 +98,22 @@ class ResourcesPanel(wx.Panel):
         }
 
         file_path = self.dtc.GetItemPath(item)
-        dir_path = os.path.split(file_path)[0]
         systems.get(os.name, os.startfile)(file_path)
+
+    def OnDeleteFile(self, evt, item):
+        msg = f'Are you sure you want to delete the selected item(s)?'
+        if wxutils.YesNoDialog(msg, 'Delete File', wx.ICON_WARNING) == wx.ID_NO:
+            return
+        file_path = self.dtc.GetItemPath(item)
+        os.remove(file_path)
+        logger.info(f'Deleted file: {file_path}')
+
+        # TODO: We know we altered the file system so force-refresh.
 
     def OnMiddleDown(self, evt):
 
         # Get the item under the mouse - bail if the item is not ok.
-        item_id = wxUtils.GetClickedItem(self.dtc, evt)
+        item_id = wxutils.get_clicked_item(self.dtc, evt)
         if item_id is None or not item_id.IsOk():
             return
 
@@ -110,7 +127,7 @@ class ResourcesPanel(wx.Panel):
     def OnLeftDClick(self, evt):
 
         # Load items
-        itemId = wxUtils.GetClickedItem(self.dtc, evt)
+        itemId = wxutils.get_clicked_item(self.dtc, evt)
         filePath = self.dtc.GetItemPath(itemId)
         ext = os.path.splitext(os.path.basename(self.dtc.GetItemText(itemId)))[1]
         if ext == '.xml':

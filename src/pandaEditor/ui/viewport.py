@@ -29,6 +29,7 @@ class Viewport(WxViewport):
             '.dae': self.add_model,
             '.egg': self.add_model,
             '.gltf': self.add_model,
+            '.jpg': self.add_texture,
             '.obj': self.add_model,
             '.png': self.add_texture,
             '.ptf': self.add_particles,

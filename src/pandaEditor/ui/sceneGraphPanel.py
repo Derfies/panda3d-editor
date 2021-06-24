@@ -27,7 +27,7 @@ class SceneGraphPanel(SceneGraphBasePanel):
     def on_right_up(self, evt):
 
         # Get the item under the mouse - bail if the item is not ok
-        item = wxutils.GetClickedItem(self.tc, evt)
+        item = wxutils.get_clicked_item(self.tc, evt)
         if item is None or not item.IsOk():
             return
 

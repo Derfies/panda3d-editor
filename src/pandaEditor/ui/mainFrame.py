@@ -348,7 +348,7 @@ class MainFrame(wx.Frame):
         foo = comp_cls.get_foo()
         if foo:
             dialog = CreateDialog(
-                comp_cls.__name__,
+                f'Create {comp_cls.__name__}',
                 {
                     key: values[key]
                     for key in foo

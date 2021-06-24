@@ -2,7 +2,7 @@ import panda3d.core as pm
 from direct.directtools.DirectUtil import ROUND_TO
 
 from p3d import commonUtils as utils
-from p3d.geometry import Cone, Square, Line
+from p3d.geometry import cone, Square, Line
 from .axis import Axis
 from .base import Base
 from .constants import *
@@ -32,13 +32,13 @@ class Translation(Base):
         # Create the geometry and collision
         vec.normalize()
         line = pm.NodePath(Line((0, 0, 0), vec))
-        cone = pm.NodePath(Cone(0.05, 0.25, axis=vec, origin=vec * 0.125))
+        head = pm.NodePath(cone(0.05, 0.25, axis=vec, origin=vec * 0.125))
         collTube = pm.CollisionCapsule((0,0,0), pm.Point3(vec) * 0.95, 0.05)
         
         # Create the axis, add the geometry and collision
         axis = Axis(self.name, vec, colour)
         axis.AddGeometry(line, sizeStyle=SCALE)
-        axis.AddGeometry(cone, vec, colour)
+        axis.AddGeometry(head, vec, colour)
         axis.AddCollisionSolid(collTube, sizeStyle=TRANSLATE_POINT_B)
         axis.reparentTo(self)
         
