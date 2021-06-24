@@ -69,6 +69,9 @@ class PrimitivesPlugin(base.Base):
         dialog.CenterOnParent()
         if dialog.ShowModal() == wx.ID_OK:
             geom = geom_fn(**dialog.GetValues())
+
+            # Note: Seems like we have to wrap with model root here or else model
+            # cannot be loaded using the editor.
             root = pc.NodePath(pc.ModelRoot('root'))
             root.attach_new_node(geom)
             self.create_geometry(primitive.lower(), root)
