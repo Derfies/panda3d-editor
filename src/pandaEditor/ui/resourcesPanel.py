@@ -1,5 +1,6 @@
 import logging
 import os
+import subprocess
 
 import wx
 import wx.lib.agw.customtreectrl as ct
@@ -91,14 +92,13 @@ class ResourcesPanel(wx.Panel):
 
     def OnOpenFile(self, evt, item):
         systems = {
-            'nt': os.startfile,
-            'posix': lambda foldername: os.system('xdg-open "%s"' % foldername),
-            'os2': lambda foldername: os.system('open "%s"' % foldername)
+            'nt': lambda path: subprocess.Popen(f'explorer /select, {path}'),
+            'posix': lambda path: os.system('xdg-open "%s"' % path),
+            'os2': lambda path: os.system('open "%s"' % path)
         }
 
         file_path = self.dtc.GetItemPath(item)
-        dir_path = os.path.split(file_path)[0]
-        systems.get(os.name, os.startfile)(dir_path)
+        systems.get(os.name, os.startfile)(file_path)
 
     def OnDeleteFile(self, evt, item):
         msg = f'Are you sure you want to delete the selected item(s)?'

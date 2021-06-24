@@ -11,7 +11,7 @@ from game.nodes.nodepath import NodePath
 class ModelRoot(NodePath):
     
     type_ = pc.ModelRoot
-    model_path = Attribute(
+    fullpath = Attribute(
         pc.Filename,
         pc.ModelRoot.get_fullpath,
         required=True,
@@ -20,41 +20,31 @@ class ModelRoot(NodePath):
 
     @classmethod
     def create(cls, *args, **kwargs):
-        model_path = kwargs.pop('model_path', None)
-        if model_path is None:
-            np = pc.NodePath(pc.ModelRoot(''))  # TODO: Enforce name here?
-        else:
-            filePath = pc.Filename.fromOsSpecific(model_path)
+        fullpath = kwargs.pop('fullpath', None)
+        if fullpath is not None:
+            panda_fullpath = pc.Filename.from_os_specific(fullpath)
+            np = get_base().loader.load_model(panda_fullpath)
+            kwargs['data'] = np
 
-            # TODO: Figure out a better way to deal with extensions. All this
-            # might be redundant anyway if we serialise extensions.
-            try:
-                np = get_base().loader.loadModel(filePath)
-            except:
-                try:
-                    np = get_base().loader.loadModel(filePath + '.bam')
-                except IOError:
-                    print('Failed to load: ', filePath)
-                    np = pc.NodePath(pc.ModelRoot(''))
-            np.setName(filePath.getBasenameWoExtension())
-
-        comp = super().create(data=np)
+        comp = super().create(*args, **kwargs)
+        fullpath = comp.data.node().get_fullpath()
+        comp.data.set_name(fullpath.get_basename_wo_extension())
         
         # Iterate over child nodes
         # TBH I'm not even sure I know what this does.
-        comp.extraNps = []
-        def Recurse(node):
-            nTypeStr = node.getTag(TAG_NODE_TYPE)
-            cWrprCls = get_base().node_manager.get_component_by_name(nTypeStr)
-            if cWrprCls is not None:
-                cWrpr = cWrprCls.create(inputNp=node)
-                comp.extraNps.append(cWrpr.data)
-            
-            # Recurse
-            for child in node.getChildren():
-                Recurse(child)
-                
-        Recurse(np)
+        # comp.extraNps = []
+        # def Recurse(node):
+        #     nTypeStr = node.getTag(TAG_NODE_TYPE)
+        #     cWrprCls = get_base().node_manager.get_component_by_name(nTypeStr)
+        #     if cWrprCls is not None:
+        #         cWrpr = cWrprCls.create(inputNp=node)
+        #         comp.extraNps.append(cWrpr.data)
+        #
+        #     # Recurse
+        #     for child in node.getChildren():
+        #         Recurse(child)
+        #
+        # Recurse(comp.data)
         
         return comp
     

@@ -212,6 +212,9 @@ class Rotation(Base):
             self.startVec = self.getRelativeVector(self.rootNp, self.GetAxisPoint(self.foobar) - self.getPos())
         else:
             self.startVec = self.getRelativeVector(self.rootNp, self.startAxisPoint - self.getPos())
+
+        # TODO:
+        # AttributeError: 'Rotation' object has no attribute 'startAxisPoint'
     
     def OnNodeMouseOver(self, collEntry):
         Base.OnNodeMouseOver(self, collEntry)

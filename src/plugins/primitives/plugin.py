@@ -57,7 +57,7 @@ class PrimitivesPlugin(base.Base):
         # abstraction there.
         rel_path = get_base().project.get_project_relative_path(asset_path)
         logging.info(f'Adding model: {rel_path}')
-        get_base().add_component('ModelRoot', model_path=rel_path)
+        get_base().add_component('ModelRoot', fullpath=rel_path)
 
     def on_create(self, primitive, props, geom_fn):
         dialog = CreateDialog(
