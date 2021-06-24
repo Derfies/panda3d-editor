@@ -69,7 +69,9 @@ class PrimitivesPlugin(base.Base):
         dialog.CenterOnParent()
         if dialog.ShowModal() == wx.ID_OK:
             geom = geom_fn(**dialog.GetValues())
-            self.create_geometry(primitive.lower(), pc.NodePath(geom))
+            root = pc.NodePath(pc.ModelRoot('root'))
+            root.attach_new_node(geom)
+            self.create_geometry(primitive.lower(), root)
 
     def on_create_box(self, evt):
         props = {
