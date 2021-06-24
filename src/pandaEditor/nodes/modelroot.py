@@ -6,7 +6,7 @@ from game.nodes.attributes import ProjectAssetAttribute
 class ModelRoot:
 
     serialise_descendants = False
-    model_path = ProjectAssetAttribute(
+    fullpath = ProjectAssetAttribute(
         pc.Filename,
         pc.ModelRoot.get_fullpath,
         required=True,

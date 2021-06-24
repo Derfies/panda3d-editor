@@ -76,7 +76,7 @@ class DirectoryWatcher(threading.Thread):
             self.before = after
             
             # Sleep a bit so we don't max out the thread
-            time.sleep(1)
+            time.sleep(0.5)
             
     def onAdded(self, filePaths):
         pass

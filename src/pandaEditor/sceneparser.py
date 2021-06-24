@@ -68,6 +68,8 @@ class SceneParser(GameSceneParser):
 
         conns_elem = et.Element('Connections')
         for name, values in comp.connections.items():
+            if not comp.__class__.connections[name].many:
+                values = [values]
             for value in values:
                 conn_elem = et.SubElement(conns_elem, 'Connection')
                 conn_elem.set('type', name)

@@ -72,8 +72,8 @@ class NodePath:
         if comp.geo is not None:
             comp.geo.copy_to(comp.data)
 
-        # Mark as pickable.
-        if comp.pickable:
+        # Mark as pickable unless this node is under a model root.
+        if comp.pickable and 'path' not in kwargs:
             comp.data.set_python_tag(TAG_PICKABLE, comp.pickable)
 
         return comp
@@ -157,10 +157,8 @@ class NodePath:
         in the hierarchy to the attrib dictionary.
         """
         attrib = super().get_attrib()
-        
         if self.modified:
             attrib['path'] = self.get_path()
-            
         return attrib
     
     def validate_drag_drop(self, dragComps, dropComp):

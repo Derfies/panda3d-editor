@@ -71,11 +71,13 @@ class Base:
     @abc.abstractmethod
     def default_parent(self):
         """"""
-    
-    def get_sibling_index(self):
+
+    @property
+    def sibling_index(self):
         """
         Return the position of of this wrapper's component amongst its sibling
         components.
+
         """
         parent = self.parent
         return parent.children.index(self) if parent is not None else None
@@ -100,13 +102,18 @@ class Base:
             )
 
     @property
+    def attributes(self):
+        return {
+            name: getattr(self, name)
+            for name, prop in self.__class__.attributes.items()
+        }
+
+    @property
     def connections(self):
         conns = {}
         for name, prop in self.__class__.connections.items():
             targets = getattr(self, name)
             if targets is None:
                 continue
-            if not prop.many:
-                targets = [targets]
             conns[name] = targets
         return conns

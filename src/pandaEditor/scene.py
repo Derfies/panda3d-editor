@@ -71,17 +71,20 @@ class Scene(Scene):
     def get_outgoing_connections(self, comp):
         """
         Return all outgoing connections for the indicated component.
+
         """
         return self.connections.get(comp.id, [])
     
     def get_incoming_connections(self, comp):
         """
         Return all incoming connections for the indicated component wrapper.
+
         """
         in_connections = []
         for comp_id, connections in self.connections.items():
             for connection in connections:
-                if connection.srcComp == comp.data:
+                source, name = connection
+                if source == comp.data:
                     in_connections.append(connection)
         return in_connections
     

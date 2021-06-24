@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 ATTRIBUTE_TAG = 'attr'
 
 
-
 class PropertyGrid(wxpg.PropertyGrid):
 
     """
