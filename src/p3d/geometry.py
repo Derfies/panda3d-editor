@@ -96,12 +96,12 @@ class GeomBuilder:
         else:
             raise InvalidPrimitive
 
-    def add_box(self, x, y, z, colour=None, origin=None, flip_normals=False):
+    def add_box(self, width, height, depth, colour=None, origin=None, flip_normals=False, scale_texcoords=True):
 
         origin = origin or pc.Point3(0, 0, 0)
-        x_shift = x / 2.0
-        y_shift = y / 2.0
-        z_shift = z / 2.0
+        x_shift = width / 2.0
+        y_shift = height / 2.0
+        z_shift = depth / 2.0
 
         vertices = (
             pc.Point3(-x_shift, +y_shift, +z_shift),
@@ -127,11 +127,23 @@ class GeomBuilder:
             [vertices[7], vertices[6], vertices[1], vertices[0]],
         )
 
+        # texcoords = ((0, 0), (1, 0), (1, 1), (0, 1))
+        face_texcoords = (
+            # XY
+            ((0, 0), (height, 0), (height, width), (0, width)),
+            ((0, 0), (height, 0), (height, width), (0, width)),
+            # XZ
+            ((0, 0), (width, 0), (width, depth), (0, depth)),
+            ((0, 0), (width, 0), (width, depth), (0, depth)),
+            # YZ
+            ((0, 0), (height, 0), (height, depth), (0, depth)),
+            ((0, 0), (height, 0), (height, depth), (0, depth)),
+        )
 
-        for face in faces:
+        for i, face in enumerate(faces):
             if flip_normals:
                 face.reverse()
-            self._commit_polygon(Polygon(face, ((0, 0), (1, 0), (1, 1), (0, 1)), colour))
+            self._commit_polygon(Polygon(face, face_texcoords[i], colour))
 
         return self
 
@@ -472,10 +484,10 @@ def sphere(radius=1.0, num_segs=16, degrees=360,
     return geomNode
     
 
-def box(width=1, depth=1, height=1, origin=pm.Point3(0, 0, 0), flip_normals=False):
+def box(width=1, depth=1, height=1, origin=pm.Point3(0, 0, 0), flip_normals=False, scale_texcoords=True):
     """Return a geom node representing a box."""
     gb = GeomBuilder('box')
-    gb.add_box(width, depth, height, origin=origin, flip_normals=flip_normals)
+    gb.add_box(width, depth, height, origin=origin, flip_normals=flip_normals, scale_texcoords=scale_texcoords)
     return gb.get_geom_node()
 
 
