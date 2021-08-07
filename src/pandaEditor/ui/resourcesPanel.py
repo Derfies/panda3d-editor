@@ -2,6 +2,7 @@ import logging
 import os
 import subprocess
 
+import pyperclip
 import wx
 import wx.lib.agw.customtreectrl as ct
 from p3d import wxPanda
@@ -81,6 +82,7 @@ class ResourcesPanel(wx.Panel):
 
         menu = wx.Menu()
         for name, fn in {
+            'Copy Path': self.on_copy_path,
             'Open in Explorer': self.OnOpenFile,
             'Delete File': self.OnDeleteFile,
         }.items():
@@ -109,6 +111,10 @@ class ResourcesPanel(wx.Panel):
         logger.info(f'Deleted file: {file_path}')
 
         # TODO: We know we altered the file system so force-refresh.
+
+    def on_copy_path(self, evt, item):
+        file_path = self.dtc.GetItemPath(item)
+        pyperclip.copy(file_path)
 
     def OnMiddleDown(self, evt):
 

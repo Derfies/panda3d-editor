@@ -4,45 +4,60 @@ import panda3d.core as pm
 import panda3d.core as pc
 
 
-class VertexDataWriter:
+def calculate_box_polygons(width, height, depth, colour=None, origin=None, flip_normals=False, scale_texcoords=True):
+    origin = origin or pc.Point3(0, 0, 0)
+    x_shift = width / 2.0
+    y_shift = height / 2.0
+    z_shift = depth / 2.0
 
-    def __init__(self, vdata):
-        self.count = 0
-        self.vertex = pc.GeomVertexWriter(vdata, 'vertex')
-        self.normal = pc.GeomVertexWriter(vdata, 'normal')
-        self.color = pc.GeomVertexWriter(vdata, 'color')
-        self.texcoord = pc.GeomVertexWriter(vdata, 'texcoord')
+    positions = (
+        pc.Point3(-x_shift, +y_shift, +z_shift),
+        pc.Point3(-x_shift, -y_shift, +z_shift),
+        pc.Point3(+x_shift, -y_shift, +z_shift),
+        pc.Point3(+x_shift, +y_shift, +z_shift),
+        pc.Point3(+x_shift, +y_shift, -z_shift),
+        pc.Point3(+x_shift, -y_shift, -z_shift),
+        pc.Point3(-x_shift, -y_shift, -z_shift),
+        pc.Point3(-x_shift, +y_shift, -z_shift),
+    )
+    positions = [v - origin for v in positions]
 
-    def add_vertex(self, vertex, normal, color, texcoord):
-        self.vertex.add_data3f(vertex)
-        self.normal.add_data3f(normal)
-        self.color.add_data4f(*color)
-        self.texcoord.add_data2f(*texcoord)
-        self.count += 1
+    faces = (
+        # XY
+        [positions[0], positions[1], positions[2], positions[3]],
+        [positions[4], positions[5], positions[6], positions[7]],
+        # XZ
+        [positions[0], positions[3], positions[4], positions[7]],
+        [positions[6], positions[5], positions[2], positions[1]],
+        # YZ
+        [positions[5], positions[4], positions[3], positions[2]],
+        [positions[7], positions[6], positions[1], positions[0]],
+    )
 
+    # texcoords = ((0, 0), (1, 0), (1, 1), (0, 1))
+    face_texcoords = (
+        # XY
+        ((0, 0), (height, 0), (height, width), (0, width)),
+        ((0, 0), (height, 0), (height, width), (0, width)),
+        # XZ
+        ((0, 0), (width, 0), (width, depth), (0, depth)),
+        ((0, 0), (width, 0), (width, depth), (0, depth)),
+        # YZ
+        ((0, 0), (height, 0), (height, depth), (0, depth)),
+        ((0, 0), (height, 0), (height, depth), (0, depth)),
+    )
 
-class Polygon:
+    polygons = []
+    for i, face in enumerate(faces):
+        if flip_normals:
+            face.reverse()
+        vertices = [
+            Vertex(face[j], texcoord=face_texcoords[i][j])
+            for j in range(len(face))
+        ]
+        polygons.append(Polygon(vertices))
 
-    def __init__(self, vertices=None, texcoords=None, colour=None):
-        self.vertices = vertices or []
-        self.texcoords = texcoords or []
-        self.colour = colour or (1, 1, 1, 1)
-
-    def get_normal(self):
-        seen = set()
-        vertices = [p for p in self.vertices if p not in seen and not seen.add(p)]
-        if len(vertices) >= 3:
-            v1 = vertices[0] - vertices[1]
-            v2 = vertices[1] - vertices[2]
-            normal = v1.cross(v2)
-            normal.normalize()
-        else:
-            normal = pc.Vec3.up()
-        return normal
-
-    def reverse(self):
-        self.vertices.reverse()
-        self.texcoords.reverse()
+    return polygons
 
 
 def get_square_points(x, y, reverse=False):
@@ -57,104 +72,110 @@ def get_square_points(x, y, reverse=False):
     return vertices
 
 
+class Vertex:
+
+    def __init__(self, position, normal=None, colour=None, texcoord=None):
+        self.position = position
+        self.normal = normal
+        self.colour = colour
+        self.texcoord = texcoord
+
+
+class Polygon:
+
+    def __init__(self, vertices):
+        self.vertices = vertices
+
+    def get_normal(self):
+        seen = set()
+        positions = [
+            vertex.position
+            for vertex in self.vertices
+            if vertex.position not in seen and not seen.add(vertex.position)
+        ]
+        if len(positions) >= 3:
+            v1 = positions[0] - positions[1]
+            v2 = positions[1] - positions[2]
+            normal = v1.cross(v2)
+            normal.normalize()
+        else:
+            normal = pc.Vec3.up()
+        return normal
+
+    # def reverse(self):
+    #     self.vertices.reverse()
+    #     self.texcoords.reverse()
+
+
 class InvalidPrimitive(Exception):
     pass
 
 
+class VertexDataWriter:
+
+    def __init__(self, name, normal=False, colour=False, texcoord=False):
+        self.count = 0
+        method_name = 'get_v3'
+        if normal:
+            method_name += 'n3'
+        if colour:
+            method_name += 'c4'
+        if texcoord:
+            method_name += 't2'
+        vformat = getattr(pc.GeomVertexFormat, method_name)()
+        self.vdata = pc.GeomVertexData(name, vformat, pc.Geom.UHStatic)
+        self.position = pc.GeomVertexWriter(self.vdata, 'vertex')
+        self.normal = pc.GeomVertexWriter(self.vdata, 'normal') if normal else None
+        self.colour = pc.GeomVertexWriter(self.vdata, 'color') if colour else None
+        self.texcoord = pc.GeomVertexWriter(self.vdata, 'texcoord') if texcoord else None
+
+    def add_polygon(self, polygon):
+        face_normal = polygon.get_normal()
+        for vertex in polygon.vertices:
+            self.position.add_data3f(vertex.position)
+            if self.normal is not None:
+                self.normal.add_data3f(vertex.normal or face_normal)
+            if self.colour is not None:
+                self.colour.add_data4f(vertex.colour or (1, 1, 1, 1))
+            if self.texcoord is not None:
+                self.texcoord.add_data2f(vertex.texcoord)
+            self.count += 1
+
+
 class GeomBuilder:
 
-    def __init__(self, name='tris'):
-        self.name = name
-        self.vdata = pc.GeomVertexData(
-            name,
-            pc.GeomVertexFormat.get_v3n3cpt2(),
-            pc.Geom.UHDynamic,
-        )
-        self.writer = VertexDataWriter(self.vdata)
-        self.tris = pc.GeomTriangles(pc.Geom.UHDynamic)
+    def __init__(self, polygons=None):
+        self.polygons = polygons or []
 
-    def _commit_polygon(self, poly):
-        """
-        Transmutes colors and vertices for tris and quads into visible geometry.
+    def create_geom_node(self, name, **kwargs):
+        writer = VertexDataWriter(name, **kwargs)
+        tris = pc.GeomTriangles(pc.Geom.UHStatic)
+        for polygon in self.polygons:
 
-        """
-        vertex_id = self.writer.count
-        for i in range(len(poly.vertices)):
-            v, t = poly.vertices[i], poly.texcoords[i]
-            self.writer.add_vertex(v, poly.get_normal(), poly.colour, t)
+            # Add geometry data.
+            vertex_id = writer.count
+            writer.add_polygon(polygon)
 
-        if len(poly.vertices) == 3:
-            self.tris.add_consecutive_vertices(vertex_id, 3)
-            self.tris.close_primitive()
-        elif len(poly.vertices) == 4:
-            self.tris.add_vertex(vertex_id)
-            self.tris.add_vertex(vertex_id + 1)
-            self.tris.add_vertex(vertex_id + 3)
-            self.tris.close_primitive()
-            self.tris.add_consecutive_vertices(vertex_id + 1, 3)
-            self.tris.close_primitive()
-        else:
-            raise InvalidPrimitive
+            # Define triangles.
+            if len(polygon.vertices) == 3:
+                tris.add_consecutive_vertices(vertex_id, 3)
+                tris.close_primitive()
+            elif len(polygon.vertices) == 4:
+                tris.add_vertex(vertex_id)
+                tris.add_vertex(vertex_id + 1)
+                tris.add_vertex(vertex_id + 3)
+                tris.close_primitive()
+                tris.add_consecutive_vertices(vertex_id + 1, 3)
+                tris.close_primitive()
+            else:
 
-    def add_box(self, width, height, depth, colour=None, origin=None, flip_normals=False, scale_texcoords=True):
+                # TODO: Use triangulator...?
+                raise InvalidPrimitive
 
-        origin = origin or pc.Point3(0, 0, 0)
-        x_shift = width / 2.0
-        y_shift = height / 2.0
-        z_shift = depth / 2.0
-
-        vertices = (
-            pc.Point3(-x_shift, +y_shift, +z_shift),
-            pc.Point3(-x_shift, -y_shift, +z_shift),
-            pc.Point3(+x_shift, -y_shift, +z_shift),
-            pc.Point3(+x_shift, +y_shift, +z_shift),
-            pc.Point3(+x_shift, +y_shift, -z_shift),
-            pc.Point3(+x_shift, -y_shift, -z_shift),
-            pc.Point3(-x_shift, -y_shift, -z_shift),
-            pc.Point3(-x_shift, +y_shift, -z_shift),
-        )
-        vertices = [v - origin for v in vertices]
-
-        faces = (
-            # XY
-            [vertices[0], vertices[1], vertices[2], vertices[3]],
-            [vertices[4], vertices[5], vertices[6], vertices[7]],
-            # XZ
-            [vertices[0], vertices[3], vertices[4], vertices[7]],
-            [vertices[6], vertices[5], vertices[2], vertices[1]],
-            # YZ
-            [vertices[5], vertices[4], vertices[3], vertices[2]],
-            [vertices[7], vertices[6], vertices[1], vertices[0]],
-        )
-
-        # texcoords = ((0, 0), (1, 0), (1, 1), (0, 1))
-        face_texcoords = (
-            # XY
-            ((0, 0), (height, 0), (height, width), (0, width)),
-            ((0, 0), (height, 0), (height, width), (0, width)),
-            # XZ
-            ((0, 0), (width, 0), (width, depth), (0, depth)),
-            ((0, 0), (width, 0), (width, depth), (0, depth)),
-            # YZ
-            ((0, 0), (height, 0), (height, depth), (0, depth)),
-            ((0, 0), (height, 0), (height, depth), (0, depth)),
-        )
-
-        for i, face in enumerate(faces):
-            if flip_normals:
-                face.reverse()
-            self._commit_polygon(Polygon(face, face_texcoords[i], colour))
-
-        return self
-
-    def get_geom(self):
-        geom = pc.Geom(self.vdata)
-        geom.add_primitive(self.tris)
-        return geom
-
-    def get_geom_node(self):
-        node = pc.GeomNode(self.name)
-        node.add_geom(self.get_geom())
+        geom = pc.Geom(writer.vdata)
+        geom.add_primitive(tris)
+        node = pc.GeomNode(name)
+        node.add_geom(geom)
         return node
 
 
@@ -380,18 +401,24 @@ def cylinder(radius=1.0, height=2.0, num_segs=16, degrees=360,
     geomNode = pm.GeomNode('cylinder')
     geomNode.addGeom(geom)
     return geomNode
-    
 
-def sphere(radius=1.0, num_segs=16, degrees=360,
-           axis=pm.Vec3(0, 0, 1), origin=pm.Point3(0, 0, 0)):
+
+def box(width=1, depth=1, height=1, origin=pm.Point3(0, 0, 0), flip_normals=False, scale_texcoords=True, normal=True, colour=False, texcoord=False):
+    """Return a geom node representing a box."""
+    polys = calculate_box_polygons(
+        width,
+        depth,
+        height,
+        origin=origin,
+        flip_normals=flip_normals,
+        scale_texcoords=scale_texcoords
+    )
+    return GeomBuilder(polys).create_geom_node('box', normal=normal, colour=colour, texcoord=texcoord)
+
+
+def sphere(radius=1.0, num_segs=16, degrees=360, axis=pm.Vec3(0, 0, 1), origin=pm.Point3(0, 0, 0), normal=True, colour=False, texcoord=False):
     """Return a geom node representing a cylinder."""
-    # Create vetex data format
-    gvf = pm.GeomVertexFormat.getV3n3()
-    gvd = pm.GeomVertexData('vertexData', gvf, pm.Geom.UHStatic)
-
-    # Create vetex writers for each type of data we are going to store
-    gvwV = pm.GeomVertexWriter(gvd, 'vertex')
-    gvwN = pm.GeomVertexWriter(gvd, 'normal')
+    polys = []
 
     # Get the points for an arc
     axis = pm.Vec3(axis)
@@ -400,95 +427,72 @@ def sphere(radius=1.0, num_segs=16, degrees=360,
     zPoints = GetPointsForArc(180, int(num_segs / 2), True)
     for z in range(1, len(zPoints) - 2):
         rad1 = zPoints[z][1] * radius
-        rad2 = zPoints[z+1][1] * radius
+        rad2 = zPoints[z + 1][1] * radius
         offset1 = axis * zPoints[z][0] * radius
-        offset2 = axis * zPoints[z+1][0] * radius
-        
+        offset2 = axis * zPoints[z + 1][0] * radius
+
         for i in range(len(points) - 1):
-            
+
             # Get points
             p1 = pm.Point3(points[i][0], points[i][1], 0) * rad1
             p2 = pm.Point3(points[i + 1][0], points[i + 1][1], 0) * rad1
             p3 = pm.Point3(points[i + 1][0], points[i + 1][1], 0) * rad2
             p4 = pm.Point3(points[i][0], points[i][1], 0) * rad2
-            
+
             # Rotate the points around the desired axis
             p1, p2, p3, p4 = [
-                RotatePoint3(p, pm.Vec3(0, 0, 1), axis) 
+                RotatePoint3(p, pm.Vec3(0, 0, 1), axis)
                 for p in [p1, p2, p3, p4]
             ]
-            
+
             a = p1 + offset1 - origin
             b = p2 + offset1 - origin
             c = p3 + offset2 - origin
             d = p4 + offset2 - origin
 
-            # Quad
-            gvwV.addData3f(d)
-            gvwV.addData3f(b)
-            gvwV.addData3f(a)
-            gvwV.addData3f(d)
-            gvwV.addData3f(c)
-            gvwV.addData3f(b)
-            
-            # Normals
-            cross = (b - c).cross(a - c)
-            for i in range(6):
-                gvwN.addData3f(cross)
-                
+            polys.append(Polygon((
+                Vertex(d),
+                Vertex(c),
+                Vertex(b),
+                Vertex(a),
+            )))
+
     # Get points
     rad1 = zPoints[1][1] * radius
     for m in [1, -2]:
         offset1 = axis * zPoints[m][0] * radius
-        
+
         clampedM = max(-1, min(m, 1)) * radius
-        
+
         for i in range(len(points) - 1):
             p1 = pm.Point3(points[i][0], points[i][1], 0) * rad1
             p2 = pm.Point3(points[i + 1][0], points[i + 1][1], 0) * rad1
-            
+
             # Rotate the points around the desired axis
             p1, p2 = [
-                RotatePoint3(p, pm.Vec3(0, 0, 1), axis) 
+                RotatePoint3(p, pm.Vec3(0, 0, 1), axis)
                 for p in [p1, p2]
             ]
-            
+
             a = p1 + offset1 - origin
             b = p2 + offset1 - origin
             c = -axis * clampedM
 
             # Quad
             if clampedM > 0:
-                gvwV.addData3f(a)
-                gvwV.addData3f(b)
-                gvwV.addData3f(c)
+                polys.append(Polygon((
+                    Vertex(a),
+                    Vertex(b),
+                    Vertex(c),
+                )))
             else:
-                gvwV.addData3f(c)
-                gvwV.addData3f(b)
-                gvwV.addData3f(a)
-            
-            # Normals
-            cross = (b - c).cross(a - c)
-            for i in range(3):
-                gvwN.addData3f(cross * -m)
+                polys.append(Polygon((
+                    Vertex(c),
+                    Vertex(b),
+                    Vertex(a),
+                )))
 
-    geom = pm.Geom(gvd)
-    for i in range(0, gvwV.getWriteRow(), 3):
-
-        # Create and add triangle
-        geom.addPrimitive(GetGeomTriangle(i, i + 1, i + 2))
-
-    # Return the cylinder GeomNode
-    geomNode = pm.GeomNode('cylinder')
-    geomNode.addGeom(geom)
-    return geomNode
-    
-
-def box(width=1, depth=1, height=1, origin=pm.Point3(0, 0, 0), flip_normals=False, scale_texcoords=True):
-    """Return a geom node representing a box."""
-    gb = GeomBuilder('box')
-    gb.add_box(width, depth, height, origin=origin, flip_normals=flip_normals, scale_texcoords=scale_texcoords)
-    return gb.get_geom_node()
+    return GeomBuilder(polys).create_geom_node('sphere', normal=normal, colour=colour, texcoord=texcoord)
 
 
 def Line(start, end, thickness=1.0):

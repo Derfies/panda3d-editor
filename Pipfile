@@ -10,6 +10,7 @@ panda3d = "==1.10.9"
 wxpython = "==4.1.1"
 pypubsub = "==4.0.3"
 yapsy = "==1.12.2"
+pyperclip = "==1.8.2"
 
 [requires]
 python_version = "3.6"
