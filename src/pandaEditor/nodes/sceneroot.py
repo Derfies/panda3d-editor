@@ -3,6 +3,8 @@ from direct.showbase.PythonUtil import getBase as get_base
 
 class SceneRoot:
 
+    serialise_descendants = True
+
     # TODO: Move to game class?
     @property
     def children(self):

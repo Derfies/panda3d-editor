@@ -63,10 +63,13 @@ class NodePath:
     def create(cls, *args, **kwargs):
         comp = super().create(*args, **kwargs)
 
+        # Commenting this out for the moment - the scene serialiser
+        # can just ignore nodes there so not sure why we need to go
+        # to the effort of tagging everything.
         # Mark all nodes below this one so as to not serialise them.
-        if not cls.serialise_descendants:
-            for child in comp.data.find_all_matches('**/*'):
-                child.set_python_tag(TAG_MODEL_ROOT_CHILD, True)
+        # if not cls.serialise_descendants:
+        #     for child in comp.data.find_all_matches('**/*'):
+        #         child.set_python_tag(TAG_MODEL_ROOT_CHILD, True)
 
         # Copy any helper geo to the new instance.
         if comp.geo is not None:

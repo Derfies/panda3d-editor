@@ -40,8 +40,9 @@ class SceneParser(GameSceneParser):
             self.save_connections(comp, elem)
         
         # Recurse through hierarchy.
-        for child in comp.children:
-            self.save_component(child, elem)
+        if comp.serialise_descendants:
+            for child in comp.children:
+                self.save_component(child, elem)
 
         return elem
                 
