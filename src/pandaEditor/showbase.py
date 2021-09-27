@@ -1,5 +1,8 @@
 import logging
 import os
+import shutil
+import subprocess
+import tempfile
 import uuid
 
 import panda3d.core as pc
@@ -13,6 +16,7 @@ from p3d.displayShading import DisplayShading
 from p3d.editorCamera import EditorCamera
 from p3d.frameRate import FrameRate
 from p3d.mouse import MOUSE_ALT
+from pandaEditor import constants
 from pandaEditor.ui.mainFrame import MainFrame
 from pandaEditor import actions, commands, gizmos
 from pandaEditor.assetManager import AssetManager
@@ -600,11 +604,44 @@ class ShowBase(GameShowBase):
         self.asset_manager.on_asset_modified(filePaths)
         self.plugin_manager.on_project_modified(filePaths)
 
-    def write_bam_file(self):
+    def write_bam_file(self, evt):
         sel_comps = self.selection.comps
         self.selection.clear()
         for comp in sel_comps:
             model_name = comp.data.get_name()
             bam_path = os.path.join(self.project.models_directory, model_name) + '.bam'
             comp.data.write_bam_file(pc.Filename.from_os_specific(bam_path))
+        self.selection.add(sel_comps)
+
+    def export_obj(self, evt):
+
+        # TODO: Save panda3d runtime location to preferences.
+        sel_comps = self.selection.comps
+        self.selection.clear()
+        for comp in sel_comps:
+            model_name = comp.data.get_name()
+            temp_dir_path = tempfile.mkdtemp()
+            bam_path = os.path.join(temp_dir_path, model_name) + '.bam'
+            comp.data.write_bam_file(pc.Filename.from_os_specific(bam_path))
+
+            bam_to_egg_path = os.path.join(constants.PANDA_3D_RUNTIME_PATH, 'bin', 'bam2egg.exe')
+            egg_path = os.path.join(temp_dir_path, model_name) + '.egg'
+            p = subprocess.call(
+                [bam_to_egg_path, bam_path, egg_path],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            )
+            #print(p)
+            #print(p.communicate())
+
+            egg_to_obj_path = os.path.join(constants.PANDA_3D_RUNTIME_PATH, 'bin', 'egg2obj.exe')
+            obj_path = os.path.join(self.project.models_directory, model_name) + '.obj'
+            p = subprocess.call(
+                [egg_to_obj_path, egg_path, obj_path],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            )
+            #print(p.communicate())
+
+            shutil.rmtree(temp_dir_path)
         self.selection.add(sel_comps)

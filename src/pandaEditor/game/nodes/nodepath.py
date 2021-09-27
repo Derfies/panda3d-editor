@@ -27,11 +27,21 @@ def set_texture(data, value):
 class NodePath(Base, metaclass=ComponentMetaClass):
     
     type_ = pc.NodePath
-    name = Attribute(str, pc.NodePath.get_name, pc.NodePath.set_name, required=True)
+    name = Attribute(
+        str,
+        pc.NodePath.get_name,
+        pc.NodePath.set_name,
+        required=True
+    )
+    color = Attribute(
+        pc.LColor,
+        pc.NodePath.get_color,
+        pc.NodePath.set_color,
+    )
     color_scale = Attribute(
         pc.LColor,
         pc.NodePath.get_color_scale,
-        pc.NodePath.set_color_scale
+        pc.NodePath.set_color_scale,
     )
     matrix = Attribute(pc.Mat4, pc.NodePath.get_mat, pc.NodePath.set_mat)
     texture = Connection(

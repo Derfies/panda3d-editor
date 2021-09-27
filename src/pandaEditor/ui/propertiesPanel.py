@@ -231,6 +231,7 @@ class PropertiesPanel(wx.Panel):
             pc.LVector2f: custProps.Vec2Property,
             pc.LVector3f: custProps.Vec3Property,
             pc.LVector4f: custProps.Vec4Property,
+            pc.LVecBase4f: custProps.Vec4Property,
             pc.LPoint2f: custProps.Point2Property,
             pc.LPoint3f: custProps.Point3Property,
             pc.LPoint4f: custProps.Point4Property,

@@ -46,6 +46,7 @@ ID_EDIT_PARENT = wx.NewId()
 ID_EDIT_UNPARENT = wx.NewId()
 ID_EDIT_DUPLICATE = wx.NewId()
 ID_EDIT_WRITE_BAM_FILE = wx.NewId()
+ID_EDIT_EXPORT_OBJ = wx.NewId()
 
 ID_MODIFY_PHYSICS = wx.NewId()
 
@@ -525,6 +526,7 @@ class MainFrame(wx.Frame):
         self.mEdit.Enable(ID_EDIT_UNGROUP, comps_selected)
         self.mEdit.Enable(ID_EDIT_DUPLICATE, comps_selected)
         self.mEdit.Enable(ID_EDIT_WRITE_BAM_FILE, comps_selected)
+        self.mEdit.Enable(ID_EDIT_EXPORT_OBJ, comps_selected)
 
         self.tbEdit.Refresh()
 
@@ -687,6 +689,13 @@ class MainFrame(wx.Frame):
             ID_EDIT_WRITE_BAM_FILE
         )
         self.mEdit.AppendActionItem(write_bam, self)
+        export_obj = ActionItem(
+            'Export Obj File',
+            '',
+            self.base.export_obj,
+            ID_EDIT_EXPORT_OBJ
+        )
+        self.mEdit.AppendActionItem(export_obj, self)
         
         # Create edit toolbar
         self.tbEdit = CustomAuiToolBar(self, -1)
