@@ -3,12 +3,12 @@ import sys
 
 import wx
 import wx.aui
-import wx.propgrid as wxpg
 from pubsub import pub
-import panda3d.core as pm
+import panda3d.core as pc
 
 import p3d
 from direct.showbase.PythonUtil import getBase as get_base
+from game.nodes.pandanode import PandaNode
 from wxExtra import utils as wxUtils, ActionItem
 from wxExtra.logpanel import LogPanel
 from wxExtra import AuiManagerConfig, CustomAuiToolBar, CustomMenu
@@ -333,7 +333,7 @@ class MainFrame(wx.Frame):
         Orbit camera top or bottom by manipulating delta values
         See p3d.camera.Orbit for more
         """
-        delta = pm.Vec2(
+        delta = pc.Vec2(
             -get_base().edCamera.getH() + yaw_pitch[0],
             -get_base().edCamera.getP() + yaw_pitch[1]
         )
@@ -385,17 +385,22 @@ class MainFrame(wx.Frame):
         """
         Create a new prefab for the selected object in the prefab directory.
         """
-        np = self.base.selection.node_paths[0]
-        np_name = np.get_name()
+        comp = self.base.selection.comps[0]
         dir_path = self.base.project.prefabs_directory
-        asset_name = self.base.project.get_unique_asset_name(f'{np_name}.xml', dir_path)
+        asset_name = self.base.project.get_unique_asset_name(f'{comp.name}.xml', dir_path)
         asset_path = os.path.join(dir_path, asset_name)
 
-        # HAXXOR. Need to force the prefab to serialise its descendants.
-        comp = self.base.selection.comps[0]
-        comp.__class__.serialise_descendants = True
-        get_base().scene_parser.save(np, asset_path)
-        comp.__class__.serialise_descendants = False
+        # Replace the root so we're not attempting to write a prefab out just as
+        # a reference to itself.
+        dupe_comp = comp.duplicate()
+        new_root = PandaNode.create(name=comp.name)
+        for child in dupe_comp.children:
+            child.parent = new_root
+        get_base().scene_parser.save(new_root.data, asset_path)
+
+        # Clean up.
+        dupe_comp.destroy()
+        new_root.destroy()
 
     def OnCreateCgShader(self, evt):
         """

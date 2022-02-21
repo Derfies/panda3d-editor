@@ -11,17 +11,22 @@ logger = logging.getLogger(__name__)
 class SceneParser:
     
     """A class to load map files into Panda3D."""
+
+    def __init__(self):
+        self.reset()
+
+    def reset(self):
+        self.nodes = {}
+        self.connections = {}
     
     def load(self, file_path, pcomp=None, load_connections=True):
         """Load the scene from an xml file."""
+        self.reset()
 
         # Include connections that exist already in the scene.
-        self.nodes = {}
         for obj in get_base().scene.objects:
             comp = get_base().node_manager.wrap(obj)
             self.nodes[comp.id] = comp
-            
-        self.connections = {}
         
         tree = et.parse(file_path)
         relem = tree.getroot()

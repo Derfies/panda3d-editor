@@ -23,7 +23,7 @@ class Prefab(NodePath):
         # have to do to get around the way scene loader manages its connections.
         old_nodes = get_base().scene_parser.nodes
         old_connections = get_base().scene_parser.connections
-        prefab = get_base().scene_parser.load(full_path, None, load_connections=False)
+        prefab = get_base().scene_parser.load(full_path, None, load_connections=kwargs.pop('load_connections', False))
         get_base().scene_parser.nodes.update(old_nodes)
         get_base().scene_parser.connections.update(old_connections)
 

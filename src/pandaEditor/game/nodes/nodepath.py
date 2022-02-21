@@ -76,8 +76,8 @@ class NodePath(Base, metaclass=ComponentMetaClass):
         if path is not None:
             return cls(cls.find_child(path, kwargs.pop('parent')))
 
-        # Sometimes the data being wrapped is already a node path so this
-        # step is unnecessary.
+        # Sometimes the data being wrapped is already a node path so this step
+        # is unnecessary.
         comp = super().create(*args, **kwargs)
         if not isinstance(comp.data, pc.NodePath):
             comp.data = pc.NodePath(comp.data)

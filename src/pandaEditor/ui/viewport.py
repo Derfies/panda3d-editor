@@ -104,7 +104,7 @@ class Viewport(WxViewport):
     def add_prefab(self, file_path, x, y):
         rel_path = get_base().project.get_project_relative_path(file_path)
         logging.info(f'Adding prefab: {rel_path}')
-        self.base.add_component('Prefab', fullpath=rel_path)
+        self.base.add_component('Prefab', fullpath=rel_path, load_connections=True)
 
     def add_texture(self, file_path, x, y):
         rel_path = get_base().project.get_project_relative_path(file_path)
