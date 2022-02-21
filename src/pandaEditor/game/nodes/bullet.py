@@ -6,8 +6,6 @@ from game.nodes.attributes import (
     Attribute,
     Connection,
     Connections,
-    PythonTagAttribute,
-    TagAttribute,
     MetaobjectTagAttribute,
 )
 from game.nodes.nodepath import NodePath

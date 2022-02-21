@@ -218,6 +218,12 @@ class ProjectAssetAttribute(Attribute):
         )
 
 
+class ProjectAssetTagAttribute(ProjectAssetAttribute, TagAttribute):
+
+    pass
+
+
+
 class ProjectAssetPythonTagAttribute(ProjectAssetAttribute, PythonTagAttribute):
 
     pass

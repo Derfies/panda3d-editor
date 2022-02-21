@@ -390,7 +390,12 @@ class MainFrame(wx.Frame):
         dir_path = self.base.project.prefabs_directory
         asset_name = self.base.project.get_unique_asset_name(f'{np_name}.xml', dir_path)
         asset_path = os.path.join(dir_path, asset_name)
+
+        # HAXXOR. Need to force the prefab to serialise its descendants.
+        comp = self.base.selection.comps[0]
+        comp.__class__.serialise_descendants = True
         get_base().scene_parser.save(np, asset_path)
+        comp.__class__.serialise_descendants = False
 
     def OnCreateCgShader(self, evt):
         """
@@ -603,7 +608,7 @@ class MainFrame(wx.Frame):
         """
         Set the project path and rebuild the resources panel.
         """
-        self.base.project.Set(dirPath)
+        self.base.project.set_path(dirPath)
         self.pnlRsrcs.Build(self.base.project.path)
         
     def BuildFileActions(self):

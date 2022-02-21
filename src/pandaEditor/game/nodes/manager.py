@@ -33,6 +33,7 @@ from game.nodes.nodepath import NodePath
 from game.nodes.nongraphobject import NonGraphObject
 from game.nodes.pandanode import PandaNode
 from game.nodes.particleeffect import ParticleEffect
+from game.nodes.prefab import Prefab
 from game.nodes.sceneroot import SceneRoot
 from game.nodes.showbasedefaults import (
     Aspect2d,
@@ -84,6 +85,7 @@ class Manager:
             'ParticleEffect': ParticleEffect,
             'Pixel2d': Pixel2d,
             'PointLight': PointLight,
+            'Prefab': Prefab,
             'Render': Render,
             'Render2d': Render2d,
             'SceneRoot': SceneRoot,

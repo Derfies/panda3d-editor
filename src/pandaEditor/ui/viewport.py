@@ -102,8 +102,9 @@ class Viewport(WxViewport):
         self.base.add_component('ParticleEffect', config_path=file_path)
 
     def add_prefab(self, file_path, x, y):
-        logging.info(f'Adding prefab: {file_path}')
-        self.base.add_prefab(file_path)
+        rel_path = get_base().project.get_project_relative_path(file_path)
+        logging.info(f'Adding prefab: {rel_path}')
+        self.base.add_component('Prefab', fullpath=rel_path)
 
     def add_texture(self, file_path, x, y):
         rel_path = get_base().project.get_project_relative_path(file_path)

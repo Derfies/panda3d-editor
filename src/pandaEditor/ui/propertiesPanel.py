@@ -426,7 +426,7 @@ class PropertiesPanel(wx.Panel):
             for attr_name, attr in attrs.items():
                 attr_label = camel_case_to_label(attr_name)
                 try:
-                    value = getattr(comps[0], attr_name)#attr.get()
+                    value = getattr(comps[0], attr_name)
                 except (TypeError, AttributeError) as e:
                     print('skipping no get fn prop:', attr_name, attr.type, e)
                     continue

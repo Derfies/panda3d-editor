@@ -12,7 +12,7 @@ class SceneParser:
     
     """A class to load map files into Panda3D."""
     
-    def load(self, file_path, pcomp=None):
+    def load(self, file_path, pcomp=None, load_connections=True):
         """Load the scene from an xml file."""
 
         # Include connections that exist already in the scene.
@@ -26,7 +26,8 @@ class SceneParser:
         tree = et.parse(file_path)
         relem = tree.getroot()
         rcomp = self.load_component(relem, pcomp)
-        self.load_connections()
+        if load_connections:
+            self.load_connections()
 
         return rcomp
 

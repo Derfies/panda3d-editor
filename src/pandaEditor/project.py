@@ -1,11 +1,10 @@
 import logging
 import os
-import sys
 import shutil
 import subprocess
 import xml.etree.cElementTree as et
 
-import panda3d.core as pm
+import panda3d.core as pc
 from pubsub import pub
 
 import p3d
@@ -102,39 +101,44 @@ base.run()"""
         # Create a main.py stub
         self.CreateAsset(os.path.join(dirPath, 'main.py'), self.GetMainScript())
     
-    def Set(self, dirPath):
+    def set_path(self, project_path):
         
         # Check project definition file exists
-        if not os.path.exists(os.path.join(dirPath, PROJECT_DEF_NAME)):
+        if not os.path.exists(os.path.join(project_path, PROJECT_DEF_NAME)):
             self.path = None
             return
         
         # Set the project directory
-        oldPath = self.path
-        self.path = dirPath
+        #old_project_path = self.path
+        self.path = project_path
         
         # Clear the model search path and add the new project path. Make sure
         # to prepend the new directory or else Panda might search in-built
         # paths first and supply the incorrect model.
-        base.ResetModelPath()
-        modelPath = pm.Filename.fromOsSpecific(self.path)
-        pm.getModelPath().prependDirectory(modelPath)
+        #get_base().reset_model_path()
+        # modelPath = pm.Filename.fromOsSpecific(self.path)
+        # pm.getModelPath().prependDirectory(modelPath)
+
+
+
         
         # Remove the old project path from sys.path and add the new one
-        if oldPath in sys.path:
-            sys.path.remove(oldPath)
-        sys.path.insert(0, self.path)
+        # if oldPath in sys.path:
+        #     sys.path.remove(oldPath)
+        # sys.path.insert(0, self.path)
         
         # Set paths
-        self.SetDirectories()
+        self.set_directories()
 
         # Add the project root to the model path.
-        pm.get_model_path().clear()
-        panda_path = pm.Filename.from_os_specific(self.path)
-        pm.get_model_path().append_directory(panda_path)
-        logger.info(f'Model path set to: {pm.get_model_path()}')
+        pc.get_model_path().clear()
+        panda_project_path = pc.Filename.from_os_specific(self.path)
+        pc.get_model_path().append_directory(panda_project_path)
+        logger.info(f'Model path changed:')
+        for model_path in pc.get_model_path().get_directories():
+            logger.info(f'    -> {model_path}')
         
-        # Set directory watcher root path and start it
+        # Set directory watcher root path and start it.
         self.dirWatcher.setDirectory(self.path)
         if not self.dirWatcher.running:
             self.dirWatcher.start()
@@ -145,7 +149,7 @@ base.run()"""
         for dirName in dirNames:
             os.makedirs(os.path.join(self.path, dirName))
             
-    def SetDirectories(self):
+    def set_directories(self):
         """
         
         """
@@ -359,10 +363,10 @@ class """ + fileName + """(p3d):
         paths. If found then return a path relative to it. Also make sure to 
         remove all extensions so we can load  both egg and bam files.
         """
-        relPath = pm.Filename(pandaPath)
-        index = relPath.findOnSearchpath(pm.getModelPath().getValue())
+        relPath = pc.Filename(pandaPath)
+        index = relPath.findOnSearchpath(pc.getModelPath().getValue())
         if index >= 0:
-            basePath = pm.getModelPath().getDirectories()[index]
+            basePath = pc.getModelPath().getDirectories()[index]
             relPath.makeRelativeTo(basePath)
         #
         # # Remove all extensions.
@@ -383,4 +387,5 @@ class """ + fileName + """(p3d):
             if directory is not None:
                 start_path = self.get_directory(directory)
             rel_path = os.path.relpath(rel_path, start_path)
+        print('rel:', file_path, rel_path)
         return rel_path

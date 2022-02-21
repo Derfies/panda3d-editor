@@ -152,7 +152,7 @@ class Selection(Object):
         # AND have the TAG_PICKABLE tag.
         nps = []
         for np in self.rootNp.findAllMatches('**'):
-            pick_np = self.GetPickableNodePath(np)
+            pick_np = self.get_pickable_node_path(np)
             if (
                 pick_np is not None and
                 self.marquee.IsNodePathInside(pick_np) and
@@ -182,11 +182,12 @@ class Selection(Object):
     def GetNodePathUnderMouse(self):
         """
         Returns the closest node under the mouse, or None if there isn't one.
+
         """
         self.picker.OnUpdate(None)
         pickedNp = self.picker.GetFirstNodePath()
         if pickedNp is not None:
-            return self.GetPickableNodePath(pickedNp)
+            return self.get_pickable_node_path(pickedNp)
         else:
             return None
 
@@ -194,20 +195,14 @@ class Selection(Object):
         self.picker.OnUpdate(None, x, y)
         pickedNp = self.picker.GetFirstNodePath()
         if pickedNp is not None:
-            return self.GetPickableNodePath(pickedNp)
+            return self.get_pickable_node_path(pickedNp)
         else:
             return None
 
-    def GetPickableNodePath(self, np):
-        # if MOUSE_CTRL not in get_base().edCamera.mouse.modifiers:
-        #     np = np.findNetPythonTag(TAG_PICKABLE)
-        # return None if np.isEmpty() else np
-        if np.getPythonTag(TAG_IGNORE):
-            return np.findNetPythonTag(TAG_PICKABLE)
-        elif MOUSE_CTRL in get_base().edCamera.modifiers:
-           return np
-        else:
-            return np.findNetPythonTag(TAG_PICKABLE)
+    def get_pickable_node_path(self, np):
+        if MOUSE_CTRL in get_base().edCamera.modifiers:
+            return np
+        return np.findNetPythonTag(TAG_PICKABLE)
 
     def update(self):
         """Update the selection by running deselect and select handlers."""

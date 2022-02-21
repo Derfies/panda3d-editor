@@ -348,10 +348,11 @@ class ShowBase(GameShowBase):
         # Set auto shader.
         render.setShaderAuto()
 
-    def ResetModelPath(self):
+    def reset_model_path(self):
         """
         Clears the model path, making sure to restore the current working
         directory (so editor models can still be found).
+
         """
         pc.getModelPath().clear()
         pc.getModelPath().prependDirectory('.')
@@ -592,13 +593,6 @@ class ShowBase(GameShowBase):
         comp.set_default_values()
         commands.add([comp])
         return comp
-
-    def add_prefab(self, file_path):
-        logger.info(f'Adding prefab: {file_path}')
-        root_comp = self.node_manager.wrap(self.render)
-        prefab_comp = self.scene_parser.load(file_path, root_comp)
-        commands.add([prefab_comp])
-        return prefab_comp
 
     def OnProjectFilesModified(self, filePaths):
         self.asset_manager.on_asset_modified(filePaths)

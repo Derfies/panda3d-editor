@@ -4,6 +4,7 @@ import abc
 class Base:
 
     default_values = {}
+    serialise_descendants = True
 
     @classmethod
     def get_default_values(cls):
