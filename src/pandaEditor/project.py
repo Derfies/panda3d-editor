@@ -108,26 +108,8 @@ base.run()"""
             self.path = None
             return
         
-        # Set the project directory
-        #old_project_path = self.path
+        # Set paths.
         self.path = project_path
-        
-        # Clear the model search path and add the new project path. Make sure
-        # to prepend the new directory or else Panda might search in-built
-        # paths first and supply the incorrect model.
-        #get_base().reset_model_path()
-        # modelPath = pm.Filename.fromOsSpecific(self.path)
-        # pm.getModelPath().prependDirectory(modelPath)
-
-
-
-        
-        # Remove the old project path from sys.path and add the new one
-        # if oldPath in sys.path:
-        #     sys.path.remove(oldPath)
-        # sys.path.insert(0, self.path)
-        
-        # Set paths
         self.set_directories()
 
         # Add the project root to the model path.
