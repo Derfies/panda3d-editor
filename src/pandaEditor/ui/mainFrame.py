@@ -9,9 +9,7 @@ import panda3d.core as pc
 import p3d
 from direct.showbase.PythonUtil import getBase as get_base
 from game.nodes.pandanode import PandaNode
-from wxExtra import utils as wxUtils, ActionItem
-from wxExtra.logpanel import LogPanel
-from wxExtra import AuiManagerConfig, CustomAuiToolBar, CustomMenu
+from game.nodes.prefab import Prefab
 from pandaEditor import commands as cmds
 from pandaEditor.constants import MODEL_EXTENSIONS
 from pandaEditor.ui.viewport import Viewport
@@ -20,6 +18,9 @@ from pandaEditor.ui.sceneGraphPanel import SceneGraphPanel
 from pandaEditor.ui.propertiesPanel import PropertiesPanel
 from pandaEditor.ui.preferenceseditor import PreferencesEditor
 from pandaEditor.ui.createdialog import CreateDialog
+from wxExtra import utils as wxutils, ActionItem
+from wxExtra import AuiManagerConfig, CustomAuiToolBar, CustomMenu
+from wxExtra.logpanel import LogPanel
 
 
 FRAME_TITLE = 'Panda Editor 0.1'
@@ -158,12 +159,12 @@ class MainFrame(wx.Frame):
             defaultDir = self.base.project.GetScenesDirectory()
 
         # Open file browser
-        filePath = wxUtils.file_save_dialog('Save Scene As', WILDCARD_SCENE, defaultDir=defaultDir, defaultFile=defaultFile)
+        filePath = wxutils.file_save_dialog('Save Scene As', WILDCARD_SCENE, defaultDir=defaultDir, defaultFile=defaultFile)
         if filePath and os.path.exists(filePath):
 
             # Warn user if the chosen file path already exists
             msg = ''.join(['The file "', filePath, '" already exists.\nDo you want to replace it?'])
-            if wxUtils.YesNoDialog(msg, 'Replace File?', wx.ICON_WARNING) == wx.ID_NO:
+            if wxutils.YesNoDialog(msg, 'Replace File?', wx.ICON_WARNING) == wx.ID_NO:
                 return False
 
         return filePath
@@ -177,7 +178,7 @@ class MainFrame(wx.Frame):
 
             # Show dialog, record result
             msg = ''.join(['The document "', self.base.doc.title, '" was modified after last save.\nSave changes before continuing?'])
-            result = wxUtils.YesNoCancelDialog(msg, 'Save Changes?', wx.ICON_WARNING)
+            result = wxutils.YesNoCancelDialog(msg, 'Save Changes?', wx.ICON_WARNING)
             if result == wx.ID_YES:
                 self.OnFileSave(None)
             elif result == wx.ID_CANCEL:
@@ -237,7 +238,7 @@ class MainFrame(wx.Frame):
             if scnsDirPath is None:
                 scnsDirPath = os.getcwd()
 
-            filePath = wxUtils.file_open_dialog('Open Scene', WILDCARD_SCENE,
+            filePath = wxutils.file_open_dialog('Open Scene', WILDCARD_SCENE,
                                                 defaultDir=scnsDirPath)
 
         # Create new document
@@ -272,7 +273,7 @@ class MainFrame(wx.Frame):
         """Import assets to project."""
         formats = '; '.join([f'*{extn}' for extn in MODEL_EXTENSIONS])
         wild_card = f'Model ({formats})|{formats}'
-        file_paths = wxUtils.file_open_dialog(
+        file_paths = wxutils.file_open_dialog(
             'Import Models',
             wild_card,
             wx.FD_MULTIPLE
@@ -282,7 +283,7 @@ class MainFrame(wx.Frame):
 
     def OnFileNewProject(self, evt):
         """Build project directory and set project."""
-        dirPath = wxUtils.director_dialog('Set New Project Directory')
+        dirPath = wxutils.director_dialog('Set New Project Directory')
         if dirPath:
             self.base.project.New(dirPath)
             self.SetProjectPath(dirPath)
@@ -292,14 +293,14 @@ class MainFrame(wx.Frame):
         """
         Set the active project directory path and rebuild the resources panel.
         """
-        dirPath = wxUtils.director_dialog('Set Project Directory')
+        dirPath = wxutils.director_dialog('Set Project Directory')
         if dirPath:
             self.SetProjectPath(dirPath)
             self.base.doc.on_refresh()
 
     def OnFileBuildProject(self, evt):
         """Build the current project to a p3d file."""
-        filePath = wxUtils.file_save_dialog('Build Project', WILDCARD_P3D)
+        filePath = wxutils.file_save_dialog('Build Project', WILDCARD_P3D)
         if not filePath:
             return
 
@@ -307,7 +308,7 @@ class MainFrame(wx.Frame):
 
             # Warn user if the chosen file path already exists
             msg = ''.join(['The file "', filePath, '" already exists.\nDo you want to replace it?'])
-            if wxUtils.YesNoDialog(msg, 'Replace File?', wx.ICON_WARNING) == wx.ID_NO:
+            if wxutils.YesNoDialog(msg, 'Replace File?', wx.ICON_WARNING) == wx.ID_NO:
                 return
 
         self.base.project.Build(filePath)
@@ -386,13 +387,19 @@ class MainFrame(wx.Frame):
         Create a new prefab for the selected object in the prefab directory.
         """
         comp = self.base.selection.comps[0]
-        dir_path = self.base.project.prefabs_directory
-        asset_name = self.base.project.get_unique_asset_name(f'{comp.name}.xml', dir_path)
-        asset_path = os.path.join(dir_path, asset_name)
+        if isinstance(comp, Prefab) and os.path.isfile(os.path.join(self.base.project.path, comp.fullpath)):
+            msg = f'Save over existing prefab?'
+            if wxutils.YesNoDialog(msg, 'Overwrite', wx.ICON_WARNING) == wx.ID_NO:
+                return
+            asset_path = os.path.join(self.base.project.path, comp.fullpath)
+        else:
+            dir_path = self.base.project.prefabs_directory
+            asset_name = self.base.project.get_unique_asset_name(f'{comp.name}.xml', dir_path)
+            asset_path = os.path.join(dir_path, asset_name)
 
         # Replace the root so we're not attempting to write a prefab out just as
         # a reference to itself.
-        dupe_comp = comp.duplicate()
+        dupe_comp = comp.duplicate()    # Warning - duplicates connections
         new_root = PandaNode.create(name=comp.name)
         for child in dupe_comp.children:
             child.parent = new_root

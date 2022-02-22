@@ -3,10 +3,11 @@ import os
 from direct.showbase.PythonUtil import getBase as get_base
 
 from game.nodes.attributes import TagAttribute
-from game.nodes.nodepath import NodePath
+from game.nodes.constants import TAG_NODE_TYPE
+from game.nodes.pandanode import PandaNode
 
 
-class Prefab(NodePath):
+class Prefab(PandaNode):
 
     fullpath = TagAttribute(
         required=True,
@@ -30,4 +31,5 @@ class Prefab(NodePath):
         # Bit crass. Need to rewrap the component returned by scene loader.
         comp = super().create(data=prefab.data)
         comp.fullpath = full_path
+        comp.data.set_tag(TAG_NODE_TYPE, 'Prefab')
         return comp

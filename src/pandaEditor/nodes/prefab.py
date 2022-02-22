@@ -9,9 +9,3 @@ class Prefab:
         required=True,
         read_only=True,
     )
-
-    @classmethod
-    def create(cls, *args, **kwargs):
-        comp = super().create(*args, **kwargs)
-        comp.data.set_tag(TAG_NODE_TYPE, 'Prefab')
-        return comp

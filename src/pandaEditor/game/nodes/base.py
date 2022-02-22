@@ -21,7 +21,7 @@ class Base(metaclass=ComponentMetaClass):
     def create(cls, *args, **kwargs):
         data = kwargs.pop('data', None)
         if data is None:
-            data = cls.type_(**kwargs)
+            data = cls.type_(*args, **kwargs)
         comp = cls(data)
         return comp
 
