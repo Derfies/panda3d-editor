@@ -387,5 +387,4 @@ class """ + fileName + """(p3d):
             if directory is not None:
                 start_path = self.get_directory(directory)
             rel_path = os.path.relpath(rel_path, start_path)
-        print('rel:', file_path, rel_path)
         return rel_path

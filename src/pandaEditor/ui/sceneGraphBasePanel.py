@@ -92,7 +92,7 @@ class SceneGraphBasePanel(wx.Panel):
                 wx.CallAfter(cmds.set_attribute, [comp], 'name', name)
 
         comp = evt.GetItem().GetData()
-        name = evt.GetLabel()
+        name = evt.GetLabel().strip()
         if not name:
             return
         wx.CallAfter(SetComponentName, comp, name)
