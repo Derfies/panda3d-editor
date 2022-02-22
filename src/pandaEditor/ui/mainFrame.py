@@ -102,8 +102,8 @@ class MainFrame(wx.Frame):
 
         # Bind frame events
         self.Bind(wx.EVT_CLOSE, self.OnClose)
-        self.Bind(wx.EVT_KEY_UP, p3d.wxPanda.OnKeyUp)
-        self.Bind(wx.EVT_KEY_DOWN, p3d.wxPanda.OnKeyDown)
+        self.Bind(wx.EVT_KEY_UP, self.on_up)
+        self.Bind(wx.EVT_KEY_DOWN, self.on_down)
         self.Bind(wx.EVT_SIZE, self.OnSize)
         self.Bind(wx.EVT_MOVE, self.OnMove)
 
@@ -146,6 +146,12 @@ class MainFrame(wx.Frame):
 
         # Update the view menu based on the perspective saved in preferences
         self.OnUpdateWindowMenu(None)
+
+    def on_up(self, event):
+        p3d.wxPanda.OnKeyUp(event)
+
+    def on_down(self, event):
+        p3d.wxPanda.OnKeyDown(event)
 
     def _GetSavePath(self):
 

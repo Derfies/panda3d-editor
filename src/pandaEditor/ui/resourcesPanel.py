@@ -17,8 +17,10 @@ logger = logging.getLogger(__name__)
 
 class ResourcesPanel(wx.Panel):
     
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, parent, *args, **kwargs):
+        super().__init__(parent, *args, **kwargs)
+
+        self.parent = parent
 
         # Bind project file events
         pub.subscribe(self.OnUpdate, 'projectFilesAdded')
@@ -46,8 +48,8 @@ class ResourcesPanel(wx.Panel):
             self.dtc.Expand(self.dtc.GetRootItem())
             self.bs1.Add(self.dtc, 1, wx.EXPAND)
 
-            self.dtc.Bind(wx.EVT_KEY_UP, wxPanda.OnKeyUp)
-            self.dtc.Bind(wx.EVT_KEY_DOWN, wxPanda.OnKeyDown)
+            self.dtc.Bind(wx.EVT_KEY_UP, self.on_key_up)
+            self.dtc.Bind(wx.EVT_KEY_DOWN, self.on_key_down)
             self.dtc.Bind(wx.EVT_LEFT_UP, wxPanda.OnLeftUp)
             self.dtc.Bind(wx.EVT_RIGHT_UP, self.OnRightUp)
             self.dtc.Bind(wx.EVT_MIDDLE_DOWN, self.OnMiddleDown)
@@ -64,6 +66,12 @@ class ResourcesPanel(wx.Panel):
             self.bs1.Add(tc, 1, wx.EXPAND | wx.LEFT | wx.RIGHT, 2)
 
         self.bs1.Layout()
+
+    def on_key_up(self, event):
+        wx.PostEvent(self.parent, event)
+
+    def on_key_down(self, event):
+        wx.PostEvent(self.parent, event)
 
     def OnRightDown(self, evt):
         """

@@ -17,9 +17,10 @@ DISPLAY_NODEPATHS = wx.NewId()
 
 class SceneGraphBasePanel(wx.Panel):
     
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, parent, *args, **kwargs):
+        super().__init__(parent, *args, **kwargs)
 
+        self.parent = parent
         self._comps = {}
         self.filter = pm.PandaNode
 
@@ -53,8 +54,8 @@ class SceneGraphBasePanel(wx.Panel):
         self.tc.Bind(wx.EVT_TREE_BEGIN_LABEL_EDIT, self.OnTreeBeginLabelEdit)
         self.tc.Bind(wx.EVT_TREE_END_LABEL_EDIT, self.OnTreeEndLabelEdit)
         self.tc.Bind(wx.EVT_LEFT_DCLICK, self.OnLeftDClick)
-        self.tc.Bind(wx.EVT_KEY_UP, p3d.wxPanda.OnKeyUp)
-        self.tc.Bind(wx.EVT_KEY_DOWN, p3d.wxPanda.OnKeyDown)
+        self.tc.Bind(wx.EVT_KEY_UP, self.on_key_up)
+        self.tc.Bind(wx.EVT_KEY_DOWN, self.on_key_down)
         self.tc.Bind(wx.EVT_LEFT_UP, p3d.wxPanda.OnLeftUp)
         self.tc.Bind(wx.EVT_MIDDLE_DOWN, self.OnMiddleDown)
 
@@ -67,6 +68,12 @@ class SceneGraphBasePanel(wx.Panel):
         self.bs1.Add(ln, 0, wx.EXPAND)
         self.bs1.Add(self.tc, 1, wx.EXPAND)
         self.SetSizer(self.bs1)
+
+    def on_key_up(self, event):
+        wx.PostEvent(self.parent, event)
+
+    def on_key_down(self, event):
+        wx.PostEvent(self.parent, event)
 
     def OnFlatMenuSelected(self, evt):
 
