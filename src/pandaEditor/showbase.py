@@ -41,6 +41,31 @@ class ShowBase(GameShowBase):
     scene_parser_cls = SceneParser
 
     def __init__(self, *args, **kwargs):
+
+
+
+        import sys
+        #from direct.showbase.ShowBase import ShowBase
+
+        # Insert the pipeline path to the system path, this is required to be
+        # able to import the pipeline classes. In case you placed the render
+        # pipeline in a subfolder of your project, you have to adjust this.
+        sys.path.insert(0, "../../RenderPipeline")
+        # sys.path.insert(0, "../../")
+
+        # Import render pipeline classes
+        from rpcore import RenderPipeline
+
+        # Construct and create the pipeline
+        render_pipeline = RenderPipeline()
+        render_pipeline.pre_showbase_init()
+
+        # Construct and create the ShowBase
+        #base = ShowBase()
+        #render_pipeline.create(self)
+
+
+
         super().__init__(*args, **kwargs)
 
         if ConfigVariableBool('no_ui', False):
@@ -77,7 +102,7 @@ class ShowBase(GameShowBase):
         # aspect windows so aspect is fixed when the window is resized.
         self.forcedAspectWins.append((self.win, self.edCamera, self.edPixel2d))
 
-        self.reset()
+        #self.reset()
 
         # Create project manager
         self.project = Project(self)
@@ -173,6 +198,37 @@ class ShowBase(GameShowBase):
         self.doc.on_refresh()
 
         self.windowEvent(None)
+
+        self.render_pipeline =render_pipeline
+
+        from rpcore import RenderPipeline, SpotLight
+        from panda3d.core import Point3, Vec3
+
+        render_pipeline.create(self, self.edCamera.cam)
+
+        light = SpotLight()
+        light.direction = (0, 0, -1)
+        light.fov = 70
+        light.set_color_from_temperature(1 * 1000.0)
+        light.energy = 5000
+        light.pos = Vec3(0, 0, 10)
+        light.radius = 10
+        light.casts_shadows = True
+        light.shadow_map_resolution = 256
+        self.render_pipeline.add_light(light)
+
+
+
+
+
+        #sys.path.append(r'C:\Users\Jamie Davies\Documents\git\RenderPipeline\samples\02-Roaming-Ralph')
+
+        # Set time of day
+        render_pipeline.daytime_mgr.time = "7:40"
+
+        # Use a special effect for rendering the scene, this is because the
+        # roaming ralph model has no normals or valid materials
+        render_pipeline.set_effect(self.render, "scene-effect.yaml", {}, sort=250)
 
     def SetupEdRender(self):
         """
