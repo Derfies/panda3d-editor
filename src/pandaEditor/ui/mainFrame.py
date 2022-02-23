@@ -122,7 +122,7 @@ class MainFrame(wx.Frame):
 
         # Build viewport. Don't initialise just yet as ShowBase has not yet
         # been created.
-        self.pnlViewport = Viewport(self.base, self)
+        self.pnlViewport = Viewport(self.base, self, style=wx.WANTS_CHARS)
 
         # Build editor panels
         self.pnlSceneGraph = SceneGraphPanel(self)
