@@ -83,28 +83,28 @@ class Vertex:
 
 class Polygon:
 
-    def __init__(self, vertices):
+    def __init__(self, vertices, normal=None):
         self.vertices = vertices
+        self._normal = normal
 
-    def get_normal(self):
-        seen = set()
-        positions = [
-            vertex.position
-            for vertex in self.vertices
-            if vertex.position not in seen and not seen.add(vertex.position)
-        ]
-        if len(positions) >= 3:
-            v1 = positions[0] - positions[1]
-            v2 = positions[1] - positions[2]
-            normal = v1.cross(v2)
-            normal.normalize()
-        else:
-            normal = pc.Vec3.up()
-        return normal
-
-    # def reverse(self):
-    #     self.vertices.reverse()
-    #     self.texcoords.reverse()
+    @property
+    def normal(self):
+        if self._normal is None:
+            seen = set()
+            positions = [
+                vertex.position
+                for vertex in self.vertices
+                if vertex.position not in seen and not seen.add(vertex.position)
+            ]
+            if len(positions) >= 3:
+                v1 = positions[0] - positions[1]
+                v2 = positions[1] - positions[2]
+                normal = v1.cross(v2)
+                normal.normalize()
+            else:
+                normal = pc.Vec3.up()
+            self._normal = normal
+        return self._normal
 
 
 class InvalidPrimitive(Exception):
@@ -130,11 +130,10 @@ class VertexDataWriter:
         self.texcoord = pc.GeomVertexWriter(self.vdata, 'texcoord') if texcoord else None
 
     def add_polygon(self, polygon):
-        face_normal = polygon.get_normal()
         for vertex in polygon.vertices:
             self.position.add_data3f(vertex.position)
             if self.normal is not None:
-                self.normal.add_data3f(vertex.normal or face_normal)
+                self.normal.add_data3f(vertex.normal or polygon.normal)
             if self.colour is not None:
                 self.colour.add_data4f(vertex.colour or (1, 1, 1, 1))
             if self.texcoord is not None:
