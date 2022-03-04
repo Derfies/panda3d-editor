@@ -168,8 +168,19 @@ class GeomBuilder:
                 tris.close_primitive()
             else:
 
-                # TODO: Use triangulator...?
-                raise InvalidPrimitive
+                # Use triangulator for ngons.
+                trig = pm.Triangulator3()
+                for vertex in polygon.vertices:
+                    vi = trig.addVertex(*vertex.position)
+                    trig.addPolygonVertex(vi)
+                trig.triangulate()
+                for i in range(trig.getNumTriangles()):
+                    tris.addVertices(
+                        trig.getTriangleV0(i),
+                        trig.getTriangleV1(i),
+                        trig.getTriangleV2(i),
+                    )
+                    tris.closePrimitive()
 
         geom = pc.Geom(writer.vdata)
         geom.add_primitive(tris)
