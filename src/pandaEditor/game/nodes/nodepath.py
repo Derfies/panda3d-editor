@@ -50,6 +50,11 @@ class NodePath(Base, metaclass=ComponentMetaClass):
         set_texture,
         pc.NodePath.clear_texture,
     )
+    transparency = Attribute(
+        bool,
+        pc.NodePath.get_transparency,
+        pc.NodePath.set_transparency,
+    )
     lights = Connections(
         pc.Light,
         get_lights,
