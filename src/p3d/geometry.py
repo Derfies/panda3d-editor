@@ -176,11 +176,11 @@ class GeomBuilder:
                 trig.triangulate()
                 for i in range(trig.getNumTriangles()):
                     tris.addVertices(
-                        trig.getTriangleV0(i),
-                        trig.getTriangleV1(i),
-                        trig.getTriangleV2(i),
+                        vertex_id + trig.getTriangleV0(i),
+                        vertex_id + trig.getTriangleV1(i),
+                        vertex_id + trig.getTriangleV2(i),
                     )
-                    tris.closePrimitive()
+                    tris.close_primitive()
 
         geom = pc.Geom(writer.vdata)
         geom.add_primitive(tris)
