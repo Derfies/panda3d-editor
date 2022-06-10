@@ -247,7 +247,7 @@ class ShowBase(GameShowBase):
         self.edDr = self.win.makeDisplayRegion(0, 1, 0, 1)
         self.edDr.setCamera(self.edCamera)
         self.edDr.setClearColorActive(True)
-        self.edDr.setClearColor((0.63, 0.63, 0.63, 0))
+        self.edDr.setClearColor((0.23, 0.23, 0.23, 0))
 
     def windowEvent(self, *args, **kwargs):
         """
@@ -409,11 +409,11 @@ class ShowBase(GameShowBase):
             parent=self.edRender
        )
         self.grid.snapMarker.hide()
-        self.grid.centerLines.setColor((0, 0, 0, 0))
+        self.grid.centerLines.setColor((0.1, 0.1, 0.1, 0))
         self.grid.centerLines.setThickness(2)
-        self.grid.majorLines.setColor((0.25, 0.25, 0.25, 0))
+        self.grid.majorLines.setColor((0.32, 0.32, 0.32, 0))
         self.grid.majorLines.setThickness(1)
-        self.grid.minorLines.setColor((0.5, 0.5, 0.5, 0))
+        self.grid.minorLines.setColor((0.28, 0.28, 0.28, 0))
         self.grid.updateGrid()
 
     def SetupGizmoManager(self):
